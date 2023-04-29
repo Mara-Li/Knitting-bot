@@ -4,6 +4,7 @@ import ready from "./listeners/ready";
 import memberUpdate from "./listeners/memberUpdate";
 import onThreadCreated from "./listeners/onThreadCreated";
 import onChannelUpdate from "./listeners/onChannelUpdate";
+import onNewMember from "./listeners/onNewMember";
 
 dotenv.config();
 
@@ -21,6 +22,7 @@ ready(client);
 memberUpdate(client);
 onThreadCreated(client);
 onChannelUpdate(client);
+onNewMember(client);
 
 client.login(process.env.DISCORD_TOKEN);
 
