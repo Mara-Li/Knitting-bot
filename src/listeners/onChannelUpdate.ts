@@ -1,4 +1,4 @@
-import { Channel, ChannelType, Client, Snowflake, TextChannel } from 'discord.js';
+import {ChannelType, Client, Snowflake, TextChannel } from "discord.js";
 
 /**
  * @param {Client} client - Discord.js Client
@@ -6,8 +6,6 @@ import { Channel, ChannelType, Client, Snowflake, TextChannel } from 'discord.js
  * @description This is a listener for channel update event.
  * When the permission of a channel is updated, check if the channel have thread and update them.
  */
-
-
 
 export default (client: Client): void => {
 	client.on("channelUpdate", async (
