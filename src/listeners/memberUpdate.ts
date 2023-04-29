@@ -1,4 +1,5 @@
 import { Client, ThreadMember, ThreadChannel } from "discord.js";
+import { sendMessageAndEditPing } from "../index";
 
 export default (client: Client): void => {
 	client.on("guildMemberUpdate", async (oldMember, newMember) => {
@@ -18,8 +19,7 @@ export default (client: Client): void => {
 			if (!threadMemberArray.some(member => member.id === newMember.id)) {
 				//check thread permission with user role
 				if (threadChannel.permissionsFor(newMember).has("ViewChannel")) {
-					//send a message with mentioning the user
-					await threadChannel.members.add(newMember);
+					await sendMessageAndEditPing(newMember, threadChannel);
 					console.log(`Added ${newMember.user.username} to ${threadChannel.name}`);
 				}
 			} //remove user from thread if not have permission

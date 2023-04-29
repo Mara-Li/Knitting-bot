@@ -1,4 +1,5 @@
 import {ChannelType, Client, Snowflake, TextChannel } from "discord.js";
+import { sendMessageAndEditPing } from "../index";
 
 /**
  * @param {Client} client - Discord.js Client
@@ -40,8 +41,8 @@ export default (client: Client): void => {
 		});
 		//add allowed members to the thread, if there are not already in it
 		threads.forEach(thread => {
-			allowedMembers.forEach(member => {
-				thread.members.add(member);
+			allowedMembers.forEach(async (member)=> {
+				await sendMessageAndEditPing(member, thread);
 				console.log(`Adding ${member.user.username} to ${thread.name}`);
 			});
 			//remove not allowed members from the thread

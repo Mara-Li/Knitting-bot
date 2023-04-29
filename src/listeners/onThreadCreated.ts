@@ -1,4 +1,5 @@
 import { ChannelType, Client, ThreadChannel } from "discord.js";
+import { sendMessageAndEditPing } from "../index";
 
 /**
  * @param {Client} client - Discord.js Client
@@ -24,7 +25,7 @@ export default (client: Client): void => {
 		});
 		for (const member of allowedMembers.values()) {
 			console.log(`Adding ${member.user.username} to ${thread.name}`);
-			await thread.members.add(member);
+			await sendMessageAndEditPing(member, thread);
 		}
 	});
 };

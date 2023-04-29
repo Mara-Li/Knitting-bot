@@ -1,4 +1,4 @@
-import { Client, GatewayIntentBits, Partials } from "discord.js";
+import { Client, GatewayIntentBits, GuildMember, Partials, ThreadChannel } from "discord.js";
 import dotenv from "dotenv";
 import ready from "./listeners/ready";
 import memberUpdate from "./listeners/memberUpdate";
@@ -17,6 +17,18 @@ const client = new Client({
 	],
 	partials: [Partials.Channel],
 });
+
+
+/**
+ * Send an empty message, and after, edit it with mentionning the user
+ * @param {GuildMember} user The user to mention
+ * @param {ThreadChannel} channel The channel to send the message
+ */
+export async function sendMessageAndEditPing(user: GuildMember, channel: ThreadChannel) {
+	const message = await channel.send("//");
+	await message.edit(`<@${user.id}>`);
+	await message.delete();
+}
 
 ready(client);
 memberUpdate(client);
