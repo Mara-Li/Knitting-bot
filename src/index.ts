@@ -24,4 +24,3 @@ onChannelUpdate(client);
 
 client.login(process.env.DISCORD_TOKEN);
 
-console.log("Bot is running!");
