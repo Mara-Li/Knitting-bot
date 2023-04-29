@@ -1,5 +1,5 @@
 import { ChannelType, Client, ThreadChannel } from "discord.js";
-import { sendMessageAndEditPing } from "../index";
+import { getMemberPermission, sendMessageAndEditPing } from "../utils";
 
 /**
  * @param {Client} client - Discord.js Client
@@ -15,14 +15,7 @@ export default (client: Client): void => {
 		//get all members of the server
 		const members = await thread.guild.members.fetch();
 		//filter members that have the permission to view the thread
-		const allowedMembers = members.filter(member => {
-			if (!thread.parent) return false;
-			const memberPermissions = thread.parent.permissionsFor(member);
-			return (
-				memberPermissions.has("ViewChannel", true) &&
-                memberPermissions.has("ReadMessageHistory", true)
-			);
-		});
+		const allowedMembers = getMemberPermission(members, thread);
 		for (const member of allowedMembers.values()) {
 			console.log(`Add @${member.user.username} to #${thread.name}`);
 			await sendMessageAndEditPing(member, thread);

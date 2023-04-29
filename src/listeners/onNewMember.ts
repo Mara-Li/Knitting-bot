@@ -1,5 +1,5 @@
 import { Client, ThreadChannel } from "discord.js";
-import { sendMessageAndEditPing } from "../index";
+import { addUserToThread } from "../utils";
 
 /**
  * @param {Client} client - Discord.js Client
@@ -15,11 +15,7 @@ export default (client: Client): void => {
 		for (const channel of channels.values()) {
 			const threadChannel = channel as ThreadChannel;
 			//check thread permission with user role
-			if (threadChannel.permissionsFor(member).has("ViewChannel")) {
-				//add user to thread
-				await sendMessageAndEditPing(member, threadChannel);
-				console.log(`Add @${member.user.username} to #${threadChannel.name}`);
-			}
+			await addUserToThread(threadChannel, member);
 		}
 		
 	});

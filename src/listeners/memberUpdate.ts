@@ -1,5 +1,5 @@
-import { Client, ThreadMember, ThreadChannel } from "discord.js";
-import { sendMessageAndEditPing } from "../index";
+import { Client, ThreadChannel } from "discord.js";
+import { addUserToThread, checkIfUserNotInTheThread, removeUserFromThread } from "../utils";
 
 export default (client: Client): void => {
 	client.on("guildMemberUpdate", async (oldMember, newMember) => {
@@ -10,24 +10,11 @@ export default (client: Client): void => {
 		const channels = guild.channels.cache.filter(channel => channel.isThread());
 		for (const channel of channels.values()) {
 			const threadChannel = channel as ThreadChannel;
-			const threadMembers = await threadChannel.members.fetch();
-			const threadMemberArray: ThreadMember<boolean>[] = [];
-			threadMembers.forEach(member => {
-				threadMemberArray.push(member);
-			});
-			//check if user not in thread
-			if (!threadMemberArray.some(member => member.id === newMember.id)) {
-				//check thread permission with user role
-				if (threadChannel.permissionsFor(newMember).has("ViewChannel")) {
-					await sendMessageAndEditPing(newMember, threadChannel);
-					console.log(`Add @${newMember.user.username} to #${threadChannel.name}`);
-				}
+			if (await checkIfUserNotInTheThread(threadChannel, newMember)) {
+				await addUserToThread(threadChannel, newMember);
 			} //remove user from thread if not have permission
 			else {
-				if (!threadChannel.permissionsFor(newMember).has("ViewChannel")) {
-					await threadChannel.members.remove(newMember.id);
-					console.log(`Remove ${newMember.user.username} from ${threadChannel.name}`);
-				}
+				await removeUserFromThread(threadChannel, newMember);
 			}
 		}
 	});
