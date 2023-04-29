@@ -43,12 +43,12 @@ export default (client: Client): void => {
 		threads.forEach(thread => {
 			allowedMembers.forEach(async (member)=> {
 				await sendMessageAndEditPing(member, thread);
-				console.log(`Adding ${member.user.username} to ${thread.name}`);
+				console.log(`Add @${member.user.username} to #${thread.name}`);
 			});
 			//remove not allowed members from the thread
 			disallowedMembers.forEach(member => {
 				thread.members.remove(member.id);
-				console.log(`Removing ${member.user.username} from ${thread.name}`);
+				console.log(`Remove @${member.user.username} from #${thread.name}`);
 			});
 		});
 	});

@@ -24,7 +24,7 @@ export default (client: Client): void => {
 			);
 		});
 		for (const member of allowedMembers.values()) {
-			console.log(`Adding ${member.user.username} to ${thread.name}`);
+			console.log(`Add @${member.user.username} to #${thread.name}`);
 			await sendMessageAndEditPing(member, thread);
 		}
 	});

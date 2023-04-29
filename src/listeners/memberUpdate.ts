@@ -20,13 +20,13 @@ export default (client: Client): void => {
 				//check thread permission with user role
 				if (threadChannel.permissionsFor(newMember).has("ViewChannel")) {
 					await sendMessageAndEditPing(newMember, threadChannel);
-					console.log(`Added ${newMember.user.username} to ${threadChannel.name}`);
+					console.log(`Add @${newMember.user.username} to #${threadChannel.name}`);
 				}
 			} //remove user from thread if not have permission
 			else {
 				if (!threadChannel.permissionsFor(newMember).has("ViewChannel")) {
 					await threadChannel.members.remove(newMember.id);
-					console.log(`Removed ${newMember.user.username} from ${threadChannel.name}`);
+					console.log(`Remove ${newMember.user.username} from ${threadChannel.name}`);
 				}
 			}
 		}

@@ -18,7 +18,7 @@ export default (client: Client): void => {
 			if (threadChannel.permissionsFor(member).has("ViewChannel")) {
 				//add user to thread
 				await sendMessageAndEditPing(member, threadChannel);
-				console.log(`Added ${member.user.username} to ${threadChannel.name}`);
+				console.log(`Add @${member.user.username} to #${threadChannel.name}`);
 			}
 		}
 		
