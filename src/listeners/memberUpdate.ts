@@ -18,7 +18,7 @@ export default (client: Client): void => {
 			if (!threadMemberArray.some(member => member.id === newMember.id)) {
 				//check thread permission with user role
 				if (threadChannel.permissionsFor(newMember).has("ViewChannel")) {
-					//add user to thread
+					//send a message with mentioning the user
 					await threadChannel.members.add(newMember);
 					console.log(`Added ${newMember.user.username} to ${threadChannel.name}`);
 				}
