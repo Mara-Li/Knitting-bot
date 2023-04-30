@@ -108,7 +108,6 @@ export async function checkIfUserNotInTheThread(thread: ThreadChannel, memberToC
  */
 export async function addRoleAndUserToThread(thread: ThreadChannel) {
 	const members = await thread.guild.members.fetch();
-	const message = await thread.send("@silent");
 	const toPing: GuildMember[] = [];
 	const rolesWithAccess: Role[] = thread
 		.guild.roles.cache
@@ -138,6 +137,9 @@ export async function addRoleAndUserToThread(thread: ThreadChannel) {
 			toPing.push(...users);
 		});
 	}
-	await message.edit(toPing.map(member => `<@${member.id}>`).join(" "));
-	await message.delete();
+	if (toPing.length > 0) {
+		const message = await thread.send("@silent");
+		await message.edit(toPing.map(member => `<@${member.id}>`).join(" "));
+		await message.delete();
+	}
 }
