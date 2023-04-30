@@ -7,7 +7,7 @@
         "init": "npm i && node install.js",
         "build": "tsc",
         "prestart": "npm run build",
-        "start": "pm2 start dist/index.js --name knitting-bot --time",
+        "start": "pm2 start dist/index.js --name knitting-bot --log-date-format=\"YYYY-MM-DD HH:mm Z\"",
         "stop": "pm2 stop knitting-bot",
         "restart": "pm2 restart knitting-bot",
         "delete": "pm2 delete knitting-bot",
