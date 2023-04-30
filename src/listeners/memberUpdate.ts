@@ -1,4 +1,4 @@
-import { Client, ThreadChannel } from "discord.js";
+import { Client,ThreadChannel } from "discord.js";
 import { addUserToThread, checkIfUserNotInTheThread, removeUserFromThread } from "../utils";
 
 export default (client: Client): void => {

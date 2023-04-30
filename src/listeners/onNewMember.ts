@@ -14,7 +14,6 @@ export default (client: Client): void => {
 		const channels = guild.channels.cache.filter(channel => channel.isThread());
 		for (const channel of channels.values()) {
 			const threadChannel = channel as ThreadChannel;
-			//check thread permission with user role
 			await addUserToThread(threadChannel, member);
 		}
 		

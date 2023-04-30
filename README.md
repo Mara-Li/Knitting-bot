@@ -3,7 +3,7 @@
 A bot that help you to add user to a thread, to keep the thread always visible for everyone, and without pinging them!  
 
 > **Note**  
-> The user added to the thread need to have the permission to see it.  
+> The user added to the thread needs to have the permission to see it.  
 
 The bot will automatically add user to a thread when: 
 - A user join the server and have the permission to see the thread
@@ -13,7 +13,13 @@ The bot will automatically add user to a thread when:
 
 The bot will also remove user that lost the perm to see the thread. Normally, discord will remove the user from the thread, but it's not always the case.  
 
-> **Note**  **How pinging work ?**  
+For some optimization purpose, the bot will first @role when a thread is created (or when it joins a server). After, it will check if some user (that don't have role/allowed role) can see the thread and add them.
+Moreover, if there are no role in the server, the bot process on the members instead.
+
+> It will avoid to iterate and mention all members of the server. 
+> (Imagine that the bot send 100 messages because they are 100 members in the server, it will be a lot of spam)
+
+> **Note**  **How adding work ?**  
 > The bot will send a message containing "//", edit it (so no mention because of editing message) and then delete it.   
 > As the user was mentioned, the thread will be visible for them.  
 

@@ -1,5 +1,8 @@
 import {ChannelType, Client, Snowflake, TextChannel } from "discord.js";
-import { checkIfUserNotInTheThread, getMemberPermission, sendMessageAndEditPing } from "../utils";
+import {
+	addRoleAndUserToThread,
+	getMemberPermission,
+} from "../utils";
 
 /**
  * @param {Client} client - Discord.js Client
@@ -25,16 +28,10 @@ export default (client: Client): void => {
 		//get all role allowed to view the channel
 		const members = await newChannel.guild.members.fetch();
 		//filter members that have the permission to view the thread
-		const allowedMembers  = getMemberPermission(members, newChannel);
 		const disallowedMembers = getMemberPermission(members, newChannel, false);
 		//add allowed members to the thread, if there are not already in it
 		threads.forEach(thread => {
-			allowedMembers.forEach(async (member)=> {
-				if (await checkIfUserNotInTheThread(thread, member)) {
-					await sendMessageAndEditPing(member, thread);
-					console.log(`Add @${member.user.username} to #${thread.name}`);
-				}
-			});
+			addRoleAndUserToThread(thread);
 			//remove not allowed members from the thread
 			disallowedMembers.forEach(member => {
 				thread.members.remove(member.id);
