@@ -26,17 +26,17 @@ export default (client: Client): void => {
 		console.log(`Updating threads of ${newChannel.name}`);
 		const threads = await newChannel.threads.cache;
 		//get all role allowed to view the channel
-		const members = await newChannel.guild.members.fetch();
+		//const members = await newChannel.guild.members.fetch();
 		//filter members that have the permission to view the thread
-		const disallowedMembers = getMemberPermission(members, newChannel, false);
+		//const disallowedMembers = getMemberPermission(members, newChannel, false);
 		//add allowed members to the thread, if there are not already in it
 		threads.forEach(thread => {
 			addRoleAndUserToThread(thread);
 			//remove not allowed members from the thread
-			disallowedMembers.forEach(member => {
-				thread.members.remove(member.id);
-				console.log(`Remove @${member.user.username} from #${thread.name}`);
-			});
+			//disallowedMembers.forEach(member => {
+			//  thread.members.remove(member.id);
+			//  console.log(`Remove @${member.user.username} from #${thread.name}`);
+			//});
 		});
 	});
 };

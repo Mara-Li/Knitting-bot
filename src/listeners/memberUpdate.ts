@@ -15,7 +15,7 @@ export default (client: Client): void => {
 					await addUserToThread(threadChannel, newMember);
 				} //remove user from thread if not have permission
 				else {
-					await removeUserFromThread(threadChannel, newMember);
+					//await removeUserFromThread(threadChannel, newMember);
 				}
 			}
 		} catch (error) {

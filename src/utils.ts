@@ -1,4 +1,4 @@
-import { Collection, GuildMember, Role, TextChannel, ThreadChannel, ThreadMember } from "discord.js";
+import { Collection, GuildMember, Message, Role, TextChannel, ThreadChannel, ThreadMember } from "discord.js";
 
 
 
@@ -27,35 +27,48 @@ export function getMemberPermission(members: Collection<string, GuildMember>, th
 			);
 		});
 	}
-	return [];
+	return members;
+}
+
+export async function addUserToThread(thread: ThreadChannel, user: GuildMember) {
+	if (thread.permissionsFor(user).has("ViewChannel", true) && await checkIfUserNotInTheThread(thread, user)) {
+		const message = await thread.send("// FROM ONE USER");
+		await message.edit(`<@${user.id}>`);
+		await message.delete();
+		console.log(`Add @${user.user.username} to #${thread.name}`);
+	}
 }
 
 /**
- * Add a user to a thread, with verification the permission. After, send a message to ping the user and remove it.
+ * Add a list to user to a thread, with verification the permission. After, send a message to ping the user and remove it.
  * @param {ThreadChannel} thread The thread to add the user and send the message
- * @param {GuildMember} member The member to add to the thread
+ * @param {GuildMember} members The member to add to the thread
+ * @param {Message} message
  */
-export async function addUserToThread(thread: ThreadChannel, member: GuildMember) {
-	if (thread.permissionsFor(member).has("ViewChannel", true)) {
-		const message = await thread.send("//");
-		await message.edit(`<@${member.id}>`);
-		await message.delete();
-		console.log(`Add @${member.user.username} to #${thread.name}`);
+export async function addUsersToThread(thread: ThreadChannel, members: GuildMember[], message: Message) {
+	for (const member of members) {
+		if (thread.permissionsFor(member).has("ViewChannel", true) && await checkIfUserNotInTheThread(thread, member)) {
+			await message.edit(`<@${member.id}>`);
+			console.log(`Add @${member.user.username} to #${thread.name}`);
+		}
 	}
 }
 
 /**
  * Same as above, but for a role
  * @param {ThreadChannel} thread The thread to add the role and send the message
- * @param {Role} role The role to add to the thread
+ * @param {Role[]} roles The role to add to the thread
+ * @param message
  */
-export async function sendMessageRole(thread: ThreadChannel, role: Role) {
-	if (role.name === "@everyone") return;
-	if (thread.permissionsFor(role).has("ViewChannel", true)) {
-		const message = await thread.send("//");
-		await message.edit(`<@&${role.id}>`);
-		await message.delete();
-		console.log(`Add @${role.name} to #${thread.name}`);
+export async function sendMessageRole(thread: ThreadChannel, roles: Role[], message: Message) {
+	for (const role of roles) {
+		//check if all members of the role are in the thread
+		const membersInTheThread = await thread.members.fetch();
+		const membersOfTheRoleNotInTheThread = role.members.filter(member => !membersInTheThread.has(member.id));
+		if (role.name !== "@everyone" && thread.permissionsFor(role).has("ViewChannel", true) && role.members.size >0 && membersOfTheRoleNotInTheThread.size > 0) {
+			await message.edit(`<@&${role.id}>`);
+			console.log(`Add @${role.name} to #${thread.name}`);
+		}
 	}
 }
 
@@ -93,6 +106,7 @@ export async function checkIfUserNotInTheThread(thread: ThreadChannel, memberToC
  */
 export async function addRoleAndUserToThread(thread: ThreadChannel) {
 	const members = await thread.guild.members.fetch();
+	const message = await thread.send("@silent");
 	const rolesWithAccess: Role[] = thread
 		.guild.roles.cache
 		.filter((role) => {
@@ -101,30 +115,17 @@ export async function addRoleAndUserToThread(thread: ThreadChannel) {
 		})
 		.toJSON();
 	if (rolesWithAccess.length > 0) {
-		for (const role of rolesWithAccess) {
-			//if no member in the role, skip
-			if (role.members.size > 0) {
-				for (const member of role.members.values()) {
-					if (await checkIfUserNotInTheThread(thread, member)) {
-						await sendMessageRole(thread, role);
-						break;
-					}
-					
-				}
-			}
-		}
+		await sendMessageRole(thread, rolesWithAccess, message);
 	} else {
-		for (const member of members.values()) {
-			if (await checkIfUserNotInTheThread(thread, member)) {
-				await addUserToThread(thread, member);
-			}
-		}
+		const guildMembers: GuildMember[] = members.toJSON();
+		await addUsersToThread(thread, guildMembers, message);
 	}
 	//get all member that have access to the thread (overwriting permission)
-	const memberWithAccess = getMemberPermission(members, thread);
-	for (const member of memberWithAccess.values()) {
-		if (await checkIfUserNotInTheThread(thread, member)) {
-			await addUserToThread(thread, member);
-		}
+	const reloadMembers = await thread.guild.members.fetch();
+	const memberWithAccess = getMemberPermission(reloadMembers, thread);
+	if (memberWithAccess) {
+		const memberWithAccessArray: GuildMember[] = memberWithAccess.toJSON();
+		await addUsersToThread(thread, memberWithAccessArray, message);
 	}
+	await message.delete();
 }
