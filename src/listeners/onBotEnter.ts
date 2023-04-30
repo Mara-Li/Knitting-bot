@@ -1,5 +1,5 @@
 import { Client, ThreadChannel } from "discord.js";
-import { addRoleAndUserToThread} from "../utils";
+import { addRoleAndUserToThread, logInDev } from "../utils";
 import { commands } from "../commands";
 
 /**
@@ -15,9 +15,9 @@ export default (client: Client):void => {
 				await guild.commands.create(command.data);
 			}
 		} catch (error) {
-			console.log(error);
+			console.error(error);
 		}
-		console.log(`${client.user?.username} has been added to ${guild.name}`);
+		logInDev(`${client.user?.username} has been added to ${guild.name}`);
 		const threads = guild.channels.cache.filter(channel => channel.isThread());
 		for (const thread of threads.values()) {
 			const threadChannel = thread as ThreadChannel;

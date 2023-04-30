@@ -10,6 +10,7 @@ import onThreadCreated from "./listeners/onThreadCreated";
 import onChannelUpdate from "./listeners/onChannelUpdate";
 import onNewMember from "./listeners/onNewMember";
 import { commands } from "./commands";
+import { logInDev } from "./utils";
 
 
 dotenv.config();
@@ -27,7 +28,7 @@ const rest = new REST({ version: "9" }).setToken(process.env.DISCORD_TOKEN ?? "0
 
 (async () => {
 	try {
-		console.log("Started refreshing application (/) commands.");
+		logInDev("Started refreshing application (/) commands.");
 
 		// Enregistrement des commandes Slash pour chaque serveur que le bot rejoint
 		for (const guild of client.guilds.cache.values()) {
@@ -38,10 +39,10 @@ const rest = new REST({ version: "9" }).setToken(process.env.DISCORD_TOKEN ?? "0
 				);
 			}
 
-			console.log(`Slash commands registered for ${guild.name}`);
+			logInDev(`Slash commands registered for ${guild.name}`);
 		}
 
-		console.log("Successfully reloaded application (/) commands.");
+		logInDev("Successfully reloaded application (/) commands.");
 	} catch (error) {
 		console.error(error);
 	}
@@ -56,7 +57,7 @@ try {
 	onBotEnter(client);
 	interactionCreate(client);
 } catch (error) {
-	console.log(error);
+	console.error(error);
 }
 client.login(process.env.DISCORD_TOKEN);
 

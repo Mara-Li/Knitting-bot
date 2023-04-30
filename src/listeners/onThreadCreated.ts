@@ -1,6 +1,6 @@
 import { ChannelType, Client, ThreadChannel } from "discord.js";
 import {
-	addRoleAndUserToThread,
+	addRoleAndUserToThread, logInDev,
 } from "../utils";
 
 /**
@@ -13,7 +13,7 @@ export default (client: Client): void => {
 	client.on("threadCreate", async (thread: ThreadChannel) => {
 		//return if the thread is not a public thread
 		if (thread.type !== ChannelType.PublicThread) return;
-		console.log(`Thread ${thread.name} created!`);
+		logInDev(`Thread ${thread.name} created!`);
 		await addRoleAndUserToThread(thread);
 	});
 };

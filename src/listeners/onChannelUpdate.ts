@@ -1,6 +1,6 @@
 import {ChannelType, Client, Snowflake, TextChannel } from "discord.js";
 import {
-	addRoleAndUserToThread,
+	addRoleAndUserToThread, logInDev,
 } from "../utils";
 
 /**
@@ -14,15 +14,15 @@ export default (client: Client): void => {
 	client.on("channelUpdate", async (
 		oldChannel,
 		newChannel) => {
-		console.log(`Channel #${getChannelName(oldChannel.id, client)} updated`);
+		logInDev(`Channel #${getChannelName(oldChannel.id, client)} updated`);
 		if (oldChannel.type !== ChannelType.GuildText
 			|| newChannel.type !== ChannelType.GuildText
 			|| oldChannel.permissionOverwrites.cache === newChannel.permissionOverwrites.cache) {
-			console.log("Channel is not a text channel or permission are not changed");
+			console.error("Channel is not a text channel or permission are not changed");
 			return;
 		}
 		//get all threads of this channel
-		console.log(`Updating threads of ${newChannel.name}`);
+		logInDev(`Updating threads of ${newChannel.name}`);
 		const threads = await newChannel.threads.cache;
 		//get all role allowed to view the channel
 		//const members = await newChannel.guild.members.fetch();
