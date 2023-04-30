@@ -1,5 +1,5 @@
 import { Client,ThreadChannel } from "discord.js";
-import { addUserToThread, checkIfUserNotInTheThread, removeUserFromThread } from "../utils";
+import { addUserToThread, checkIfUserNotInTheThread } from "../utils";
 
 export default (client: Client): void => {
 	client.on("guildMemberUpdate", async (oldMember, newMember) => {

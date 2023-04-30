@@ -12,8 +12,6 @@ The bot will automatically add user to a thread when:
 - When a thread is created
 - When the bot join the server. Note that it needs the permissions to see the thread to add members.
 
-The bot will also remove user that lost the perm to see the thread. Normally, discord will remove the user from the thread, but it's not always the case.  
-
 For some optimization purpose, the bot will first @role when a thread is created (or when it joins a server). After, it will check if some user (that don't have role/allowed role) can see the thread and add them.
 Moreover, if there are no role in the server, the bot process on the members instead.
 
@@ -40,6 +38,9 @@ If, for some reason, the bot doesn't update the thread, you have three commands 
 - `/specific [thread]` : Update a specific thread
 - `/global` : Update all thread in the server
 - `/update` : Update the thread where the command is used
+
+> **Warning**  
+> It will re-add all user that leaves the thread, even if they left it on purpose.
 
 ---
 
