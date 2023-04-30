@@ -1,4 +1,4 @@
-import { Collection, GuildMember, Message, Role, TextChannel, ThreadChannel, ThreadMember } from "discord.js";
+import { Collection, GuildMember, Role, TextChannel, ThreadChannel, ThreadMember } from "discord.js";
 
 
 

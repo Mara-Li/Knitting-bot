@@ -1,7 +1,6 @@
 import {ChannelType, Client, Snowflake, TextChannel } from "discord.js";
 import {
 	addRoleAndUserToThread,
-	getMemberPermission,
 } from "../utils";
 
 /**
