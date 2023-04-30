@@ -7,6 +7,9 @@
         "init": "npm i && node install.js",
         "build": "tsc",
         "start": "pm2 start dist/index.js --name knitting-bot",
+        "stop" : "pm2 stop knitting-bot",
+        "restart": "pm2 restart knitting-bot",
+        "delete": "pm2 delete knitting-bot",
         "dev": "ts-node-dev --respawn -- src/index.ts",
         "lint": "eslint --ext .ts src/",
         "lint:fix": "eslint --ext .ts src/ --fix"
