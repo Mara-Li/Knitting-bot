@@ -1,4 +1,4 @@
-import { CommandInteraction, SlashCommandBuilder, ThreadChannel } from "discord.js";
+import { CommandInteraction, GuildMember, SlashCommandBuilder, ThreadChannel } from "discord.js";
 import { addRoleAndUserToThread } from "../utils";
 
 export default {
@@ -6,6 +6,12 @@ export default {
 		.setName("update")
 		.setDescription("Update this thread with adding or removing user"),
 	async execute(interaction: CommandInteraction) {
+		//check if user has permission to update thread
+		const user = interaction.member as GuildMember;
+		if (!user.permissions.has("ManageThreads")){
+			await interaction.reply({ content: "You don't have permission to update this thread", ephemeral: true });
+			return;
+		}
 		if (!interaction.channel || !(interaction.channel instanceof ThreadChannel)) {
 			await interaction.reply({ content: "This is not a thread", ephemeral: true });
 			return;
