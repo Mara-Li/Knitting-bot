@@ -28,9 +28,9 @@ let isDevEnv = readlineSync.keyInYNStrict(c.info("Is this a development environm
 
 const nodeEnv = isDevEnv ? "development" : "production";
 
-console.log("Token: " + token);
-console.log("Client ID: " + clientId);
-console.log("Environment de dev: " + nodeEnv);
+console.log(c.success("Token: " + token));
+console.log(c.success("Client ID: " + clientId));
+console.log(c.success("Environment: " + nodeEnv));
 
 const envContent = `TOKEN=${token}\nCLIENT_ID=${clientId}\nNODE_ENV=${nodeEnv}`;
 
