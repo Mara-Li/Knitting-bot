@@ -15,12 +15,12 @@ The bot will automatically add user to a thread when:
 For some optimization purpose, the bot will first @role when a thread is created (or when it joins a server). After, it will check if some user (that don't have role/allowed role) can see the thread and add them.
 Moreover, if there are no role in the server, the bot process on the members instead.
 
-> It will avoid to iterate and mention all members of the server. 
-> (Imagine that the bot send 100 messages because they are 100 members in the server, it will be a lot of spam)
+> It will avoid to iterate and mention all members of the server.
 
 > **Note**  **How adding work ?**  
-> The bot will send a message containing "//", edit it (so no mention because of editing message) and then delete it.   
+> The bot will send a message containing "//", edit it (so no mention because of editing message) and then delete it.
 > As the user was mentioned, the thread will be visible for them.  
+> Only one message will be sent : the same message will be edited for each user/roles, preventing sending a lot of message.
 
 ### Permission asked
 
