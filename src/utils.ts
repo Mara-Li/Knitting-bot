@@ -43,33 +43,35 @@ export async function addUserToThread(thread: ThreadChannel, user: GuildMember) 
  * Add a list to user to a thread, with verification the permission. After, send a message to ping the user and remove it.
  * @param {ThreadChannel} thread The thread to add the user and send the message
  * @param {GuildMember} members The member to add to the thread
- * @param {Message} message
  */
-export async function addUsersToThread(thread: ThreadChannel, members: GuildMember[], message: Message) {
+export async function getUsersToPing(thread: ThreadChannel, members: GuildMember[]) {
+	const usersToBeAdded: GuildMember[] = [];
 	for (const member of members) {
 		if (thread.permissionsFor(member).has("ViewChannel", true) && await checkIfUserNotInTheThread(thread, member)) {
-			await message.edit(`<@${member.id}>`);
+			usersToBeAdded.push(member);
 			console.log(`Add @${member.user.username} to #${thread.name}`);
 		}
 	}
+	return usersToBeAdded;
 }
 
 /**
  * Same as above, but for a role
  * @param {ThreadChannel} thread The thread to add the role and send the message
  * @param {Role[]} roles The role to add to the thread
- * @param message
  */
-export async function sendMessageRole(thread: ThreadChannel, roles: Role[], message: Message) {
+export async function getRoleToPing(thread: ThreadChannel, roles: Role[]) {
+	const roleToBeAdded: Role[] = [];
 	for (const role of roles) {
 		//check if all members of the role are in the thread
 		const membersInTheThread = await thread.members.fetch();
 		const membersOfTheRoleNotInTheThread = role.members.filter(member => !membersInTheThread.has(member.id));
 		if (role.name !== "@everyone" && thread.permissionsFor(role).has("ViewChannel", true) && role.members.size >0 && membersOfTheRoleNotInTheThread.size > 0) {
-			await message.edit(`<@&${role.id}>`);
+			roleToBeAdded.push(role);
 			console.log(`Add @${role.name} to #${thread.name}`);
 		}
 	}
+	return roleToBeAdded;
 }
 
 /**
@@ -107,6 +109,7 @@ export async function checkIfUserNotInTheThread(thread: ThreadChannel, memberToC
 export async function addRoleAndUserToThread(thread: ThreadChannel) {
 	const members = await thread.guild.members.fetch();
 	const message = await thread.send("@silent");
+	const toPing: GuildMember[] = [];
 	const rolesWithAccess: Role[] = thread
 		.guild.roles.cache
 		.filter((role) => {
@@ -115,17 +118,26 @@ export async function addRoleAndUserToThread(thread: ThreadChannel) {
 		})
 		.toJSON();
 	if (rolesWithAccess.length > 0) {
-		await sendMessageRole(thread, rolesWithAccess, message);
+		getRoleToPing(thread, rolesWithAccess).then(roles => {
+			roles.forEach(role => {
+				toPing.push(...role.members.toJSON());
+			});
+		});
 	} else {
 		const guildMembers: GuildMember[] = members.toJSON();
-		await addUsersToThread(thread, guildMembers, message);
+		await getUsersToPing(thread, guildMembers).then(users => {
+			toPing.push(...users);
+		});
 	}
 	//get all member that have access to the thread (overwriting permission)
 	const reloadMembers = await thread.guild.members.fetch();
 	const memberWithAccess = getMemberPermission(reloadMembers, thread);
 	if (memberWithAccess) {
 		const memberWithAccessArray: GuildMember[] = memberWithAccess.toJSON();
-		await addUsersToThread(thread, memberWithAccessArray, message);
+		await getUsersToPing(thread, memberWithAccessArray).then(users => {
+			toPing.push(...users);
+		});
 	}
+	await message.edit(toPing.map(member => `<@${member.id}>`).join(" "));
 	await message.delete();
 }
