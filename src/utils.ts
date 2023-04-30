@@ -35,7 +35,7 @@ export async function addUserToThread(thread: ThreadChannel, user: GuildMember) 
 		const message = await thread.send("// FROM ONE USER");
 		await message.edit(`<@${user.id}>`);
 		await message.delete();
-		console.log(`Add @${user.user.username} to #${thread.name}`);
+		logInDev(`Add @${user.user.username} to #${thread.name}`);
 	}
 }
 
@@ -49,7 +49,7 @@ export async function getUsersToPing(thread: ThreadChannel, members: GuildMember
 	for (const member of members) {
 		if (thread.permissionsFor(member).has("ViewChannel", true) && await checkIfUserNotInTheThread(thread, member)) {
 			usersToBeAdded.push(member);
-			console.log(`Add @${member.user.username} to #${thread.name}`);
+			logInDev(`Add @${member.user.username} to #${thread.name}`);
 		}
 	}
 	return usersToBeAdded;
@@ -68,7 +68,7 @@ export async function getRoleToPing(thread: ThreadChannel, roles: Role[]) {
 		const membersOfTheRoleNotInTheThread = role.members.filter(member => !membersInTheThread.has(member.id));
 		if (role.name !== "@everyone" && thread.permissionsFor(role).has("ViewChannel", true) && role.members.size >0 && membersOfTheRoleNotInTheThread.size > 0) {
 			roleToBeAdded.push(role);
-			console.log(`Add @${role.name} to #${thread.name}`);
+			logInDev(`Add @${role.name} to #${thread.name}`);
 		}
 	}
 	return roleToBeAdded;
@@ -82,7 +82,7 @@ export async function getRoleToPing(thread: ThreadChannel, roles: Role[]) {
 export async function removeUserFromThread(thread: ThreadChannel, member: GuildMember) {
 	if (!thread.permissionsFor(member).has("ViewChannel", true)) {
 		await thread.members.remove(member.id);
-		console.log(`Remove @${member.user.username} from #${thread.name}`);
+		logInDev(`Remove @${member.user.username} from #${thread.name}`);
 	}
 }
 
@@ -141,5 +141,11 @@ export async function addRoleAndUserToThread(thread: ThreadChannel) {
 		const message = await thread.send("@silent");
 		await message.edit(toPing.map(member => `<@${member.id}>`).join(" "));
 		await message.delete();
+	}
+}
+
+export function logInDev(text: string) {
+	if (process.env.NODE_ENV === "development") {
+		console.log(text);
 	}
 }

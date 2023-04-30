@@ -4,8 +4,7 @@
  * It will create a new file called .env and will ask for the bot token.
  */
 
-const fs = require("fs");
-const readline = require("readline");
+const readlineSync = require("readline-sync");
 const c = require("ansi-colors");
 
 c.theme({
@@ -23,12 +22,16 @@ c.theme({
 	warning: c.yellow
 });
 
-const rl = readline.createInterface({
-	input: process.stdin,
-	output: process.stdout
-});
+let token = readlineSync.question(c.info("Discord BOT TOKEN: "));
+let clientId = readlineSync.question(c.info("Discord Bot Client ID: "));
+let isDevEnv = readlineSync.keyInYNStrict(c.info("Is this a development environment?"));
 
-rl.question(c.info("Enter the discord bot token: "), (token) => {
-	fs.writeFileSync(".env", `DISCORD_TOKEN=${token}\n`, { flag: "w" });
-	rl.close();
-});
+const nodeEnv = isDevEnv ? "development" : "production";
+
+console.log("Token: " + token);
+console.log("Client ID: " + clientId);
+console.log("Environment de dev: " + nodeEnv);
+
+const envContent = `TOKEN=${token}\nCLIENT_ID=${clientId}\nNODE_ENV=${nodeEnv}`;
+
+require("fs").writeFileSync(".env", envContent);
