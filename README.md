@@ -34,6 +34,13 @@ The bot needs some intents to work:
 
 [Invitation links](https://discord.com/api/oauth2/authorize?client_id=1101559076086886500&permissions=292057785360&scope=bot)
 
+### Slash Commands
+
+If, for some reason, the bot doesn't update the thread, you have three commands : 
+- `/specific [thread]` : Update a specific thread
+- `/global` : Update all thread in the server
+- `/update` : Update the thread where the command is used
+
 ---
 
 ## Thread Watcher

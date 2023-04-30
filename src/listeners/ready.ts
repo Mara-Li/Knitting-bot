@@ -1,4 +1,6 @@
 import { Client } from "discord.js";
+import { commands } from "../commands";
+
 
 export default (client: Client): void => {
 	client.on("ready", async () => {
@@ -6,5 +8,12 @@ export default (client: Client): void => {
 			return;
 		}
 		console.log(`${client.user.username} is online`);
+		const guilds = await client.guilds.cache;
+		for (const guild of guilds) {
+			for (const command of commands) {
+				console.log(`Adding ${command.data.name} to ${guild[1].name}`);
+				await guild[1].commands.create(command.data);
+			}
+		}
 	});
 };
