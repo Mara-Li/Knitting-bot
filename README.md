@@ -10,6 +10,7 @@ The bot will automatically add user to a thread when:
 - A user is updated and get a new role
 - When a channel or category have their permission edited
 - When a thread is created
+- When the bot join the server. Note that it needs the permissions to see the thread to add members.
 
 The bot will also remove user that lost the perm to see the thread. Normally, discord will remove the user from the thread, but it's not always the case.  
 
