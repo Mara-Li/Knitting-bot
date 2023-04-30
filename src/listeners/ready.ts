@@ -8,7 +8,7 @@ export default (client: Client): void => {
 		if (!client.user || !client.application) {
 			return;
 		}
-		console.log(`${client.user.username} is online`);
+		console.info(`${client.user.username} is online`);
 		const guilds = await client.guilds.cache;
 		for (const guild of guilds) {
 			for (const command of commands) {

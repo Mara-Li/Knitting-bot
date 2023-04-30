@@ -32,6 +32,6 @@ console.log(c.success("Token: " + token));
 console.log(c.success("Client ID: " + clientId));
 console.log(c.success("Environment: " + nodeEnv));
 
-const envContent = `TOKEN=${token}\nCLIENT_ID=${clientId}\nNODE_ENV=${nodeEnv}`;
+const envContent = `DISCORD_TOKEN=${token}\nCLIENT_ID=${clientId}\nNODE_ENV=${nodeEnv}`;
 
 require("fs").writeFileSync(".env", envContent);
