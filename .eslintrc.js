@@ -6,16 +6,24 @@ module.exports = {
 	},
 	"extends": [
 		"eslint:recommended",
-		"plugin:@typescript-eslint/recommended",
 		"plugin:jsonc/recommended-with-jsonc",
 		"plugin:jsonc/recommended-with-json",
 
 	],
-	"parser": "@typescript-eslint/parser",
-	overrides: [
+	"overrides": [
 		{
-			files: ["*.json"],
-			parser: "jsonc-eslint-parser"
+			"files": ["**/*.ts", "**/*.tsx"],
+			"excludedFiles": ["**/*.js"], 
+			"extends": ["eslint:recommended", "plugin:@typescript-eslint/recommended"], 
+			"parser": "@typescript-eslint/parser",
+		},
+		{
+			"files": ["**/*.js"],
+			"extends": ["eslint:recommended"]
+		},
+		{
+			"files": ["*.json"],
+			"parser": "jsonc-eslint-parser"
 		},
 	],
 	"parserOptions": {
@@ -51,4 +59,4 @@ module.exports = {
 		],
 		"@typescript-eslint/ban-ts-comment": "off"
 	}
-}
+};
