@@ -8,7 +8,7 @@ Si vous voulez essayer le bot, vous pouvez rejoindre [ce serveur discord](https:
 
 Un bot qui vous aide à ajouter un utilisateur à un fil de discussion, pour que le fil soit toujours visible pour tout le monde, sans les mentionner !
 
-> **Note**
+> **Note**  
 > L'utilisateur ajouté au fil doit avoir la permission de le voir.
 
 Le bot ajoutera automatiquement un utilisateur à un fil de discussion lorsque :
@@ -28,10 +28,10 @@ Si vous voulez mettre à jour manuellement un fil, vous pouvez utiliser les comm
 
 Ces commandes n'apparaissent pas pour les utilisateurs qui n'ont pas la permission `gérer les fils`.
 
-> **Attention**
+> **Attention**  
 > Tous les utilisateurs qui quittent le fil seront ré-ajoutés, même s'ils l'ont quitté volontairement.
 
-> **Note**
+> **Note**  
 > Il n'y a aucun moyen que je puisse coder quelque chose qui n'ajoute aucune notification (c'est-à-dire la bordure blanche) sur le fil. Vous aurez toujours le fil qui deviendra blanc lorsque le bot s'active.
 
 De plus, vous pouvez configurer le bot et désactiver les événements que vous ne souhaitez pas utiliser. Vous pouvez le faire avec la commande `/config`. Vous pouvez voir la configuration avec `/config afficher`.
