@@ -37,9 +37,9 @@ If you want to try out the bot, you can join [this discord server](https://disco
 ### Slash Commands
 
 If, for some reason, the bot doesn't update the thread, you have three commands : 
-- `/specific [thread]` : Update a specific thread
-- `/global` : Update all threads in the server
-- `/update` : Update the thread where the command is used
+- `/update-specific-thread [thread]` : Update a specific thread
+- `/update-all-threads` : Update all threads in the server
+- `/update-thread` : Update the thread where the command is used
 
 These commands don't appear for user that doesn't have the `manage thread` permission.
 
@@ -49,6 +49,8 @@ These commands don't appear for user that doesn't have the `manage thread` permi
 > **Note**
 > There is no way that I can code something that don't add any notification (aka white border) on the thread.
 > You **always** will have the thread that become white when the bot activate. 
+
+More over, you can configure the bot and disable event that you don't want to use. You can do that with the `/config` command. You can see the configuration with `/config-show`
 
 ---
 
