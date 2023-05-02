@@ -28,7 +28,7 @@ Si vous voulez mettre à jour manuellement un fil, vous pouvez utiliser les comm
 
 Ces commandes n'apparaissent pas pour les utilisateurs qui n'ont pas la permission `gérer les fils`.
 
-> **Attention**  
+> **Warning**  
 > Tous les utilisateurs qui quittent le fil seront ré-ajoutés, même s'ils l'ont quitté volontairement.
 
 > **Note**  
