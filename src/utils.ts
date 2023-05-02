@@ -1,4 +1,12 @@
-import { Collection, GuildMember, Role, TextChannel, ThreadChannel, ThreadMember } from "discord.js";
+import {
+	Collection,
+	GuildMember,
+	MessageFlags, MessagePayload, MessagePayloadOption,
+	Role,
+	TextChannel,
+	ThreadChannel,
+	ThreadMember,
+} from "discord.js";
 
 
 
@@ -32,7 +40,11 @@ export function getMemberPermission(members: Collection<string, GuildMember>, th
 
 export async function addUserToThread(thread: ThreadChannel, user: GuildMember) {
 	if (thread.permissionsFor(user).has("ViewChannel", true) && await checkIfUserNotInTheThread(thread, user)) {
-		const message = await thread.send("// FROM ONE USER");
+		const messagePayload : MessagePayloadOption = {
+			content: " ",
+			flags: MessageFlags.SuppressNotifications,
+		};
+		const message = await thread.send(messagePayload);
 		await message.edit(`<@${user.id}>`);
 		await message.delete();
 		logInDev(`Add @${user.user.username} to #${thread.name}`);
@@ -138,7 +150,11 @@ export async function addRoleAndUserToThread(thread: ThreadChannel) {
 		});
 	}
 	if (toPing.length > 0) {
-		const message = await thread.send("@silent");
+		const messagePayload : MessagePayloadOption = {
+			content: "🔄",
+			flags: MessageFlags.SuppressNotifications
+		};
+		const message = await thread.send(messagePayload);
 		await message.edit(toPing.map(member => `<@${member.id}>`).join(" "));
 		await message.delete();
 	}

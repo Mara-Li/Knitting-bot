@@ -1,4 +1,5 @@
-import { Client,ThreadChannel } from "discord.js";
+import { Client, ThreadChannel } from "discord.js";
+import { CommandName, get } from "../maps";
 import { addUserToThread, checkIfUserNotInTheThread, logInDev } from "../utils";
 
 export default (client: Client): void => {
@@ -6,6 +7,7 @@ export default (client: Client): void => {
 		//trigger only on role change
 		try {
 			if (oldMember.roles.cache.size === newMember.roles.cache.size) return;
+			if (get(CommandName.member) === false) return;
 			logInDev(`${oldMember.user.username} has been updated!`);
 			const guild = newMember.guild;
 			const channels = guild.channels.cache.filter(channel => channel.isThread());

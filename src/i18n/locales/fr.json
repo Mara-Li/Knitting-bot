@@ -1,0 +1,49 @@
+{
+  "error" : "Une erreur est apparue : {{error}}",
+  "configuration" : {
+    "title" : "Configuration",
+    "description" : "Configuration actuelle du bot",
+    "language" : "Langue",
+    "onMemberUpdate" : "Action lors d'une mise à jour de membre",
+    "onChannelUpdate" : "Action lors d'une mise à jour de salon/catégorie",
+    "onThreadCreated" : "Action lors de la création d'un thread",
+    "onNewMember" : "Action lors de l'arrivée d'un nouveau membre"
+  },
+  "commands" : {
+    "desc" : "Changer la configuration du bot",
+    "enableDisable" : "Activer/désactiver sur {{type}}",
+    "language" : {
+      "desc" : "Changer la langue du bot",
+      "usage" : "Langue à utiliser"
+    },
+    "onMemberUpdate" : {
+      "desc" : "Changer l'action lors d'une mise à jour de membre",
+      "type" : "Lors d'une mise à jour de membre",
+      "name": "on-member-update"
+    },
+    "onChannelUpdate" : {
+      "desc" : "Changer l'action lors d'une mise à jour de salon/catégorie",
+      "type" : "lors d'une mise à jour de salon/catégorie",
+      "name": "on-channel-update"
+    },
+    "onThreadCreated" : {
+      "desc" : "Changer l'action lors de la création d'un thread",
+      "type" : "Lors de la création d'un thread",
+        "name": "on-thread-created"
+    },
+    "onNewMember" : {
+      "desc" : "Changer l'action lors de l'arrivée d'un nouveau membre",
+      "type" : "Lors de l'arrivée d'un nouveau membre",
+        "name": "on-new-member"
+    }
+  },
+  "reply" : {
+    "language" : "Langue changée pour : {{lang}}",
+    "disable" : "Désactivation de : {{- type}}",
+    "enable" : "Activation de : {{- type}}"
+  },
+  "display" : {
+    "enable": "Activé",
+    "disable": "Désactivé"
+  }
+}

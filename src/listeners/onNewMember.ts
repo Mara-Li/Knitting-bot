@@ -1,4 +1,5 @@
 import { Client, ThreadChannel } from "discord.js";
+import { CommandName, get } from "../maps";
 import { addUserToThread, logInDev } from "../utils";
 
 /**
@@ -9,6 +10,8 @@ import { addUserToThread, logInDev } from "../utils";
 
 export default (client: Client): void => {
 	client.on("guildMemberAdd", async (member) => {
+		if (get(CommandName.newMember) === false) return;
+		if (member.user.bot) return;
 		logInDev(`${member.user.username} joined the server`);
 		const guild = member.guild;
 		const channels = guild.channels.cache.filter(channel => channel.isThread());

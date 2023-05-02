@@ -10,8 +10,10 @@ import onThreadCreated from "./listeners/onThreadCreated";
 import onChannelUpdate from "./listeners/onChannelUpdate";
 import onNewMember from "./listeners/onNewMember";
 import { commands } from "./commands";
+import { get } from "./maps";
 import { logInDev } from "./utils";
-
+import { ressources } from "./i18n/i18next";
+import i18next from "i18next";
 
 dotenv.config();
 
@@ -23,6 +25,7 @@ const client = new Client({
 	],
 	partials: [Partials.Channel],
 });
+
 
 const rest = new REST({ version: "9" }).setToken(process.env.DISCORD_TOKEN ?? "0");
 

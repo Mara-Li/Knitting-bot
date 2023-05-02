@@ -1,7 +1,6 @@
-import {ChannelType, Client, Snowflake, TextChannel } from "discord.js";
-import {
-	addRoleAndUserToThread, logInDev,
-} from "../utils";
+import { ChannelType, Client, Snowflake, TextChannel } from "discord.js";
+import { CommandName, get } from "../maps";
+import { addRoleAndUserToThread, logInDev } from "../utils";
 
 /**
  * @param {Client} client - Discord.js Client
@@ -14,6 +13,7 @@ export default (client: Client): void => {
 	client.on("channelUpdate", async (
 		oldChannel,
 		newChannel) => {
+		if (get(CommandName.channel) === false) return;
 		logInDev(`Channel #${getChannelName(oldChannel.id, client)} updated`);
 		if (oldChannel.type !== ChannelType.GuildText
 			|| newChannel.type !== ChannelType.GuildText

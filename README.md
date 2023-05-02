@@ -46,6 +46,10 @@ These commands don't appear for user that doesn't have the `manage thread` permi
 > **Warning**  
 > It will re-add all users that leave the thread, even if they left it on purpose.
 
+> **Note**
+> There is no way that I can code something that don't add any notification (aka white border) on the thread.
+> You **always** will have the thread that become white when the bot activate. 
+
 ---
 
 ## Thread Watcher
@@ -72,3 +76,4 @@ NODE_ENV=development # or production
 ```
 
 The last part is for logging. In production, nothing (unless error) is recorded. In development, the bot will log everything in the console.
+

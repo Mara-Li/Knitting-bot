@@ -1,0 +1,49 @@
+{
+  "error" : "An error occured: {{error}}",
+  "configuration" : {
+    "title" : "Configuration",
+    "description" : "Actual bot configuration",
+    "language" : "Language",
+    "onMemberUpdate" : "Action on member update",
+    "onChannelUpdate" : "Action on channel/category update",
+    "onThreadCreated" : "Action on thread creation",
+    "onNewMember" : "Action on new member"
+  },
+  "commands" : {
+    "desc" : "Change bot configuration",
+    "enableDisable" : "Enable/Disable on {{type}}",
+    "language" : {
+      "desc" : "Change bot language",
+      "usage" : "Language to use"
+    },
+    "onMemberUpdate" : {
+      "name": "on-member-update",
+      "desc" : "Change action on member update",
+      "type" : "on member update"
+    },
+    "onChannelUpdate" : {
+        "name": "on-channel-update",
+      "desc" : "Change action on channel/category update",
+      "type" : "on channel/category update"
+    },
+    "onThreadCreated" : {
+        "name": "on-thread-created",
+      "desc" : "Change action on thread creation",
+      "type" : "on thread creation"
+    },
+    "onNewMember" : {
+        "name": "on-new-member",
+      "desc" : "Change action on new member",
+      "type" : "on new member"
+    }
+  },
+  "reply" : {
+    "language" : "Language changed to {{lang}}",
+    "disable" : "Disabled: {{- type}}",
+    "enable" : "Enabled: {{- type}}"
+  },
+  "display" : {
+    "enable": "Enabled",
+    "disable": "Disabled"
+  }
+}
