@@ -1,5 +1,11 @@
 ## Knitting
 
+→  [Traduction française](README_FR.md)
+
+[Invitation links](https://discord.com/api/oauth2/authorize?client_id=1101559076086886500&permissions=292057785360&scope=bot)
+
+If you want to try out the bot, you can join [this discord server](https://discord.gg/TWjfz2yTSA)!
+
 A bot that helps you to add user to a thread, to keep the thread always visible for everyone, and without pinging them!  
 
 > **Note**  
@@ -26,7 +32,7 @@ These commands don't appear for user that doesn't have the `manage thread` permi
 > It will re-add all users that leave the thread, even if they left it on purpose.
 
 > **Note**
-> There is no way that I can code something that don't add any notification (aka white border) on the thread.
+> There is no way that I can code something that don't add any notification on the thread.
 > You **always** will have the thread that becomes white when the bot activates. 
 
 More over, you can configure the bot and disable event that you don't want to use. You can do that with the `/config` command. You can see the configuration with `/config show`
@@ -36,8 +42,7 @@ More over, you can configure the bot and disable event that you don't want to us
 The slash command `/config` allows you to configure the bot. You can: 
 - Change the language (English or French)
 - Disable/Enable all events (new members, members update permission, new thread created or channel/category permission update).
-
-If you disable everything, you set the bot in "manual" mode. You will need to use the different slash commands to update threads.
+- It is possible to disable all events with `/config manual-mode`. In this mode, you need to use the slash commands to update the threads.
 
 ### How it's work
 
@@ -56,22 +61,15 @@ The bot needs some intents to work:
 
 (For some reason, the bot needs the presence intents to get the user id when they join the server)
 
-[Invitation links](https://discord.com/api/oauth2/authorize?client_id=1101559076086886500&permissions=292057785360&scope=bot)
-
-If you want to try out the bot, you can join [this discord server](https://discord.gg/TWjfz2yTSA)!
-
 ---
 
 ## 🤖 Development 
 
-The bot is made with [discord.js](https://discord.js.org/#/). You need to have [node.js](https://nodejs.org/en/) installed on your computer.
+The bot is made with [discord.js](https://discord.js.org/#/). You need to have [node.js (LTS)](https://nodejs.org/en/) installed on your computer.
 After cloning the repo, you need to install the dependencies with:
 ```bash
 npm run init
 ```
-
-> **Warning**  
-> You need to use the LTS version of node (v18), not the current (v20).
 
 The script will ask you for the bot token. You can get it on the [discord developer portal](https://discord.com/developers/applications).
 
