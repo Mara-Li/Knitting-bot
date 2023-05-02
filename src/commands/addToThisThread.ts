@@ -3,7 +3,7 @@ import { addRoleAndUserToThread } from "../utils";
 
 export default {
 	data: new SlashCommandBuilder()
-		.setName("thread-update")
+		.setName("update-thread")
 		.setDescription("Update this thread with adding missing users")
 		.setDescriptionLocalizations({
 			fr: "Met à jour ce thread en ajoutant les utilisateurs manquants",

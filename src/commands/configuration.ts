@@ -17,7 +17,7 @@ enum CommandsBuilder {
 
 export default {
 	data: new SlashCommandBuilder()
-		.setName("edit-server-config")
+		.setName("config")
 		.setDescription(
 			"Edit the server configuration. Allow to disable / enable some events"
 		)
