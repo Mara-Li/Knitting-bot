@@ -22,6 +22,8 @@
 	"reply": {
 		"disable": "Disabled: {{- type}}",
 		"enable": "Enabled: {{- type}}",
-		"language": "Language changed to {{lang}}"
+		"language": "Language changed to {{lang}}",
+		"enabledManual" : "Enabled manual mode",
+		"disabledManual" : "Disabled manual mode"
 	}
 }

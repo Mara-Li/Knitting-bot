@@ -22,6 +22,8 @@
 	"reply": {
 		"disable": "Désactivation de : {{- type}}",
 		"enable": "Activation de : {{- type}}",
-		"language": "Langue changée pour : {{lang}}"
+		"language": "Langue changée pour : {{lang}}",
+		"enabledManual" : "Mode manuel activé",
+		"disabledManual" : "Mode manuel désactivé"
 	}
 }

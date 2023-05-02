@@ -1,6 +1,6 @@
-import { Client, ThreadChannel } from "discord.js";
-import { addRoleAndUserToThread, logInDev } from "../utils";
+import { Client } from "discord.js";
 import { commands } from "../commands";
+import { logInDev } from "../utils";
 
 /**
  * When the bot arrive on a server, check all thread and add members that have the permission to view the thread
@@ -18,10 +18,5 @@ export default (client: Client):void => {
 			console.error(error);
 		}
 		logInDev(`${client.user?.username} has been added to ${guild.name}`);
-		const threads = guild.channels.cache.filter(channel => channel.isThread());
-		for (const thread of threads.values()) {
-			const threadChannel = thread as ThreadChannel;
-			await addRoleAndUserToThread(threadChannel);
-		}
 	});
 };

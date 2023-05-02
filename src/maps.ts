@@ -19,7 +19,9 @@ export enum CommandName {
  */
 export function set(name: CommandName, value: string | boolean) {
 	optionMaps.set(name, value);
+	logInDev(`Set ${name} to ${value}`);
 }
+
 
 /**
  * Get a value in the Emaps "configuration"
@@ -32,7 +34,7 @@ export function get(name: CommandName):any {
 	if (name === CommandName.language) {
 		return optionMaps.get(name) || "en";
 	}
-	return optionMaps.get(name) || true;
+	return optionMaps.get(name) ?? true;
 }
 
 /**
