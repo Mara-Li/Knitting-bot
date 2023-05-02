@@ -23,11 +23,16 @@ export function set(name: CommandName, value: string | boolean) {
 
 /**
  * Get a value in the Emaps "configuration"
+ * Return "en" if CommandName.language is not set
+ * return true if value is not set (for the other options)
  * @param {CommandName} name
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function get(name: CommandName):any {
-	return optionMaps.get(name) ?? false;
+	if (name === CommandName.language) {
+		return optionMaps.get(name) || "en";
+	}
+	return optionMaps.get(name) || true;
 }
 
 /**
