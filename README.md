@@ -79,3 +79,4 @@ NODE_ENV=development # or production
 
 The last part is for logging. In production, nothing (unless error) is recorded. In development, the bot will log everything in the console.
 
+The bot uses Enmap to store data. You can find the documentation [here](https://enmap.evie.dev/). You need a special installation for it, so follow the instructions [here](https://enmap.evie.dev/install).
