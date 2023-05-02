@@ -68,6 +68,9 @@ After cloning the repo, you need to install the dependencies with:
 npm run init
 ```
 
+> **Warning**  
+> You need to use the LTS version of node (v18), not the current (v20).
+
 The script will ask you for the bot token. You can get it on the [discord developer portal](https://discord.com/developers/applications).
 
 By the way, the `.env` file must looks like that:
@@ -79,4 +82,4 @@ NODE_ENV=development # or production
 
 The last part is for logging. In production, nothing (unless error) is recorded. In development, the bot will log everything in the console.
 
-The bot uses Enmap to store data. You can find the documentation [here](https://enmap.evie.dev/). You need a special installation for it, so follow the instructions [here](https://enmap.evie.dev/install).
+The bot uses Enmap to store data. You can find the documentation [here](https://enmap.evie.dev/). You need a special installation for it, so follow the instructions [here](https://enmap.evie.dev/install). 
