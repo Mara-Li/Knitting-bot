@@ -8,12 +8,11 @@ export const ressources = {
 	fr: { translation: fr },
 } as const;
 
-
-export const languageValue = {
+//eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const languageValue: any = {
 	en: "English",
 	fr: "Français",
 };
-
 
 i18next.init({
 	lng: translationLanguage,

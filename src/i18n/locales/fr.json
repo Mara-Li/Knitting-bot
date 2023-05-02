@@ -1,49 +1,27 @@
 {
-  "commands" : {
-    "desc" : "Changer la configuration du bot",
-    "enableDisable" : "Activer/désactiver sur {{type}}",
-    "language" : {
-      "desc" : "Changer la langue du bot",
-      "usage" : "Langue à utiliser"
-    },
-    "onChannelUpdate" : {
-      "desc" : "Mise-à-jour de salon/catégorie",
-      "name": "on-channel-update",
-      "type" : "lors d'une mise à jour de salon/catégorie"
-    },
-    "onMemberUpdate" : {
-      "desc" : "Mise-à-jour de membre",
-      "name": "on-member-update",
-      "type" : "Lors d'une mise à jour de membre"
-    },
-    "onNewMember" : {
-      "desc" : "Arrivée d'un nouveau membre",
-        "name": "on-new-member",
-      "type" : "Lors de l'arrivée d'un nouveau membre"
-    },
-    "onThreadCreated" : {
-      "desc" : "Création d'un thread",
-        "name": "on-thread-created",
-      "type" : "Lors de la création d'un thread"
-    }
-  },
-  "configuration" : {
-    "description" : "Configuration actuelle du bot",
-    "language" : "Langue",
-    "onChannelUpdate" : "Action lors d'une mise à jour de salon/catégorie",
-    "onMemberUpdate" : "Action lors d'une mise à jour de membre",
-    "onNewMember" : "Action lors de l'arrivée d'un nouveau membre",
-    "onThreadCreated" : "Action lors de la création d'un thread",
-    "title" : "Configuration"
-  },
-  "display" : {
-    "disable": "Désactivé",
-    "enable": "Activé"
-  },
-  "error" : "Une erreur est apparue : {{error}}",
-  "reply" : {
-    "disable" : "Désactivation de : {{- type}}",
-    "enable" : "Activation de : {{- type}}",
-    "language" : "Langue changée pour : {{lang}}"
-  }
+	"commands": {
+		"onChannelUpdate": "Mise-à-jour de salon/catégorie",
+		"onMemberUpdate": "Mise-à-jour de membre",
+		"onNewMember": "Arrivée d'un nouveau membre",
+		"onThreadCreated": "Création d'un thread"
+	},
+	"configuration": {
+		"description": "Configuration actuelle du bot",
+		"language": "Langue",
+		"onChannelUpdate": "Action lors d'une mise à jour de salon/catégorie",
+		"onMemberUpdate": "Action lors d'une mise à jour de membre",
+		"onNewMember": "Action lors de l'arrivée d'un nouveau membre",
+		"onThreadCreated": "Action lors de la création d'un thread",
+		"title": "Configuration"
+	},
+	"display": {
+		"disable": "Désactivé",
+		"enable": "Activé"
+	},
+	"error": "Une erreur est apparue : {{error}}",
+	"reply": {
+		"disable": "Désactivation de : {{- type}}",
+		"enable": "Activation de : {{- type}}",
+		"language": "Langue changée pour : {{lang}}"
+	}
 }
