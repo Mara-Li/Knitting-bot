@@ -5,57 +5,41 @@ import {
 	SlashCommandBuilder,
 } from "discord.js";
 import { default as i18next, languageValue } from "../i18n/i18next";
+import { DefaultMenuBuilder } from "../interface";
 import { set, CommandName, get } from "../maps";
 
-enum CommandsBuilder {
-	language = "language",
-	member = "on-member-update",
-	thread = "on-thread-created",
-	channel = "on-channel-update",
-	newMember = "on-new-member",
-	disable = "manual-mode",
-	show = "show",
-}
-
-enum CommandsBuilderFrench {
-	language = "langue",
-	member = "sur-mise-a-jour-membre",
-	thread = "sur-creation-thread",
-	channel = "sur-mise-a-jour-channel",
-	newMember = "sur-nouveau-membre",
-	disable = "mode-manuel",
-	show = "afficher",
-}
+const fr = i18next.getFixedT("fr");
+const en = i18next.getFixedT("en");
 
 export default {
 	data: new SlashCommandBuilder()
-		.setName("config")
+		.setName(en("slash.main.name"))
 		.setDescription(
-			"Edit the server configuration. Allow to disable / enable some events"
+			en("slash.main.description")
 		)
 		.setDescriptionLocalizations({
-			fr: "Modifie la configuration du serveur. Permet d'activer / désactiver certains évènements",
+			fr: fr("slash.main.description"),
 		})
 		.setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
 		.addSubcommand((subcommand) =>
 			subcommand
-				.setName(CommandsBuilder.language)
+				.setName(en("slash.language.name"))
 				.setNameLocalizations({
-					fr: CommandsBuilderFrench.language,
+					fr: fr("slash.language.name"),
 				})
-				.setDescription("Change the bot language")
+				.setDescription(en("slash.language.description"))
 				.setDescriptionLocalizations({
-					fr: "Change la langue du bot",
+					fr: fr("slash.language.description"),
 				})
 				.addStringOption((option) =>
 					option
-						.setName(CommandsBuilder.language)
+						.setName(en("slash.language.name"))
 						.setNameLocalizations({
-							fr: CommandsBuilderFrench.language,
+							fr: fr("slash.language.name"),
 						})
-						.setDescription("Language to use")
+						.setDescription(en("slash.language.options"))
 						.setDescriptionLocalizations({
-							fr: "Langue à utiliser",
+							fr: fr("slash.language.options"),
 						})
 						.addChoices(
 							{ name: "English", value: "en" },
@@ -66,117 +50,115 @@ export default {
 		)
 		.addSubcommand((subcommand) =>
 			subcommand
-				.setName(CommandsBuilder.show)
+				.setName(en("slash.show.name"))
 				.setNameLocalizations({
-					fr: CommandsBuilderFrench.show,
+					fr: fr("slash.show.name"),
 				})
-				.setDescription("Show the current configuration")
+				.setDescription(en("slash.show.description"))
 				.setDescriptionLocalizations({
-					fr: "Affiche la configuration actuelle",
+					fr: fr("slash.show.description")
 				})
 		)
 		.addSubcommand((subcommand) =>
 			subcommand
-				.setName(CommandsBuilder.disable)
+				.setName(en("slash.disable.name"))
 				.setNameLocalizations({
-					fr: CommandsBuilderFrench.disable,
+					fr: fr("slash.disable.name"),
 				})
-				.setDescription("Disable or enable all events to switch the bot in manual or automatic mode")
+				.setDescription(en("slash.disable.description"))
 				.setDescriptionLocalizations({
-					fr: "Active ou désactive tous les évènements pour passer le bot en mode manuel ou automatique",	
+					fr: fr("slash.disable.description"),
 				})
 				.addBooleanOption((option) =>
 					option
 						.setName("switch")
-						.setDescription("Enable or disable the manual mode")
+						.setDescription(en("slash.switch"))
 						.setDescriptionLocalizations({
-							fr: "Active ou désactive le mode manuel",	
+							fr: fr("slash.switch"),
 						})
 						.setRequired(true)
 				)
 		)
 		.addSubcommand((subcommand) =>
 			subcommand
-				.setName(CommandsBuilder.member)
+				.setName(en("slash.member.name"))
 				.setNameLocalizations({
-					fr: CommandsBuilderFrench.member,
+					fr: fr("slash.member.name"),
 				})
-				.setDescription("Enable or disable the on member update event")
+				.setDescription(en("slash.member.description"))
 				.setDescriptionLocalizations({
-					fr: "Active ou désactive l'update des threads lors de mise à jour des membres",
+					fr: fr("slash.member.description"),
 				})
 				.addBooleanOption((option) =>
 					option
 						.setName("switch")
-						.setDescription("Enable or disable this event")
+						.setDescription(en("slash.switch"))
 						.setDescriptionLocalizations({
-							fr: "Active ou désactive cet évènement",
+							fr: fr("slash.switch"),
 						})
 						.setRequired(true)
 				)
 		)
 		.addSubcommand((subcommand) =>
 			subcommand
-				.setName(CommandsBuilder.thread)
+				.setName(en("slash.thread.name"))
 				.setNameLocalizations({
-					fr: CommandsBuilderFrench.thread,
+					fr: fr("slash.thread.name"),
 				})
 				.setDescription(
-					"Enable or disable the adding of members on thread created event"
+					en("slash.thread.description")
 				)
 				.setDescriptionLocalizations({
-					fr: "Active ou désactive l'ajout des membres des threads lors de leur création",
+					fr: fr("slash.thread.description"),
 				})
 				.addBooleanOption((option) =>
 					option
 						.setName("switch")
-						.setDescription("Enable or disable this event")
+						.setDescription(en("slash.switch"))
 						.setDescriptionLocalizations({
-							fr: "Active ou désactive cet évènement",
+							fr: fr("slash.switch"),
 						})
 						.setRequired(true)
 				)
 		)
 		.addSubcommand((subcommand) =>
 			subcommand
-				.setName(CommandsBuilder.channel)
+				.setName(en("slash.channel.name"))
 				.setNameLocalizations({
-					fr: CommandsBuilderFrench.channel,
+					fr: fr("slash.channel.name"),
 				})
-				.setDescription(
-					"Enable or disable the adding of members on channel update event"
-				)
+				.setDescription(en("slash.channel.description"))
 				.setDescriptionLocalizations({
-					fr: "Active ou désactive l'ajout des membres des threads lors de leur création",
+					fr: fr("slash.channel.description"),
 				})
 				.addBooleanOption((option) =>
 					option
 						.setName("switch")
-						.setDescription("Enable or disable this event")
+						.setDescription(en("slash.switch"))
 						.setDescriptionLocalizations({
-							fr: "Active ou désactive cet évènement",
+							fr: fr("slash.switch"),
 						})
 						.setRequired(true)
 				)
 		)
 		.addSubcommand((subcommand) =>
 			subcommand
-				.setName(CommandsBuilder.newMember)
+				.setName(en("slash.newMember.name"))
 				.setNameLocalizations({
-					fr: CommandsBuilderFrench.newMember,
+					fr: fr("slash.newMember.name"),
 				})
 				.setDescription(
-					"Enable or disable the adding of members on new member event"
+					en("slash.newMember.description")
 				)
 				.setDescriptionLocalizations({
-					fr: "Active ou désactive l'ajout des membres des threads lors de leur création",
+					fr: fr("slash.newMember.description"),
 				})
 				.addBooleanOption((option) =>
 					option
 						.setName("switch")
-						.setDescription("Enable or disable this event")
+						.setDescription(en("slash.switch"))
 						.setDescriptionLocalizations({
-							fr: "Active ou désactive cet évènement",
+							fr: fr("slash.switch"),
 						})
 						.setRequired(true)
 				)
@@ -192,7 +174,7 @@ export default {
 				"on-channel-update": CommandName.channel,
 				"on-new-member": CommandName.newMember,
 			};
-			if (commands === CommandsBuilder.language) {
+			if (commands === DefaultMenuBuilder.language) {
 				const newValue = options.getString(CommandName.language) ?? "en";
 				set(CommandName.language, newValue);
 				//reload i18next
@@ -202,7 +184,7 @@ export default {
 					//@ts-ignore
 					`${i18next.t("reply.language", { lang: languageValue[newValue] })}`
 				);
-			} else if (commands === CommandsBuilder.disable) {
+			} else if (commands === DefaultMenuBuilder.disable) {
 				const manualMode = !options.getBoolean("switch");
 				for (const command of Object.values(CommandName)) {
 					if (command !== CommandName.language) {
@@ -211,31 +193,31 @@ export default {
 				}
 				const rep = options.getBoolean("switch") ? i18next.t("reply.enabledManual") : i18next.t("reply.disabledManual");
 				await interaction.reply({ content: rep, ephemeral: true });
-			} else if (commands === CommandsBuilder.channel) {
+			} else if (commands === DefaultMenuBuilder.channel) {
 				await getBooleanAndReply(
 					interaction,
-					mapsCommands[CommandsBuilder.channel],
+					mapsCommands[DefaultMenuBuilder.channel],
 					options.getBoolean("switch") ?? false
 				);
-			} else if (commands === CommandsBuilder.member) {
+			} else if (commands === DefaultMenuBuilder.member) {
 				await getBooleanAndReply(
 					interaction,
-					mapsCommands[CommandsBuilder.member],
+					mapsCommands[DefaultMenuBuilder.member],
 					options.getBoolean("switch") ?? false
 				);
-			} else if (commands === CommandsBuilder.newMember) {
+			} else if (commands === DefaultMenuBuilder.newMember) {
 				await getBooleanAndReply(
 					interaction,
-					mapsCommands[CommandsBuilder.newMember],
+					mapsCommands[DefaultMenuBuilder.newMember],
 					options.getBoolean("switch") ?? false
 				);
-			} else if (commands === CommandsBuilder.thread) {
+			} else if (commands === DefaultMenuBuilder.thread) {
 				await getBooleanAndReply(
 					interaction,
-					mapsCommands[CommandsBuilder.thread],
+					mapsCommands[DefaultMenuBuilder.thread],
 					options.getBoolean("switch") ?? false
 				);
-			} else if (commands === CommandsBuilder.show) {
+			} else if (commands === DefaultMenuBuilder.show) {
 				await display(interaction);
 			} else {
 				await display(interaction);

@@ -1,28 +1,34 @@
 import { CommandInteraction, SlashCommandBuilder, ThreadChannel, PermissionFlagsBits  } from "discord.js";
 import { addRoleAndUserToThread } from "../utils";
+import { default as i18next } from "../i18n/i18next";
+const fr = i18next.getFixedT("fr");
+const en = i18next.getFixedT("en");
+
+
 
 export default {
 	data: new SlashCommandBuilder()
-		.setName("update-thread")
-		.setDescription("Update this thread with adding missing users")
+		.setName(en("slash.updateThread.name"))
+		.setDescription(en("slash.updateThread.description"))
+		
 		.setDescriptionLocalizations({
-			fr: "Met à jour ce thread en ajoutant les utilisateurs manquants",
+			fr: fr("slash.updateThread.description"),
 		})
 		.setDefaultMemberPermissions(PermissionFlagsBits.ManageThreads),
 	async execute(interaction: CommandInteraction) {
 		//check if user has permission to update thread
 		if (!interaction.channel || !(interaction.channel instanceof ThreadChannel)) {
-			await interaction.reply({ content: "This is not a thread", ephemeral: true });
+			await interaction.reply({ content: i18next.t("slash.updateThread.error") as string, ephemeral: true });
 			return;
 		}
 		try {
-			await interaction.reply({ content: `Updating thread ${interaction.channel.name}`, ephemeral: true});
+			await interaction.reply({ content: `${i18next.t("slash.updateThread.success", {channel: interaction.channel.name}) as string}`, ephemeral: true});
 			const thread = interaction.channel as ThreadChannel;
 			await addRoleAndUserToThread(thread);
 		}
-		catch (error) {
-			console.error(error);
-			await interaction.reply({ content: "Something went wrong", ephemeral: true });
+		catch (e) {
+			console.error(e);
+			await interaction.reply({ content: i18next.t("error", {error: e}) as string, ephemeral: true });
 		}
 	}
 };

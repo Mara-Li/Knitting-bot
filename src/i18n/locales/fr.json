@@ -21,9 +21,68 @@
 	"error": "Une erreur est apparue : {{error}}",
 	"reply": {
 		"disable": "Désactivation de : {{- type}}",
+		"disabledManual" : "Mode manuel désactivé",
 		"enable": "Activation de : {{- type}}",
-		"language": "Langue changée pour : {{lang}}",
 		"enabledManual" : "Mode manuel activé",
-		"disabledManual" : "Mode manuel désactivé"
+		"language": "Langue changée pour : {{lang}}"
+	},
+	"slash" : {
+		"channel": {
+			"description": "Active/désactive l'ajout des membres aux threads lors de l'édition des permissions d'un channel.",
+			"name": "sur-mise-a-jour-channel"
+		},
+		"disable":{
+			"description": "Active ou désactive tous les évènements pour passer le bot en mode manuel ou automatique",
+			"name": "mode-manuel",
+			"option": "Active ou désactive le mode manuel"
+		},
+		"language": {
+			"description": "Modifie la langue du bot",
+			"name": "langue",
+			"options": "Langue à utiliser"
+		},
+		"main": {
+			"description": "Modifie la configuration du serveur. Permet d'activer / désactiver certains évènements",
+			"name": "config"
+		},
+		"member": {
+			"description": "Active/désactive l'ajout de membres aux threads lors de l'édition de leurs permissions.",
+			"name": "sur-mise-a-jour-membre"
+		},
+		"newMember": {
+			"description": "Active ou désactive l'ajout d'un nouveau membre lorsqu'il rejoint le serveur.",
+			"name": "sur-nouveau-membre"
+		},
+		"show" : {
+			"description": "Affiche la configuration actuelle",
+			"name": "afficher"
+		},
+		"switch": "Activer ou désactiver cet événement",
+		"thread": {
+			"description": "Active ou désactive l'ajout des membres aux threads lors de leur création",
+			"name": "sur-creation-thread"
+		},
+		"updateAllThreads" : {
+			"description":  "Met à jour tous les threads du serveur, en ajoutant ou supprimant des utilisateurs",
+			"name": "update-all-threads",
+			"reply" : "Mise à jour de tous les threads…",
+			"success": "Mise à jour effectuée de {{- count}} threads"
+		},
+		"updateSpecificThread" : {
+			"description": "Met à jour un thread spécifique",
+			"error" : "Merci de sélectionné un thread.",
+			"name": "update-specific-thread",
+			"option": {
+				"description" : "Select the thread to update",
+				"name" : "thread"
+			},
+			"success": "Mise à jour effectuée de {{- channel}}"
+		},
+		"updateThread" : {
+			"description": "Met à jour ce thread en ajoutant les utilisateurs manquants",
+			"error" : "Vous n'avez pas lancé la commande dans un thread",
+			"name": "update-thread",
+			"success": "Mise à jour effectuée de {{- channel}}"
+		}
 	}
 }

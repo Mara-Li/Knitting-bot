@@ -18,12 +18,71 @@
 		"disable": "Disabled",
 		"enable": "Enabled"
 	},
-	"error": "An error occured: {{error}}",
+	"error": "An error occur: {{error}}",
 	"reply": {
 		"disable": "Disabled: {{- type}}",
+		"disabledManual" : "Disabled manual mode",
 		"enable": "Enabled: {{- type}}",
-		"language": "Language changed to {{lang}}",
 		"enabledManual" : "Enabled manual mode",
-		"disabledManual" : "Disabled manual mode"
+		"language": "Language changed to {{lang}}"
+	},
+	"slash": {
+		"channel": {
+			"description": "Enable or disable the adding of members when channel/category permission are changed.",
+			"name": "on-channel-update"
+		},
+		"disable":{
+			"description": "Enable or disable all events to switch the bot to manual or automatic mode",
+			"name": "manual-mode",
+			"option": "Enable or disable the manual mode"
+		},
+		"language": {
+			"description": "Change the bot language",
+			"name": "language",
+			"options": "Language to use"
+		},
+		"main": {
+			"description": "Edit the server configuration. Allow to disable / enable some events",
+			"name": "config"
+		},
+		"member": {
+			"description": "Enable or disable the thread update on member permission modifications",
+			"name": "on-member-update"
+		},
+		"newMember": {
+			"description": "Enable or disable the adding of members when they join the server.",
+			"name": "on-new-member"
+		},
+		"show" : {
+			"description": "Show the current configuration",
+			"name": "show"
+		},
+		"switch": "Enable or disable this event",
+		"thread": {
+			"description": "Enable or disable the adding of members when thread are created.",
+			"name": "on-thread-created"
+		},
+		"updateAllThreads" : {
+			"description":  "Update all threads with adding missing users",
+			"name": "update-all-threads",
+			"reply": "Update of all threads…",
+			"success": "Updating success of {{- count}} threads"
+		},
+		"updateSpecificThread" : {
+			"description": "Update a specific thread with adding missing users",
+			"error" : "This command can only be used in a thread",
+			"name": "update-specific-thread",
+			"option": {
+				"description" : "Select the thread to update",
+				"name" : "thread"
+			},
+			"success": "Updating thread: {{- channel}}"
+		},
+		"updateThread" : {
+			"description": "Update this thread with adding missing users",
+			"error" : "This command can only be used in a thread",
+			"name": "update-thread",
+			"success": "Updating thread: {{- channel}}"
+		}
 	}
 }
