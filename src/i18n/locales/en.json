@@ -1,14 +1,4 @@
 {
-  "error" : "An error occured: {{error}}",
-  "configuration" : {
-    "title" : "Configuration",
-    "description" : "Actual bot configuration",
-    "language" : "Language",
-    "onMemberUpdate" : "Action on member update",
-    "onChannelUpdate" : "Action on channel/category update",
-    "onThreadCreated" : "Action on thread creation",
-    "onNewMember" : "Action on new member"
-  },
   "commands" : {
     "desc" : "Change bot configuration",
     "enableDisable" : "Enable/Disable on {{type}}",
@@ -16,34 +6,44 @@
       "desc" : "Change bot language",
       "usage" : "Language to use"
     },
-    "onMemberUpdate" : {
-      "name": "on-member-update",
-      "desc" : "Change action on member update",
-      "type" : "on member update"
-    },
     "onChannelUpdate" : {
-        "name": "on-channel-update",
       "desc" : "Change action on channel/category update",
+        "name": "on-channel-update",
       "type" : "on channel/category update"
     },
-    "onThreadCreated" : {
-        "name": "on-thread-created",
-      "desc" : "Change action on thread creation",
-      "type" : "on thread creation"
+    "onMemberUpdate" : {
+      "desc" : "Change action on member update",
+      "name": "on-member-update",
+      "type" : "on member update"
     },
     "onNewMember" : {
-        "name": "on-new-member",
       "desc" : "Change action on new member",
+        "name": "on-new-member",
       "type" : "on new member"
+    },
+    "onThreadCreated" : {
+      "desc" : "Change action on thread creation",
+        "name": "on-thread-created",
+      "type" : "on thread creation"
     }
   },
-  "reply" : {
-    "language" : "Language changed to {{lang}}",
-    "disable" : "Disabled: {{- type}}",
-    "enable" : "Enabled: {{- type}}"
+  "configuration" : {
+    "description" : "Actual bot configuration",
+    "language" : "Language",
+    "onChannelUpdate" : "Action on channel/category update",
+    "onMemberUpdate" : "Action on member update",
+    "onNewMember" : "Action on new member",
+    "onThreadCreated" : "Action on thread creation",
+    "title" : "Configuration"
   },
   "display" : {
-    "enable": "Enabled",
-    "disable": "Disabled"
+    "disable": "Disabled",
+    "enable": "Enabled"
+  },
+  "error" : "An error occured: {{error}}",
+  "reply" : {
+    "disable" : "Disabled: {{- type}}",
+    "enable" : "Enabled: {{- type}}",
+    "language" : "Language changed to {{lang}}"
   }
 }

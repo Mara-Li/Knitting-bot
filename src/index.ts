@@ -10,10 +10,7 @@ import onThreadCreated from "./listeners/onThreadCreated";
 import onChannelUpdate from "./listeners/onChannelUpdate";
 import onNewMember from "./listeners/onNewMember";
 import { commands } from "./commands";
-import { get } from "./maps";
 import { logInDev } from "./utils";
-import { ressources } from "./i18n/i18next";
-import i18next from "i18next";
 
 dotenv.config();
 

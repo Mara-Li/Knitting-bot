@@ -116,7 +116,7 @@ export default {
 		try {
 			const options = interaction.options as CommandInteractionOptionResolver;
 			const commands = options.getSubcommand();
-			
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			const mapsCommands:any = {
 				"on-member-update": CommandName.member,
 				"on-thread-created": CommandName.thread,
@@ -153,6 +153,7 @@ export default {
 
 async function getBooleanAndReply(interaction: CommandInteraction, option: CommandName, value: boolean) {
 	set(option, value);
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const optionTranslation : any = {
 		onMemberUpdate: "**__" + i18next.t("commands.onMemberUpdate.desc").toLowerCase() + "__**",
 		onThreadCreated: "**__" + i18next.t("commands.onThreadCreated.desc").toLowerCase() + "__**",

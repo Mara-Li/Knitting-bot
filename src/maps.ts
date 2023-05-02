@@ -25,6 +25,7 @@ export function set(name: CommandName, value: string | boolean) {
  * Get a value in the Emaps "configuration"
  * @param {CommandName} name
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function get(name: CommandName):any {
 	return optionMaps.get(name) ?? false;
 }

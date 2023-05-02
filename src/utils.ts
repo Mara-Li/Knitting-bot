@@ -1,7 +1,7 @@
 import {
 	Collection,
 	GuildMember,
-	MessageFlags, MessagePayload, MessagePayloadOption,
+	MessageFlags, MessagePayloadOption,
 	Role,
 	TextChannel,
 	ThreadChannel,
