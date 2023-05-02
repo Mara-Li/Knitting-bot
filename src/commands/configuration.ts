@@ -17,6 +17,16 @@ enum CommandsBuilder {
 	show = "show",
 }
 
+enum CommandsBuilderFrench {
+	language = "langue",
+	member = "sur-mise-a-jour-membre",
+	thread = "sur-creation-thread",
+	channel = "sur-mise-a-jour-channel",
+	newMember = "sur-nouveau-membre",
+	disable = "mode-manuel",
+	show = "afficher",
+}
+
 export default {
 	data: new SlashCommandBuilder()
 		.setName("config")
@@ -31,7 +41,7 @@ export default {
 			subcommand
 				.setName(CommandsBuilder.language)
 				.setNameLocalizations({
-					fr: "langue",
+					fr: CommandsBuilderFrench.language,
 				})
 				.setDescription("Change the bot language")
 				.setDescriptionLocalizations({
@@ -41,7 +51,7 @@ export default {
 					option
 						.setName(CommandsBuilder.language)
 						.setNameLocalizations({
-							fr: "langue",
+							fr: CommandsBuilderFrench.language,
 						})
 						.setDescription("Language to use")
 						.setDescriptionLocalizations({
@@ -58,7 +68,7 @@ export default {
 			subcommand
 				.setName(CommandsBuilder.show)
 				.setNameLocalizations({
-					fr: "afficher",
+					fr: CommandsBuilderFrench.show,
 				})
 				.setDescription("Show the current configuration")
 				.setDescriptionLocalizations({
@@ -69,7 +79,7 @@ export default {
 			subcommand
 				.setName(CommandsBuilder.disable)
 				.setNameLocalizations({
-					fr: "mode-manuel",
+					fr: CommandsBuilderFrench.disable,
 				})
 				.setDescription("Disable or enable all events to switch the bot in manual or automatic mode")
 				.setDescriptionLocalizations({
@@ -88,6 +98,9 @@ export default {
 		.addSubcommand((subcommand) =>
 			subcommand
 				.setName(CommandsBuilder.member)
+				.setNameLocalizations({
+					fr: CommandsBuilderFrench.member,
+				})
 				.setDescription("Enable or disable the on member update event")
 				.setDescriptionLocalizations({
 					fr: "Active ou désactive l'update des threads lors de mise à jour des membres",
@@ -105,6 +118,9 @@ export default {
 		.addSubcommand((subcommand) =>
 			subcommand
 				.setName(CommandsBuilder.thread)
+				.setNameLocalizations({
+					fr: CommandsBuilderFrench.thread,
+				})
 				.setDescription(
 					"Enable or disable the adding of members on thread created event"
 				)
@@ -124,6 +140,9 @@ export default {
 		.addSubcommand((subcommand) =>
 			subcommand
 				.setName(CommandsBuilder.channel)
+				.setNameLocalizations({
+					fr: CommandsBuilderFrench.channel,
+				})
 				.setDescription(
 					"Enable or disable the adding of members on channel update event"
 				)
@@ -143,6 +162,9 @@ export default {
 		.addSubcommand((subcommand) =>
 			subcommand
 				.setName(CommandsBuilder.newMember)
+				.setNameLocalizations({
+					fr: CommandsBuilderFrench.newMember,
+				})
 				.setDescription(
 					"Enable or disable the adding of members on new member event"
 				)
