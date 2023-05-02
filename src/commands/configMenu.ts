@@ -19,7 +19,6 @@ function enabledOrDisabled(value: boolean) {
  * @param {CommandInteraction} interaction The interaction that triggered the command
  */
 export async function display(interaction: CommandInteraction) {
-	console.log(i18next.language);
 	const embed = new EmbedBuilder()
 		.setColor("#0099ff")
 		.setTitle(i18next.t("configuration.title"))
