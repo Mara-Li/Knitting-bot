@@ -3,8 +3,11 @@ import { addRoleAndUserToThread } from "../utils";
 
 export default {
 	data: new SlashCommandBuilder()
-		.setName("global")
+		.setName("update-all-threads")
 		.setDescription("Update all thread in this server, with adding or removing user")
+		.setDescriptionLocalizations({
+			fr: "Met à jour tous les threads du serveur, en ajoutant ou supprimant des utilisateurs",
+		})
 		.setDefaultMemberPermissions(PermissionFlagsBits.ManageThreads),
 	async execute(interaction: CommandInteraction) {
 		if (!interaction.guild) return;

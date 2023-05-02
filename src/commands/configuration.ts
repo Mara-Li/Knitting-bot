@@ -17,8 +17,11 @@ enum CommandsBuilder {
 
 export default {
 	data: new SlashCommandBuilder()
-		.setName("edit")
-		.setDescription(i18next.t("commands.desc"))
+		.setName("edit-server-config")
+		.setDescription("Edit the server configuration. Allow to disable / enable some events")
+		.setDescriptionLocalizations({
+			fr: "Modifie la configuration du serveur. Permet d'activer / désactiver certains évènements",
+		})
 		.setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
 		.addSubcommand((subcommand) =>
 			subcommand

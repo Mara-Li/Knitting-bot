@@ -3,8 +3,11 @@ import { addRoleAndUserToThread } from "../utils";
 
 export default {
 	data: new SlashCommandBuilder()
-		.setName("specific")
-		.setDescription("Update a specific thread (provide thread id)")
+		.setName("update-specific-thread")
+		.setDescription("Update a specific thread")
+		.setDescriptionLocalizations({
+			fr: "Met à jour un thread spécifique",
+		})
 		.setDefaultMemberPermissions(PermissionFlagsBits.ManageThreads)
 		.addChannelOption(option => 
 			option.setName("thread")

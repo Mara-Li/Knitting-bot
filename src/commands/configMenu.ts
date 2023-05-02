@@ -37,7 +37,7 @@ export async function display(interaction: CommandInteraction) {
 
 export default {
 	data: new SlashCommandBuilder()
-		.setName("config")
+		.setName("display-config")
 		.setDescription("Display the current bot configuration")
 		.setDescriptionLocalizations({
 			fr: "Affiche la configuration actuelle du bot",

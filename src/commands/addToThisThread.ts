@@ -3,8 +3,11 @@ import { addRoleAndUserToThread } from "../utils";
 
 export default {
 	data: new SlashCommandBuilder()
-		.setName("update")
-		.setDescription("Update this thread with adding or removing user")
+		.setName("thread-update")
+		.setDescription("Update this thread with adding missing users")
+		.setDescriptionLocalizations({
+			fr: "Met à jour ce thread en ajoutant les utilisateurs manquants",
+		})
 		.setDefaultMemberPermissions(PermissionFlagsBits.ManageThreads),
 	async execute(interaction: CommandInteraction) {
 		//check if user has permission to update thread
