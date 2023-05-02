@@ -30,13 +30,15 @@ const rest = new REST({ version: "9" }).setToken(process.env.DISCORD_TOKEN ?? "0
 	try {
 		logInDev("Started refreshing application (/) commands.");
 		for (const guild of client.guilds.cache.values()) {
-			for (const command of commands) {
-				await rest.put(
-					Routes.applicationGuildCommands(process.env.CLIENT_ID ?? "0", guild.id),
-					{ body: command },
-				);
-				logInDev(`Slash ${command.data.name} registered for ${guild.name}`);
-			}
+			// clean commands
+			await rest.put(Routes.applicationGuildCommands(process.env.CLIENT_ID ?? "0", guild.id),
+				{ body: [] })
+				.then(() => console.log("Successfully deleted all guild commands."))
+				.catch(console.error);
+			await rest.put(
+				Routes.applicationGuildCommands(process.env.CLIENT_ID ?? "0", guild.id),
+				{ body: commands },
+			);
 		}
 		logInDev("Successfully reloaded slash commands.");
 	} catch (error) {

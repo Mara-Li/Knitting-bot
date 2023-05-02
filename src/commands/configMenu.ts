@@ -5,6 +5,7 @@ import {
 } from "discord.js";
 import { default as i18next } from "../i18n/i18next";
 import { get, CommandName } from "../maps";
+import {languageValue} from "../i18n/i18next";
 
 /**
  * Return the translation if value is true or false
@@ -24,7 +25,7 @@ export async function display(interaction: CommandInteraction) {
 		.setTitle(i18next.t("configuration.title"))
 		.setDescription(i18next.t("configuration.description"))
 		.addFields(
-			{ name: i18next.t("configuration.language"), value: get(CommandName.language) as string },
+			{ name: i18next.t("configuration.language"), value: languageValue[get(CommandName.language) as string] },
 			{ name: i18next.t("configuration.onChannelUpdate"), value: enabledOrDisabled(get(CommandName.channel))},
 			{ name: i18next.t("configuration.onMemberUpdate"), value: enabledOrDisabled(get(CommandName.member)) },
 			{ name: i18next.t("configuration.onNewMember"), value: enabledOrDisabled(get(CommandName.newMember)) },
