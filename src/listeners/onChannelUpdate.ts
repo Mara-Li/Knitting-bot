@@ -18,7 +18,7 @@ export default (client: Client): void => {
 		if (oldChannel.type !== ChannelType.GuildText
 			|| newChannel.type !== ChannelType.GuildText
 			|| oldChannel.permissionOverwrites.cache === newChannel.permissionOverwrites.cache) {
-			console.error("Channel is not a text channel or permission are not changed");
+			logInDev("Channel is not a text channel or permission are not changed");
 			return;
 		}
 		//get all threads of this channel

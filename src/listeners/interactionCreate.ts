@@ -1,5 +1,6 @@
 import { BaseInteraction, Client } from "discord.js";
 import { commands } from "../commands";
+import {default as i18next} from "../i18n/i18next";
 
 export default (client: Client): void => {
 	
@@ -14,7 +15,7 @@ export default (client: Client): void => {
 		} catch (error) {
 			console.error(error);
 			await interaction.reply({
-				content: "There was an error while executing this command!",
+				content: i18next.t("error", { error: error }) as string,
 				ephemeral: true,
 			});
 		}

@@ -8,21 +8,21 @@ const en = i18next.getFixedT("en");
 
 export default {
 	data: new SlashCommandBuilder()
-		.setName(en("slash.updateThread.name"))
-		.setDescription(en("slash.updateThread.description"))
+		.setName(en("commands.updateThread.name"))
+		.setDescription(en("commands.updateThread.description"))
 		
 		.setDescriptionLocalizations({
-			fr: fr("slash.updateThread.description"),
+			fr: fr("commands.updateThread.description"),
 		})
 		.setDefaultMemberPermissions(PermissionFlagsBits.ManageThreads),
 	async execute(interaction: CommandInteraction) {
 		//check if user has permission to update thread
 		if (!interaction.channel || !(interaction.channel instanceof ThreadChannel)) {
-			await interaction.reply({ content: i18next.t("slash.updateThread.error") as string, ephemeral: true });
+			await interaction.reply({ content: i18next.t("commands.updateThread.error") as string, ephemeral: true });
 			return;
 		}
 		try {
-			await interaction.reply({ content: `${i18next.t("slash.updateThread.success", {channel: interaction.channel.name}) as string}`, ephemeral: true});
+			await interaction.reply({ content: `${i18next.t("commands.updateThread.success", {channel: interaction.channel.name}) as string}`, ephemeral: true});
 			const thread = interaction.channel as ThreadChannel;
 			await addRoleAndUserToThread(thread);
 		}

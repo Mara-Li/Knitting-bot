@@ -1,6 +1,7 @@
 import {
 	CommandInteraction,
-	CommandInteractionOptionResolver, EmbedBuilder,
+	CommandInteractionOptionResolver,
+	EmbedBuilder,
 	PermissionFlagsBits,
 	SlashCommandBuilder,
 } from "discord.js";
@@ -13,33 +14,31 @@ const en = i18next.getFixedT("en");
 
 export default {
 	data: new SlashCommandBuilder()
-		.setName(en("slash.main.name"))
-		.setDescription(
-			en("slash.main.description")
-		)
+		.setName(en("configuration.main.name"))
+		.setDescription(en("configuration.main.description"))
 		.setDescriptionLocalizations({
-			fr: fr("slash.main.description"),
+			fr: fr("configuration.main.description"),
 		})
 		.setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
 		.addSubcommand((subcommand) =>
 			subcommand
-				.setName(en("slash.language.name"))
+				.setName(en("configuration.language.name").toLowerCase())
 				.setNameLocalizations({
-					fr: fr("slash.language.name"),
+					fr: fr("configuration.language.name").toLowerCase(),
 				})
-				.setDescription(en("slash.language.description"))
+				.setDescription(en("configuration.language.description"))
 				.setDescriptionLocalizations({
-					fr: fr("slash.language.description"),
+					fr: fr("configuration.language.description"),
 				})
 				.addStringOption((option) =>
 					option
-						.setName(en("slash.language.name"))
+						.setName(en("configuration.language.name").toLowerCase())
 						.setNameLocalizations({
-							fr: fr("slash.language.name"),
+							fr: fr("configuration.language.name").toLowerCase(),
 						})
-						.setDescription(en("slash.language.options"))
+						.setDescription(en("configuration.language.options"))
 						.setDescriptionLocalizations({
-							fr: fr("slash.language.options"),
+							fr: fr("configuration.language.options"),
 						})
 						.addChoices(
 							{ name: "English", value: "en" },
@@ -50,115 +49,111 @@ export default {
 		)
 		.addSubcommand((subcommand) =>
 			subcommand
-				.setName(en("slash.show.name"))
+				.setName(en("configuration.show.name"))
 				.setNameLocalizations({
-					fr: fr("slash.show.name"),
+					fr: fr("configuration.show.name"),
 				})
-				.setDescription(en("slash.show.description"))
+				.setDescription(en("configuration.show.description"))
 				.setDescriptionLocalizations({
-					fr: fr("slash.show.description")
+					fr: fr("configuration.show.description"),
 				})
 		)
 		.addSubcommand((subcommand) =>
 			subcommand
-				.setName(en("slash.disable.name"))
+				.setName(en("configuration.disable.name"))
 				.setNameLocalizations({
-					fr: fr("slash.disable.name"),
+					fr: fr("configuration.disable.name"),
 				})
-				.setDescription(en("slash.disable.description"))
+				.setDescription(en("configuration.disable.description"))
 				.setDescriptionLocalizations({
-					fr: fr("slash.disable.description"),
+					fr: fr("configuration.disable.description"),
 				})
 				.addBooleanOption((option) =>
 					option
 						.setName("switch")
-						.setDescription(en("slash.switch"))
+						.setDescription(en("configuration.switch"))
 						.setDescriptionLocalizations({
-							fr: fr("slash.switch"),
+							fr: fr("configuration.switch"),
 						})
 						.setRequired(true)
 				)
 		)
 		.addSubcommand((subcommand) =>
 			subcommand
-				.setName(en("slash.member.name"))
+				.setName(en("configuration.member.name"))
 				.setNameLocalizations({
-					fr: fr("slash.member.name"),
+					fr: fr("configuration.member.name"),
 				})
-				.setDescription(en("slash.member.description"))
+				.setDescription(en("configuration.member.description"))
 				.setDescriptionLocalizations({
-					fr: fr("slash.member.description"),
+					fr: fr("configuration.member.description"),
 				})
 				.addBooleanOption((option) =>
 					option
 						.setName("switch")
-						.setDescription(en("slash.switch"))
+						.setDescription(en("configuration.switch"))
 						.setDescriptionLocalizations({
-							fr: fr("slash.switch"),
+							fr: fr("configuration.switch"),
 						})
 						.setRequired(true)
 				)
 		)
 		.addSubcommand((subcommand) =>
 			subcommand
-				.setName(en("slash.thread.name"))
+				.setName(en("configuration.thread.name"))
 				.setNameLocalizations({
-					fr: fr("slash.thread.name"),
+					fr: fr("configuration.thread.name"),
 				})
-				.setDescription(
-					en("slash.thread.description")
-				)
+				.setDescription(en("configuration.thread.description"))
 				.setDescriptionLocalizations({
-					fr: fr("slash.thread.description"),
+					fr: fr("configuration.thread.description"),
 				})
 				.addBooleanOption((option) =>
 					option
 						.setName("switch")
-						.setDescription(en("slash.switch"))
+						.setDescription(en("configuration.switch"))
 						.setDescriptionLocalizations({
-							fr: fr("slash.switch"),
+							fr: fr("configuration.switch"),
 						})
 						.setRequired(true)
 				)
 		)
 		.addSubcommand((subcommand) =>
 			subcommand
-				.setName(en("slash.channel.name"))
+				.setName(en("configuration.channel.name"))
 				.setNameLocalizations({
-					fr: fr("slash.channel.name"),
+					fr: fr("configuration.channel.name"),
 				})
-				.setDescription(en("slash.channel.description"))
+				.setDescription(en("configuration.channel.description"))
 				.setDescriptionLocalizations({
-					fr: fr("slash.channel.description"),
+					fr: fr("configuration.channel.description"),
 				})
 				.addBooleanOption((option) =>
 					option
 						.setName("switch")
-						.setDescription(en("slash.switch"))
+						.setDescription(en("configuration.switch"))
 						.setDescriptionLocalizations({
-							fr: fr("slash.switch"),
+							fr: fr("configuration.switch"),
 						})
 						.setRequired(true)
 				)
 		)
 		.addSubcommand((subcommand) =>
 			subcommand
-				.setName(en("slash.newMember.name"))
+				.setName(en("configuration.newMember.name"))
 				.setNameLocalizations({
-					fr: fr("slash.newMember.name"),
+					fr: fr("configuration.newMember.name"),
 				})
-				.setDescription(
-					en("slash.newMember.description")
-				)
+				.setDescription(en("configuration.newMember.description"))
 				.setDescriptionLocalizations({
-					fr: fr("slash.newMember.description"),
+					fr: fr("configuration.newMember.description"),
 				})
 				.addBooleanOption((option) =>
 					option
 						.setName("switch")
-						.setDescription(en("slash.switch"))
+						.setDescription(en("configuration.switch"))
 						.setDescriptionLocalizations({
-							fr: fr("slash.switch"),
+							fr: fr("configuration.switch"),
 						})
 						.setRequired(true)
 				)
@@ -182,7 +177,9 @@ export default {
 				await interaction.reply(
 					// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 					//@ts-ignore
-					`${i18next.t("reply.language", { lang: languageValue[newValue] })}`
+					`${i18next.t("configuration.language.reply", {
+						lang: languageValue[newValue],
+					})}`
 				);
 			} else if (commands === DefaultMenuBuilder.disable) {
 				const manualMode = !options.getBoolean("switch");
@@ -191,7 +188,9 @@ export default {
 						set(command, manualMode);
 					}
 				}
-				const rep = options.getBoolean("switch") ? i18next.t("reply.enabledManual") : i18next.t("reply.disabledManual");
+				const rep = options.getBoolean("switch")
+					? i18next.t("enable.manual")
+					: i18next.t("disable.manual");
 				await interaction.reply({ content: rep, ephemeral: true });
 			} else if (commands === DefaultMenuBuilder.channel) {
 				await getBooleanAndReply(
@@ -241,24 +240,24 @@ async function getBooleanAndReply(
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const optionTranslation: any = {
 		onMemberUpdate:
-			"**__" + i18next.t("commands.onMemberUpdate").toLowerCase() + "__**",
+			"**__" + i18next.t("configuration.member.title").toLowerCase() + "__**",
 		onThreadCreated:
-			"**__" + i18next.t("commands.onThreadCreated").toLowerCase() + "__**",
+			"**__" + i18next.t("configuration.thread.title").toLowerCase() + "__**",
 		onChannelUpdate:
-			"**__" + i18next.t("commands.onChannelUpdate").toLowerCase() + "__**",
+			"**__" + i18next.t("configuration.channel.title").toLowerCase() + "__**",
 		onNewMember:
-			"**__" + i18next.t("commands.onNewMember").toLowerCase() + "__**",
+			"**__" + i18next.t("configuration.newMember.title").toLowerCase() + "__**",
 	};
 	if (value) {
 		return interaction.reply({
-			content: `${i18next.t("reply.enable", {
+			content: `${i18next.t("enable.type", {
 				type: optionTranslation[option],
 			})}`,
 			ephemeral: true,
 		});
 	} else {
 		return interaction.reply({
-			content: `${i18next.t("reply.disable", {
+			content: `${i18next.t("disable.disableType", {
 				type: optionTranslation[option],
 			})}`,
 			ephemeral: true,
@@ -271,7 +270,7 @@ async function getBooleanAndReply(
  * @param {boolean} value The value to check
  */
 function enabledOrDisabled(value: boolean) {
-	return value ? i18next.t("display.enable") : i18next.t("display.disable");
+	return value ? i18next.t("enable.enable") : i18next.t("disable.disable");
 }
 
 /**
@@ -281,14 +280,33 @@ function enabledOrDisabled(value: boolean) {
 export async function display(interaction: CommandInteraction) {
 	const embed = new EmbedBuilder()
 		.setColor("#0099ff")
-		.setTitle(i18next.t("configuration.title"))
-		.setDescription(i18next.t("configuration.description"))
+		.setTitle(i18next.t("configuration.show.menu.title"))
+		.setDescription(i18next.t("configuration.show.menu.description"))
 		.addFields(
-			{ name: i18next.t("configuration.language"), value: languageValue[get(CommandName.language) as string] },
-			{ name: i18next.t("configuration.onChannelUpdate"), value: enabledOrDisabled(get(CommandName.channel))},
-			{ name: i18next.t("configuration.onMemberUpdate"), value: enabledOrDisabled(get(CommandName.member)) },
-			{ name: i18next.t("configuration.onNewMember"), value: enabledOrDisabled(get(CommandName.newMember)) },
-			{ name: i18next.t("configuration.onThreadCreated"), value: enabledOrDisabled(get(CommandName.thread))},
+			{
+				name: i18next.t("configuration.language.name"),
+				value: languageValue[get(CommandName.language) as string],
+			},
+			{
+				name: i18next.t("configuration.channel.display"),
+				value: enabledOrDisabled(get(CommandName.channel)),
+				inline: true,
+			},
+			{
+				name: i18next.t("configuration.member.display"),
+				value: enabledOrDisabled(get(CommandName.member)),
+				inline: true,
+			},
+			{
+				name: i18next.t("configuration.newMember.display"),
+				value: enabledOrDisabled(get(CommandName.newMember)),
+				inline: true,
+			},
+			{
+				name: i18next.t("configuration.thread.display"),
+				value: enabledOrDisabled(get(CommandName.thread)),
+				inline: true,
+			}
 		);
 	await interaction.reply({ embeds: [embed], ephemeral: true });
 }

@@ -7,28 +7,28 @@ const en = i18next.getFixedT("en");
 
 export default {
 	data: new SlashCommandBuilder()
-		.setName(en("slash.updateSpecificThread.name"))
-		.setDescription(en("slash.updateSpecificThread.description"))
+		.setName(en("commands.updateSpecificThread.name"))
+		.setDescription(en("commands.updateSpecificThread.description"))
 		.setDescriptionLocalizations({
-			fr: fr("slash.updateSpecificThread.description"),
+			fr: fr("commands.updateSpecificThread.description"),
 		})
 		.setDefaultMemberPermissions(PermissionFlagsBits.ManageThreads)
 		.addChannelOption(option => 
-			option.setName(en("slash.updateSpecificThread.option.name"))
-				.setDescription(en("slash.updateSpecificThread.option.description"))
+			option.setName(en("commands.updateSpecificThread.option.name"))
+				.setDescription(en("commands.updateSpecificThread.option.description"))
 				.setDescriptionLocalizations({
-					fr: fr("slash.updateSpecificThread.option.description"),
+					fr: fr("commands.updateSpecificThread.option.description"),
 				})
 				.setRequired(true)
 		),
 	async execute(interaction: CommandInteraction) {
 		const threadOption = interaction.options.get("thread");
 		const channelId = threadOption?.channel?.name;
-		await interaction.reply({ content: i18next.t("slash.updateThread.success", {channel: channelId}) as string, ephemeral: true });
+		await interaction.reply({ content: i18next.t("commands.updateThread.success", {channel: channelId}) as string, ephemeral: true });
 		if (!interaction.guild) return;
 		const thread = threadOption?.channel as ThreadChannel;
 		if (!thread || !thread.isThread()) {
-			await interaction.followUp({ content: i18next.t("slash.updateThread.error") as string, ephemeral: true });
+			await interaction.followUp({ content: i18next.t("commands.updateThread.error") as string, ephemeral: true });
 			return;
 		}
 		await addRoleAndUserToThread(thread);

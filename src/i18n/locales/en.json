@@ -1,45 +1,32 @@
 {
-	"commands": {
-		"onChannelUpdate": "Change action on channel/category update",
-		"onMemberUpdate": "Change action on member update",
-		"onNewMember": "Change action on new member",
-		"onThreadCreated": "Change action on thread creation"
-	},
-	"configuration": {
-		"description": "Actual bot configuration",
-		"language": "Language",
-		"onChannelUpdate": "Action on channel/category update",
-		"onMemberUpdate": "Action on member update",
-		"onNewMember": "Action on new member",
-		"onThreadCreated": "Action on thread creation",
-		"title": "Configuration"
-	},
-	"display": {
+	"disable": {
 		"disable": "Disabled",
-		"enable": "Enabled"
+		"disableType": "Disabled: {{- type}}",
+		"manual": "Disabled manual mode"
+	},
+	"enable": {
+		"enable": "Enabled",
+		"type": "Enabled: {{- type}}",
+		"manual": "Enabled manual mode"
 	},
 	"error": "An error occur: {{error}}",
-	"reply": {
-		"disable": "Disabled: {{- type}}",
-		"disabledManual" : "Disabled manual mode",
-		"enable": "Enabled: {{- type}}",
-		"enabledManual" : "Enabled manual mode",
-		"language": "Language changed to {{lang}}"
-	},
-	"slash": {
+	"configuration": {
 		"channel": {
 			"description": "Enable or disable the adding of members when channel/category permission are changed.",
-			"name": "on-channel-update"
+			"display": "On channel/category update",
+			"name": "on-channel-update",
+			"title": "Change action on channel/category update"
 		},
-		"disable":{
+		"disable": {
 			"description": "Enable or disable all events to switch the bot to manual or automatic mode",
 			"name": "manual-mode",
 			"option": "Enable or disable the manual mode"
 		},
 		"language": {
 			"description": "Change the bot language",
-			"name": "language",
-			"options": "Language to use"
+			"name": "Language",
+			"options": "Language to use",
+			"reply": "Language changed to {{- lang}}"
 		},
 		"main": {
 			"description": "Edit the server configuration. Allow to disable / enable some events",
@@ -47,40 +34,52 @@
 		},
 		"member": {
 			"description": "Enable or disable the thread update on member permission modifications",
-			"name": "on-member-update"
+			"display": "On member update",
+			"name": "on-member-update",
+			"title": "Change action on member update"
 		},
 		"newMember": {
 			"description": "Enable or disable the adding of members when they join the server.",
-			"name": "on-new-member"
+			"display": "On new member",
+			"name": "on-new-member",
+			"title": "Change action on new member"
 		},
-		"show" : {
+		"show": {
 			"description": "Show the current configuration",
-			"name": "show"
+			"name": "show",
+			"menu": {
+				"description": "Actual bot configuration",
+				"title": "Configuration"
+			}
 		},
 		"switch": "Enable or disable this event",
 		"thread": {
 			"description": "Enable or disable the adding of members when thread are created.",
-			"name": "on-thread-created"
-		},
-		"updateAllThreads" : {
-			"description":  "Update all threads with adding missing users",
+			"display": "On thread creation",
+			"name": "on-thread-created",
+			"title": "Change action on thread creation"
+		}
+	},
+	"commands" : {
+		"updateAllThreads": {
+			"description": "Update all threads with adding missing users",
 			"name": "update-all-threads",
 			"reply": "Update of all threads…",
 			"success": "Updating success of {{- count}} threads"
 		},
-		"updateSpecificThread" : {
+		"updateSpecificThread": {
 			"description": "Update a specific thread with adding missing users",
-			"error" : "This command can only be used in a thread",
+			"error": "This command can only be used in a thread",
 			"name": "update-specific-thread",
 			"option": {
-				"description" : "Select the thread to update",
-				"name" : "thread"
+				"description": "Select the thread to update",
+				"name": "thread"
 			},
 			"success": "Updating thread: {{- channel}}"
 		},
-		"updateThread" : {
+		"updateThread": {
 			"description": "Update this thread with adding missing users",
-			"error" : "This command can only be used in a thread",
+			"error": "This command can only be used in a thread",
 			"name": "update-thread",
 			"success": "Updating thread: {{- channel}}"
 		}
