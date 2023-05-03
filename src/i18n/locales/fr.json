@@ -1,5 +1,6 @@
 {
   "commands": {
+    "error": "Cette commande ne peut être utilisée que dans un thread.",
     "success": "Mise à jour effectuée : {{- channel}}",
     "updateAllThreads": {
       "description": "Met à jour tous les threads du serveur, en ajoutant ou supprimant des utilisateurs",
@@ -9,7 +10,6 @@
     },
     "updateSpecificThread": {
       "description": "Met à jour un thread spécifique",
-      "error": "Merci de sélectionné un thread.",
       "name": "update-specific-thread",
       "option": {
         "description": "Sélectionner le thread à mettre à jour",
@@ -18,14 +18,13 @@
     },
     "updateThread": {
       "description": "Met à jour ce thread en ajoutant les utilisateurs manquants",
-      "error": "Vous n'avez pas lancé la commande dans un thread",
       "name": "update-thread"
     }
   },
   "configuration": {
     "channel": {
       "description": "Active/désactive l'ajout des membres aux threads lors de l'édition des permissions d'un channel.",
-      "display": "Action lors d'une mise à jour de salon/catégorie",
+      "display": "Salon/catégorie",
       "name": "sur-mise-a-jour-channel",
       "title": "Mise-à-jour de salon/catégorie"
     },
@@ -46,20 +45,20 @@
     },
     "member": {
       "description": "Active/désactive l'ajout de membres aux threads lors de l'édition de leurs permissions.",
-      "display": "Action lors d'une mise à jour de membre",
+      "display": "Membre modifié ",
       "name": "sur-mise-a-jour-membre",
       "title": "Mise-à-jour de membre"
     },
     "newMember": {
       "description": "Active ou désactive l'ajout d'un nouveau membre lorsqu'il rejoint le serveur.",
-      "display": "Action lors de l'arrivée d'un nouveau membre",
+      "display": "Arrivée d'un membre",
       "name": "sur-nouveau-membre",
       "title": "Arrivée d'un nouveau membre"
     },
     "show": {
       "description": "Affiche la configuration actuelle",
       "menu": {
-        "description": "Configuration actuelle du bot",
+        "description": "Le bot peut être activé sur :\n- Changement de permission d'un membre, d'un channel, catégorie\n- Lors de la création d'un thread\n- Lors de l'arrivée d'un nouveau membre.",
         "title": "Configuration"
       },
       "name": "afficher"
@@ -67,7 +66,7 @@
     "switch": "Activer ou désactiver cet événement",
     "thread": {
       "description": "Active ou désactive l'ajout des membres aux threads lors de leur création",
-      "display": "Action lors de la création d'un thread",
+      "display": "Création d'un thread",
       "name": "sur-creation-thread",
       "title": "Création d'un thread"
     }

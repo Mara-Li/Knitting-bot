@@ -284,7 +284,9 @@ export async function display(interaction: CommandInteraction) {
 			{
 				name: i18next.t("configuration.language.name"),
 				value: languageValue[get(CommandName.language) as string],
-			},
+			})
+		.addFields({ name: "\u200A", value: "\u200A" })
+		.addFields(
 			{
 				name: i18next.t("configuration.channel.display"),
 				value: enabledOrDisabled(get(CommandName.channel)),
@@ -295,6 +297,9 @@ export async function display(interaction: CommandInteraction) {
 				value: enabledOrDisabled(get(CommandName.member)),
 				inline: true,
 			},
+		)
+		.addFields({ name: "\u200A", value: "\u200A" })
+		.addFields(
 			{
 				name: i18next.t("configuration.newMember.display"),
 				value: enabledOrDisabled(get(CommandName.newMember)),

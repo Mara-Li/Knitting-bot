@@ -28,7 +28,7 @@ export default {
 		if (!interaction.guild) return;
 		const thread = threadOption?.channel as ThreadChannel;
 		if (!thread || !thread.isThread()) {
-			await interaction.followUp({ content: i18next.t("commands.updateThread.error") as string, ephemeral: true });
+			await interaction.followUp({ content: i18next.t("commands.error") as string, ephemeral: true });
 			return;
 		}
 		await addRoleAndUserToThread(thread);

@@ -18,7 +18,7 @@ export default {
 	async execute(interaction: CommandInteraction) {
 		//check if user has permission to update thread
 		if (!interaction.channel || !(interaction.channel instanceof ThreadChannel)) {
-			await interaction.reply({ content: i18next.t("commands.updateThread.error") as string, ephemeral: true });
+			await interaction.reply({ content: i18next.t("commands.error") as string, ephemeral: true });
 			return;
 		}
 		try {

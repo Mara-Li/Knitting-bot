@@ -1,5 +1,6 @@
 {
   "commands": {
+    "error": "This command can only be used in a thread.",
     "success": "Updating thread: {{- channel}}",
     "updateAllThreads": {
       "description": "Update all threads with adding missing users",
@@ -9,7 +10,6 @@
     },
     "updateSpecificThread": {
       "description": "Update a specific thread with adding missing users",
-      "error": "This command can only be used in a thread.",
       "name": "update-specific-thread",
       "option": {
         "description": "Select the thread to update",
@@ -18,14 +18,13 @@
     },
     "updateThread": {
       "description": "Update this thread with adding missing users",
-      "error": "This command can only be used in a thread",
       "name": "update-thread"
     }
   },
   "configuration": {
     "channel": {
       "description": "Enable or disable the adding of members when channel/category permission are changed.",
-      "display": "On channel/category update",
+      "display": "Channel/category",
       "name": "on-channel-update",
       "title": "Change action on channel/category update"
     },
@@ -46,20 +45,20 @@
     },
     "member": {
       "description": "Enable or disable the thread update on member permission modifications",
-      "display": "On member update",
+      "display": "Member update",
       "name": "on-member-update",
       "title": "Change action on member update"
     },
     "newMember": {
       "description": "Enable or disable the adding of members when they join the server.",
-      "display": "On new member",
+      "display": "New member",
       "name": "on-new-member",
       "title": "Change action on new member"
     },
     "show": {
       "description": "Show the current configuration",
       "menu": {
-        "description": "Actual bot configuration",
+        "description": "The bot can be activated on:\n- Changing the permission of a member, a channel, a category,\n- When a thread is created,\n- When a new member arrives.",
         "title": "Configuration"
       },
       "name": "show"
@@ -67,7 +66,7 @@
     "switch": "Enable or disable this event",
     "thread": {
       "description": "Enable or disable the adding of members when thread are created.",
-      "display": "On thread creation",
+      "display": "Thread creation",
       "name": "on-thread-created",
       "title": "Change action on thread creation"
     }
