@@ -1,6 +1,6 @@
 {
   "commands": {
-    "success": "Mise à jour effectuée de {{- channel}}",
+    "success": "Mise à jour effectuée : {{- channel}}",
     "updateAllThreads": {
       "description": "Met à jour tous les threads du serveur, en ajoutant ou supprimant des utilisateurs",
       "name": "update-all-threads",
@@ -12,7 +12,7 @@
       "error": "Merci de sélectionné un thread.",
       "name": "update-specific-thread",
       "option": {
-        "description": "Select the thread to update",
+        "description": "Sélectionner le thread à mettre à jour",
         "name": "thread"
       }
     },
