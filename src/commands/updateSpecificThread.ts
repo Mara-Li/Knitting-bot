@@ -24,7 +24,7 @@ export default {
 	async execute(interaction: CommandInteraction) {
 		const threadOption = interaction.options.get("thread");
 		const channelId = threadOption?.channel?.name;
-		await interaction.reply({ content: i18next.t("commands.updateThread.success", {channel: channelId}) as string, ephemeral: true });
+		await interaction.reply({ content: i18next.t("commands.success", {channel: channelId}) as string, ephemeral: true });
 		if (!interaction.guild) return;
 		const thread = threadOption?.channel as ThreadChannel;
 		if (!thread || !thread.isThread()) {

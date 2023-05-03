@@ -257,9 +257,7 @@ async function getBooleanAndReply(
 		});
 	} else {
 		return interaction.reply({
-			content: `${i18next.t("disable.disableType", {
-				type: optionTranslation[option],
-			})}`,
+			content: `${i18next.t("disable.type", { type: optionTranslation[option]})}`,
 			ephemeral: true,
 		});
 	}

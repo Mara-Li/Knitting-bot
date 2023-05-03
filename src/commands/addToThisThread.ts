@@ -22,7 +22,7 @@ export default {
 			return;
 		}
 		try {
-			await interaction.reply({ content: `${i18next.t("commands.updateThread.success", {channel: interaction.channel.name}) as string}`, ephemeral: true});
+			await interaction.reply({ content: `${i18next.t("commands.success", {channel: interaction.channel.name}) as string}`, ephemeral: true});
 			const thread = interaction.channel as ThreadChannel;
 			await addRoleAndUserToThread(thread);
 		}

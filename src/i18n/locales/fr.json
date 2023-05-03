@@ -1,85 +1,86 @@
 {
-	"configuration": {
-		"description": "Configuration actuelle du bot",
-		"title": "Configuration"
-	},
-	"disable": {
-		"disable": "Désactivé",
-		"type": "Désactivation de : {{- type}}",
-		"manual": "Mode manuel désactivé"
-	},
-	"enable": {
-		"enable": "Activé",
-		"type": "Activation de : {{- type}}",
-		"manual": "Mode manuel activé"
-	},
-	"error": "Une erreur est apparue : {{error}}",
-	"slash": {
-		"channel": {
-			"description": "Active/désactive l'ajout des membres aux threads lors de l'édition des permissions d'un channel.",
-			"display": "Action lors d'une mise à jour de salon/catégorie",
-			"name": "sur-mise-a-jour-channel",
-			"title": "Mise-à-jour de salon/catégorie"
-		},
-		"disable": {
-			"description": "Active ou désactive tous les évènements pour passer le bot en mode manuel ou automatique",
-			"name": "mode-manuel",
-			"option": "Active ou désactive le mode manuel"
-		},
-		"language": {
-			"description": "Modifie la langue du bot",
-			"name": "Langue",
-			"options": "Langue à utiliser",
-			"reply": "Langue changée pour : {{- lang}}"
-		},
-		"main": {
-			"description": "Modifie la configuration du serveur. Permet d'activer / désactiver certains évènements",
-			"name": "config"
-		},
-		"member": {
-			"description": "Active/désactive l'ajout de membres aux threads lors de l'édition de leurs permissions.",
-			"display": "Action lors d'une mise à jour de membre",
-			"name": "sur-mise-a-jour-membre",
-			"title": "Mise-à-jour de membre"
-		},
-		"newMember": {
-			"description": "Active ou désactive l'ajout d'un nouveau membre lorsqu'il rejoint le serveur.",
-			"display": "Action lors de l'arrivée d'un nouveau membre",
-			"name": "sur-nouveau-membre",
-			"title": "Arrivée d'un nouveau membre"
-		},
-		"show": {
-			"description": "Affiche la configuration actuelle",
-			"name": "afficher"
-		},
-		"switch": "Activer ou désactiver cet événement",
-		"thread": {
-			"description": "Active ou désactive l'ajout des membres aux threads lors de leur création",
-			"display": "Action lors de la création d'un thread",
-			"name": "sur-creation-thread",
-			"title": "Création d'un thread"
-		},
-		"updateAllThreads": {
-			"description": "Met à jour tous les threads du serveur, en ajoutant ou supprimant des utilisateurs",
-			"name": "update-all-threads",
-			"reply": "Mise à jour de tous les threads…",
-			"success": "Mise à jour effectuée de {{- count}} threads"
-		},
-		"updateSpecificThread": {
-			"description": "Met à jour un thread spécifique",
-			"error": "Merci de sélectionné un thread.",
-			"name": "update-specific-thread",
-			"option": {
-				"description": "Select the thread to update",
-				"name": "thread"
-			},
-			"success": "Mise à jour effectuée de {{- channel}}"
-		},
-		"updateThread": {
-			"description": "Met à jour ce thread en ajoutant les utilisateurs manquants",
-			"error": "Vous n'avez pas lancé la commande dans un thread",
-			"name": "update-thread",
-			"success": "Mise à jour effectuée de {{- channel}}"
-		}
-	}
+  "commands": {
+    "success": "Mise à jour effectuée de {{- channel}}",
+    "updateAllThreads": {
+      "description": "Met à jour tous les threads du serveur, en ajoutant ou supprimant des utilisateurs",
+      "name": "update-all-threads",
+      "reply": "Mise à jour de tous les threads…",
+      "success": "Mise à jour effectuée de {{- count}} threads"
+    },
+    "updateSpecificThread": {
+      "description": "Met à jour un thread spécifique",
+      "error": "Merci de sélectionné un thread.",
+      "name": "update-specific-thread",
+      "option": {
+        "description": "Select the thread to update",
+        "name": "thread"
+      }
+    },
+    "updateThread": {
+      "description": "Met à jour ce thread en ajoutant les utilisateurs manquants",
+      "error": "Vous n'avez pas lancé la commande dans un thread",
+      "name": "update-thread"
+    }
+  },
+  "configuration": {
+    "channel": {
+      "description": "Active/désactive l'ajout des membres aux threads lors de l'édition des permissions d'un channel.",
+      "display": "Action lors d'une mise à jour de salon/catégorie",
+      "name": "sur-mise-a-jour-channel",
+      "title": "Mise-à-jour de salon/catégorie"
+    },
+    "disable": {
+      "description": "Active ou désactive tous les évènements pour passer le bot en mode manuel ou automatique",
+      "name": "mode-manuel",
+      "option": "Active ou désactive le mode manuel"
+    },
+    "language": {
+      "description": "Modifie la langue du bot",
+      "name": "Langue",
+      "options": "Langue à utiliser",
+      "reply": "Langue changée pour : {{- lang}}"
+    },
+    "main": {
+      "description": "Modifie la configuration du serveur. Permet d'activer / désactiver certains évènements",
+      "name": "config"
+    },
+    "member": {
+      "description": "Active/désactive l'ajout de membres aux threads lors de l'édition de leurs permissions.",
+      "display": "Action lors d'une mise à jour de membre",
+      "name": "sur-mise-a-jour-membre",
+      "title": "Mise-à-jour de membre"
+    },
+    "newMember": {
+      "description": "Active ou désactive l'ajout d'un nouveau membre lorsqu'il rejoint le serveur.",
+      "display": "Action lors de l'arrivée d'un nouveau membre",
+      "name": "sur-nouveau-membre",
+      "title": "Arrivée d'un nouveau membre"
+    },
+    "show": {
+      "description": "Affiche la configuration actuelle",
+      "menu": {
+        "description": "Configuration actuelle du bot",
+        "title": "Configuration"
+      },
+      "name": "afficher"
+    },
+    "switch": "Activer ou désactiver cet événement",
+    "thread": {
+      "description": "Active ou désactive l'ajout des membres aux threads lors de leur création",
+      "display": "Action lors de la création d'un thread",
+      "name": "sur-creation-thread",
+      "title": "Création d'un thread"
+    }
+  },
+  "disable": {
+    "disable": "Désactivé",
+    "manual": "Mode manuel désactivé",
+    "type": "Désactivation de : {{- type}}"
+  },
+  "enable": {
+    "enable": "Activé",
+    "manual": "Mode manuel activé",
+    "type": "Activation de : {{- type}}"
+  },
+  "error": "Une erreur est apparue : {{error}}"
 }
