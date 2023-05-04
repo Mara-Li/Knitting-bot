@@ -24,12 +24,16 @@ export default {
 		.addSubcommand(subcommand =>
 			subcommand
 				.setName(en("commands.updateSpecificThread.name"))
+				.setNameLocalizations({
+					fr: fr("commands.updateSpecificThread.name"),
+				})
 				.setDescription(en("commands.updateSpecificThread.description"))
 				.setDescriptionLocalizations({ 
 					fr: fr("commands.updateSpecificThread.description"), 
 				})
 				.addChannelOption(option =>
-					option.setName(en("commands.updateSpecificThread.option.name"))
+					option
+						.setName(en("commands.updateSpecificThread.option.name"))
 						.setDescription(en("commands.updateSpecificThread.option.description"))
 						.setDescriptionLocalizations({
 							fr: fr("commands.updateSpecificThread.option.description"),
@@ -40,6 +44,9 @@ export default {
 		.addSubcommand(subcommand =>
 			subcommand
 				.setName(en("commands.updateThread.name"))
+				.setNameLocalizations({
+					fr: fr("commands.updateThread.name"),
+				})
 				.setDescription(en("commands.updateThread.description"))
 				.setDescriptionLocalizations({
 					fr: fr("commands.updateThread.description"),
@@ -48,9 +55,23 @@ export default {
 		.addSubcommand(subcommand =>
 			subcommand
 				.setName(en("commands.updateAllThreads.name"))
+				.setNameLocalizations({
+					fr: fr("commands.updateAllThreads.name"),
+				})
 				.setDescription(en("commands.updateAllThreads.description"))
 				.setDescriptionLocalizations({
 					fr: fr("commands.updateAllThreads.description")
+				})
+		)
+		.addSubcommand(subcommand =>
+			subcommand
+				.setName(en("commands.help.name"))
+				.setNameLocalizations({
+					fr: fr("commands.help.name"),
+				})
+				.setDescription(en("commands.help.description"))
+				.setDescriptionLocalizations({
+					fr: fr("commands.help.description"),
 				})
 		),
 	async execute(interaction: CommandInteraction) {
@@ -67,7 +88,7 @@ export default {
 		case en("commands.updateSpecificThread.name"):
 			await updateSpecificThread(interaction);
 			break;
-		default:
+		case en("commands.help.name"):
 			await displayHelp(interaction);
 		}
 	}

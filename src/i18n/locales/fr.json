@@ -3,6 +3,8 @@
     "description": "Permet de mettre à jour manuellement les threads en ajoutant les utilisateurs manquants.",
     "error": "Cette commande ne peut être utilisée que dans un thread.",
     "help": {
+      "name": "aide",
+      "description" : "Affiche l'aide des commandes manuelles",
       "all": "- `/update tout` : Pour ajouter sur tous les threads du serveur.\n",
       "desc": "Met à jour manuellement les threads en ajoutant les utilisateurs manquants, avec l'aide des commandes ci-dessous :\n",
       "here": "- `/update ici` : Pour ajouter sur le thread dans lequel la commande est utilisée.\n",

@@ -3,6 +3,8 @@
     "description": "Update the threads manually with adding missing users",
     "error": "This command can only be used in a thread.",
     "help": {
+      "name" : "help",
+      "description": "Show the help of the command",
       "all": "- `/update all`: to add on all threads of the guild.\n",
       "desc": "Update the threads manually with adding missing users, using these commands:\n",
       "here": "- `/update here`: to update the thread where the command is used.\n",
