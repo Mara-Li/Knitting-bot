@@ -2,6 +2,7 @@ import { Client, GatewayIntentBits, Partials } from "discord.js";
 import { REST } from "@discordjs/rest";
 import { Routes } from "discord-api-types/v9";
 import dotenv from "dotenv";
+import * as process from "process";
 import interactionCreate from "./listeners/interactionCreate";
 import onBotEnter from "./listeners/onBotEnter";
 import ready from "./listeners/ready";
@@ -23,6 +24,8 @@ const client = new Client({
 	partials: [Partials.Channel],
 });
 
+export const emoji = process.env.MESSAGE && process.env.MESSAGE.trim().length > 0 ? process.env.MESSAGE : "🔄";
+
 
 const rest = new REST({ version: "9" }).setToken(process.env.DISCORD_TOKEN ?? "0");
 
@@ -33,7 +36,7 @@ const rest = new REST({ version: "9" }).setToken(process.env.DISCORD_TOKEN ?? "0
 			// clean commands
 			await rest.put(Routes.applicationGuildCommands(process.env.CLIENT_ID ?? "0", guild.id),
 				{ body: [] })
-				.then(() => console.log("Successfully deleted all guild commands."))
+				.then(() => logInDev("Successfully deleted all guild commands."))
 				.catch(console.error);
 			await rest.put(
 				Routes.applicationGuildCommands(process.env.CLIENT_ID ?? "0", guild.id),
