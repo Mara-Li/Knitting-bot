@@ -7,6 +7,8 @@ import {
 	ThreadChannel,
 	ThreadMember,
 } from "discord.js";
+import * as process from "process";
+import { emoji } from "./index";
 
 
 
@@ -41,7 +43,7 @@ export function getMemberPermission(members: Collection<string, GuildMember>, th
 export async function addUserToThread(thread: ThreadChannel, user: GuildMember) {
 	if (thread.permissionsFor(user).has("ViewChannel", true) && await checkIfUserNotInTheThread(thread, user)) {
 		const messagePayload : MessagePayloadOption = {
-			content: " ",
+			content: emoji,
 			flags: MessageFlags.SuppressNotifications,
 		};
 		const message = await thread.send(messagePayload);
@@ -128,6 +130,12 @@ export async function addRoleAndUserToThread(thread: ThreadChannel) {
 			return permissions.includes("ViewChannel");
 		})
 		.toJSON();
+	
+	const messagePayload : MessagePayloadOption = {
+		content: emoji,
+		flags: MessageFlags.SuppressNotifications
+	};
+	const message = await thread.send(messagePayload);
 	if (rolesWithAccess.length > 0) {
 		getRoleToPing(thread, rolesWithAccess).then(roles => {
 			roles.forEach(role => {
@@ -150,14 +158,10 @@ export async function addRoleAndUserToThread(thread: ThreadChannel) {
 		});
 	}
 	if (toPing.length > 0) {
-		const messagePayload : MessagePayloadOption = {
-			content: "🔄",
-			flags: MessageFlags.SuppressNotifications
-		};
-		const message = await thread.send(messagePayload);
 		await message.edit(toPing.map(member => `<@${member.id}>`).join(" "));
-		await message.delete();
 	}
+	await message.delete();
+
 }
 
 export function logInDev(text: string) {

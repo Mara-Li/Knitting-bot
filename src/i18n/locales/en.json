@@ -1,16 +1,25 @@
 {
   "commands": {
+    "description": "Update the threads manually with adding missing users",
     "error": "This command can only be used in a thread.",
+    "help": {
+      "all": "- `/update all`: to add on all threads of the guild.\n",
+      "desc": "Update the threads manually with adding missing users, using these commands:\n",
+      "here": "- `/update here`: to update the thread where the command is used.\n",
+      "thread": "- `/update thread <thread>`: to update a specific thread (select it from the list).\n",
+      "title": "Manual commands help"
+    },
+    "name": "update",
     "success": "Updating thread: {{- channel}}",
     "updateAllThreads": {
       "description": "Update all threads with adding missing users",
-      "name": "update-all-threads",
+      "name": "all",
       "reply": "Update of all threads…",
       "success": "Updating success of {{- count}} threads"
     },
     "updateSpecificThread": {
       "description": "Update a specific thread with adding missing users",
-      "name": "update-specific-thread",
+      "name": "thread",
       "option": {
         "description": "Select the thread to update",
         "name": "thread"
@@ -18,7 +27,7 @@
     },
     "updateThread": {
       "description": "Update this thread with adding missing users",
-      "name": "update-thread"
+      "name": "here"
     }
   },
   "configuration": {

@@ -1,16 +1,25 @@
 {
   "commands": {
+    "description": "Permet de mettre à jour manuellement les threads en ajoutant les utilisateurs manquants.",
     "error": "Cette commande ne peut être utilisée que dans un thread.",
+    "help": {
+      "all": "- `/update tout` : Pour ajouter sur tous les threads du serveur.\n",
+      "desc": "Met à jour manuellement les threads en ajoutant les utilisateurs manquants, avec l'aide des commandes ci-dessous :\n",
+      "here": "- `/update ici` : Pour ajouter sur le thread dans lequel la commande est utilisée.\n",
+      "thread": "- `/update thread <thread>` : Pour ajouter dans un thread spécifique (à sélectionner depuis la liste).\n",
+      "title": "Aide des commandes manuelles"
+    },
+    "name": "update",
     "success": "Mise à jour effectuée : {{- channel}}",
     "updateAllThreads": {
       "description": "Met à jour tous les threads du serveur, en ajoutant ou supprimant des utilisateurs",
-      "name": "update-all-threads",
+      "name": "tout",
       "reply": "Mise à jour de tous les threads…",
       "success": "Mise à jour effectuée de {{- count}} threads"
     },
     "updateSpecificThread": {
       "description": "Met à jour un thread spécifique",
-      "name": "update-specific-thread",
+      "name": "thread",
       "option": {
         "description": "Sélectionner le thread à mettre à jour",
         "name": "thread"
@@ -18,7 +27,7 @@
     },
     "updateThread": {
       "description": "Met à jour ce thread en ajoutant les utilisateurs manquants",
-      "name": "update-thread"
+      "name": "ici"
     }
   },
   "configuration": {

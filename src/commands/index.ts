@@ -1,6 +1,4 @@
-import addToThisThread from "./addToThisThread";
-import updateThreadCommands from "./updateThreadCommands";
-import updateSpecificThread from "./updateSpecificThread";
+import update from "./update";
 import configuration from "./configuration";
 
-export const commands = [addToThisThread, updateThreadCommands, updateSpecificThread, configuration];
+export const commands = [update, configuration];
