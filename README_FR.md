@@ -22,11 +22,11 @@ Le bot ne fera rien lorsqu'il rejoindra le serveur. Si vous voulez mettre à jou
 ### Commandes Slash
 
 Si vous voulez mettre à jour manuellement un fil, vous pouvez utiliser les commandes slash:
-- `/update-specific-thread [thread]`: Mettre à jour un fil spécifique.
-- `/update-all-threads`: Mettre à jour tous les fils sur le serveur.
-- `/update-thread`: Mettre à jour le fil sur lequel la commande est utilisée.
+- `/update thread [thread]`: Mettre à jour un fil spécifique.
+- `/update tout`: Mettre à jour tous les fils sur le serveur.
+- `/update ici`: Mettre à jour le fil sur lequel la commande est utilisée.
 
-Ces commandes n'apparaissent pas pour les utilisateurs qui n'ont pas la permission `gérer les fils`.
+Ces commandes n'apparaissent pas pour les utilisateurs qui n'ont pas la permission `gérer les fils` (`manage thread` en anglais).
 
 > **Warning**  
 > Tous les utilisateurs qui quittent le fil seront ré-ajoutés, même s'ils l'ont quitté volontairement.
@@ -58,7 +58,7 @@ Le bot a besoin de certaines permissions pour fonctionner :
 - Présence
 - Membres du serveur
 
-(Pour une raison inconnue, le bot a besoin de l'intention de présence pour obtenir l'identifiant de l'utilisateur lorsqu'il rejoint le serveur.)
+(Pour une raison inconnue, le bot a besoin de la permission de présence pour obtenir l'identifiant de l'utilisateur lorsqu'il rejoint le serveur.)
 
 ---
 
@@ -70,16 +70,24 @@ Après avoir cloné le référentiel, vous devez installer les dépendances avec
 npm run init
 ```
 
-Le script vous demandera le jeton du bot. Vous pouvez l'obtenir sur le [portail des développeurs Discord](https://discord.com/developers/applications).
-
-Au fait, le fichier `.env` doit ressembler à ceci :
-```
+Le script vous demandera vos variables `.env` et le fichier sera automatiquement créé. 
+Le fichier doit ressembler à ceci :
+```dotenv
 BOT_TOKEN=your_token
 CLIENT_ID=your_client_id
-NODE_ENV=development # or production
+NODE_ENV=development# ou production
+MESSAGE= #N'importe quoi
 ```
 
-La dernière partie concerne la journalisation. En production, rien (sauf les erreurs) n'est enregistré. En développement, le bot enregistrera tout dans la console.
+> **Note**  
+> Si vous voulez test le bot, vous devez d'abord créer une application sur le [discord developer portal](https://discord.com/developers/applications).
+> [Vous trouverez ici un tutoriel](https://devcommunity.gitbook.io/bot/robot-discord-pas-a-pas/creez-lapplication-de-votre-bot)
+> N'oubliez pas d'inviter le bot sur un serveur de test !
+
+- `BOT_TOKEN` est le token du bot que vous pouvez obtenir à partir de `Bot` > `Reset token` dans le portail des développeurs.
+- `CLIENT_ID` est l'identifiant de l'application que vous pouvez obtenir à partir de `General Information` > `Client ID` dans le portail des développeurs.
+- `NODE_ENV` est l'environnement de développement. Cela peut être `development` ou `production`. En mode développement, les logs seront plus détaillés.
+- `MESSAGE` est le message que le bot enverra lors du chargement des rôles/utilisateurs. Vous pouvez un simple message, un emoji, des stickers, ou encore des émojis personnalisés. Si vous utilisez ces derniers, vous devez vous assurer que le bot est sur le même serveur que l'émoji (mais il peut les utiliser partout).
 
 Le bot utilise Enmap pour stocker des données. Vous pouvez trouver la documentation [ici](https://enmap.evie.dev/). Vous avez besoin d'une installation spéciale pour cela, donc suivez les instructions [ici](https://enmap.evie.dev/install). 
 

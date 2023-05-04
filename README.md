@@ -22,9 +22,9 @@ The bot won't do anything when joining the server. If you want to update all thr
 ### Slash Commands
 
 If you want to manually update a thread, you can use the slash commands: 
-- `/update-specific-thread [thread]` : Update a specific thread
-- `/update-all-threads` : Update all threads in the server
-- `/update-thread` : Update the thread where the command is used
+- `/update thread [thread]` : Update a specific thread
+- `/update all` : Update all threads in the server
+- `/update here` : Update the thread where the command is used
 
 These commands don't appear for user that doesn't have the `manage thread` permission.
 
@@ -71,16 +71,25 @@ After cloning the repo, you need to install the dependencies with:
 npm run init
 ```
 
-The script will ask you for the bot token. You can get it on the [discord developer portal](https://discord.com/developers/applications).
-
-By the way, the `.env` file must looks like that:
-```
+The script will ask your for your `.env` variable, and the file will be created automatically.
+It can look like this:
+```dotenv
 BOT_TOKEN=your_token
 CLIENT_ID=your_client_id
 NODE_ENV=development # or production
+MESSAGE= #N'importe quoi
 ```
 
-The last part is for logging. In production, nothing (unless error) is recorded. In development, the bot will log everything in the console.
+> **Note**  
+> If you want try your bot, you need to create an application in the [discord developer portal](https://discord.com/developers/applications). 
+> [Here a tutorial](https://github.com/reactiflux/discord-irc/wiki/Creating-a-discord-bot-&-getting-a-token)
+> Don't forget to invite your bot in a testing discord server!
+
+- `BOT_TOKEN` is the token of the bot that you can get in `Bot` > `Reset token` in the discord developer portal.
+- `CLIENT_ID` is the client id of the bot, you can get it from `General Information` > `Client ID` in the discord developer portal.
+- `NODE_ENV` is the environment of the bot. It can be `development` or `production`. If you are in development, the bot will log a lot of event. If you are in production, the bot will log only errors.
+- `MESSAGE` : The message you want to send when waiting for the list of users/roles. You can use a simple message, an emoji, stickers or external emoji. Beware of them. The bot must be on the server where the emoji is (but it can use it everywhere).
+
 
 The bot uses Enmap to store data. You can find the documentation [here](https://enmap.evie.dev/). You need a special installation for it, so follow the instructions [here](https://enmap.evie.dev/install). 
 

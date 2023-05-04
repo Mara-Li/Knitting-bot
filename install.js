@@ -7,6 +7,51 @@
 const readlineSync = require("readline-sync");
 const c = require("ansi-colors");
 
+const lang = Intl.DateTimeFormat().resolvedOptions().locale;
+
+const translation = {
+	"en-US": {
+		token: "Discord BOT TOKEN: ",
+		clientId: "Discord Bot Client ID: ",
+		env: {
+			question: "Is it a development environment? ",
+			dev: "Development",
+			prod: "Production",
+		},
+		emoji: {
+			desc: "(Message/emoji/symbol to send when loading): ",
+			title: "Message ",
+		},
+		log: {
+			env: "Environment: ",
+			clientId: "Client ID: ",
+			token: "Token: ",
+			message: "Message: ",
+		}
+	},
+	"fr-FR": {
+		token: "Token du BOT Discord : ",
+		clientId: "ID du client du BOT Discord : ",
+		env: {
+			question: "Est-ce un environnement de développement ? ",
+			dev: "Développement",
+			prod: "Production",
+		},
+		emoji: {
+			desc: "(Message/emoji/symbole à envoyer lors du chargement) : ",
+			title: "Message ",
+		},
+		log: {
+			env: "Environnement : ",
+			clientId: "ID Client : ",
+			token: "Token : ",
+			message: "Message : ",
+		}
+	}
+};
+
+
+
 c.theme({
 	danger: c.red,
 	dark: c.dim.gray,
@@ -22,16 +67,24 @@ c.theme({
 	warning: c.yellow
 });
 
-let token = readlineSync.question(c.info("Discord BOT TOKEN: "));
-let clientId = readlineSync.question(c.info("Discord Bot Client ID: "));
-let isDevEnv = readlineSync.keyInYNStrict(c.info("Is this a development environment?"));
+const t = translation[lang];
+
+let token = readlineSync.question(c.info(t.token));
+let clientId = readlineSync.question(c.info(t.clientId));
+let isDevEnv = readlineSync.keyInYNStrict(c.info(t.env.question));
+let emoji = readlineSync.question(c.info(t.emoji.title) + c.muted(t.emoji.desc));
+
 
 const nodeEnv = isDevEnv ? "development" : "production";
+const nodeEnvTrad = isDevEnv ? t.env.dev : t.env.prod;
 
-console.log(c.success("Token: " + token));
-console.log(c.success("Client ID: " + clientId));
-console.log(c.success("Environment: " + nodeEnv));
+const tlog = translation[lang].log;
+console.log("");
+console.log(c.success(tlog.token + token));
+console.log(c.success(tlog.clientId + clientId));
+console.log(c.success(tlog.env + nodeEnvTrad));
+console.log(c.success(tlog.message + emoji));
 
-const envContent = `DISCORD_TOKEN=${token}\nCLIENT_ID=${clientId}\nNODE_ENV=${nodeEnv}`;
+const envContent = `DISCORD_TOKEN=${token.trim()}\nCLIENT_ID=${clientId.trim()}\nNODE_ENV=${nodeEnv.trim()}\nMESSAGE=${emoji}`;
 
 require("fs").writeFileSync(".env", envContent);
