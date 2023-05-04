@@ -13,6 +13,7 @@ export default (client: Client):void => {
 		try {
 			for (const command of commands) {
 				await guild.commands.create(command.data);
+				logInDev(`Command ${command.data.name} created in ${guild.name}`);
 			}
 		} catch (error) {
 			console.error(error);
