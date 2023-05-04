@@ -25,6 +25,7 @@ Si vous voulez mettre à jour manuellement un fil, vous pouvez utiliser les comm
 - `/update thread [thread]`: Mettre à jour un fil spécifique.
 - `/update tout`: Mettre à jour tous les fils sur le serveur.
 - `/update ici`: Mettre à jour le fil sur lequel la commande est utilisée.
+- `/update aide` : Affiche l'aide pour les commandes slash.
 
 Ces commandes n'apparaissent pas pour les utilisateurs qui n'ont pas la permission `gérer les fils` (`manage thread` en anglais).
 

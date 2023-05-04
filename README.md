@@ -25,6 +25,7 @@ If you want to manually update a thread, you can use the slash commands:
 - `/update thread [thread]` : Update a specific thread
 - `/update all` : Update all threads in the server
 - `/update here` : Update the thread where the command is used
+- `/update help` : Get help about the manual slash commands
 
 These commands don't appear for user that doesn't have the `manage thread` permission.
 
