@@ -24,9 +24,8 @@
   "configuration": {
     "channel": {
       "description": "Enable or disable the adding of members when channel/category permission are changed.",
-      "display": "Channel/category",
       "name": "on-channel-update",
-      "title": "Change action on channel/category update"
+      "title": ""
     },
     "disable": {
       "description": "Enable or disable all events to switch the bot to manual or automatic mode",
@@ -45,9 +44,8 @@
     },
     "member": {
       "description": "Enable or disable the thread update on member permission modifications",
-      "display": "Member update",
       "name": "on-member-update",
-      "title": "Change action on member update"
+      "title": "Member update"
     },
     "newMember": {
       "description": "Enable or disable the adding of members when they join the server.",

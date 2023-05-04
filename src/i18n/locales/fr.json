@@ -24,9 +24,8 @@
   "configuration": {
     "channel": {
       "description": "Active/désactive l'ajout des membres aux threads lors de l'édition des permissions d'un channel.",
-      "display": "Salon/catégorie",
       "name": "sur-mise-a-jour-channel",
-      "title": "Mise-à-jour de salon/catégorie"
+      "title": "Salon/catégorie"
     },
     "disable": {
       "description": "Active ou désactive tous les évènements pour passer le bot en mode manuel ou automatique",
@@ -51,7 +50,6 @@
     },
     "newMember": {
       "description": "Active ou désactive l'ajout d'un nouveau membre lorsqu'il rejoint le serveur.",
-      "display": "Arrivée d'un membre",
       "name": "sur-nouveau-membre",
       "title": "Arrivée d'un nouveau membre"
     },
@@ -66,7 +64,6 @@
     "switch": "Activer ou désactiver cet événement",
     "thread": {
       "description": "Active ou désactive l'ajout des membres aux threads lors de leur création",
-      "display": "Création d'un thread",
       "name": "sur-creation-thread",
       "title": "Création d'un thread"
     }

@@ -288,12 +288,12 @@ export async function display(interaction: CommandInteraction) {
 		.addFields({ name: "\u200A", value: "\u200A" })
 		.addFields(
 			{
-				name: i18next.t("configuration.channel.display"),
+				name: i18next.t("configuration.channel.title"),
 				value: enabledOrDisabled(get(CommandName.channel)),
 				inline: true,
 			},
 			{
-				name: i18next.t("configuration.member.display"),
+				name: i18next.t("configuration.member.title"),
 				value: enabledOrDisabled(get(CommandName.member)),
 				inline: true,
 			},
