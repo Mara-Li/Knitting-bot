@@ -242,7 +242,7 @@ async function ignoreThisChannel(interaction: CommandInteraction, ignoreChannel?
 async function ignoreThisThread(interaction: CommandInteraction, ignoredChannel?:ThreadChannel) {
 	const allIgnoreChannels:ThreadChannel[] = getIgnoredThreads() as ThreadChannel[] ?? [];
 	logInDev("allIgnoreChannels", allIgnoreChannels.map((channel) => channel.id));
-	if (!ignoredChannel || !(ignoredChannel instanceof ThreadChannel)) {
+	if (!ignoredChannel) {
 		await interaction.reply({
 			content: i18next.t("commands.error") as string,
 			ephemeral: true,
