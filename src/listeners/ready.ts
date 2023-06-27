@@ -1,24 +1,36 @@
-import { Client } from "discord.js";
+import { REST } from "@discordjs/rest";
+import { Client, Routes, SlashCommandBuilder } from "discord.js";
+import dotenv from "dotenv";
+import process from "process";
 import { commands } from "../commands";
 import { logInDev } from "../utils";
+dotenv.config();
 
+const rest = new REST().setToken(process.env.DISCORD_TOKEN ?? "0");
 
 export default (client: Client): void => {
 	client.on("ready", async () => {
-		if (!client.user || !client.application) {
+		if (!client.user || !client.application || !process.env.CLIENT_ID) {
 			return;
 		}
-
+		
 		console.info(`${client.user.username} is online`);
-		const guilds = client.guilds.cache;
-		//remove all commands
-		for (const guild of guilds) {
-			logInDev(`Load in ${guild[1].name}`);
-			await guild[1].commands.set([]);
-			for (const command of commands) {
-				logInDev(`Command ${command.data.name} created in ${guild[1].name}`);
-				await guild[1].commands.create(command.data);
-			}
+		const serializeCmds = commands.map( (command) => {
+			return command.data.toJSON();
+		});
+		for (const guild of client.guilds.cache.values()) {
+			logInDev(`Load in ${guild.name}`);
+			//delete all commands
+			guild.client.application?.commands.cache.forEach( (command) => {
+				logInDev(`Delete ${command.name}`);
+				command.delete();
+			});
+			//add all commands
+			await rest.put(
+				Routes.applicationGuildCommands(process.env.CLIENT_ID, guild.id),
+				{ body: serializeCmds }
+			);
+			logInDev(`Load in ${guild.name} done`);
 		}
 	});
 };

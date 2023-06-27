@@ -10,8 +10,6 @@ import memberUpdate from "./listeners/memberUpdate";
 import onThreadCreated from "./listeners/onThreadCreated";
 import onChannelUpdate from "./listeners/onChannelUpdate";
 import onNewMember from "./listeners/onNewMember";
-import { commands } from "./commands";
-import { logInDev } from "./utils";
 
 dotenv.config();
 
@@ -26,28 +24,6 @@ const client = new Client({
 
 export const emoji = process.env.MESSAGE && process.env.MESSAGE.trim().length > 0 ? process.env.MESSAGE : "🔄";
 
-
-const rest = new REST({ version: "9" }).setToken(process.env.DISCORD_TOKEN ?? "0");
-
-(async () => {
-	try {
-		logInDev("Started refreshing application (/) commands.");
-		for (const guild of client.guilds.cache.values()) {
-			// clean commands
-			await rest.put(Routes.applicationGuildCommands(process.env.CLIENT_ID ?? "0", guild.id),
-				{ body: [] })
-				.then(() => logInDev("Successfully deleted all guild commands."))
-				.catch(console.error);
-			await rest.put(
-				Routes.applicationGuildCommands(process.env.CLIENT_ID ?? "0", guild.id),
-				{ body: commands },
-			);
-		}
-		logInDev("Successfully reloaded slash commands.");
-	} catch (error) {
-		console.error(error);
-	}
-})();
 
 try {
 	ready(client);
