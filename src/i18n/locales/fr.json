@@ -112,6 +112,7 @@
 			"role": "Rôles",
 			"title": "Liste des channels, catégories, threads et rôles ignorés"
 		},
+		"message": "{{- thread}} est ignoré dans les paramètres !",
 		"name": "Ignore",
 		"role": {
 			"added": "Role {{- role}} ignoré.",

@@ -112,6 +112,7 @@
 			"role": "",
 			"title": "List of ignored channels, categories, threads and roles"
 		},
+		"message": "{{- thread}} is ignored in parameters!",
 		"name": "Ignore",
 		"role": {
 			"added": "Role {{- role}} ignored.",
