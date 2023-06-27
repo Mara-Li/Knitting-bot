@@ -1,6 +1,6 @@
 import Enmap from "enmap";
 import { logInDev } from "./utils";
-import { Role, ThreadChannel } from "discord.js";
+import { CategoryChannel, Channel, Role, TextChannel, ThreadChannel } from "discord.js";
 
 export const optionMaps = new Enmap({ name: "Configuration" });
 export const translationLanguage = optionMaps.get("language") || "en";
@@ -24,10 +24,10 @@ export enum CommandName {
  */
 export function set(
 	name: CommandName,
-	value: string | boolean | ThreadChannel[] | Role[] 
+	value: string | boolean | ThreadChannel[] | Role[] | TextChannel[] | CategoryChannel[] 
 ) {
 	optionMaps.set(name, value);
-	logInDev(`Set ${name} to `, !(value instanceof Array) ? value : value.map((v:Role|ThreadChannel) => v.name));
+	logInDev(`Set ${name} to `, !(value instanceof Array) ? value : value.map((v:Role|ThreadChannel|TextChannel|CategoryChannel) => v.name));
 }
 
 /**
@@ -51,6 +51,13 @@ export function getIgnoredThreads(): ThreadChannel[] {
 	return optionMaps.get(CommandName.ignoreThread) as ThreadChannel[] ?? [];
 }
 
+export function getIgnoredCategories(): CategoryChannel[] {
+	if (!optionMaps.has(CommandName.ignoreCategory)) {
+		set(CommandName.ignoreCategory, []);
+	}
+	return optionMaps.get(CommandName.ignoreCategory) as CategoryChannel[] ?? [];
+}
+
 export function getIgnoredRoles(): Role[] {
 	if (!optionMaps.has(CommandName.ignoreRole)) {
 		set(CommandName.ignoreRole, []);
@@ -63,6 +70,12 @@ export function deleteMaps(key: CommandName) {
 	logInDev(`Delete ${key}`);
 }
 
+export function getIgnoredTextChannels(): TextChannel[] {
+	if (!optionMaps.has(CommandName.ignoreChannel)) {
+		set(CommandName.ignoreChannel, []);
+	}
+	return optionMaps.get(CommandName.ignoreChannel) as TextChannel[] ?? [];
+}
 /**
  * Set default value in Emaps "configuration"
  */

@@ -1,4 +1,5 @@
 import {
+	CategoryChannel,
 	Collection,
 	GuildMember,
 	MessageFlags, MessagePayloadOption,
@@ -9,6 +10,7 @@ import {
 } from "discord.js";
 import * as process from "process";
 import { emoji } from "./index";
+import { getIgnoredCategories, getIgnoredRoles, getIgnoredTextChannels, getIgnoredThreads } from "./maps";
 
 
 
@@ -115,6 +117,26 @@ export async function checkIfUserNotInTheThread(thread: ThreadChannel, memberToC
 	return !threadMemberArray.some(member => member.id === memberToCheck.id);
 }
 
+export function checkIfRoleIsIgnored(role: Role) {
+	const allIgnoredRoles = getIgnoredRoles() as Role[] || [];
+	return allIgnoredRoles.some(ignoredRole => ignoredRole.id === role.id);
+}
+
+
+export function checkIfchannelIsIgnored(channel: TextChannel | ThreadChannel | CategoryChannel) {
+	if (channel instanceof TextChannel) {
+		const allIgnoredChannels = getIgnoredTextChannels() as TextChannel[] || [];
+		return allIgnoredChannels.some(ignoredChannel => ignoredChannel.id === channel.id);
+	} else if (channel instanceof ThreadChannel) {
+		const allIgnoredChannels = getIgnoredThreads() as ThreadChannel[] || [];
+		return allIgnoredChannels.some(ignoredChannel => ignoredChannel.id === channel.id);
+	} else if (channel instanceof CategoryChannel) {
+		const allIgnoredChannels = getIgnoredCategories() as CategoryChannel[] || [];
+		return allIgnoredChannels.some(ignoredChannel => ignoredChannel.id === channel.id);
+	}
+	return false;
+}
+
 /**
  * Add all members that have the permission to view the thread, first check by their role and after add the member that have overwrite permission
  * if there is no role in the server, check all members directly
@@ -169,3 +191,4 @@ export function logInDev(...text: unknown[]) {
 		console.log(text);
 	}
 }
+

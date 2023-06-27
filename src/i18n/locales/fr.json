@@ -102,10 +102,20 @@
 		"type": "Activation de : {{- type}}"
 	},
 	"ignore": {
+		"channel": {
+		},
+		"error": "Le channel, thread ou catégorie n'a pas été reconnu.",
+		"list": {
+			"category": "Catégorie",
+			"channel": "Channel",
+			"none": "Vide",
+			"role": "Rôles",
+			"title": "Liste des channels, catégories, threads et rôles ignorés"
+		},
 		"name": "Ignore",
 		"role": {
 			"added": "Role {{- role}} ignoré.",
-			"error": "Role {{- role}} introuvable",
+			"error": "Le role {{- role}} introuvable",
 			"removed": "Role {{- role}} dés-ignoré !"
 		},
 		"thread": {

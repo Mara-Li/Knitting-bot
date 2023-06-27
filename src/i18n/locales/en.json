@@ -102,10 +102,20 @@
 		"type": "Enabled: {{- type}}"
 	},
 	"ignore": {
+		"channel": {
+		},
+		"error": "The channel, thread or category was not recognized.",
+		"list": {
+			"category": "Category",
+			"channel": "Channel",
+			"none": "Empty",
+			"role": "",
+			"title": "List of ignored channels, categories, threads and roles"
+		},
 		"name": "Ignore",
 		"role": {
 			"added": "Role {{- role}} ignored.",
-			"error": "Role {{- role }} not found",
+			"error": "The role {{- role }} not found",
 			"removed": "Role {{- role}} un-ignored!"
 		},
 		"thread": {

@@ -1,6 +1,6 @@
-import { CategoryChannel, CommandInteraction, CommandInteractionOptionResolver, PermissionFlagsBits, Role, SlashCommandBuilder, TextChannel, ThreadChannel } from "discord.js";
+import { CategoryChannel, CommandInteraction, CommandInteractionOptionResolver, EmbedBuilder, PermissionFlagsBits, Role, SlashCommandBuilder, TextChannel, ThreadChannel } from "discord.js";
 import { default as i18next } from "../i18n/i18next";
-import { CommandName, getIgnoredRoles, getIgnoredThreads, set } from "../maps";
+import { CommandName, getIgnoredCategories, getIgnoredRoles, getIgnoredTextChannels, getIgnoredThreads, set } from "../maps";
 import { logInDev } from "../utils";
 
 const fr = i18next.getFixedT("fr");
@@ -45,6 +45,11 @@ export default {
 						.setDescription("placeholder")
 						.setRequired(true)
 				)
+		)
+		.addSubcommand((subcommand) =>
+			subcommand
+				.setName("list")
+				.setDescription("List all ignored channels, threads, categories and roles")
 		),
 	async execute(interaction: CommandInteraction) {
 		if (!interaction.guild) return;
@@ -57,13 +62,50 @@ export default {
 		case "role":
 			await ignoreThisRole(interaction);
 			break;
+		case "list":
+			await listIgnored(interaction);
+			break;
 		default:
-			logInDev("default");
+			await listIgnored(interaction);
 			break;
 		}
 	},
 };
 
+async function listIgnored(interaction: CommandInteraction) {
+	const ignoredCategories = getIgnoredCategories() as CategoryChannel[] ?? [];
+	const ignoredThreads = getIgnoredThreads() as ThreadChannel[] ?? [];
+	const ignoredChannels = getIgnoredTextChannels() as TextChannel[] ?? [];
+	const ignoredRoles = getIgnoredRoles() as Role[] ?? [];
+	const ignoredCategoriesNames = "\n- " + ignoredCategories.map((category) => category.name).join("\n- ");
+	const ignoredThreadsNames = "\n- " + ignoredThreads.map((thread) => thread.name).join("\n-");
+	const ignoredChannelsNames = "\n- " + ignoredChannels.map((channel) => channel.name).join("\n-");
+	const ignoredRolesNames = "\n- " + ignoredRoles.map((role) => role.name).join("\n-");
+
+	const embed = new EmbedBuilder()
+		.setColor("#2f8e7d")
+		.setTitle(i18next.t("ignore.list.title") as string)
+		.addFields({
+			name: i18next.t("ignore.list.category") as string,
+			value: ignoredCategoriesNames || i18next.t("ignore.list.none") as string,
+		})
+		.addFields({
+			name: i18next.t("common.thread") as string,
+			value: ignoredThreadsNames || i18next.t("ignore.list.none") as string,
+		})
+		.addFields({
+			name: i18next.t("ignore.list.channel") as string,
+			value: ignoredChannelsNames || i18next.t("ignore.list.none") as string,
+		})
+		.addFields({
+			name: i18next.t("ignore.list.role") as string,
+			value: ignoredRolesNames || i18next.t("ignore.list.none") as string,
+		});
+	await interaction.reply({
+		embeds: [embed],
+		ephemeral: true,
+	});
+}
 
 async function ignoreThisRole(interaction: CommandInteraction) {
 	const role = interaction.options.get("role");
@@ -104,17 +146,85 @@ async function ignoreThisRole(interaction: CommandInteraction) {
 async function ignoreText(interaction: CommandInteraction) {
 	const toIgnore = interaction.options.get("thread") ?? interaction;
 	if (toIgnore instanceof CategoryChannel) {
-		//ignore this category
+		ignoreThisCategory(interaction, toIgnore);
 	} else if (toIgnore?.channel && toIgnore.channel instanceof ThreadChannel) {
 		ignoreThisThread(interaction, toIgnore.channel);
 	} else if (toIgnore?.channel && toIgnore.channel instanceof TextChannel) {
-		//ignore simple channel
+		ignoreThisChannel(interaction, toIgnore.channel);
 	} else {
+		await interaction.reply({
+			content: i18next.t("ignore.error") as string,
+			ephemeral: true,
+		});
+		return;
+	}
+}
+
+async function ignoreThisCategory(interaction: CommandInteraction, ignoreCategory?: CategoryChannel) {
+	const allIgnoredCategories:CategoryChannel[] = getIgnoredCategories() as CategoryChannel[] ?? [];
+	logInDev("allIgnoredCategories", allIgnoredCategories.map((category) => category.name));
+	if (!ignoreCategory) {
 		await interaction.reply({
 			content: i18next.t("commands.error") as string,
 			ephemeral: true,
 		});
 		return;
+	}
+	const isAlreadyIgnored = allIgnoredCategories.some(
+		(ignoredCategory: CategoryChannel) => ignoredCategory.id === ignoreCategory?.id
+	);
+	if (isAlreadyIgnored) {
+		//remove from ignore list
+		const newIgnoredCategories: CategoryChannel[] = allIgnoredCategories.filter(
+			(ignoredCategory: CategoryChannel) => ignoredCategory.id !== ignoreCategory?.id
+		);
+		set(CommandName.ignoreCategory, newIgnoredCategories);
+		await interaction.reply({
+			content: i18next.t("ignore.thread.remove", {category: ignoreCategory}) as string,
+			ephemeral: true,
+		});
+	} else {
+		//add to ignore list
+		allIgnoredCategories.push(ignoreCategory);
+		set(CommandName.ignoreCategory, allIgnoredCategories);
+		await interaction.reply({
+			content: i18next.t("ignore.thread.success", {category: ignoreCategory}) as string,
+			ephemeral: true,
+		});
+	}
+}
+
+async function ignoreThisChannel(interaction: CommandInteraction, ignoreChannel?:TextChannel) {
+	const allIgnoreChannels:TextChannel[] = getIgnoredTextChannels() as TextChannel[] ?? [];
+	logInDev("allIgnoreChannels", allIgnoreChannels.map((channel) => channel.id));
+	if (!ignoreChannel || ignoreChannel?.isThread() || ignoreChannel?.isDMBased() ) {
+		await interaction.reply({
+			content: i18next.t("commands.error") as string,
+			ephemeral: true,
+		});
+		return;
+	}
+	const ignoreChannels:boolean = allIgnoreChannels.some(
+		(channel: TextChannel) => channel.id === ignoreChannel?.id
+	);
+	if (ignoreChannels) {
+		//remove from ignore list
+		const newIgnoreChannels: TextChannel[] = allIgnoreChannels.filter(
+			(channel: TextChannel) => channel.id !== ignoreChannel?.id
+		);
+		set(CommandName.ignoreChannel, newIgnoreChannels);
+		await interaction.reply({
+			content: i18next.t("ignore.thread.remove", {thread: ignoreChannel}) as string,
+			ephemeral: true,
+		});
+	} else {
+		//add to ignore list
+		allIgnoreChannels.push(ignoreChannel);
+		set(CommandName.ignoreChannel, allIgnoreChannels);
+		await interaction.reply({
+			content: i18next.t("ignore.thread.success", {thread: ignoreChannel}) as string,
+			ephemeral: true,
+		});
 	}
 }
 
