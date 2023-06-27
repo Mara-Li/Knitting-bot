@@ -1,6 +1,6 @@
 import Enmap from "enmap";
 import { logInDev } from "./utils";
-import { CategoryChannel, Channel, Role, TextChannel, ThreadChannel } from "discord.js";
+import { CategoryChannel, Role, TextChannel, ThreadChannel } from "discord.js";
 
 export const optionMaps = new Enmap({ name: "Configuration" });
 export const translationLanguage = optionMaps.get("language") || "en";
@@ -24,7 +24,12 @@ export enum CommandName {
  */
 export function set(
 	name: CommandName,
-	value: string | boolean | ThreadChannel[] | Role[] | TextChannel[] | CategoryChannel[] 
+	value: string 
+	| boolean 
+	| ThreadChannel[] 
+	| Role[] 
+	| TextChannel[] 
+	| CategoryChannel[] 
 ) {
 	optionMaps.set(name, value);
 	logInDev(`Set ${name} to `, !(value instanceof Array) ? value : value.map((v:Role|ThreadChannel|TextChannel|CategoryChannel) => v.name));
@@ -65,44 +70,9 @@ export function getIgnoredRoles(): Role[] {
 	return optionMaps.get(CommandName.ignoreRole) as Role[] ?? [];
 }
 
-export function deleteMaps(key: CommandName) {
-	optionMaps.delete(key);
-	logInDev(`Delete ${key}`);
-}
-
 export function getIgnoredTextChannels(): TextChannel[] {
 	if (!optionMaps.has(CommandName.ignoreChannel)) {
 		set(CommandName.ignoreChannel, []);
 	}
 	return optionMaps.get(CommandName.ignoreChannel) as TextChannel[] ?? [];
 }
-/**
- * Set default value in Emaps "configuration"
- */
-export function setDefaultValue() {
-	if (!optionMaps.has("language")) {
-		set(CommandName.language, "en");
-		logInDev("Set default language to en");
-	}
-	if (!optionMaps.has("onChannelUpdate")) {
-		set(CommandName.channel, true);
-		logInDev("Set default onChannelUpdate to true");
-	}
-	if (!optionMaps.has("onMemberUpdate")) {
-		set(CommandName.member, true);
-		logInDev("Set default onMemberUpdate to true");
-	}
-	if (!optionMaps.has("onNewMember")) {
-		set(CommandName.newMember, true);
-		logInDev("Set default onNewMember to true");
-	}
-	if (!optionMaps.has("onThreadCreated")) {
-		set(CommandName.thread, true);
-		logInDev("Set default onThreadCreated to true");
-	}
-	if (!optionMaps.has("ignore")) {
-		set(CommandName.ignoreThread, []);
-		logInDev("Set default ignore to []");
-	}
-}
-
