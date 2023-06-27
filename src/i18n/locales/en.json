@@ -12,14 +12,8 @@
 			"title": "Manual commands help"
 		},
 		"ignore": {
-			"description": "Ignore a specific thread",
-			"error": "This command can only be used in a thread, or for a thread.",
-			"name": "Ignore",
 			"option": {
-				"description": "Select thread to ignore or to un-ignore"
-			},
-			"remove": "The {{-thread}} thread is no longer ignored",
-			"success": "Thread {{- thread}} was skipped"
+			}
 		},
 		"name": "update",
 		"success": "Updating thread: {{- channel}}",
@@ -77,8 +71,8 @@
 		},
 		"newMember": {
 			"description": "Enable or disable the adding of members when they join the server.",
-			"name": "on-new-member",
 			"display": "New member",
+			"name": "on-new-member",
 			"title": "Change action on new member"
 		},
 		"show": {
@@ -92,9 +86,9 @@
 		"switch": "Enable or disable this event",
 		"thread": {
 			"description": "Enable or disable the adding of members when thread are created.",
+			"display": "Thread creation",
 			"name": "on-thread-created",
-			"title": "Change action on thread creation",
-			"display": "Thread creation"
+			"title": "Change action on thread creation"
 		}
 	},
 	"disable": {
@@ -106,5 +100,22 @@
 		"enable": "Enabled",
 		"manual": "Enabled manual mode",
 		"type": "Enabled: {{- type}}"
+	},
+	"ignore": {
+		"name": "Ignore",
+		"role": {
+			"added": "Role {{- role}} ignored.",
+			"error": "Role {{- role }} not found",
+			"removed": "Role {{- role}} un-ignored!"
+		},
+		"thread": {
+			"description": "Ignore a specific thread",
+			"error": "This command can only be used in a thread, or for a thread.",
+			"option": {
+				"description": "Select channel/thread or category to ignore or to un-ignore"
+			},
+			"remove": "{{-thread}} is no longer ignored",
+			"success": "{{- thread}} is now ignored"
+		}
 	}
 }

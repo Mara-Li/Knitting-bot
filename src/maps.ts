@@ -1,6 +1,6 @@
 import Enmap from "enmap";
 import { logInDev } from "./utils";
-import { ThreadChannel } from "discord.js";
+import { Role, ThreadChannel } from "discord.js";
 
 export const optionMaps = new Enmap({ name: "Configuration" });
 export const translationLanguage = optionMaps.get("language") || "en";
@@ -11,7 +11,10 @@ export enum CommandName {
 	thread = "onThreadCreated",
 	channel = "onChannelUpdate",
 	newMember = "onNewMember",
-	ignore = "ignore",
+	ignoreThread = "ignoreThread",
+	ignoreRole = "ignoreRole",
+	ignoreCategory = "ignoreCategory",
+	ignoreChannel = "ignoreChannel",
 }
 
 /**
@@ -21,10 +24,10 @@ export enum CommandName {
  */
 export function set(
 	name: CommandName,
-	value: string | boolean | ThreadChannel[]
+	value: string | boolean | ThreadChannel[] | Role[] 
 ) {
 	optionMaps.set(name, value);
-	logInDev(`Set ${name} to `, !(value instanceof Array) ? value : value.map((v:ThreadChannel) => v.name));
+	logInDev(`Set ${name} to `, !(value instanceof Array) ? value : value.map((v:Role|ThreadChannel) => v.name));
 }
 
 /**
@@ -42,10 +45,17 @@ export function get(name: CommandName): any {
 }
 
 export function getIgnoredThreads(): ThreadChannel[] {
-	if (!optionMaps.has(CommandName.ignore)) {
-		set(CommandName.ignore, []);
+	if (!optionMaps.has(CommandName.ignoreThread)) {
+		set(CommandName.ignoreThread, []);
 	}
-	return optionMaps.get(CommandName.ignore) as ThreadChannel[] ?? [];
+	return optionMaps.get(CommandName.ignoreThread) as ThreadChannel[] ?? [];
+}
+
+export function getIgnoredRoles(): Role[] {
+	if (!optionMaps.has(CommandName.ignoreRole)) {
+		set(CommandName.ignoreRole, []);
+	}
+	return optionMaps.get(CommandName.ignoreRole) as Role[] ?? [];
 }
 
 export function deleteMaps(key: CommandName) {
@@ -78,7 +88,7 @@ export function setDefaultValue() {
 		logInDev("Set default onThreadCreated to true");
 	}
 	if (!optionMaps.has("ignore")) {
-		set(CommandName.ignore, []);
+		set(CommandName.ignoreThread, []);
 		logInDev("Set default ignore to []");
 	}
 }

@@ -12,14 +12,8 @@
 			"title": "Aide des commandes manuelles"
 		},
 		"ignore": {
-			"description": "Ignore un thread spécifique",
-			"error": "Cette commande ne peut être utilisée que dans un thread, ou pour un thread.",
-			"name": "Ignore",
 			"option": {
-				"description": "Sélectionner le thread à ignorer ou à dés-ignorer"
-			},
-			"remove": "Le thread {{- thread}} n'est plus ignoré",
-			"success": "Le thread {{- thread}} a été ignoré"
+			}
 		},
 		"name": "update",
 		"success": "Mise à jour effectuée : {{- channel}}",
@@ -31,7 +25,6 @@
 		},
 		"updateSpecificThread": {
 			"description": "Met à jour un thread spécifique",
-			"name": "thread",
 			"option": {
 				"description": "Sélectionner le thread à mettre à jour"
 			}
@@ -107,5 +100,22 @@
 		"enable": "Activé",
 		"manual": "Mode manuel activé",
 		"type": "Activation de : {{- type}}"
+	},
+	"ignore": {
+		"name": "Ignore",
+		"role": {
+			"added": "Role {{- role}} ignoré.",
+			"error": "Role {{- role}} introuvable",
+			"removed": "Role {{- role}} dés-ignoré !"
+		},
+		"thread": {
+			"description": "Ignore un thread, channel ou catégorie spécifique",
+			"error": "Cette commande ne peut être utilisée que pour une catégorie, un channel ou un thread.",
+			"option": {
+				"description": "Sélectionner le thread/channel/catégorie à ignorer ou à dés-ignorer"
+			},
+			"remove": "{{- thread}} n'est plus ignoré",
+			"success": "{{- thread}} a été ignoré"
+		}
 	}
 }

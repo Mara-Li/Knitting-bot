@@ -6,9 +6,8 @@ import {
 	SlashCommandBuilder,
 	ThreadChannel,
 } from "discord.js";
-import { addRoleAndUserToThread, logInDev } from "../utils";
+import { addRoleAndUserToThread} from "../utils";
 import { default as i18next } from "../i18n/i18next";
-import { CommandName, deleteMaps, get, getIgnoredThreads, set } from "../maps";
 const fr = i18next.getFixedT("fr");
 const en = i18next.getFixedT("en");
 
@@ -79,31 +78,7 @@ export default {
 				.setDescription(en("commands.help.description"))
 				.setDescriptionLocalizations({
 					fr: fr("commands.help.description"),
-				})
-		)
-		.addSubcommand((subcommand) =>
-			subcommand
-				.setName(en("commands.ignore.name").toLowerCase())
-				.setNameLocalizations({
-					fr: fr("commands.ignore.name").toLowerCase(),
-				})
-				.setDescription(en("commands.ignore.description"))
-				.setDescriptionLocalizations({
-					fr: fr("commands.ignore.description"),
-				})
-				.addChannelOption((option) =>
-					option
-						.setName(en("common.thread").toLowerCase())
-						.setNameLocalizations({
-							fr: fr("common.thread").toLowerCase(),
-						})
-						.setDescription(
-							en("commands.ignore.option.description")
-						)
-						.setDescriptionLocalizations({
-							fr: fr("commands.ignore.option.description"),
-						})
-				)
+				})		
 		),
 	async execute(interaction: CommandInteraction) {
 		if (!interaction.guild) return;
@@ -118,9 +93,6 @@ export default {
 			break;
 		case en("common.thread"):
 			await updateSpecificThread(interaction);
-			break;
-		case "ignore":
-			await ignoreThisThread(interaction);
 			break;
 		case en("commands.help.name"):
 			await displayHelp(interaction);
@@ -210,64 +182,3 @@ async function displayHelp(interaction: CommandInteraction) {
 	await interaction.reply({ embeds: [embed], ephemeral: true });
 }
 
-async function ignoreThisThread(interaction: CommandInteraction) {
-	let ignoredChannel = interaction.channel;
-	if (interaction.options.get("thread")) {
-		const interactionChannel = interaction.options.get("thread");
-		if (interactionChannel?.channel && interactionChannel.channel instanceof ThreadChannel) {
-			ignoredChannel = interactionChannel.channel;
-		} else {
-			await interaction.reply({
-				content: i18next.t("commands.error") as string,
-				ephemeral: true,
-			});
-			return;
-		}
-	}
-	const allIgnoreChannels:ThreadChannel[] = get(CommandName.ignore) as ThreadChannel[];
-	logInDev("allIgnoreChannels", allIgnoreChannels.map((channel) => channel.id));
-	if (!ignoredChannel || !(ignoredChannel instanceof ThreadChannel)) {
-		await interaction.reply({
-			content: i18next.t("commands.error") as string,
-			ephemeral: true,
-		});
-		return;
-	}
-	if (!ignoredChannel || !ignoredChannel.isThread()) {
-		await interaction.reply({
-			content: i18next.t("commands.error") as string,
-			ephemeral: true,
-		});
-		return;
-	}
-	const ignoreChannels:ThreadChannel[] = allIgnoreChannels.filter(
-		(channel: ThreadChannel) => channel.id === ignoredChannel?.id
-	);
-	
-	if (ignoreChannels.length > 0) {
-		//remove from ignore list
-		const newIgnoreChannels: ThreadChannel[] = allIgnoreChannels.filter(
-			(channel: ThreadChannel) => channel.id !== ignoredChannel?.id
-		);
-		set(CommandName.ignore, newIgnoreChannels);
-		await interaction.reply({
-			content: i18next.t("commands.ignore.remove", {
-				thread: ignoredChannel.name,
-			}) as string,
-			ephemeral: true,
-		});
-		logInDev(`${ignoredChannel.name} removed from ignore list`);
-		return;
-	} else {
-		const newIgnoreChannels: ThreadChannel[] = allIgnoreChannels.concat(ignoredChannel);
-		set(CommandName.ignore, newIgnoreChannels);
-		await interaction.reply({
-			content: i18next.t("commands.ignore.success", {
-				thread: ignoredChannel.name,
-			}) as string,
-			ephemeral: true,
-		});
-		logInDev(`${ignoredChannel.name} added to ignore list`);
-		return;
-	}
-}

@@ -23,7 +23,7 @@ export default (client: Client): void => {
 		}
 		//get all threads of this channel
 		logInDev(`Updating threads of ${newChannel.name}`);
-		const ignoredChannels = get(CommandName.ignore);
+		const ignoredChannels = get(CommandName.ignoreThread);
 		const threads = await newChannel.threads.cache;
 		//get all role allowed to view the channel
 		//const members = await newChannel.guild.members.fetch();
