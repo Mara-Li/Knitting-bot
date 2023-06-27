@@ -11,9 +11,10 @@ export default (client: Client): void => {
 			logInDev(`${oldMember.user.username} has been updated!`);
 			const guild = newMember.guild;
 			const channels = guild.channels.cache.filter(channel => channel.isThread());
+			const ignoredChannels = get(CommandName.ignore) as ThreadChannel[];
 			for (const channel of channels.values()) {
 				const threadChannel = channel as ThreadChannel;
-				if (await checkIfUserNotInTheThread(threadChannel, newMember)) {
+				if (await checkIfUserNotInTheThread(threadChannel, newMember) && !ignoredChannels.includes(threadChannel)) {
 					await addUserToThread(threadChannel, newMember);
 				} //remove user from thread if not have permission
 				else {

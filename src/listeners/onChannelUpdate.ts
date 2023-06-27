@@ -23,6 +23,7 @@ export default (client: Client): void => {
 		}
 		//get all threads of this channel
 		logInDev(`Updating threads of ${newChannel.name}`);
+		const ignoredChannels = get(CommandName.ignore);
 		const threads = await newChannel.threads.cache;
 		//get all role allowed to view the channel
 		//const members = await newChannel.guild.members.fetch();
@@ -30,7 +31,7 @@ export default (client: Client): void => {
 		//const disallowedMembers = getMemberPermission(members, newChannel, false);
 		//add allowed members to the thread, if there are not already in it
 		threads.forEach(thread => {
-			addRoleAndUserToThread(thread);
+			if (!ignoredChannels.includes(thread)) addRoleAndUserToThread(thread);
 			//remove not allowed members from the thread
 			//disallowedMembers.forEach(member => {
 			//  thread.members.remove(member.id);
