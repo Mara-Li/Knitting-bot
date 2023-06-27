@@ -1,6 +1,18 @@
-import { CategoryChannel, CommandInteraction, CommandInteractionOptionResolver, EmbedBuilder, PermissionFlagsBits, Role, SlashCommandBuilder, TextChannel, ThreadChannel } from "discord.js";
+import { CategoryChannel, 
+	CommandInteraction, 
+	CommandInteractionOptionResolver, 
+	EmbedBuilder, 
+	PermissionFlagsBits, 
+	Role, SlashCommandBuilder,
+	TextChannel, 
+	ThreadChannel } from "discord.js";
 import { default as i18next } from "../i18n/i18next";
-import { CommandName, getIgnoredCategories, getIgnoredRoles, getIgnoredTextChannels, getIgnoredThreads, set } from "../maps";
+import { CommandName, 
+	getIgnoredCategories, 
+	getIgnoredRoles, 
+	getIgnoredTextChannels, 
+	getIgnoredThreads, 
+	set } from "../maps";
 import { logInDev } from "../utils";
 
 const fr = i18next.getFixedT("fr");
