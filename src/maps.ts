@@ -1,7 +1,8 @@
 import Enmap from "enmap";
 import { logInDev } from "./utils";
+import { ThreadChannel } from "discord.js";
 
-export const optionMaps = new Enmap({name: "Configuration"});
+export const optionMaps = new Enmap({ name: "Configuration" });
 export const translationLanguage = optionMaps.get("language") || "en";
 
 export enum CommandName {
@@ -10,6 +11,7 @@ export enum CommandName {
 	thread = "onThreadCreated",
 	channel = "onChannelUpdate",
 	newMember = "onNewMember",
+	ignore = "ignore",
 }
 
 /**
@@ -17,11 +19,13 @@ export enum CommandName {
  * @param {commandName} name
  * @param {string | boolean} value
  */
-export function set(name: CommandName, value: string | boolean) {
+export function set(
+	name: CommandName,
+	value: string | boolean | ThreadChannel[]
+) {
 	optionMaps.set(name, value);
-	logInDev(`Set ${name} to ${value}`);
+	logInDev(`Set ${name} to `, !(value instanceof Array) ? value : value.map((v:ThreadChannel) => v.name));
 }
-
 
 /**
  * Get a value in the Emaps "configuration"
@@ -30,11 +34,23 @@ export function set(name: CommandName, value: string | boolean) {
  * @param {CommandName} name
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function get(name: CommandName):any {
+export function get(name: CommandName): any {
 	if (name === CommandName.language) {
 		return optionMaps.get(name) || "en";
 	}
 	return optionMaps.get(name) ?? true;
+}
+
+export function getIgnoredThreads(): ThreadChannel[] {
+	if (!optionMaps.has(CommandName.ignore)) {
+		set(CommandName.ignore, []);
+	}
+	return optionMaps.get(CommandName.ignore) as ThreadChannel[] ?? [];
+}
+
+export function deleteMaps(key: CommandName) {
+	optionMaps.delete(key);
+	logInDev(`Delete ${key}`);
 }
 
 /**
@@ -60,6 +76,10 @@ export function setDefaultValue() {
 	if (!optionMaps.has("onThreadCreated")) {
 		set(CommandName.thread, true);
 		logInDev("Set default onThreadCreated to true");
+	}
+	if (!optionMaps.has("ignore")) {
+		set(CommandName.ignore, []);
+		logInDev("Set default ignore to []");
 	}
 }
 

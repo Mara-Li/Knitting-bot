@@ -164,7 +164,7 @@ export async function addRoleAndUserToThread(thread: ThreadChannel) {
 
 }
 
-export function logInDev(text: string) {
+export function logInDev(...text: unknown[]) {
 	if (process.env.NODE_ENV === "development") {
 		console.log(text);
 	}
