@@ -1,7 +1,6 @@
 import {
 	CategoryChannel,
 	Collection,
-	GuildBasedChannel,
 	GuildMember,
 	GuildMemberRoleManager,
 	MessageFlags, MessagePayloadOption,
@@ -137,6 +136,7 @@ export function checkRoleNotIgnored(role: GuildMemberRoleManager) {
  * @returns {boolean} Return true if the thread is ignored
  */
 export function checkIfThreadIsIgnored(channel: ThreadChannel) {
+	logInDev(`Check if #${channel.name} is ignored`);
 	const parentChannel = channel.parent;
 	const categoryOfParent = parentChannel?.parent;
 	const allIgnoredChannels = getIgnoredTextChannels() as TextChannel[] || [];
@@ -200,8 +200,10 @@ export async function addRoleAndUserToThread(thread: ThreadChannel) {
 }
 
 export function logInDev(...text: unknown[]) {
+	const time= new Date();
+	const timeString = `${time.getHours()}:${time.getMinutes()}:${time.getSeconds()}`;
 	if (process.env.NODE_ENV === "development") {
-		console.log(text);
+		console.log(timeString, text);
 	}
 }
 
