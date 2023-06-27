@@ -109,7 +109,6 @@ async function listIgnored(interaction: CommandInteraction) {
 
 async function ignoreThisRole(interaction: CommandInteraction) {
 	const role = interaction.options.get("role");
-	console.log(role?.role);
 	if (!role || !(role.role instanceof Role)) {
 		await interaction.reply({
 			content: i18next.t("ignore.role.error", {role: role}) as string,

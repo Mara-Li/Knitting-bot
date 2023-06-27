@@ -1,6 +1,6 @@
 import { Client, ThreadChannel } from "discord.js";
 import { CommandName, get } from "../maps";
-import { addUserToThread, checkIfUserNotInTheThread, logInDev } from "../utils";
+import { addUserToThread, checkIfThreadIsIgnored, checkIfUserNotInTheThread, checkRoleNotIgnored, logInDev } from "../utils";
 
 export default (client: Client): void => {
 	client.on("guildMemberUpdate", async (oldMember, newMember) => {
@@ -11,15 +11,12 @@ export default (client: Client): void => {
 			logInDev(`${oldMember.user.username} has been updated!`);
 			const guild = newMember.guild;
 			const channels = guild.channels.cache.filter(channel => channel.isThread());
-			const ignoredThread = get(CommandName.ignoreThread) as ThreadChannel[];
+			
 			for (const channel of channels.values()) {
 				const threadChannel = channel as ThreadChannel;
-				if (await checkIfUserNotInTheThread(threadChannel, newMember) && !ignoredThread.includes(threadChannel)) {
+				if (await checkIfUserNotInTheThread(threadChannel, newMember) && !checkIfThreadIsIgnored(threadChannel) && !checkRoleNotIgnored(newMember.roles)) {
 					await addUserToThread(threadChannel, newMember);
-				} //remove user from thread if not have permission
-				else {
-					//await removeUserFromThread(threadChannel, newMember);
-				}
+				} 
 			}
 		} catch (error) {
 			console.error(error);

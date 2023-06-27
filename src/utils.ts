@@ -1,7 +1,9 @@
 import {
 	CategoryChannel,
 	Collection,
+	GuildBasedChannel,
 	GuildMember,
+	GuildMemberRoleManager,
 	MessageFlags, MessagePayloadOption,
 	Role,
 	TextChannel,
@@ -117,24 +119,33 @@ export async function checkIfUserNotInTheThread(thread: ThreadChannel, memberToC
 	return !threadMemberArray.some(member => member.id === memberToCheck.id);
 }
 
-export function checkIfRoleIsIgnored(role: Role) {
+/**
+ * Verify if any role of the member is not ignored
+ * @param role {GuildMemberRoleManager} The roles of the member to check
+ * @returns {boolean} Return true if the member has a role that is ignored
+ */
+export function checkRoleNotIgnored(role: GuildMemberRoleManager) {
 	const allIgnoredRoles = getIgnoredRoles() as Role[] || [];
-	return allIgnoredRoles.some(ignoredRole => ignoredRole.id === role.id);
+	const allMemberRoles = role.cache;
+	return allMemberRoles.some(memberRole => allIgnoredRoles.some(ignoredRole => ignoredRole.id === memberRole.id));
+
 }
 
-
-export function checkIfchannelIsIgnored(channel: TextChannel | ThreadChannel | CategoryChannel) {
-	if (channel instanceof TextChannel) {
-		const allIgnoredChannels = getIgnoredTextChannels() as TextChannel[] || [];
-		return allIgnoredChannels.some(ignoredChannel => ignoredChannel.id === channel.id);
-	} else if (channel instanceof ThreadChannel) {
-		const allIgnoredChannels = getIgnoredThreads() as ThreadChannel[] || [];
-		return allIgnoredChannels.some(ignoredChannel => ignoredChannel.id === channel.id);
-	} else if (channel instanceof CategoryChannel) {
-		const allIgnoredChannels = getIgnoredCategories() as CategoryChannel[] || [];
-		return allIgnoredChannels.some(ignoredChannel => ignoredChannel.id === channel.id);
-	}
-	return false;
+/**
+ * Check if a thread is not ignored
+ * @param channel {ThreadChannel} The thread to check
+ * @returns {boolean} Return true if the thread is ignored
+ */
+export function checkIfThreadIsIgnored(channel: ThreadChannel) {
+	const parentChannel = channel.parent;
+	const categoryOfParent = parentChannel?.parent;
+	const allIgnoredChannels = getIgnoredTextChannels() as TextChannel[] || [];
+	const allIgnoredCategories = getIgnoredCategories() as CategoryChannel[] || [];
+	const allIgnoredThreads = getIgnoredThreads() as ThreadChannel[] || [];
+	return allIgnoredChannels.some(ignoredChannel => ignoredChannel.id === channel.id) ||
+		allIgnoredCategories.some(ignoredCategory => ignoredCategory.id === categoryOfParent?.id) ||
+		allIgnoredThreads.some(ignoredThread => ignoredThread.id === channel.id);
+	
 }
 
 /**
@@ -179,8 +190,10 @@ export async function addRoleAndUserToThread(thread: ThreadChannel) {
 			toPing.push(...users);
 		});
 	}
-	if (toPing.length > 0) {
-		await message.edit(toPing.map(member => `<@${member.id}>`).join(" "));
+	//remove all member that have a role that is ignored
+	const allMemberToPing = toPing.filter(member => !checkRoleNotIgnored(member.roles));
+	if (allMemberToPing.length > 0) {
+		await message.edit(allMemberToPing.map(member => `<@${member.id}>`).join(" "));
 	}
 	await message.delete();
 

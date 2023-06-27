@@ -1,6 +1,6 @@
 import { ChannelType, Client, Snowflake, TextChannel } from "discord.js";
 import { CommandName, get } from "../maps";
-import { addRoleAndUserToThread, logInDev } from "../utils";
+import { addRoleAndUserToThread, checkIfThreadIsIgnored, logInDev } from "../utils";
 
 /**
  * @param {Client} client - Discord.js Client
@@ -23,20 +23,9 @@ export default (client: Client): void => {
 		}
 		//get all threads of this channel
 		logInDev(`Updating threads of ${newChannel.name}`);
-		const ignoredChannels = get(CommandName.ignoreThread);
 		const threads = await newChannel.threads.cache;
-		//get all role allowed to view the channel
-		//const members = await newChannel.guild.members.fetch();
-		//filter members that have the permission to view the thread
-		//const disallowedMembers = getMemberPermission(members, newChannel, false);
-		//add allowed members to the thread, if there are not already in it
 		threads.forEach(thread => {
-			if (!ignoredChannels.includes(thread)) addRoleAndUserToThread(thread);
-			//remove not allowed members from the thread
-			//disallowedMembers.forEach(member => {
-			//  thread.members.remove(member.id);
-			//  console.log(`Remove @${member.user.username} from #${thread.name}`);
-			//});
+			if (!checkIfThreadIsIgnored(thread)) addRoleAndUserToThread(thread);
 		});
 	});
 };
