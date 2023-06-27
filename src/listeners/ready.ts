@@ -1,5 +1,5 @@
 import { REST } from "@discordjs/rest";
-import { Client, Routes, SlashCommandBuilder } from "discord.js";
+import { Client, Routes } from "discord.js";
 import dotenv from "dotenv";
 import process from "process";
 import { commands } from "../commands";

@@ -156,12 +156,12 @@ async function ignoreThisRole(interaction: CommandInteraction) {
 
 async function ignoreText(interaction: CommandInteraction) {
 	const toIgnore = interaction.options.get("thread") ?? interaction;
-	if (toIgnore instanceof CategoryChannel) {
-		ignoreThisCategory(interaction, toIgnore);
+	if (toIgnore.channel instanceof CategoryChannel) {
+		await ignoreThisCategory(interaction, toIgnore.channel as CategoryChannel);
 	} else if (toIgnore?.channel && toIgnore.channel instanceof ThreadChannel) {
-		ignoreThisThread(interaction, toIgnore.channel);
+		await ignoreThisThread(interaction, toIgnore.channel);
 	} else if (toIgnore?.channel && toIgnore.channel instanceof TextChannel) {
-		ignoreThisChannel(interaction, toIgnore.channel);
+		await ignoreThisChannel(interaction, toIgnore.channel);
 	} else {
 		await interaction.reply({
 			content: i18next.t("ignore.error") as string,

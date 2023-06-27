@@ -1,6 +1,4 @@
 import { Client, GatewayIntentBits, Partials } from "discord.js";
-import { REST } from "@discordjs/rest";
-import { Routes } from "discord-api-types/v9";
 import dotenv from "dotenv";
 import * as process from "process";
 import interactionCreate from "./listeners/interactionCreate";
