@@ -1,94 +1,110 @@
 {
-  "commands": {
-    "description": "Update the threads manually with adding missing users",
-    "error": "This command can only be used in a thread.",
-    "help": {
-      "name" : "help",
-      "description": "Show the help of the command",
-      "all": "- `/update all`: to add on all threads of the guild.\n",
-      "desc": "Update the threads manually with adding missing users, using these commands:\n",
-      "here": "- `/update here`: to update the thread where the command is used.\n",
-      "thread": "- `/update thread <thread>`: to update a specific thread (select it from the list).\n",
-      "title": "Manual commands help"
-    },
-    "name": "update",
-    "success": "Updating thread: {{- channel}}",
-    "updateAllThreads": {
-      "description": "Update all threads with adding missing users",
-      "name": "all",
-      "reply": "Update of all threads…",
-      "success": "Updating success of {{- count}} threads"
-    },
-    "updateSpecificThread": {
-      "description": "Update a specific thread with adding missing users",
-      "name": "thread",
-      "option": {
-        "description": "Select the thread to update",
-        "name": "thread"
-      }
-    },
-    "updateThread": {
-      "description": "Update this thread with adding missing users",
-      "name": "here"
-    }
-  },
-  "configuration": {
-    "channel": {
-      "description": "Enable or disable the adding of members when channel/category permission are changed.",
-      "name": "on-channel-update",
-      "title": ""
-    },
-    "disable": {
-      "description": "Enable or disable all events to switch the bot to manual or automatic mode",
-      "name": "manual-mode",
-      "option": "Enable or disable the manual mode"
-    },
-    "language": {
-      "description": "Change the bot language",
-      "name": "Language",
-      "options": "Language to use",
-      "reply": "Language changed to {{- lang}}"
-    },
-    "main": {
-      "description": "Edit the server configuration. Allow to disable / enable some events",
-      "name": "config"
-    },
-    "member": {
-      "description": "Enable or disable the thread update on member permission modifications",
-      "name": "on-member-update",
-      "title": "Member update"
-    },
-    "newMember": {
-      "description": "Enable or disable the adding of members when they join the server.",
-      "display": "New member",
-      "name": "on-new-member",
-      "title": "Change action on new member"
-    },
-    "show": {
-      "description": "Show the current configuration",
-      "menu": {
-        "description": "The bot can be activated on:\n- Changing the permission of a member, a channel, a category,\n- When a thread is created,\n- When a new member arrives.",
-        "title": "Configuration"
-      },
-      "name": "show"
-    },
-    "switch": "Enable or disable this event",
-    "thread": {
-      "description": "Enable or disable the adding of members when thread are created.",
-      "display": "Thread creation",
-      "name": "on-thread-created",
-      "title": "Change action on thread creation"
-    }
-  },
-  "disable": {
-    "disable": "Disabled",
-    "manual": "Disabled manual mode",
-    "type": "Disabled: {{- type}}"
-  },
-  "enable": {
-    "enable": "Enabled",
-    "manual": "Enabled manual mode",
-    "type": "Enabled: {{- type}}"
-  },
-  "error": "An error occur: {{error}}"
+	"commands": {
+		"description": "Update the threads manually with adding missing users",
+		"error": "This command can only be used in a thread.",
+		"help": {
+			"all": "- `/update all`: to add on all threads of the guild.\n",
+			"desc": "Update the threads manually with adding missing users, using these commands:\n",
+			"description": "Show the help of the command",
+			"here": "- `/update here`: to update the thread where the command is used.\n",
+			"name": "help",
+			"thread": "- `/update thread <thread>`: to update a specific thread (select it from the list).\n",
+			"title": "Manual commands help"
+		},
+		"ignore": {
+			"description": "Ignore a specific thread",
+			"error": "This command can only be used in a thread, or for a thread.",
+			"name": "Ignore",
+			"option": {
+				"description": "Select thread to ignore or to un-ignore"
+			},
+			"remove": "The {{-thread}} thread is no longer ignored",
+			"success": "Thread {{- thread}} was skipped"
+		},
+		"name": "update",
+		"success": "Updating thread: {{- channel}}",
+		"updateAllThreads": {
+			"description": "Update all threads with adding missing users",
+			"name": "all",
+			"reply": "Update of all threads…",
+			"success": "Updating success of {{- count}} threads"
+		},
+		"updateSpecificThread": {
+			"description": "Update a specific thread with adding missing users",
+			"option": {
+				"description": "Select the thread to update"
+			}
+		},
+		"updateThread": {
+			"description": "Update this thread with adding missing users"
+		}
+	},
+	"common": {
+		"cancel": "Cancel",
+		"confirm": "Confirm",
+		"error": "An error occurred: {{error}}",
+		"here": "here",
+		"no": "No",
+		"thread": "Thread",
+		"yes": "Yes"
+	},
+	"configuration": {
+		"channel": {
+			"description": "Enable or disable the adding of members when channel/category permission are changed.",
+			"name": "on-channel-update",
+			"title": "Channel/category"
+		},
+		"disable": {
+			"description": "Enable or disable all events to switch the bot to manual or automatic mode",
+			"name": "manual-mode",
+			"option": "Enable or disable the manual mode"
+		},
+		"language": {
+			"description": "Change the bot language",
+			"name": "Language",
+			"options": "Language to use",
+			"reply": "Language changed to {{- lang}}"
+		},
+		"main": {
+			"description": "Edit the server configuration. Allow to disable / enable some events",
+			"name": "config"
+		},
+		"member": {
+			"description": "Enable or disable the thread update on member permission modifications",
+			"display": "Modified member",
+			"name": "on-member-update",
+			"title": "Member update"
+		},
+		"newMember": {
+			"description": "Enable or disable the adding of members when they join the server.",
+			"name": "on-new-member",
+			"display": "New member",
+			"title": "Change action on new member"
+		},
+		"show": {
+			"description": "Show the current configuration",
+			"menu": {
+				"description": "The bot can be activated on:\n- Changing the permission of a member, a channel, a category,\n- When a thread is created,\n- When a new member arrives.",
+				"title": "Configuration"
+			},
+			"name": "show"
+		},
+		"switch": "Enable or disable this event",
+		"thread": {
+			"description": "Enable or disable the adding of members when thread are created.",
+			"name": "on-thread-created",
+			"title": "Change action on thread creation",
+			"display": "Thread creation"
+		}
+	},
+	"disable": {
+		"disable": "Disabled",
+		"manual": "Disabled manual mode",
+		"type": "Disabled: {{- type}}"
+	},
+	"enable": {
+		"enable": "Enabled",
+		"manual": "Enabled manual mode",
+		"type": "Enabled: {{- type}}"
+	}
 }

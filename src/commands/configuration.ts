@@ -224,7 +224,7 @@ export default {
 		} catch (e) {
 			console.error(e);
 			await interaction.reply({
-				content: `${i18next.t("error", { error: e })}`,
+				content: `${i18next.t("common.error", { error: e })}`,
 				ephemeral: true,
 			});
 		}
@@ -246,7 +246,9 @@ async function getBooleanAndReply(
 		onChannelUpdate:
 			"**__" + i18next.t("configuration.channel.title").toLowerCase() + "__**",
 		onNewMember:
-			"**__" + i18next.t("configuration.newMember.title").toLowerCase() + "__**",
+			"**__" +
+			i18next.t("configuration.newMember.title").toLowerCase() +
+			"__**",
 	};
 	if (value) {
 		return interaction.reply({
@@ -257,7 +259,9 @@ async function getBooleanAndReply(
 		});
 	} else {
 		return interaction.reply({
-			content: `${i18next.t("disable.type", { type: optionTranslation[option]})}`,
+			content: `${i18next.t("disable.type", {
+				type: optionTranslation[option],
+			})}`,
 			ephemeral: true,
 		});
 	}
@@ -280,11 +284,10 @@ export async function display(interaction: CommandInteraction) {
 		.setColor("#0099ff")
 		.setTitle(i18next.t("configuration.show.menu.title"))
 		.setDescription(i18next.t("configuration.show.menu.description"))
-		.addFields(
-			{
-				name: i18next.t("configuration.language.name"),
-				value: languageValue[get(CommandName.language) as string],
-			})
+		.addFields({
+			name: i18next.t("configuration.language.name"),
+			value: languageValue[get(CommandName.language) as string],
+		})
 		.addFields({ name: "\u200A", value: "\u200A" })
 		.addFields(
 			{
@@ -296,7 +299,7 @@ export async function display(interaction: CommandInteraction) {
 				name: i18next.t("configuration.member.title"),
 				value: enabledOrDisabled(get(CommandName.member)),
 				inline: true,
-			},
+			}
 		)
 		.addFields({ name: "\u200A", value: "\u200A" })
 		.addFields(
