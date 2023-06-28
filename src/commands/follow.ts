@@ -27,9 +27,9 @@ export default {
 		.setDefaultMemberPermissions(PermissionFlagsBits.ManageThreads)
 		.addSubcommand((subcommand) =>
 			subcommand
-				.setName(en("common.thread").toLowerCase())
+				.setName(en("common.channel").toLowerCase())
 				.setNameLocalizations({
-					fr: fr("common.thread").toLowerCase(),
+					fr: fr("common.channel").toLowerCase(),
 				})
 				.setDescription(en("follow.thread.description"))
 				.setDescriptionLocalizations({
@@ -37,9 +37,9 @@ export default {
 				})
 				.addChannelOption((option) =>
 					option
-						.setName(en("common.thread").toLowerCase())
+						.setName(en("common.channel").toLowerCase())
 						.setNameLocalizations({
-							fr: fr("common.thread").toLowerCase(),
+							fr: fr("common.channel").toLowerCase(),
 						})
 						.setDescription(
 							en("follow.thread.option.description")
@@ -89,7 +89,7 @@ export default {
 		const commands = options.getSubcommand();
 		logInDev("follow", commands);
 		switch (commands) {
-		case "thread":
+		case (en("common.channel").toLowerCase()):
 			if (!get(CommandName.followOnlyChannel)) {
 				await interaction.reply({
 					content: i18next.t("follow.disabled") as string,
@@ -139,7 +139,7 @@ async function displayFollowed(interaction: CommandInteraction) {
 			value: followedCategoriesNames || i18next.t("common.none") as string,
 		})
 		.addFields({
-			name: i18next.t("common.thread") as string,
+			name: i18next.t("common.channel") as string,
 			value: followedThreadsNames || i18next.t("common.none") as string,
 		})
 		.addFields({
@@ -198,7 +198,7 @@ async function followThisRole(interaction: CommandInteraction) {
 }
 
 async function followText(interaction: CommandInteraction) {
-	const toIgnore = interaction.options.get("thread") ?? interaction;
+	const toIgnore = interaction.options.get(en("common.channel").toLowerCase()) ?? interaction;
 	if (toIgnore.channel instanceof CategoryChannel) {
 		await followThis(interaction, TypeName.category, toIgnore.channel);
 	} else if (toIgnore?.channel && toIgnore.channel instanceof ThreadChannel) {

@@ -28,9 +28,9 @@ export default {
 		.setDefaultMemberPermissions(PermissionFlagsBits.ManageThreads)
 		.addSubcommand((subcommand) =>
 			subcommand
-				.setName(en("common.thread").toLowerCase())
+				.setName(en("common.channel").toLowerCase())
 				.setNameLocalizations({
-					fr: fr("common.thread").toLowerCase(),
+					fr: fr("common.channel").toLowerCase(),
 				})
 				.setDescription(en("ignore.thread.description"))
 				.setDescriptionLocalizations({
@@ -38,9 +38,9 @@ export default {
 				})
 				.addChannelOption((option) =>
 					option
-						.setName(en("common.thread").toLowerCase())
+						.setName(en("common.channel").toLowerCase())
 						.setNameLocalizations({
-							fr: fr("common.thread").toLowerCase(),
+							fr: fr("common.channel").toLowerCase(),
 						})
 						.setDescription(
 							en("ignore.thread.option.description")
@@ -93,7 +93,7 @@ export default {
 		 * Verify if the "follow-only" mode is enabled ; return error if it is
 		 */
 		switch (commands) {
-		case "thread":
+		case en("common.channel").toLowerCase():
 			if (get(CommandName.followOnlyChannel)) {
 				await interaction.reply({
 					content: i18next.t("ignore.followError") as string,
@@ -143,7 +143,7 @@ async function listIgnored(interaction: CommandInteraction) {
 			value: ignoredCategoriesNames || i18next.t("ignore.list.none") as string,
 		})
 		.addFields({
-			name: i18next.t("common.thread") as string,
+			name: i18next.t("common.channel") as string,
 			value: ignoredThreadsNames || i18next.t("ignore.list.none") as string,
 		})
 		.addFields({
@@ -202,7 +202,7 @@ async function ignoreThisRole(interaction: CommandInteraction) {
 }
 
 async function ignoreText(interaction: CommandInteraction) {
-	const toIgnore = interaction.options.get("thread") ?? interaction;
+	const toIgnore = interaction.options.get(en("common.channel").toLowerCase()) ?? interaction;
 	if (toIgnore.channel instanceof CategoryChannel) {
 		await ignoreThis(interaction, TypeName.category, toIgnore.channel);
 	} else if (toIgnore?.channel && toIgnore.channel instanceof ThreadChannel) {
@@ -257,7 +257,7 @@ async function ignoreThis(
 		);
 		setIgnore(typeName, newIgnoredCategories);
 		await interaction.reply({
-			content: i18next.t("ignore.thread.remove", {category: mention}) as string,
+			content: i18next.t("ignore.thread.remove", {thread: mention}) as string,
 			ephemeral: true,
 		});
 	} else {
@@ -265,7 +265,7 @@ async function ignoreThis(
 		allIgnored.push(ignoreCategory);
 		setIgnore(typeName, allIgnored);
 		await interaction.reply({
-			content: i18next.t("ignore.thread.success", {category: mention}) as string,
+			content: i18next.t("ignore.thread.success", {thread: mention}) as string,
 			ephemeral: true,
 		});
 	}
