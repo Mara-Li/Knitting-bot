@@ -1,4 +1,4 @@
-## Knitting
+# Knitting
 
 →  [English translation](README.md)
 
@@ -19,8 +19,48 @@ Le bot ajoutera automatiquement un utilisateur à un fil de discussion lorsque :
 
 Le bot ne fera rien lorsqu'il rejoindra le serveur. Si vous voulez mettre à jour tous les fils, vous pouvez utiliser la commande slash `/update-all-threads` (voir ci-dessous).
 
-### Commandes Slash
+## Commandes Slash
+### Configuration
 
+La commande slash `/config` vous permet de configurer le bot. Vous pouvez :
+- Changer la langue (anglais ou français)
+- Désactiver/activer tous les événements (nouveaux membres, membres mis à jour, nouveau fil de discussion créé ou autorisations de canal/catégorie mises à jour).
+- Il est possible de tout désactiver avec la commande `/config mode-manuel`. Dans ce mode, vous devez utiliser les commandes slash pour mettre à jour les fils.
+- Activer le mode "follow-only" :
+  - `/config follow-only-channel` : Seuls les channels enregistrés avec la commande `/follow channel [channel]` seront mis à jour.
+  - `/config follow-only-role` : Seuls les rôles enregistrés avec la commande `/follow role [role]` seront mis à jour.
+
+### Follow (suivre)
+
+Permet de ne ping uniquement certains channels ou rôle spécifique.
+
+Vous devez préalablement activer les modes "follow-only" avec la commande `/config follow-only-channel` ou `/config follow-only-role`.
+
+- `/follow channel [channel]` : Ajoute un channel à la liste des channels à suivre.
+- `/follow role [role]` : Ajoute un rôle à la liste des rôles à suivre.
+- `/follow list` : Affiche la liste des channels et rôles à suivre.
+
+> **Note**  
+> Pour arrêter de suivre un channel ou un rôle, vous devez refaire la commande avec le même channel/role.
+
+### Ignore
+
+Permet d'ignorer un channel ou un rôle spécifique : le bot ne pingera pas les utilisateurs qui ont ce rôle ou qui sont dans ce channel.
+
+- `/ignore channel [channel]` : Ajoute un channel à la liste des channels à ignorer.
+- `/ignore role [role]` : Ajoute un rôle à la liste des rôles à ignorer.
+- `/ignore list` : Affiche la liste des channels et rôles ignorés.
+
+> **Note**  
+> Comme précédemment, pour arrêter d'ignorer un channel ou un rôle, vous devez refaire la commande avec le même channel/role.
+
+> **Warning**  
+> Vous ne pouvez "suivre"  et "ignorer" un channel en même temps. Par exemple:
+> - Si vous avez activé le mode `follow-only-channel`, vous ne pouvez ignorer un channel.
+> - Si vous avez activé le mode `follow-only-role`, vous ne pouvez ignorer un rôle.
+> Dans les faits, la commande `follow` ignorera tous les rôles/channels sauf ceux spécifiés dans la commande `follow`.
+
+### Mise à jour des fils
 Si vous voulez mettre à jour manuellement un fil, vous pouvez utiliser les commandes slash:
 - `/update thread [thread]`: Mettre à jour un fil spécifique.
 - `/update tout`: Mettre à jour tous les fils sur le serveur.
@@ -37,21 +77,17 @@ Ces commandes n'apparaissent pas pour les utilisateurs qui n'ont pas la permissi
 
 De plus, vous pouvez configurer le bot et désactiver les événements que vous ne souhaitez pas utiliser. Vous pouvez le faire avec la commande `/config`. Vous pouvez voir la configuration avec `/config afficher`.
 
-#### Configuration
-
-La commande slash `/config` vous permet de configurer le bot. Vous pouvez :
-- Changer la langue (anglais ou français)
-- Désactiver/activer tous les événements (nouveaux membres, membres mis à jour, nouveau fil de discussion créé ou autorisations de canal/catégorie mises à jour).
-- Il est possible de tout désactiver avec la commande `/config mode-manuel`. Dans ce mode, vous devez utiliser les commandes slash pour mettre à jour les fils.
 
 ### Comment ça fonctionne
 
-Le bot enverra un message contenant "//", l'éditera avec la liste des utilisateurs/rôles qui peuvent voir le fil, puis supprimera le message. Comme l'utilisateur a été mentionné, le fil sera visible pour eux et un seul message sera envoyé.
 
 Pour des raisons d'optimisation, le bot mentionnera d'abord les @rôle d'abord lorsqu'un fil doit être mis à jour. Ensuite, il vérifiera si certains utilisateurs (qui n'ont pas de rôle/role autorisé) peuvent voir le fil et les ajoutera.
 De plus, s'il n'y a aucun rôle dans le serveur, le bot traitera la liste des membres à la place.
 
 Notez que le rôle sera mentionné si certains utilisateurs ayant le rôle ne sont pas dans le fil de discussion.
+
+Le bot enverra un message contenant "//", l'éditera avec la liste des utilisateurs/rôles qui peuvent voir le fil, puis supprimera le message. Comme l'utilisateur a été mentionné, le fil sera visible pour eux et un seul message sera envoyé.
+Aucun message ne sera envoyé s'il n'y a pas de membre / rôle à mentionner.
 
 ### Permission requise
 

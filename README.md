@@ -33,13 +33,16 @@ The slash command `/config` allows you to configure the bot. You can:
 
 ### Follow
 
-Allow to only "ping" specific channels or roles. You can use the slash commands:
+Allow to only "ping" specific channels or roles.
+
+You need to activate the `follow-only` mode to use these commands. You can do that with `/config follow-only-channel` or `/config follow-only-role`.
+
 - `/follow channel [channel]` : Add a channel to the list of followed channels
 - `/follow role [role]` : Add a role to the list of followed roles
 - `/follow list` : List all followed channels and roles
 
 > **Note**  
-> To unfollow a channel, you need to redo the command with the same channel. Same for the role.
+> To unfollow a channel/role, you need to redo the command with the same channel/role.
 
 ### Ignore
 
@@ -85,7 +88,8 @@ Moreover, if there is no role in the server, the bot process on the members list
 
 Note that role will be mentioned if some users that have the role aren't in the thread. 
 
-After making the list of user/role to ping, the user will send a message with a ping to these user and roles. If there is no member to add, nothing will be sent! 
+After making the list of user/role to ping, the user will send a message with a content (like an emoji) and edit it with the list of user/role to ping.
+No message will be sent if there is no user/role to ping.
 
 ### Permission asked
 
@@ -111,6 +115,7 @@ It can look like this:
 BOT_TOKEN=your_token
 CLIENT_ID=your_client_id
 NODE_ENV=development # or production
+MESSAGE= #N'importe quoi
 ```
 
 > **Note**  
@@ -121,7 +126,7 @@ NODE_ENV=development # or production
 - `BOT_TOKEN` is the token of the bot that you can get in `Bot` > `Reset token` in the discord developer portal.
 - `CLIENT_ID` is the client id of the bot, you can get it from `General Information` > `Client ID` in the discord developer portal.
 - `NODE_ENV` is the environment of the bot. It can be `development` or `production`. If you are in development, the bot will log a lot of event. If you are in production, the bot will log only errors.
-
+- `MESSAGE` : The message you want to send when waiting for the list of users/roles. You can use a simple message, an emoji, stickers or external emoji. Beware of them. The bot must be on the server where the emoji is (but it can use it everywhere).
 
 The bot uses Enmap to store data. You can find the documentation [here](https://enmap.evie.dev/). You need a special installation for it, so follow the instructions [here](https://enmap.evie.dev/install). 
 
