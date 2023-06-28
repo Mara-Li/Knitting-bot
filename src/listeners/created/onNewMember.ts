@@ -23,7 +23,7 @@ export default (client: Client): void => {
 		const channels = guild.channels.cache.filter(channel => channel.isThread());
 		for (const channel of channels.values()) {
 			const threadChannel = channel as ThreadChannel;
-			const roleIsAllowed = checkIfMemberRoleIsFollowed(member.roles) && !checkMemberRoleNotIgnored(member.roles);
+			const roleIsAllowed = !checkIfMemberRoleIsFollowed(member.roles) && !checkMemberRoleNotIgnored(member.roles);
 			if (!get(CommandName.followOnlyChannel)) {
 				/**
 				 * followOnlyChannel is disabled && followOnlyRole can be enabled or disabled
