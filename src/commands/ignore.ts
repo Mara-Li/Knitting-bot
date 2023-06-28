@@ -1,4 +1,5 @@
-import { CategoryChannel, 
+import {
+	CategoryChannel,
 	CommandInteraction, 
 	CommandInteractionOptionResolver, 
 	EmbedBuilder, 
@@ -7,7 +8,8 @@ import { CategoryChannel,
 	TextChannel, 
 	ThreadChannel } from "discord.js";
 import { default as i18next } from "../i18n/i18next";
-import { CommandName, 
+import {
+	CommandName,
 	getIgnoredCategories, 
 	getIgnoredRoles, 
 	getIgnoredTextChannels, 
