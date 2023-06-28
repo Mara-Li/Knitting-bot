@@ -23,9 +23,6 @@ const client = new Client({
 	partials: [Partials.Channel],
 });
 
-export const emoji = process.env.MESSAGE && process.env.MESSAGE.trim().length > 0 ? process.env.MESSAGE : "🔄";
-
-
 try {
 	ready(client);
 	memberUpdate(client);
