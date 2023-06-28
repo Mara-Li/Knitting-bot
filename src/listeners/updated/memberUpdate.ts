@@ -22,8 +22,8 @@ export default (client: Client): void => {
 			for (const channel of channels.values()) {
 				const threadChannel = channel as ThreadChannel;
 				const roleIsAllowed = !checkIfMemberRoleIsFollowed(newMember.roles) && !checkMemberRoleNotIgnored(newMember.roles);
-				logInDev(`Role member is followed :`, checkIfMemberRoleIsFollowed(newMember.roles));
-				logInDev(`Role member is ignored :`, checkMemberRoleNotIgnored(newMember.roles));
+				logInDev("Role member is followed :", checkIfMemberRoleIsFollowed(newMember.roles));
+				logInDev("Role member is ignored :", checkMemberRoleNotIgnored(newMember.roles));
 				logInDev(`Role is allowed: ${roleIsAllowed}`);
 				if (!get(CommandName.followOnlyChannel)) {
 					/**

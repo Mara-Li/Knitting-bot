@@ -114,7 +114,7 @@ It can look like this:
 ```dotenv
 BOT_TOKEN=your_token
 CLIENT_ID=your_client_id
-NODE_ENV=development # or production
+NODE_ENV=development# or production
 MESSAGE= #N'importe quoi
 ```
 
