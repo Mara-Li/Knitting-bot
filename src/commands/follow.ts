@@ -50,16 +50,16 @@ export default {
 		)
 		.addSubcommand((subcommand) =>
 			subcommand
-				.setName(en("common.role"))
+				.setName(en("common.role").toLowerCase())
 				.setNameLocalizations({
-					fr: fr("common.role"),
+					fr: fr("common.role").toLowerCase(),
 				})
 				.setDescription("follow.role.description")
 				.addRoleOption((option) =>
 					option
-						.setName(en("common.role"))
+						.setName(en("common.role").toLowerCase())
 						.setNameLocalizations({
-							fr: fr("common.role"),
+							fr: fr("common.role").toLowerCase(),
 						})
 						.setDescription(en("follow.role.option"))
 						.setDescriptionLocalizations({
@@ -152,16 +152,16 @@ async function followThisRole(interaction: CommandInteraction) {
 		return;
 	}
 	const followedRoles:Role[] = getFollow(TypeName.role) as Role[] ?? [];
-	logInDev("allfollowRoles", followedRoles.map((role) => role.id));
-	const isAlreadyfollowed = followedRoles.some(
+	logInDev("allFollowRoles", followedRoles.map((role) => role.id));
+	const isAlreadyFollowed = followedRoles.some(
 		(followedRole: Role) => followedRole.id === role.role?.id
 	);
-	if (isAlreadyfollowed) {
+	if (isAlreadyFollowed) {
 		//remove from follow list
-		const newfollowRoles: Role[] = followedRoles.filter(
+		const newFollowRoles: Role[] = followedRoles.filter(
 			(followedRole: Role) => followedRole.id !== role.role?.id
 		);
-		setFollow(TypeName.role, newfollowRoles);
+		setFollow(TypeName.role, newFollowRoles);
 		await interaction.reply({
 			content: i18next.t("follow.role.removed", {role: role}) as string,
 			ephemeral: true,
@@ -210,7 +210,7 @@ async function followThis(
 		});
 		return;
 	}
-	let allFollowed: (ThreadChannel<boolean> | CategoryChannel | TextChannel | ForumChannel)[] = [];
+	let allFollowed: (ThreadChannel | CategoryChannel | TextChannel | ForumChannel)[] = [];
 	switch (typeName) {
 	case TypeName.category:
 		allFollowed = getFollow(TypeName.category) as CategoryChannel[] ?? [];

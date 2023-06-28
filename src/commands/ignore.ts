@@ -52,9 +52,9 @@ export default {
 		)
 		.addSubcommand((subcommand) =>
 			subcommand
-				.setName(en("common.role"))
+				.setName(en("common.role").toLowerCase())
 				.setNameLocalizations({
-					fr: fr("common.role"),
+					fr: fr("common.role").toLowerCase(),
 				})
 				.setDescription(en("ignore.role.description"))
 				.setDescriptionLocalizations({
@@ -63,9 +63,9 @@ export default {
 				
 				.addRoleOption((option) =>
 					option
-						.setName(en("common.role"))
+						.setName(en("common.role").toLowerCase())
 						.setNameLocalizations({
-							fr: fr("common.role"),
+							fr: fr("common.role").toLowerCase(),
 						})
 						.setDescription(en("ignore.role.option"))
 						.setDescriptionLocalizations({
