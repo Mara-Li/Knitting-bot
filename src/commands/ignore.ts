@@ -21,7 +21,10 @@ const en = i18next.getFixedT("en");
 export default {
 	data: new SlashCommandBuilder()
 		.setName("ignore")
-		.setDescription("placeholder")
+		.setDescription(en("ignore.description"))
+		.setDescriptionLocalizations({
+			fr: fr("ignore.description"),
+		})
 		.setDefaultMemberPermissions(PermissionFlagsBits.ManageThreads)
 		.addSubcommand((subcommand) =>
 			subcommand
@@ -49,19 +52,38 @@ export default {
 		)
 		.addSubcommand((subcommand) =>
 			subcommand
-				.setName("role")
-				.setDescription("placeholder")
+				.setName(en("common.role"))
+				.setNameLocalizations({
+					fr: fr("common.role"),
+				})
+				.setDescription(en("ignore.role.description"))
+				.setDescriptionLocalizations({
+					fr: fr("ignore.role.description"),
+				})
+				
 				.addRoleOption((option) =>
 					option
-						.setName("role")
-						.setDescription("placeholder")
+						.setName(en("common.role"))
+						.setNameLocalizations({
+							fr: fr("common.role"),
+						})
+						.setDescription(en("ignore.role.option"))
+						.setDescriptionLocalizations({
+							fr: fr("ignore.role.option"),
+						})
 						.setRequired(true)
 				)
 		)
 		.addSubcommand((subcommand) =>
 			subcommand
-				.setName("list")
-				.setDescription("List all ignored channels, threads, categories and roles")
+				.setName(en("common.list"))
+				.setNameLocalizations({
+					fr: fr("common.list"),
+				})
+				.setDescription(en("ignore.list.description"))
+				.setDescriptionLocalizations({
+					fr: fr("ignore.list.description"),
+				})
 		),
 	async execute(interaction: CommandInteraction) {
 		if (!interaction.guild) return;

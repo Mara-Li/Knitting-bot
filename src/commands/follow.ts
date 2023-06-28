@@ -19,7 +19,10 @@ const en = i18next.getFixedT("en");
 export default {
 	data: new SlashCommandBuilder()
 		.setName("follow")
-		.setDescription("placeholder")
+		.setDescription("follow.description")
+		.setDescriptionLocalizations({
+			fr: fr("follow.description"),
+		})
 		.setDefaultMemberPermissions(PermissionFlagsBits.ManageThreads)
 		.addSubcommand((subcommand) =>
 			subcommand
@@ -47,12 +50,21 @@ export default {
 		)
 		.addSubcommand((subcommand) =>
 			subcommand
-				.setName("role")
-				.setDescription("placeholder")
+				.setName(en("common.role"))
+				.setNameLocalizations({
+					fr: fr("common.role"),
+				})
+				.setDescription("follow.role.description")
 				.addRoleOption((option) =>
 					option
-						.setName("role")
-						.setDescription("placeholder")
+						.setName(en("common.role"))
+						.setNameLocalizations({
+							fr: fr("common.role"),
+						})
+						.setDescription(en("follow.role.option"))
+						.setDescriptionLocalizations({
+							fr: fr("follow.role.option"),
+						})
 						.setRequired(true)
 				)
 		)

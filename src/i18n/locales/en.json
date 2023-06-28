@@ -37,6 +37,7 @@
     "error": "An error occurred: {{error}}",
     "forum": "Forum",
     "here": "here",
+    "list": "list",
     "no": "No",
     "none": "/",
     "role": "Roles",
@@ -108,12 +109,15 @@
     "type": "Enabled: {{- type}}"
   },
   "follow": {
+    "description": "Update only on the followed role/channels",
     "disabled": "You can't use these commands : the follow-only mode is disabled.",
     "list": {
       "title": "Follow"
     },
     "role": {
       "added": "{{- role}} followed",
+      "description": "Role to follow/unfollow",
+      "option": "Select the role",
       "removed": "{{- role}} unfollowed"
     },
     "thread": {
@@ -126,9 +130,11 @@
     }
   },
   "ignore": {
+    "description": "Exclude channel/roles from update.",
     "error": "The channel, thread or category was not recognized.",
     "followError": "The ignore commands can't be used under the follow-only mode.",
     "list": {
+      "description": "List all ignored channels, threads, categories and role",
       "none": "Empty",
       "title": "List of ignored channels, categories, threads and roles"
     },
@@ -136,7 +142,9 @@
     "name": "Ignore",
     "role": {
       "added": "Role {{- role}} ignored.",
+      "description": "Exclude role from update",
       "error": "{{- role }} not found",
+      "option": "Select role to exclude/include",
       "removed": "Role {{- role}} un-ignored!"
     },
     "thread": {

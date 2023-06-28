@@ -37,6 +37,7 @@
     "error": "Une erreur est apparue : {{error}}",
     "forum": "Forum",
     "here": "ici",
+    "list": "list",
     "no": "Non",
     "none": "/",
     "role": "Rôles",
@@ -108,12 +109,15 @@
     "type": "Activation de : {{- type}}"
   },
   "follow": {
+    "description": "Mise à jour uniquement sur les rôles/canaux suivis",
     "disabled": "Vous ne pouvez pas utiliser ces commandes : le mode \"follow-only\" est désactivé.",
     "list": {
       "title": "Suivi"
     },
     "role": {
       "added": "{{- role}} suivi",
+      "description": "Role à suivre ou ne plus suivre",
+      "option": "Sélection le role",
       "removed": "{{- role}} non-suivi"
     },
     "thread": {
@@ -126,9 +130,11 @@
     }
   },
   "ignore": {
+    "description": "Exclure des channels ou rôle des mises-à-jours",
     "error": "Le channel, thread ou catégorie n'a pas été reconnu.",
     "followError": "Les commandes \"ignore\" ne peuvent pas être utilisées en mode \"follow-only\".",
     "list": {
+      "description": "Liste de tous les canaux, fils de discussion, catégories et rôles ignorés",
       "none": "Vide",
       "title": "Liste des channels, catégories, threads et rôles ignorés"
     },
@@ -136,7 +142,9 @@
     "name": "Ignore",
     "role": {
       "added": "Role {{- role}} ignoré.",
+      "description": "Exclure un rôle des mises-à-jours",
       "error": "{{- role}} introuvable",
+      "option": "Selectionner le rôle à inclure/exclure",
       "removed": "Role {{- role}} dés-ignoré !"
     },
     "thread": {
