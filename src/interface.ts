@@ -6,4 +6,5 @@ export enum DefaultMenuBuilder {
 	newMember = "on-new-member",
 	disable = "manual-mode",
 	show = "show",
+	followOnly = "follow-only"
 }

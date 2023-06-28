@@ -1,132 +1,152 @@
 {
-	"commands": {
-		"description": "Permet de mettre à jour manuellement les threads en ajoutant les utilisateurs manquants.",
-		"error": "Cette commande ne peut être utilisée que dans un thread.",
-		"help": {
-			"all": "- `/update tout` : Pour ajouter sur tous les threads du serveur.\n",
-			"desc": "Met à jour manuellement les threads en ajoutant les utilisateurs manquants, avec l'aide des commandes ci-dessous :\n",
-			"description": "Affiche l'aide des commandes manuelles",
-			"here": "- `/update ici` : Pour ajouter sur le thread dans lequel la commande est utilisée.\n",
-			"name": "aide",
-			"thread": "- `/update thread <thread>` : Pour ajouter dans un thread spécifique (à sélectionner depuis la liste).\n",
-			"title": "Aide des commandes manuelles"
-		},
-		"ignore": {
-			"option": {
-			}
-		},
-		"name": "update",
-		"success": "Mise à jour effectuée : {{- channel}}",
-		"updateAllThreads": {
-			"description": "Met à jour tous les threads du serveur, en ajoutant ou supprimant des utilisateurs",
-			"name": "tout",
-			"reply": "Mise à jour de tous les threads…",
-			"success": "Mise à jour effectuée de {{- count}} threads"
-		},
-		"updateSpecificThread": {
-			"description": "Met à jour un thread spécifique",
-			"option": {
-				"description": "Sélectionner le thread à mettre à jour"
-			}
-		},
-		"updateThread": {
-			"description": "Met à jour ce thread en ajoutant les utilisateurs manquants"
-		}
-	},
-	"common": {
-		"cancel": "Annuler",
-		"confirm": "Confirmer",
-		"error": "Une erreur est apparue : {{error}}",
-		"here": "ici",
-		"no": "Non",
-		"thread": "Thread",
-		"yes": "Oui"
-	},
-	"configuration": {
-		"channel": {
-			"description": "Active/désactive l'ajout des membres aux threads lors de l'édition des permissions d'un channel.",
-			"name": "sur-mise-a-jour-channel",
-			"title": "Salon/catégorie"
-		},
-		"disable": {
-			"description": "Active ou désactive tous les évènements pour passer le bot en mode manuel ou automatique",
-			"name": "mode-manuel",
-			"option": "Active ou désactive le mode manuel"
-		},
-		"language": {
-			"description": "Modifie la langue du bot",
-			"name": "Langue",
-			"options": "Langue à utiliser",
-			"reply": "Langue changée pour : {{- lang}}"
-		},
-		"main": {
-			"description": "Modifie la configuration du serveur. Permet d'activer / désactiver certains évènements",
-			"name": "config"
-		},
-		"member": {
-			"description": "Active/désactive l'ajout de membres aux threads lors de l'édition de leurs permissions.",
-			"display": "Membre modifié ",
-			"name": "sur-mise-a-jour-membre",
-			"title": "Mise-à-jour de membre"
-		},
-		"newMember": {
-			"description": "Active ou désactive l'ajout d'un nouveau membre lorsqu'il rejoint le serveur.",
-			"display": "Nouveau membre",
-			"name": "sur-nouveau-membre",
-			"title": "Arrivée d'un nouveau membre"
-		},
-		"show": {
-			"description": "Affiche la configuration actuelle",
-			"menu": {
-				"description": "Le bot peut être activé sur :\n- Changement de permission d'un membre, d'un channel, catégorie\n- Lors de la création d'un thread\n- Lors de l'arrivée d'un nouveau membre.",
-				"title": "Configuration"
-			},
-			"name": "afficher"
-		},
-		"switch": "Activer ou désactiver cet événement",
-		"thread": {
-			"description": "Active ou désactive l'ajout des membres aux threads lors de leur création",
-			"display": "Creation de thread",
-			"name": "sur-creation-thread",
-			"title": "Création d'un thread"
-		}
-	},
-	"disable": {
-		"disable": "Désactivé",
-		"manual": "Mode manuel désactivé",
-		"type": "Désactivation de : {{- type}}"
-	},
-	"enable": {
-		"enable": "Activé",
-		"manual": "Mode manuel activé",
-		"type": "Activation de : {{- type}}"
-	},
-	"ignore": {
-		"channel": {
-		},
-		"error": "Le channel, thread ou catégorie n'a pas été reconnu.",
-		"list": {
-			"category": "Catégorie",
-			"channel": "Channel",
-			"none": "Vide",
-			"role": "Rôles",
-			"title": "Liste des channels, catégories, threads et rôles ignorés"
-		},
-		"message": "{{- thread}} est ignoré dans les paramètres !",
-		"name": "Ignore",
-		"role": {
-			"added": "Role {{- role}} ignoré.",
-			"error": "Le role {{- role}} introuvable",
-			"removed": "Role {{- role}} dés-ignoré !"
-		},
-		"thread": {
-			"description": "Ignore un thread, channel ou catégorie spécifique",
-			"error": "Cette commande ne peut être utilisée que pour une catégorie, un channel ou un thread.",
-			"option": {
-				"description": "Sélectionner le thread/channel/catégorie à ignorer ou à dés-ignorer"
-			},
-			"remove": "{{- thread}} n'est plus ignoré",
-			"success": "{{- thread}} a été ignoré"
-		}
-	}
+  "commands": {
+    "description": "Permet de mettre à jour manuellement les threads en ajoutant les utilisateurs manquants.",
+    "error": "Cette commande ne peut être utilisée que dans un thread.",
+    "help": {
+      "all": "- `/update tout` : Pour ajouter sur tous les threads du serveur.\n",
+      "desc": "Met à jour manuellement les threads en ajoutant les utilisateurs manquants, avec l'aide des commandes ci-dessous :\n",
+      "description": "Affiche l'aide des commandes manuelles",
+      "here": "- `/update ici` : Pour ajouter sur le thread dans lequel la commande est utilisée.\n",
+      "name": "aide",
+      "thread": "- `/update thread <thread>` : Pour ajouter dans un thread spécifique (à sélectionner depuis la liste).\n",
+      "title": "Aide des commandes manuelles"
+    },
+    "name": "update",
+    "success": "Mise à jour effectuée : {{- channel}}",
+    "updateAllThreads": {
+      "description": "Met à jour tous les threads du serveur, en ajoutant ou supprimant des utilisateurs",
+      "name": "tout",
+      "reply": "Mise à jour de tous les threads…",
+      "success": "Mise à jour effectuée de {{- count}} threads"
+    },
+    "updateSpecificThread": {
+      "description": "Met à jour un thread spécifique",
+      "option": {
+        "description": "Sélectionner le thread à mettre à jour"
+      }
+    },
+    "updateThread": {
+      "description": "Met à jour ce thread en ajoutant les utilisateurs manquants"
+    }
+  },
+  "common": {
+    "cancel": "Annuler",
+    "category": "Catégorie",
+    "channel": "Channel",
+    "confirm": "Confirmer",
+    "error": "Une erreur est apparue : {{error}}",
+    "forum": "Forum",
+    "here": "ici",
+    "no": "Non",
+    "none": "/",
+    "role": "Rôles",
+    "thread": "Thread",
+    "yes": "Oui"
+  },
+  "configuration": {
+    "channel": {
+      "description": "Active/désactive l'ajout des membres aux threads lors de l'édition des permissions d'un channel.",
+      "name": "sur-mise-a-jour-channel",
+      "title": "Salon/catégorie"
+    },
+    "disable": {
+      "description": "Active ou désactive tous les évènements pour passer le bot en mode manuel ou automatique",
+      "name": "mode-manuel",
+      "option": "Active ou désactive le mode manuel"
+    },
+    "follow": {
+      "description": "Le bot ne mettra à jour uniquement sur certains rôle/channel/…",
+      "name": "follow-only",
+      "title": "Mode suivi uniquement"
+    },
+    "language": {
+      "description": "Modifie la langue du bot",
+      "name": "Langue",
+      "options": "Langue à utiliser",
+      "reply": "Langue changée pour : {{- lang}}"
+    },
+    "main": {
+      "description": "Modifie la configuration du serveur. Permet d'activer / désactiver certains évènements",
+      "name": "config"
+    },
+    "member": {
+      "description": "Active/désactive l'ajout de membres aux threads lors de l'édition de leurs permissions.",
+      "display": "Membre modifié ",
+      "name": "sur-mise-a-jour-membre",
+      "title": "Mise-à-jour de membre"
+    },
+    "newMember": {
+      "description": "Active ou désactive l'ajout d'un nouveau membre lorsqu'il rejoint le serveur.",
+      "display": "Nouveau membre",
+      "name": "sur-nouveau-membre",
+      "title": "Arrivée d'un nouveau membre"
+    },
+    "show": {
+      "description": "Affiche la configuration actuelle",
+      "menu": {
+        "description": "Le bot peut être activé sur :\n- Changement de permission d'un membre, d'un channel, catégorie\n- Lors de la création d'un thread\n- Lors de l'arrivée d'un nouveau membre.\n\nVous pouvez aussi désactiver le bot entièrement, et ne mettre à jour uniquement pour certains salons et rôles.",
+        "title": "Configuration"
+      },
+      "name": "afficher"
+    },
+    "switch": "Activer ou désactiver cet événement",
+    "thread": {
+      "description": "Active ou désactive l'ajout des membres aux threads lors de leur création",
+      "display": "Creation de thread",
+      "name": "sur-creation-thread",
+      "title": "Création d'un thread"
+    }
+  },
+  "disable": {
+    "disable": "Désactivé",
+    "manual": "Mode manuel désactivé",
+    "type": "Désactivation de : {{- type}}"
+  },
+  "enable": {
+    "enable": "Activé",
+    "manual": "Mode manuel activé",
+    "type": "Activation de : {{- type}}"
+  },
+  "follow": {
+    "disabled": "Vous ne pouvez pas utiliser ces commandes : le mode \"follow-only\" est désactivé.",
+    "list": {
+      "title": "Suivi"
+    },
+    "role": {
+      "added": "{{- role}} suivi",
+      "removed": "{{- role}} non-suivi"
+    },
+    "thread": {
+      "description": "Sélectionne un salon, thread, catégorie, ou forum, à suivre",
+      "option": {
+        "description": "Salon à suivre"
+      },
+      "remove": "{{- thread}} a été supprimé du suivi",
+      "success": "{{- thread}} est maintenant suivi."
+    }
+  },
+  "ignore": {
+    "error": "Le channel, thread ou catégorie n'a pas été reconnu.",
+    "followError": "Les commandes \"ignore\" ne peuvent pas être utilisées en mode \"follow-only\".",
+    "list": {
+      "none": "Vide",
+      "title": "Liste des channels, catégories, threads et rôles ignorés"
+    },
+    "message": "{{- thread}} est ignoré depuis les paramètres !",
+    "name": "Ignore",
+    "role": {
+      "added": "Role {{- role}} ignoré.",
+      "error": "{{- role}} introuvable",
+      "removed": "Role {{- role}} dés-ignoré !"
+    },
+    "thread": {
+      "description": "Ignore un thread, channel ou catégorie spécifique",
+      "error": "Cette commande ne peut être utilisée que pour une catégorie, un channel ou un thread.",
+      "option": {
+        "description": "Sélectionner le thread/channel/catégorie à ignorer ou à dés-ignorer"
+      },
+      "remove": "{{- thread}} n'est plus ignoré",
+      "success": "{{- thread}} a été ignoré"
+    }
+  }
 }

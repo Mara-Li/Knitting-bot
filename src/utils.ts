@@ -1,9 +1,10 @@
 import {
 	CategoryChannel,
-	Collection,
+	Collection, ForumChannel,
 	GuildMember,
 	GuildMemberRoleManager,
-	MessageFlags, MessagePayloadOption,
+	MessageFlags,
+	MessagePayloadOption,
 	Role,
 	TextChannel,
 	ThreadChannel,
@@ -11,8 +12,7 @@ import {
 } from "discord.js";
 import * as process from "process";
 import { emoji } from "./index";
-import { getIgnoredCategories, getIgnoredRoles, getIgnoredTextChannels, getIgnoredThreads } from "./maps";
-
+import { CommandName, get, getFollow, getIgnored, TypeName } from "./maps";
 
 
 /**
@@ -124,10 +124,15 @@ export async function checkIfUserNotInTheThread(thread: ThreadChannel, memberToC
  * @returns {boolean} Return true if the member has a role that is ignored
  */
 export function checkRoleNotIgnored(role: GuildMemberRoleManager) {
-	const allIgnoredRoles = getIgnoredRoles() as Role[] || [];
+	const allIgnoredRoles = getIgnored(TypeName.role) as Role[] || [];
 	const allMemberRoles = role.cache;
 	return allMemberRoles.some(memberRole => allIgnoredRoles.some(ignoredRole => ignoredRole.id === memberRole.id));
+}
 
+export function checkIfRoleIsFollowed(role: GuildMemberRoleManager) {
+	const allFollowedRoles = getFollow(TypeName.role) as Role[] || [];
+	const allMemberRoles = role.cache;
+	return allMemberRoles.some(memberRole => allFollowedRoles.some(followedRole => followedRole.id === memberRole.id));
 }
 
 /**
@@ -139,13 +144,29 @@ export function checkIfThreadIsIgnored(channel: ThreadChannel) {
 	logInDev(`Check if #${channel.name} is ignored`);
 	const parentChannel = channel.parent;
 	const categoryOfParent = parentChannel?.parent;
-	const allIgnoredChannels = getIgnoredTextChannels() as TextChannel[] || [];
-	const allIgnoredCategories = getIgnoredCategories() as CategoryChannel[] || [];
-	const allIgnoredThreads = getIgnoredThreads() as ThreadChannel[] || [];
+	const allIgnoredChannels = getIgnored(TypeName.channel) as TextChannel[] || [];
+	const allIgnoredCategories = getIgnored(TypeName.category) as CategoryChannel[] || [];
+	const allIgnoredThreads = getIgnored(TypeName.thread) as ThreadChannel[] || [];
+	const allIgnoredForum = getIgnored(TypeName.forum) as ForumChannel[] || [];
 	return allIgnoredChannels.some(ignoredChannel => ignoredChannel.id === channel.id) ||
+		allIgnoredForum.some(ignoredForum => ignoredForum.id === channel.id) ||
 		allIgnoredCategories.some(ignoredCategory => ignoredCategory.id === categoryOfParent?.id) ||
 		allIgnoredThreads.some(ignoredThread => ignoredThread.id === channel.id);
 	
+}
+
+export function checkIfTheadIsFollowed(channel: ThreadChannel) {
+	logInDev(`Check if #${channel.name} is followed`);
+	const parentChannels = channel.parent;
+	const categoryOfParent = parentChannels?.parent;
+	const followedThread = getFollow(TypeName.thread) as ThreadChannel[] || [];
+	const followedChannels = getFollow(TypeName.channel) as TextChannel[] || [];
+	const followedCategories = getFollow(TypeName.category) as CategoryChannel[] || [];
+	const followedForum = getFollow(TypeName.forum) as ForumChannel[] || [];
+	return followedChannels.some(followedChannel => followedChannel.id === channel.id) ||
+		followedForum.some(followedForum => followedForum.id === channel.id) ||
+		followedCategories.some(followedCategory => followedCategory.id === categoryOfParent?.id) ||
+		followedThread.some(followedThread => followedThread.id === channel.id);
 }
 
 /**
@@ -190,8 +211,10 @@ export async function addRoleAndUserToThread(thread: ThreadChannel) {
 			toPing.push(...users);
 		});
 	}
+	let allMemberToPing: GuildMember[];
 	//remove all member that have a role that is ignored
-	const allMemberToPing = toPing.filter(member => !checkRoleNotIgnored(member.roles));
+	if (!get(CommandName.followOnly)) allMemberToPing = toPing.filter(member => !checkRoleNotIgnored(member.roles));
+	else allMemberToPing = toPing.filter(member => checkIfRoleIsFollowed(member.roles));
 	if (allMemberToPing.length > 0) {
 		await message.edit(allMemberToPing.map(member => `<@${member.id}>`).join(" "));
 	}
@@ -203,7 +226,11 @@ export function logInDev(...text: unknown[]) {
 	const time= new Date();
 	const timeString = `${time.getHours()}:${time.getMinutes()}:${time.getSeconds()}`;
 	if (process.env.NODE_ENV === "development") {
-		console.log(timeString, text);
+		if (text.length === 1) {
+			console.log(`${timeString} - ${text}`);
+		} else {
+			console.log(timeString, text);
+		}
 	}
 }
 

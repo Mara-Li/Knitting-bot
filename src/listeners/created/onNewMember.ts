@@ -1,6 +1,12 @@
 import { Client, ThreadChannel } from "discord.js";
-import { CommandName, get } from "../maps";
-import { addUserToThread, checkIfThreadIsIgnored, checkRoleNotIgnored, logInDev } from "../utils";
+import { CommandName, get } from "../../maps";
+import {
+	addUserToThread,
+	checkIfRoleIsFollowed, checkIfTheadIsFollowed,
+	checkIfThreadIsIgnored,
+	checkRoleNotIgnored,
+	logInDev,
+} from "../../utils";
 
 /**
  * @param {Client} client - Discord.js Client
@@ -17,7 +23,13 @@ export default (client: Client): void => {
 		const channels = guild.channels.cache.filter(channel => channel.isThread());
 		for (const channel of channels.values()) {
 			const threadChannel = channel as ThreadChannel;
-			if (!checkIfThreadIsIgnored(threadChannel) && !checkRoleNotIgnored(member.roles)) await addUserToThread(threadChannel, member);
+			if (!get(CommandName.followOnly)) {
+				if (!checkIfThreadIsIgnored(threadChannel) && !checkRoleNotIgnored(member.roles)) await addUserToThread(threadChannel, member);
+			} else {
+				const followedRole = checkIfRoleIsFollowed(member.roles);
+				const followedThrad = checkIfTheadIsFollowed(threadChannel);
+				if (followedRole && followedThrad) await addUserToThread(threadChannel, member);
+			}
 		}
 		
 	});

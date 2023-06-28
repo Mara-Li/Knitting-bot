@@ -80,6 +80,26 @@ export default {
 		)
 		.addSubcommand((subcommand) =>
 			subcommand
+				.setName(en("configuration.follow.name"))
+				.setNameLocalizations({
+					fr: fr("configuration.follow.name"),
+				})
+				.setDescription(en("configuration.follow.description"))
+				.setDescriptionLocalizations({
+					fr: fr("configuration.follow.description"),
+				})
+				.addBooleanOption((option) =>
+					option
+						.setName("switch")
+						.setDescription(en("configuration.switch"))
+						.setDescriptionLocalizations({
+							fr: fr("configuration.switch"),
+						})
+						.setRequired(true)
+				)
+		)
+		.addSubcommand((subcommand) =>
+			subcommand
 				.setName(en("configuration.member.name"))
 				.setNameLocalizations({
 					fr: fr("configuration.member.name"),
@@ -168,6 +188,7 @@ export default {
 				"on-thread-created": CommandName.thread,
 				"on-channel-update": CommandName.channel,
 				"on-new-member": CommandName.newMember,
+				"follow-only" : CommandName.followOnly,
 			};
 			if (commands === DefaultMenuBuilder.language) {
 				const newValue = options.getString(CommandName.language) ?? "en";
@@ -216,6 +237,12 @@ export default {
 					mapsCommands[DefaultMenuBuilder.thread],
 					options.getBoolean("switch") ?? false
 				);
+			} else if (commands === DefaultMenuBuilder.followOnly) {
+				await getBooleanAndReply(
+					interaction,
+					mapsCommands[DefaultMenuBuilder.followOnly],
+					options.getBoolean("switch") ?? false
+				);
 			} else if (commands === DefaultMenuBuilder.show) {
 				await display(interaction);
 			} else {
@@ -248,6 +275,10 @@ async function getBooleanAndReply(
 		onNewMember:
 			"**__" +
 			i18next.t("configuration.newMember.title").toLowerCase() +
+			"__**",
+		followOnly:
+			"**__" +
+			i18next.t("configuration.follow.description").toLowerCase() +
 			"__**",
 	};
 	if (value) {
@@ -284,11 +315,15 @@ export async function display(interaction: CommandInteraction) {
 		.setColor("#0099ff")
 		.setTitle(i18next.t("configuration.show.menu.title"))
 		.setDescription(i18next.t("configuration.show.menu.description"))
-		.addFields({
-			name: i18next.t("configuration.language.name"),
-			value: languageValue[get(CommandName.language) as string],
-		})
-		.addFields({ name: "\u200A", value: "\u200A" })
+		.addFields(
+			{
+				name: i18next.t("configuration.language.name"),
+				value: languageValue[get(CommandName.language) as string]
+			},
+			{
+				name: i18next.t("configuration.follow.title"),
+				value: enabledOrDisabled(get(CommandName.followOnly)),
+			})
 		.addFields(
 			{
 				name: i18next.t("configuration.channel.title"),

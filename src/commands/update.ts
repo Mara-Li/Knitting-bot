@@ -1,3 +1,4 @@
+import { channelMention } from "@discordjs/formatters";
 import {
 	CommandInteraction,
 	CommandInteractionOptionResolver,
@@ -6,7 +7,8 @@ import {
 	SlashCommandBuilder,
 	ThreadChannel,
 } from "discord.js";
-import { addRoleAndUserToThread, checkIfThreadIsIgnored} from "../utils";
+import { CommandName, get } from "../maps";
+import { addRoleAndUserToThread, checkIfTheadIsFollowed, checkIfThreadIsIgnored } from "../utils";
 import { default as i18next } from "../i18n/i18next";
 const fr = i18next.getFixedT("fr");
 const en = i18next.getFixedT("en");
@@ -112,7 +114,16 @@ async function updateAllThreads(interaction: CommandInteraction) {
 	const count = threads.size;
 	for (const thread of threads.values()) {
 		const threadChannel = thread as ThreadChannel;
-		await addRoleAndUserToThread(threadChannel);
+		if (!get(CommandName.followOnly)) {
+			if (!checkIfThreadIsIgnored(threadChannel)) {
+				await addRoleAndUserToThread(threadChannel);
+			}
+		}
+		else {
+			if (checkIfTheadIsFollowed(threadChannel)) {
+				await addRoleAndUserToThread(threadChannel);
+			}
+		}
 	}
 	await interaction.followUp({
 		content: i18next.t("commands.updateAllThreads.success", {
@@ -130,9 +141,10 @@ async function updateThisThread(interaction: CommandInteraction) {
 		});
 		return;
 	}
-	if (checkIfThreadIsIgnored(interaction.channel)) {
+	const isFollowed = get(CommandName.followOnly) && checkIfTheadIsFollowed(interaction.channel);
+	if (checkIfThreadIsIgnored(interaction.channel) || !isFollowed) {
 		await interaction.reply({
-			content: i18next.t("ignore.message", {thread: interaction.channel.name}) as string,
+			content: i18next.t("ignore.message", {thread: channelMention(interaction.channel.id)}) as string,
 			ephemeral: true,
 		});
 		return;
@@ -141,7 +153,7 @@ async function updateThisThread(interaction: CommandInteraction) {
 		await interaction.reply({
 			content: `${
 				i18next.t("commands.success", {
-					channel: interaction.channel.name,
+					channel: channelMention(interaction.channel.id),
 				}) as string
 			}`,
 			ephemeral: true,
@@ -159,16 +171,17 @@ async function updateThisThread(interaction: CommandInteraction) {
 
 async function updateSpecificThread(interaction: CommandInteraction) {
 	const threadOption = interaction.options.get(i18next.t("common.thread") as string);
-	if (checkIfThreadIsIgnored(threadOption?.channel as ThreadChannel)) {
+	const mention = threadOption?.channel ? channelMention(threadOption.channel.id) : "";
+	const isFollowed = get(CommandName.followOnly) && checkIfTheadIsFollowed(threadOption?.channel as ThreadChannel);
+	if (checkIfThreadIsIgnored(threadOption?.channel as ThreadChannel) || !isFollowed) {
 		await interaction.reply({
-			content: i18next.t("ignore.message", {thread: threadOption?.channel?.name}) as string,
+			content: i18next.t("ignore.message", {thread: mention}) as string,
 			ephemeral: true,
 		});
 		return;
 	}
-	const channelId = threadOption?.channel?.name;
 	await interaction.reply({
-		content: i18next.t("commands.success", { channel: channelId }) as string,
+		content: i18next.t("commands.success", { channel: mention }) as string,
 		ephemeral: true,
 	});
 	if (!interaction.guild) return;
