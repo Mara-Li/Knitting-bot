@@ -4,12 +4,14 @@ import {
 	ForumChannel,
 	GuildMember,
 	GuildMemberRoleManager,
+	MessageFlags, MessagePayloadOption,
 	Role,
 	TextChannel,
 	ThreadChannel,
 	ThreadMember,
 } from "discord.js";
 import * as process from "process";
+import { emoji } from "./index";
 import { CommandName, get, getFollow, getIgnored, TypeName } from "./maps";
 
 
@@ -46,13 +48,9 @@ export async function addUserToThread(thread: ThreadChannel, user: GuildMember) 
 		if (!get(CommandName.followOnlyRole) && !checkMemberRoleNotIgnored(user.roles)) {
 			await thread.members.add(user);
 			logInDev(`Add @${user.user.username} to #${thread.name}`);
-			const msg = await thread.send(`<@${user.id}>`);
-			await msg.delete();
 		} else if (get(CommandName.followOnlyRole) && checkIfMemberRoleIsFollowed(user.roles)) {
 			await thread.members.add(user);
 			logInDev(`Add @${user.user.username} to #${thread.name}`);
-			const msg = await thread.send(`<@${user.id}>`);
-			await msg.delete();
 		}
 	}
 }
@@ -221,8 +219,13 @@ export async function addRoleAndUserToThread(thread: ThreadChannel) {
 		});
 	}
 	if (toPing.length > 0) {
-		await thread.send(toPing.map(member => `<@${member.id}>`).join(" "));
-		await thread.delete();
+		const messagePayload: MessagePayloadOption = {
+			content: emoji,
+			flags: MessageFlags.SuppressNotifications
+		};
+		const message = await thread.send(messagePayload);
+		await message.edit(toPing.map(member => `<@${member.id}>`).join(" "));
+		await message.delete();
 	}
 }
 
