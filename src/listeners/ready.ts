@@ -18,6 +18,7 @@ export default (client: Client): void => {
 		const serializeCmds = commands.map( (command) => {
 			return command.data.toJSON();
 		});
+		logInDev("serializeCmds", serializeCmds);
 		for (const guild of client.guilds.cache.values()) {
 			logInDev(`Load in ${guild.name}`);
 			//delete all commands
