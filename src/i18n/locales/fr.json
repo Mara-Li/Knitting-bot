@@ -1,7 +1,7 @@
 {
   "commands": {
     "description": "Permet de mettre à jour manuellement les threads en ajoutant les utilisateurs manquants.",
-    "error": "Cette commande ne peut être utilisée que dans un thread.",
+    "error": "Cette commande ne peut être utilisée que dans ou pour un thread.",
     "help": {
       "all": "- `/update tout` : Pour ajouter sur tous les threads du serveur.\n",
       "desc": "Met à jour manuellement les threads en ajoutant les utilisateurs manquants, avec l'aide des commandes ci-dessous :\n",
@@ -37,7 +37,7 @@
     "error": "Une erreur est apparue : {{error}}",
     "forum": "Forum",
     "here": "ici",
-    "list": "list",
+    "list": "liste",
     "no": "Non",
     "none": "/",
     "role": "Rôles",
@@ -56,9 +56,16 @@
       "option": "Active ou désactive le mode manuel"
     },
     "follow": {
-      "description": "Le bot ne mettra à jour uniquement sur certains rôle/channel/…",
-      "name": "follow-only",
-      "title": "Mode suivi uniquement"
+      "role": {
+        "description": "Ne mettre à jour le channel que pour un rôle spécifique",
+        "name": "follow-only-role",
+        "title": "Mode Rôle uniquement"
+      },
+      "thread": {
+        "description": "Suivre uniquement le channel et mettre à jour pour tous les rôles",
+        "name": "follow-only-channel",
+        "title": "Mode channel uniquement"
+      }
     },
     "language": {
       "description": "Modifie la langue du bot",
@@ -112,6 +119,7 @@
     "description": "Mise à jour uniquement sur les rôles/canaux suivis",
     "disabled": "Vous ne pouvez pas utiliser ces commandes : le mode \"follow-only\" est désactivé.",
     "list": {
+      "description": "Affiche les rôles et les channels suivis",
       "title": "Suivi"
     },
     "role": {
@@ -143,7 +151,7 @@
     "role": {
       "added": "Role {{- role}} ignoré.",
       "description": "Exclure un rôle des mises-à-jours",
-      "error": "{{- role}} introuvable",
+      "error": "{{- role}} est introuvable",
       "option": "Selectionner le rôle à inclure/exclure",
       "removed": "Role {{- role}} dés-ignoré !"
     },

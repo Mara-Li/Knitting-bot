@@ -80,13 +80,33 @@ export default {
 		)
 		.addSubcommand((subcommand) =>
 			subcommand
-				.setName(en("configuration.follow.name"))
+				.setName(en("configuration.follow.role.name"))
 				.setNameLocalizations({
-					fr: fr("configuration.follow.name"),
+					fr: fr("configuration.follow.role.name"),
 				})
-				.setDescription(en("configuration.follow.description"))
+				.setDescription(en("configuration.follow.role.description"))
 				.setDescriptionLocalizations({
-					fr: fr("configuration.follow.description"),
+					fr: fr("configuration.follow.role.description"),
+				})
+				.addBooleanOption((option) =>
+					option
+						.setName("switch")
+						.setDescription("Only follow role and update all channels")
+						.setDescriptionLocalizations({
+							fr: fr("configuration.switch"),
+						})
+						.setRequired(true)
+				)
+		)
+		.addSubcommand((subcommand) =>
+			subcommand
+				.setName(en("configuration.follow.thread.name"))
+				.setNameLocalizations({
+					fr: fr("configuration.follow.thread.name"),
+				})
+				.setDescription(en("configuration.follow.thread.description"))
+				.setDescriptionLocalizations({
+					fr: fr("configuration.follow.thread.description"),
 				})
 				.addBooleanOption((option) =>
 					option
@@ -188,7 +208,8 @@ export default {
 				"on-thread-created": CommandName.thread,
 				"on-channel-update": CommandName.channel,
 				"on-new-member": CommandName.newMember,
-				"follow-only" : CommandName.followOnly,
+				"follow-only-role" : CommandName.followOnlyRole,
+				"follow-only-channel" : CommandName.followOnlyChannel,
 			};
 			if (commands === DefaultMenuBuilder.language) {
 				const newValue = options.getString(CommandName.language) ?? "en";
@@ -237,10 +258,16 @@ export default {
 					mapsCommands[DefaultMenuBuilder.thread],
 					options.getBoolean("switch") ?? false
 				);
-			} else if (commands === DefaultMenuBuilder.followOnly) {
+			} else if (commands === DefaultMenuBuilder.followOnlyRole) {
 				await getBooleanAndReply(
 					interaction,
-					mapsCommands[DefaultMenuBuilder.followOnly],
+					mapsCommands[DefaultMenuBuilder.followOnlyRole],
+					options.getBoolean("switch") ?? false
+				);
+			} else if (commands === DefaultMenuBuilder.followOnlyChannel) {
+				await getBooleanAndReply(
+					interaction,
+					mapsCommands[DefaultMenuBuilder.followOnlyChannel],
 					options.getBoolean("switch") ?? false
 				);
 			} else if (commands === DefaultMenuBuilder.show) {
@@ -276,9 +303,13 @@ async function getBooleanAndReply(
 			"**__" +
 			i18next.t("configuration.newMember.title").toLowerCase() +
 			"__**",
-		followOnly:
+		followOnlyChannel:
 			"**__" +
-			i18next.t("configuration.follow.description").toLowerCase() +
+			i18next.t("configuration.follow.thread.description").toLowerCase() +
+			"__**",
+		followOnlyRole:
+			"**__" +
+			i18next.t("configuration.follow.role.description").toLowerCase() +
 			"__**",
 	};
 	if (value) {
@@ -319,11 +350,21 @@ export async function display(interaction: CommandInteraction) {
 			{
 				name: i18next.t("configuration.language.name"),
 				value: languageValue[get(CommandName.language) as string]
+			})
+		
+		.addFields({ name: "\u200A", value: "\u200A" })
+		.addFields(
+			{
+				name: i18next.t("configuration.follow.role.title"),
+				value: enabledOrDisabled(get(CommandName.followOnlyRole)),
+				inline: true,
 			},
 			{
-				name: i18next.t("configuration.follow.title"),
-				value: enabledOrDisabled(get(CommandName.followOnly)),
+				name: i18next.t("configuration.follow.thread.title"),
+				value: enabledOrDisabled(get(CommandName.followOnlyChannel)),
+				inline: true,
 			})
+		.addFields({ name: "\u200A", value: "\u200A" })
 		.addFields(
 			{
 				name: i18next.t("configuration.channel.title"),

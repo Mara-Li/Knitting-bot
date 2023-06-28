@@ -1,4 +1,4 @@
-## Knitting
+# Knitting
 
 →  [Traduction française](README_FR.md)
 
@@ -19,15 +19,54 @@ The bot will automatically add a user to a thread when:
 
 The bot won't do anything when joining the server. If you want to update all threads, you can use the slash command `/update-all-threads` (see below).
 
-### Slash Commands
+## Slash Commands
 
+### Configuration 
+
+The slash command `/config` allows you to configure the bot. You can: 
+- Change the language (English or French)
+- Disable/Enable all events (new members, members update permission, new thread created or channel/category permission update).
+- It is possible to disable all events with `/config manual-mode`. In this mode, you need to use the slash commands to update the threads.
+- Activate the `follow-only` modes:
+  - `follow-only-channel` : Will only update on specific channels (you need to set them with `/follow channel [channel]`)
+  - `follow-only-role` : Will only update on specifics roles (you need to set them with `/follow role [role]`)
+
+### Follow
+
+Allow to only "ping" specific channels or roles. You can use the slash commands:
+- `/follow channel [channel]` : Add a channel to the list of followed channels
+- `/follow role [role]` : Add a role to the list of followed roles
+- `/follow list` : List all followed channels and roles
+
+> **Note**  
+> To unfollow a channel, you need to redo the command with the same channel. Same for the role.
+
+### Ignore
+
+The exact opposite of the follow command. It won't ping the channels or roles ignored.
+- `/ignore channel [channel]` : Add a channel to the list of ignored channels
+- `/ignore role [role]` : Add a role to the list of ignored roles
+- `/ignore list` : List all ignored channels and roles
+
+> **Note**  
+> To un-ignore a channel, you need to redo the command with the same channel. Same for the role.
+
+> **Warning**  
+> You can't follow and ignore "role" or "channel" at the same time. 
+> For example:
+> - If the `only-channel` mode is activated, you can't ignore a channel.
+> - If the `only-role` mode is activated, you can't ignore a role.
+> Factually, the `follow` commands will ignore all un-specified channels/roles.
+
+
+### Update
 If you want to manually update a thread, you can use the slash commands: 
 - `/update thread [thread]` : Update a specific thread
 - `/update all` : Update all threads in the server
 - `/update here` : Update the thread where the command is used
 - `/update help` : Get help about the manual slash commands
 
-These commands don't appear for user that doesn't have the `manage thread` permission.
+These commands don't appear for user that haven't the `manage thread` permission.
 
 > **Warning**  
 > It will re-add all users that leave the thread, even if they left it on purpose.
@@ -38,21 +77,15 @@ These commands don't appear for user that doesn't have the `manage thread` permi
 
 More over, you can configure the bot and disable event that you don't want to use. You can do that with the `/config` command. You can see the configuration with `/config show`
 
-#### Configuration 
-
-The slash command `/config` allows you to configure the bot. You can: 
-- Change the language (English or French)
-- Disable/Enable all events (new members, members update permission, new thread created or channel/category permission update).
-- It is possible to disable all events with `/config manual-mode`. In this mode, you need to use the slash commands to update the threads.
 
 ### How it's work
-
-The bot will send a message containing "//", edit it with the list of users/roles that can see the thread, and then delete the message. As the user was mentioned, the thread will be visible for them, and only **one** message will be sent.
 
 For some optimization purpose, the bot will first @role when a thread must be updated. After it will check if some users (that don't have role/allowed role) can see the thread and add them.
 Moreover, if there is no role in the server, the bot process on the members list instead.
 
 Note that role will be mentioned if some users that have the role aren't in the thread. 
+
+After making the list of user/role to ping, the user will send a message with a ping to these user and roles. If there is no member to add, nothing will be sent! 
 
 ### Permission asked
 
@@ -78,7 +111,6 @@ It can look like this:
 BOT_TOKEN=your_token
 CLIENT_ID=your_client_id
 NODE_ENV=development # or production
-MESSAGE= #N'importe quoi
 ```
 
 > **Note**  
@@ -89,7 +121,6 @@ MESSAGE= #N'importe quoi
 - `BOT_TOKEN` is the token of the bot that you can get in `Bot` > `Reset token` in the discord developer portal.
 - `CLIENT_ID` is the client id of the bot, you can get it from `General Information` > `Client ID` in the discord developer portal.
 - `NODE_ENV` is the environment of the bot. It can be `development` or `production`. If you are in development, the bot will log a lot of event. If you are in production, the bot will log only errors.
-- `MESSAGE` : The message you want to send when waiting for the list of users/roles. You can use a simple message, an emoji, stickers or external emoji. Beware of them. The bot must be on the server where the emoji is (but it can use it everywhere).
 
 
 The bot uses Enmap to store data. You can find the documentation [here](https://enmap.evie.dev/). You need a special installation for it, so follow the instructions [here](https://enmap.evie.dev/install). 

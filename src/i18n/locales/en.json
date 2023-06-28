@@ -1,7 +1,7 @@
 {
   "commands": {
     "description": "Update the threads manually with adding missing users",
-    "error": "This command can only be used in a thread.",
+    "error": "This command can only be used in or for a thread.",
     "help": {
       "all": "- `/update all`: to add on all threads of the guild.\n",
       "desc": "Update the threads manually with adding missing users, using these commands:\n",
@@ -56,9 +56,16 @@
       "option": "Enable or disable the manual mode"
     },
     "follow": {
-      "description": "The bot will only update on specific role/channel/…",
-      "name": "follow-only",
-      "title": "Mode follow only"
+      "role": {
+        "description": "Only update channel for specific role",
+        "name": "follow-only-role",
+        "title": "Mode Role only"
+      },
+      "thread": {
+        "description": "Only follow channel and update for all rol",
+        "name": "follow-only-channel",
+        "title": "Mode channel only"
+      }
     },
     "language": {
       "description": "Change the bot language",
@@ -112,6 +119,7 @@
     "description": "Update only on the followed role/channels",
     "disabled": "You can't use these commands : the follow-only mode is disabled.",
     "list": {
+      "description": "Display the followed channels or roles",
       "title": "Follow"
     },
     "role": {
@@ -143,7 +151,7 @@
     "role": {
       "added": "Role {{- role}} ignored.",
       "description": "Exclude role from update",
-      "error": "{{- role }} not found",
+      "error": "{{- role }} is not found",
       "option": "Select role to exclude/include",
       "removed": "Role {{- role}} un-ignored!"
     },
