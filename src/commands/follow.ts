@@ -1,3 +1,4 @@
+import { roleMention } from "@discordjs/formatters";
 import {
 	CategoryChannel,
 	CommandInteraction,
@@ -19,7 +20,7 @@ const en = i18next.getFixedT("en");
 export default {
 	data: new SlashCommandBuilder()
 		.setName("follow")
-		.setDescription("follow.description")
+		.setDescription(en("follow.description"))
 		.setDescriptionLocalizations({
 			fr: fr("follow.description"),
 		})
@@ -54,7 +55,10 @@ export default {
 				.setNameLocalizations({
 					fr: fr("common.role").toLowerCase(),
 				})
-				.setDescription("follow.role.description")
+				.setDescription(en("follow.role.description"))
+				.setDescriptionLocalizations({
+					fr: fr("follow.role.description"),
+				})
 				.addRoleOption((option) =>
 					option
 						.setName(en("common.role").toLowerCase())
@@ -70,25 +74,39 @@ export default {
 		)
 		.addSubcommand((subcommand) =>
 			subcommand
-				.setName("list")
-				.setDescription("placeholder")
+				.setName(en("common.list"))
+				.setNameLocalizations({
+					fr: fr("common.list"),
+				})
+				.setDescription(en("follow.list.description"))
+				.setDescriptionLocalizations({
+					fr: fr("follow.list.description"),
+				})
 		),
 	async execute(interaction: CommandInteraction) {
 		if (!interaction.guild) return;
 		const options = interaction.options as CommandInteractionOptionResolver;
 		const commands = options.getSubcommand();
-		if (!get(CommandName.followOnly)) {
-			await interaction.reply({
-				content: i18next.t("follow.disabled") as string,
-				ephemeral: true,
-			});
-			return;
-		}
+		logInDev("follow", commands);
 		switch (commands) {
 		case "thread":
+			if (!get(CommandName.followOnlyChannel)) {
+				await interaction.reply({
+					content: i18next.t("follow.disabled") as string,
+					ephemeral: true,
+				});
+				return;
+			}
 			await followText(interaction);
 			break;
-		case "role":
+		case (en("common.role").toLowerCase()):
+			if (!get(CommandName.followOnlyRole)) {
+				await interaction.reply({
+					content: i18next.t("follow.disabled") as string,
+					ephemeral: true,
+				});
+				return;
+			}
 			await followThisRole(interaction);
 			break;
 		case "list":
@@ -143,7 +161,8 @@ async function displayFollowed(interaction: CommandInteraction) {
 }
 
 async function followThisRole(interaction: CommandInteraction) {
-	const role = interaction.options.get("role");
+	const role = interaction.options.get(en("common.role").toLowerCase());
+	logInDev("role", role);
 	if (!role || !(role.role instanceof Role)) {
 		await interaction.reply({
 			content: i18next.t("ignore.role.error", {role: role}) as string,
@@ -156,6 +175,7 @@ async function followThisRole(interaction: CommandInteraction) {
 	const isAlreadyFollowed = followedRoles.some(
 		(followedRole: Role) => followedRole.id === role.role?.id
 	);
+	const mention = roleMention(role.role?.id ?? "");
 	if (isAlreadyFollowed) {
 		//remove from follow list
 		const newFollowRoles: Role[] = followedRoles.filter(
@@ -163,7 +183,7 @@ async function followThisRole(interaction: CommandInteraction) {
 		);
 		setFollow(TypeName.role, newFollowRoles);
 		await interaction.reply({
-			content: i18next.t("follow.role.removed", {role: role}) as string,
+			content: i18next.t("follow.role.removed", {role: mention}) as string,
 			ephemeral: true,
 		});
 	} else {
@@ -171,7 +191,7 @@ async function followThisRole(interaction: CommandInteraction) {
 		followedRoles.push(role.role);
 		setFollow(TypeName.role, followedRoles);
 		await interaction.reply({
-			content: i18next.t("follow.role.added", {role: role}) as string,
+			content: i18next.t("follow.role.added", {role: mention}) as string,
 			ephemeral: true,
 		});
 	}

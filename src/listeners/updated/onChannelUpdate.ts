@@ -25,7 +25,7 @@ export default (client: Client): void => {
 		logInDev(`Updating threads of ${newChannel.name}`);
 		const threads = await newChannel.threads.cache;
 		threads.forEach(thread => {
-			if (!get(CommandName.followOnly)) {
+			if (!get(CommandName.followOnlyChannel)) {
 				if (!checkIfThreadIsIgnored(thread)) addRoleAndUserToThread(thread);
 			} else {
 				if (checkIfThreadIsIgnored(thread)) addRoleAndUserToThread(thread);

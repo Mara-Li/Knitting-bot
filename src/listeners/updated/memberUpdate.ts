@@ -2,10 +2,10 @@ import { Client, ThreadChannel } from "discord.js";
 import { CommandName, get } from "../../maps";
 import {
 	addUserToThread,
-	checkIfRoleIsFollowed, checkIfTheadIsFollowed,
+	checkIfMemberRoleIsFollowed,
+	checkIfTheadIsFollowed,
 	checkIfThreadIsIgnored,
-	checkIfUserNotInTheThread,
-	checkRoleNotIgnored,
+	checkMemberRoleNotIgnored,
 	logInDev,
 } from "../../utils";
 
@@ -21,17 +21,18 @@ export default (client: Client): void => {
 			
 			for (const channel of channels.values()) {
 				const threadChannel = channel as ThreadChannel;
-				if (!get(CommandName.followOnly)) {
-					if (await checkIfUserNotInTheThread(threadChannel, newMember) && !checkIfThreadIsIgnored(threadChannel) && !checkRoleNotIgnored(newMember.roles)) {
-						await addUserToThread(threadChannel, newMember);
-					}
+				const roleIsAllowed = checkIfMemberRoleIsFollowed(newMember.roles) && !checkMemberRoleNotIgnored(newMember.roles);
+				if (!get(CommandName.followOnlyChannel)) {
+				/**
+				 * followOnlyChannel is disabled && followOnlyRole can be enabled or disabled
+				 */
+					if (!checkIfThreadIsIgnored(threadChannel) && roleIsAllowed) await addUserToThread(threadChannel, newMember);
 				} else {
-					const threadFollowed = checkIfTheadIsFollowed(threadChannel);
-					const followedRole = checkIfRoleIsFollowed(newMember.roles);
-					const notInThread = await checkIfUserNotInTheThread(threadChannel, newMember);
-					if (threadFollowed && followedRole && notInThread) {
-						await addUserToThread(threadChannel, newMember);
-					}
+				/**
+				 * followOnlyChannel is enabled && followOnlyRole can be enabled or disabled
+				 */
+					const followedThread = checkIfTheadIsFollowed(threadChannel);
+					if (roleIsAllowed && followedThread) await addUserToThread(threadChannel, newMember);
 				}
 			}
 		} catch (error) {

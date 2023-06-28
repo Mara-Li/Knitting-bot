@@ -93,10 +93,13 @@ export default {
 		case en("common.here"):
 			await updateThisThread(interaction);
 			break;
-		case en("common.thread"):
+		case en("common.thread").toLowerCase():
 			await updateSpecificThread(interaction);
 			break;
 		case en("commands.help.name"):
+			await displayHelp(interaction);
+			break;
+		default:
 			await displayHelp(interaction);
 		}
 	},
@@ -114,7 +117,7 @@ async function updateAllThreads(interaction: CommandInteraction) {
 	const count = threads.size;
 	for (const thread of threads.values()) {
 		const threadChannel = thread as ThreadChannel;
-		if (!get(CommandName.followOnly)) {
+		if (!get(CommandName.followOnlyChannel)) {
 			if (!checkIfThreadIsIgnored(threadChannel)) {
 				await addRoleAndUserToThread(threadChannel);
 			}
@@ -141,7 +144,7 @@ async function updateThisThread(interaction: CommandInteraction) {
 		});
 		return;
 	}
-	const isFollowed = get(CommandName.followOnly) && checkIfTheadIsFollowed(interaction.channel);
+	const isFollowed = get(CommandName.followOnlyChannel) && checkIfTheadIsFollowed(interaction.channel);
 	if (checkIfThreadIsIgnored(interaction.channel) || !isFollowed) {
 		await interaction.reply({
 			content: i18next.t("ignore.message", {thread: channelMention(interaction.channel.id)}) as string,
@@ -170,9 +173,16 @@ async function updateThisThread(interaction: CommandInteraction) {
 }
 
 async function updateSpecificThread(interaction: CommandInteraction) {
-	const threadOption = interaction.options.get(i18next.t("common.thread") as string);
+	const threadOption = interaction.options.get(i18next.t("common.thread").toLowerCase() as string);
 	const mention = threadOption?.channel ? channelMention(threadOption.channel.id) : "";
-	const isFollowed = get(CommandName.followOnly) && checkIfTheadIsFollowed(threadOption?.channel as ThreadChannel);
+	if (!threadOption?.channel) {
+		await interaction.reply({
+			content: i18next.t("commands.error") as string,
+			ephemeral: true,
+		});
+		return;
+	}
+	const isFollowed = get(CommandName.followOnlyChannel) && checkIfTheadIsFollowed(threadOption?.channel as ThreadChannel);
 	if (checkIfThreadIsIgnored(threadOption?.channel as ThreadChannel) || !isFollowed) {
 		await interaction.reply({
 			content: i18next.t("ignore.message", {thread: mention}) as string,

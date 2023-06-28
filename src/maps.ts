@@ -13,7 +13,8 @@ export enum CommandName {
 	thread = "onThreadCreated",
 	channel = "onChannelUpdate",
 	newMember = "onNewMember",
-	followOnly = "followOnly",
+	followOnlyRole = "followOnlyRole",
+	followOnlyChannel = "followOnlyChannel",
 }
 
 export enum TypeName {
@@ -75,7 +76,7 @@ export function setFollow(
 export function get(name: CommandName): any {
 	if (name === CommandName.language) {
 		return optionMaps.get(name) || "en";
-	} else if (name === CommandName.followOnly) {
+	} else if (name === CommandName.followOnlyRole || name === CommandName.followOnlyChannel) {
 		return optionMaps.get(name) ?? false;
 	}
 	return optionMaps.get(name) ?? true;

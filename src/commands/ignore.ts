@@ -92,18 +92,25 @@ export default {
 		/**
 		 * Verify if the "follow-only" mode is enabled ; return error if it is
 		 */
-		if (get(CommandName.followOnly)) {
-			await interaction.reply({
-				content: i18next.t("ignore.followError") as string,
-				ephemeral: true,
-			});
-			return;
-		}
 		switch (commands) {
 		case "thread":
+			if (get(CommandName.followOnlyChannel)) {
+				await interaction.reply({
+					content: i18next.t("ignore.followError") as string,
+					ephemeral: true,
+				});
+				return;
+			}
 			await ignoreText(interaction);
 			break;
-		case "role":
+		case en("common.role").toLowerCase():
+			if (get(CommandName.followOnlyRole)) {
+				await interaction.reply({
+					content: i18next.t("ignore.followError") as string,
+					ephemeral: true,
+				});
+				return;
+			}
 			await ignoreThisRole(interaction);
 			break;
 		case "list":
@@ -158,8 +165,7 @@ async function listIgnored(interaction: CommandInteraction) {
 }
 
 async function ignoreThisRole(interaction: CommandInteraction) {
-	const role = interaction.options.get("role");
-
+	const role = interaction.options.get(en("common.role").toLowerCase());
 	if (!role || !(role.role instanceof Role)) {
 		await interaction.reply({
 			content: i18next.t("ignore.role.error", {role: role?.name}) as string,

@@ -1,17 +1,15 @@
 import {
 	CategoryChannel,
-	Collection, ForumChannel,
+	Collection,
+	ForumChannel,
 	GuildMember,
 	GuildMemberRoleManager,
-	MessageFlags,
-	MessagePayloadOption,
 	Role,
 	TextChannel,
 	ThreadChannel,
 	ThreadMember,
 } from "discord.js";
 import * as process from "process";
-import { emoji } from "./index";
 import { CommandName, get, getFollow, getIgnored, TypeName } from "./maps";
 
 
@@ -45,14 +43,17 @@ export function getMemberPermission(members: Collection<string, GuildMember>, th
 
 export async function addUserToThread(thread: ThreadChannel, user: GuildMember) {
 	if (thread.permissionsFor(user).has("ViewChannel", true) && await checkIfUserNotInTheThread(thread, user)) {
-		const messagePayload : MessagePayloadOption = {
-			content: emoji,
-			flags: MessageFlags.SuppressNotifications,
-		};
-		const message = await thread.send(messagePayload);
-		await message.edit(`<@${user.id}>`);
-		await message.delete();
-		logInDev(`Add @${user.user.username} to #${thread.name}`);
+		if (!get(CommandName.followOnlyRole) && !checkMemberRoleNotIgnored(user.roles)) {
+			await thread.members.add(user);
+			logInDev(`Add @${user.user.username} to #${thread.name}`);
+			const msg = await thread.send(`<@${user.id}>`);
+			await msg.delete();
+		} else if (get(CommandName.followOnlyRole) && checkIfMemberRoleIsFollowed(user.roles)) {
+			await thread.members.add(user);
+			logInDev(`Add @${user.user.username} to #${thread.name}`);
+			const msg = await thread.send(`<@${user.id}>`);
+			await msg.delete();
+		}
 	}
 }
 
@@ -65,8 +66,13 @@ export async function getUsersToPing(thread: ThreadChannel, members: GuildMember
 	const usersToBeAdded: GuildMember[] = [];
 	for (const member of members) {
 		if (thread.permissionsFor(member).has("ViewChannel", true) && await checkIfUserNotInTheThread(thread, member)) {
-			usersToBeAdded.push(member);
-			logInDev(`Add @${member.user.username} to #${thread.name}`);
+			if (get(CommandName.followOnlyRole) && checkIfMemberRoleIsFollowed(member.roles)) {
+				usersToBeAdded.push(member);
+				logInDev(`Add @${member.user.username} to #${thread.name}`);
+			} else if (!get(CommandName.followOnlyRole) && !checkMemberRoleNotIgnored(member.roles)) {
+				usersToBeAdded.push(member);
+				logInDev(`Add @${member.user.username} to #${thread.name}`);
+			}
 		}
 	}
 	return usersToBeAdded;
@@ -84,24 +90,19 @@ export async function getRoleToPing(thread: ThreadChannel, roles: Role[]) {
 		const membersInTheThread = await thread.members.fetch();
 		const membersOfTheRoleNotInTheThread = role.members.filter(member => !membersInTheThread.has(member.id));
 		if (role.name !== "@everyone" && thread.permissionsFor(role).has("ViewChannel", true) && role.members.size >0 && membersOfTheRoleNotInTheThread.size > 0) {
-			roleToBeAdded.push(role);
-			logInDev(`Add @${role.name} to #${thread.name}`);
+			if (get(CommandName.followOnlyRole) && checkIfRoleIsFollowed(role)) {
+				roleToBeAdded.push(role);
+				logInDev(`Add @${role.name} to #${thread.name}`);
+			} else if (!get(CommandName.followOnlyRole) && !checkRoleNotIgnored(role)) {
+				roleToBeAdded.push(role);
+				logInDev(`Add @${role.name} to #${thread.name}`);
+			}
 		}
 	}
 	return roleToBeAdded;
 }
 
-/**
- * Remove a user from a thread, with verification the permission
- * @param {ThreadChannel} thread The thread to remove the user
- * @param {GuildMember} member The member to remove from the thread
- */
-export async function removeUserFromThread(thread: ThreadChannel, member: GuildMember) {
-	if (!thread.permissionsFor(member).has("ViewChannel", true)) {
-		await thread.members.remove(member.id);
-		logInDev(`Remove @${member.user.username} from #${thread.name}`);
-	}
-}
+
 
 /**
  * Check if a user is not in the thread
@@ -123,16 +124,28 @@ export async function checkIfUserNotInTheThread(thread: ThreadChannel, memberToC
  * @param role {GuildMemberRoleManager} The roles of the member to check
  * @returns {boolean} Return true if the member has a role that is ignored
  */
-export function checkRoleNotIgnored(role: GuildMemberRoleManager) {
+export function checkMemberRoleNotIgnored(role: GuildMemberRoleManager) {
 	const allIgnoredRoles = getIgnored(TypeName.role) as Role[] || [];
 	const allMemberRoles = role.cache;
 	return allMemberRoles.some(memberRole => allIgnoredRoles.some(ignoredRole => ignoredRole.id === memberRole.id));
 }
 
-export function checkIfRoleIsFollowed(role: GuildMemberRoleManager) {
+export function checkRoleNotIgnored(role: Role) {
+	const allIgnoredRoles = getIgnored(TypeName.role) as Role[] || [];
+	return allIgnoredRoles.some(ignoredRole => ignoredRole.id === role.id);
+}
+
+export function checkIfMemberRoleIsFollowed(role: GuildMemberRoleManager) {
+	if (get(CommandName.followOnlyRole) === "false") return true;
 	const allFollowedRoles = getFollow(TypeName.role) as Role[] || [];
 	const allMemberRoles = role.cache;
 	return allMemberRoles.some(memberRole => allFollowedRoles.some(followedRole => followedRole.id === memberRole.id));
+}
+
+export function checkIfRoleIsFollowed(role: Role) {
+	if (get(CommandName.followOnlyRole) === "false") return true;
+	const allFollowedRoles = getFollow(TypeName.role) as Role[] || [];
+	return allFollowedRoles.some(followedRole => followedRole.id === role.id);
 }
 
 /**
@@ -185,11 +198,7 @@ export async function addRoleAndUserToThread(thread: ThreadChannel) {
 		})
 		.toJSON();
 	
-	const messagePayload : MessagePayloadOption = {
-		content: emoji,
-		flags: MessageFlags.SuppressNotifications
-	};
-	const message = await thread.send(messagePayload);
+
 	if (rolesWithAccess.length > 0) {
 		getRoleToPing(thread, rolesWithAccess).then(roles => {
 			roles.forEach(role => {
@@ -211,15 +220,10 @@ export async function addRoleAndUserToThread(thread: ThreadChannel) {
 			toPing.push(...users);
 		});
 	}
-	let allMemberToPing: GuildMember[];
-	//remove all member that have a role that is ignored
-	if (!get(CommandName.followOnly)) allMemberToPing = toPing.filter(member => !checkRoleNotIgnored(member.roles));
-	else allMemberToPing = toPing.filter(member => checkIfRoleIsFollowed(member.roles));
-	if (allMemberToPing.length > 0) {
-		await message.edit(allMemberToPing.map(member => `<@${member.id}>`).join(" "));
+	if (toPing.length > 0) {
+		await thread.send(toPing.map(member => `<@${member.id}>`).join(" "));
+		await thread.delete();
 	}
-	await message.delete();
-
 }
 
 export function logInDev(...text: unknown[]) {

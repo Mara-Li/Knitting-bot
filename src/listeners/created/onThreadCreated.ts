@@ -14,7 +14,7 @@ export default (client: Client): void => {
 		if (thread.type !== ChannelType.PublicThread) return;
 		if (get(CommandName.thread) === false) return;
 		logInDev(`Thread ${thread.name} created!`);
-		if (!get(CommandName.followOnly)) {
+		if (!get(CommandName.followOnlyChannel)) {
 			if (!checkIfThreadIsIgnored(thread)) await addRoleAndUserToThread(thread);
 		} else {
 			if (checkIfTheadIsFollowed(thread)) await addRoleAndUserToThread(thread);
