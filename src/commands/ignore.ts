@@ -14,7 +14,6 @@ import {
 import { default as i18next } from "../i18n/i18next";
 import { getConfig, getMaps, getRole, getRoleIn, setIgnore, setRole } from "../maps";
 import { TypeName, CommandName } from "../interface";
-import {logInDev } from "../utils";
 import { interactionRoleInChannel } from "./utils";
 
 const fr = i18next.getFixedT("fr");
