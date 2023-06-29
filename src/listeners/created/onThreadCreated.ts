@@ -1,7 +1,7 @@
 import { ChannelType, Client, ThreadChannel } from "discord.js";
-import { get } from "../../maps";
+import { getConfig } from "../../maps";
 import { CommandName } from "../../interface";
-import { addRoleAndUserToThread, checkIfTheadIsFollowed, checkIfThreadIsIgnored, logInDev } from "../../utils";
+import { addRoleAndUserToThread, checkThread, checkIfThreadIsIgnored, logInDev } from "../../utils";
 
 /**
  * @param {Client} client - Discord.js Client
@@ -13,12 +13,12 @@ export default (client: Client): void => {
 	client.on("threadCreate", async (thread: ThreadChannel) => {
 		//return if the thread is not a public thread
 		if (thread.type !== ChannelType.PublicThread) return;
-		if (get(CommandName.thread) === false) return;
+		if (getConfig(CommandName.thread) === false) return;
 		logInDev(`Thread ${thread.name} created!`);
-		if (!get(CommandName.followOnlyChannel)) {
+		if (!getConfig(CommandName.followOnlyChannel)) {
 			if (!checkIfThreadIsIgnored(thread)) await addRoleAndUserToThread(thread);
 		} else {
-			if (checkIfTheadIsFollowed(thread)) await addRoleAndUserToThread(thread);
+			if (checkThread(thread)) await addRoleAndUserToThread(thread);
 		}
 	});
 };

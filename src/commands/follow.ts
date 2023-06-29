@@ -14,7 +14,7 @@ import {
 } from "discord.js";
 import { default as i18next } from "../i18n/i18next";
 import { CommandName, RoleIn, TypeName } from "../interface";
-import { get, getFollow, getRole, getRoleIn, setFollow, setRole, setRoleIn } from "../maps";
+import { getConfig, getFollow, getRole, getRoleIn, setFollow, setRole, setRoleIn } from "../maps";
 import { logInDev } from "../utils";
 
 const fr = i18next.getFixedT("fr");
@@ -129,7 +129,7 @@ export default {
 		logInDev("follow", commands);
 		switch (commands) {
 		case (en("common.channel").toLowerCase()):
-			if (!get(CommandName.followOnlyChannel)) {
+			if (!getConfig(CommandName.followOnlyChannel)) {
 				await interaction.reply({
 					content: i18next.t("follow.disabled") as string,
 					ephemeral: true,
@@ -139,7 +139,7 @@ export default {
 			await followText(interaction);
 			break;
 		case (en("common.role").toLowerCase()):
-			if (!get(CommandName.followOnlyRole)) {
+			if (!getConfig(CommandName.followOnlyRole)) {
 				await interaction.reply({
 					content: i18next.t("follow.disabled") as string,
 					ephemeral: true,
@@ -190,7 +190,7 @@ async function displayFollowed(interaction: CommandInteraction) {
 	const followedRolesNames = "\n- " + followedRoles.map((role) => roleMention(role.id)).join("\n-");
 	const followedForumNames = "\n- " + followedForum.map((forum) => channelMention(forum.id)).join("\n-");
 	let embed: EmbedBuilder;
-	if (get(CommandName.followOnlyChannel)) {
+	if (getConfig(CommandName.followOnlyChannel)) {
 		embed = new EmbedBuilder()
 			.setColor("#2f8e7d")
 			.setTitle(i18next.t("follow.list.title") as string)
@@ -210,18 +210,18 @@ async function displayFollowed(interaction: CommandInteraction) {
 				name: i18next.t("common.forum") as string,
 				value: followedForumNames || i18next.t("common.none") as string,
 			});
-		if (get(CommandName.followOnlyRole)) {
+		if (getConfig(CommandName.followOnlyRole)) {
 			embed.addFields({
 				name: i18next.t("common.role") as string,
 				value: followedRolesNames || i18next.t("common.none") as string,
 			});
 		}
-	} else if (get(CommandName.followOnlyRole)) {
+	} else if (getConfig(CommandName.followOnlyRole)) {
 		embed = new EmbedBuilder()
 			.setColor("#2f8e7d")
 			.setTitle(i18next.t("follow.list.title") as string)
 			.setDescription(followedRolesNames || i18next.t("common.none") as string);
-	} else if (get(CommandName.followOnlyRoleIn)) {
+	} else if (getConfig(CommandName.followOnlyRoleIn)) {
 		embed = new EmbedBuilder()
 			.setColor("#2f8e7d")
 			.setTitle(i18next.t("follow.list.title") as string)
@@ -299,14 +299,14 @@ async function followText(interaction: CommandInteraction) {
  * @param interaction {CommandInteraction} The interaction that triggered the command
  */
 async function followRoleInChannel(interaction: CommandInteraction) {
-	if (get(CommandName.followOnlyChannel) || get(CommandName.followOnlyRole)) {
+	if (getConfig(CommandName.followOnlyChannel) || getConfig(CommandName.followOnlyRole)) {
 		await interaction.reply({
 			content: "You can't use this command with the other follow-only mode.",
 			ephemeral: true,
 		});
 		return;
 	}
-	if (!get(CommandName.followOnlyRoleIn)) {
+	if (!getConfig(CommandName.followOnlyRoleIn)) {
 		await interaction.reply({
 			content: "You need to activate the follow-only-role-in mode first.",
 			ephemeral: true,

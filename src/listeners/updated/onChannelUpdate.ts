@@ -1,5 +1,5 @@
 import { ChannelType, Client, Snowflake, TextChannel } from "discord.js";
-import { get } from "../../maps";
+import { getConfig } from "../../maps";
 import { addRoleAndUserToThread, checkIfThreadIsIgnored, logInDev } from "../../utils";
 import { CommandName } from "../../interface";
 
@@ -14,7 +14,7 @@ export default (client: Client): void => {
 	client.on("channelUpdate", async (
 		oldChannel,
 		newChannel) => {
-		if (get(CommandName.channel) === false) return;
+		if (getConfig(CommandName.channel) === false) return;
 		logInDev(`Channel #${getChannelName(oldChannel.id, client)} updated`);
 		if (oldChannel.type !== ChannelType.GuildText
 			|| newChannel.type !== ChannelType.GuildText
@@ -22,11 +22,11 @@ export default (client: Client): void => {
 			logInDev("Channel is not a text channel or permission are not changed");
 			return;
 		}
-		//get all threads of this channel
+		//getConfig all threads of this channel
 		logInDev(`Updating threads of ${newChannel.name}`);
 		const threads = await newChannel.threads.cache;
 		threads.forEach(thread => {
-			if (!get(CommandName.followOnlyChannel)) {
+			if (!getConfig(CommandName.followOnlyChannel)) {
 				if (!checkIfThreadIsIgnored(thread)) addRoleAndUserToThread(thread);
 			} else {
 				if (checkIfThreadIsIgnored(thread)) addRoleAndUserToThread(thread);

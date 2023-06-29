@@ -7,7 +7,7 @@ import {
 } from "discord.js";
 import { default as i18next, languageValue } from "../i18n/i18next";
 import { DefaultMenuBuilder, CommandName } from "../interface";
-import { set, get } from "../maps";
+import { setConfig, getConfig } from "../maps";
 
 const fr = i18next.getFixedT("fr");
 const en = i18next.getFixedT("en");
@@ -227,7 +227,7 @@ export default {
 			};
 			if (commands === DefaultMenuBuilder.language) {
 				const newValue = options.getString(CommandName.language) ?? "en";
-				set(CommandName.language, newValue);
+				setConfig(CommandName.language, newValue);
 				//reload i18next
 				await i18next.changeLanguage(newValue);
 				await interaction.reply(
@@ -241,7 +241,7 @@ export default {
 				const manualMode = !options.getBoolean("switch");
 				for (const command of Object.values(CommandName)) {
 					if (command !== CommandName.language) {
-						set(command, manualMode);
+						setConfig(command, manualMode);
 					}
 				}
 				const rep = options.getBoolean("switch")
@@ -285,7 +285,7 @@ export default {
 					options.getBoolean("switch") ?? false
 				);
 			} else if (commands === DefaultMenuBuilder.followOnlyRoleIn) {
-				if (get(CommandName.followOnlyChannel) || get(CommandName.followOnlyRole)) {
+				if (getConfig(CommandName.followOnlyChannel) || getConfig(CommandName.followOnlyRole)) {
 					await interaction.reply({
 						content: "You can't combine these options",
 						ephemeral: true,
@@ -317,7 +317,7 @@ async function getBooleanAndReply(
 	option: CommandName,
 	value: boolean
 ) {
-	set(option, value);
+	setConfig(option, value);
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const optionTranslation: any = {
 		onMemberUpdate:
@@ -380,36 +380,36 @@ export async function display(interaction: CommandInteraction) {
 		.addFields(
 			{
 				name: i18next.t("configuration.language.name"),
-				value: languageValue[get(CommandName.language) as string]
+				value: languageValue[getConfig(CommandName.language) as string]
 			})
 		
 		.addFields({ name: "\u200A", value: "\u200A" })
 		.addFields(
 			{
 				name: i18next.t("configuration.follow.role.title"),
-				value: enabledOrDisabled(get(CommandName.followOnlyRole)),
+				value: enabledOrDisabled(getConfig(CommandName.followOnlyRole)),
 				inline: true,
 			},
 			{
 				name: i18next.t("configuration.follow.thread.title"),
-				value: enabledOrDisabled(get(CommandName.followOnlyChannel)),
+				value: enabledOrDisabled(getConfig(CommandName.followOnlyChannel)),
 				inline: true,
 			},
 			{
 				name: "Role In",
-				value: enabledOrDisabled(get(CommandName.followOnlyRoleIn)),
+				value: enabledOrDisabled(getConfig(CommandName.followOnlyRoleIn)),
 				inline: true,
 			})
 		.addFields({ name: "\u200A", value: "\u200A" })
 		.addFields(
 			{
 				name: i18next.t("configuration.channel.title"),
-				value: enabledOrDisabled(get(CommandName.channel)),
+				value: enabledOrDisabled(getConfig(CommandName.channel)),
 				inline: true,
 			},
 			{
 				name: i18next.t("configuration.member.title"),
-				value: enabledOrDisabled(get(CommandName.member)),
+				value: enabledOrDisabled(getConfig(CommandName.member)),
 				inline: true,
 			}
 		)
@@ -417,12 +417,12 @@ export async function display(interaction: CommandInteraction) {
 		.addFields(
 			{
 				name: i18next.t("configuration.newMember.display"),
-				value: enabledOrDisabled(get(CommandName.newMember)),
+				value: enabledOrDisabled(getConfig(CommandName.newMember)),
 				inline: true,
 			},
 			{
 				name: i18next.t("configuration.thread.display"),
-				value: enabledOrDisabled(get(CommandName.thread)),
+				value: enabledOrDisabled(getConfig(CommandName.thread)),
 				inline: true,
 			}
 		);

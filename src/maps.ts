@@ -15,7 +15,7 @@ const followOnlyMaps = new Enmap({ name: "FollowOnly" });
  * @param {commandName} name
  * @param {string | boolean} value
  */
-export function set(
+export function setConfig(
 	name: CommandName,
 	value: string 
 	| boolean
@@ -25,7 +25,7 @@ export function set(
 }
 
 /**
- * set value in Emaps "ignore"
+ * setConfig value in Emaps "ignore"
  */
 
 export function setIgnore(
@@ -38,7 +38,7 @@ export function setIgnore(
 }
 
 /**
- * set value in Emaps "followOnly"
+ * setConfig value in Emaps "followOnly"
  */
 
 export function setFollow(
@@ -77,12 +77,12 @@ export function setRoleIn(
 
 /**
  * Get a value in the Emaps "configuration"
- * Return "en" if CommandName.language is not set
- * return true if value is not set (for the other options)
+ * Return "en" if CommandName.language is not setConfig
+ * return true if value is not setConfig (for the other options)
  * @param {CommandName} name
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function get(name: CommandName): any {
+export function getConfig(name: CommandName): any {
 	if (name === CommandName.language) {
 		return optionMaps.get(name) || "en";
 	} else if (name === CommandName.followOnlyRole || name === CommandName.followOnlyChannel || name === CommandName.followOnlyRoleIn) {
@@ -91,32 +91,7 @@ export function get(name: CommandName): any {
 	return optionMaps.get(name) ?? true;
 }
 
-/**
- * Get a value for the Emaps "Ignore"
- * @param ignore {TypeName}
- * @returns {ThreadChannel[] | CategoryChannel[] | Role[] | TextChannel[]}
- */
-export function getIgnored(ignore: TypeName):
-	| ThreadChannel[]
-	| CategoryChannel[]
-	| TextChannel[]
-	| ForumChannel[]{
-	if (!ignoreMaps.has(ignore)) {
-		setIgnore(ignore, []);
-	}
-	switch(ignore) {
-	case TypeName.thread:
-		return ignoreMaps.get(TypeName.thread) as ThreadChannel[] ?? [];
-	case TypeName.category:
-		return ignoreMaps.get(TypeName.category) as CategoryChannel[] ?? [];
-	case TypeName.channel:
-		return ignoreMaps.get(TypeName.channel) as TextChannel[] ?? [];
-	case TypeName.forum:
-		return ignoreMaps.get(TypeName.forum) as ForumChannel[] ?? [];
-	default:
-		return [];
-	}
-}
+
 
 export function getRoleIn(ignore: "follow" | "ignore"):
 	RoleIn[] {
@@ -144,12 +119,25 @@ export function getRole(ignore: "follow" | "ignore"):
 	}
 }
 
+export function getMaps(maps: "follow" | "ignore", typeName: TypeName):
+	| ThreadChannel[]
+	| CategoryChannel[]
+	| TextChannel[]
+	| ForumChannel[] {
+	switch(maps) {
+	case "follow":
+		return getFollow(typeName);
+	case "ignore":
+		return getIgnored(typeName);
+	}
+}
+
 /**
  * Get a value for the Emaps "FollowOnly"
  * @param follow {TypeName}
  * @returns {ThreadChannel[] | CategoryChannel[] | Role[] | TextChannel[]}
  */
-export function getFollow(follow: TypeName):
+function getFollow(follow: TypeName):
 	| ThreadChannel[]
 	| CategoryChannel[]
 	| TextChannel[]
@@ -166,6 +154,33 @@ export function getFollow(follow: TypeName):
 		return followOnlyMaps.get(TypeName.channel) as TextChannel[] ?? [];
 	case TypeName.forum:
 		return followOnlyMaps.get(TypeName.forum) as ForumChannel[] ?? [];
+	default:
+		return [];
+	}
+}
+
+/**
+ * Get a value for the Emaps "Ignore"
+ * @param ignore {TypeName}
+ * @returns {ThreadChannel[] | CategoryChannel[] | Role[] | TextChannel[]}
+ */
+function getIgnored(ignore: TypeName):
+	| ThreadChannel[]
+	| CategoryChannel[]
+	| TextChannel[]
+	| ForumChannel[]{
+	if (!ignoreMaps.has(ignore)) {
+		setIgnore(ignore, []);
+	}
+	switch(ignore) {
+	case TypeName.thread:
+		return ignoreMaps.get(TypeName.thread) as ThreadChannel[] ?? [];
+	case TypeName.category:
+		return ignoreMaps.get(TypeName.category) as CategoryChannel[] ?? [];
+	case TypeName.channel:
+		return ignoreMaps.get(TypeName.channel) as TextChannel[] ?? [];
+	case TypeName.forum:
+		return ignoreMaps.get(TypeName.forum) as ForumChannel[] ?? [];
 	default:
 		return [];
 	}
