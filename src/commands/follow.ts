@@ -3,7 +3,7 @@ import {
 	CategoryChannel,
 	ChannelType,
 	CommandInteraction,
-	CommandInteractionOptionResolver, Embed,
+	CommandInteractionOptionResolver,
 	EmbedBuilder,
 	ForumChannel,
 	PermissionFlagsBits,
