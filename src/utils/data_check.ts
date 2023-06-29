@@ -28,6 +28,13 @@ export async function checkIfUserNotInTheThread(thread: ThreadChannel, memberToC
 	return !threadMemberArray.some(member => member.id === memberToCheck.id);
 }
 
+/**
+ * Verify that the role is allowed by the settings for the thread.
+ * - if on: "ignore" => verify that the role is ignored
+ * - if on: "follow" => verify that the role is followed
+ * @param role {GuildMemberRoleManager} The role to check
+ * @param on {"ignore" | "follow"} The settings map to check
+ */
 export function checkMemberRole(role: GuildMemberRoleManager, on: "ignore" | "follow") {
 	if (on==="follow" && getConfig(CommandName.followOnlyRole) === "false") return true;
 	const roles = getRole(on);
@@ -35,12 +42,27 @@ export function checkMemberRole(role: GuildMemberRoleManager, on: "ignore" | "fo
 	return allMemberRoles.some(memberRole => roles.some(r => r.id === memberRole.id));
 }
 
+/**
+ * Verify that the role is allowed by the settings for the thread.
+ * - if on: "ignore" => verify that the role is ignored
+ * - if on: "follow" => verify that the role is followed
+ * @param role {Role} The role to check
+ * @param on {"ignore" | "follow"} The settings map to check
+ */
 export function checkRole(role: Role, on: "ignore" | "follow") {
 	if (on === "follow" && getConfig(CommandName.followOnlyRole) === "false") return true;
 	const allFollowedRoles = getRole(on);
 	return allFollowedRoles.some(followedRole => followedRole.id === role.id);
 }
 
+/**
+ * Verify that the role is allowed by the settings for a specific thread.
+ * - if on: "ignore" => verify that the role is ignored for the specific thread
+ * - if on: "follow" => verify that the role is followed for the specific thread
+ * @param on {"ignore" | "follow"} The settings map to check
+ * @param roleManager {GuildMemberRoleManager} The role to check
+ * @param thread {ThreadChannel} The thread to check
+ */
 export function checkMemberRoleIn(on: "follow" | "ignore", roleManager: GuildMemberRoleManager, thread: ThreadChannel) {
 	if (on === "follow" && !getConfig(CommandName.followOnlyRoleIn)) return true;
 	logInDev(`THREAD CHECKED : ${thread.name}`);
@@ -60,6 +82,14 @@ export function checkMemberRoleIn(on: "follow" | "ignore", roleManager: GuildMem
 	});
 }
 
+/**
+ * Verify that the role is allowed by the settings for a specific thread.
+ * - if on: "ignore" => verify that the role is ignored for the specific thread
+ * - if on: "follow" => verify that the role is followed for the specific thread
+ * @param on {"ignore" | "follow"} The settings map to check
+ * @param role {Role} The role to check
+ * @param thread {ThreadChannel} The thread to check
+ */
 export function checkRoleIn(on: "follow"|"ignore", role: Role, thread: ThreadChannel) {
 	if (on === "follow" && !getConfig(CommandName.followOnlyRoleIn)) return true;
 	const parentChannel = thread.parent;
@@ -76,6 +106,13 @@ export function checkRoleIn(on: "follow"|"ignore", role: Role, thread: ThreadCha
 	
 }
 
+/**
+ * Check if the thread is followed or ignored by the settings
+ * - if on: "ignore" => verify that the thread is ignored
+ * - if on: "follow" => verify that the thread is followed
+ * @param channel {ThreadChannel} The thread to check
+ * @param on {"ignore" | "follow"} The settings map to check
+ */
 
 export function checkThread(channel: ThreadChannel, on: "ignore" | "follow") {
 	logInDev("checkThread:",`Check if #${channel.name} is ${on}`);

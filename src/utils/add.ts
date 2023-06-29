@@ -13,7 +13,12 @@ import {
 } from "./data_check";
 import { logInDev } from "./index";
 
-
+/**
+ * Add a user to a thread, with verification the permission.
+ * Check if the role is allowed by the settings for the thread.
+ * @param thread {ThreadChannel} The thread to add the user
+ * @param user {GuildMember} The user to add
+ */
 export async function addUserToThread(thread: ThreadChannel, user: GuildMember) {
 	if (thread.permissionsFor(user).has("ViewChannel", true) && await checkIfUserNotInTheThread(thread, user)) {
 
