@@ -1,5 +1,7 @@
 import {
-	CategoryChannel, Collection, ForumChannel,
+	CategoryChannel,
+	Collection,
+	ForumChannel,
 	GuildMember,
 	GuildMemberRoleManager,
 	Role,
@@ -9,7 +11,7 @@ import {
 } from "discord.js";
 import { CommandName, TypeName } from "../interface";
 import { getConfig, getMaps, getRole, getRoleIn } from "../maps";
-import { logInDev } from "./add";
+import { logInDev } from "./index";
 
 /**
  * Check if a user is not in the thread
@@ -41,18 +43,20 @@ export function checkRole(role: Role, on: "ignore" | "follow") {
 
 export function checkMemberRoleIn(on: "follow" | "ignore", roleManager: GuildMemberRoleManager, thread: ThreadChannel) {
 	if (on === "follow" && !getConfig(CommandName.followOnlyRoleIn)) return true;
+	logInDev(`THREAD CHECKED : ${thread.name}`);
 	const roles = roleManager.cache;
 	const parentChannel = thread.parent;
 	const categoryOfParent = parentChannel?.parent;
 	const roleIn = getRoleIn(on);
-	
 	return roles.some(role => {
 		const find = roleIn.find(r => r.role.id === role.id);
-		if (!find) return false; //if the role is not in the follow list, it's not followed
+		if (!find) {
+			return on !== "follow";
+		}
 		return find.channels.some(channel => {
-			if (channel === thread) return true;
-			else if (channel === parentChannel) return true;
-			else if (channel === categoryOfParent) return true;
+			if (channel.id === thread.id) return true;
+			else if (channel.id === parentChannel?.id) return true;
+			else if (channel.id === categoryOfParent?.id) return true;
 			return false;
 		});
 	});

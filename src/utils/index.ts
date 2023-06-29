@@ -1,3 +1,4 @@
+import { Client, ThreadChannel } from "discord.js";
 import process from "process";
 
 export function logInDev(...text: unknown[]) {
@@ -10,4 +11,8 @@ export function logInDev(...text: unknown[]) {
 			console.log(timeString, text);
 		}
 	}
+}
+
+export function messageOfBot(thread: ThreadChannel, bot: Client) {
+	return thread.messages.cache.find((message) => message.author.id === bot.user?.id);
 }

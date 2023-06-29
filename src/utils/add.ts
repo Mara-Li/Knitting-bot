@@ -1,3 +1,4 @@
+import { userMention } from "@discordjs/formatters";
 import {
 	GuildMember,
 	MessageFlags, MessagePayloadOption,
@@ -21,13 +22,41 @@ import { logInDev } from "./index";
 
 export async function addUserToThread(thread: ThreadChannel, user: GuildMember) {
 	if (thread.permissionsFor(user).has("ViewChannel", true) && await checkIfUserNotInTheThread(thread, user)) {
+
+		const fetchedMessage = await thread.messages.fetch();
+		let message = fetchedMessage.filter(m => m.author.id === thread.client.user.id).first();
+		
 		if (getConfig(CommandName.followOnlyRoleIn)) {
-			await thread.members.add(user);
+			if (message) message.edit(userMention(user.id));
+			else {
+				message = await thread.send({
+					content: emoji,
+					flags: MessageFlags.SuppressNotifications
+				});
+				await message.edit(userMention(user.id));
+				await message.edit(emoji);
+			}
 		} else if (!getConfig(CommandName.followOnlyRole) && !checkMemberRole(user.roles, "ignore")) {
-			await thread.members.add(user);
+			if (message) message.edit(userMention(user.id));
+			else {
+				message = await thread.send({
+					content: emoji,
+					flags: MessageFlags.SuppressNotifications
+				});
+				await message.edit(userMention(user.id));
+				await message.edit(emoji);
+			}
 			logInDev(`Add @${user.user.username} to #${thread.name}`);
 		} else if (getConfig(CommandName.followOnlyRole) && checkMemberRole(user.roles, "follow")) {
-			await thread.members.add(user);
+			if (message) message.edit(userMention(user.id));
+			else {
+				message = await thread.send({
+					content: emoji,
+					flags: MessageFlags.SuppressNotifications
+				});
+				await message.edit(userMention(user.id));
+				await message.edit(emoji);
+			}
 			logInDev(`Add @${user.user.username} to #${thread.name}`);
 		}
 	}
@@ -131,9 +160,11 @@ export async function addRoleAndUserToThread(thread: ThreadChannel) {
 			content: emoji,
 			flags: MessageFlags.SuppressNotifications
 		};
-		const message = await thread.send(messagePayload);
+		const fetchedMessage = await thread.messages.fetch();
+		logInDev("****", fetchedMessage.filter(m => m.author.id === thread.client.user.id).first()?.id, "****");
+		const message = fetchedMessage.filter(m => m.author.id === thread.client.user.id).first() ?? await thread.send(messagePayload);
 		await message.edit(toPing.map(member => `<@${member.id}>`).join(" "));
-		await message.delete();
+		await message.edit(emoji);
 	}
 }
 

@@ -7,11 +7,13 @@ import {
 	SlashCommandBuilder,
 	ThreadChannel,
 } from "discord.js";
-import { getConfig } from "../maps";
-import { CommandName } from "../interface";
-import { checkThread } from "../utils/data_check";
-import {addRoleAndUserToThread} from "../utils/add";
 import { default as i18next } from "../i18n/i18next";
+import { CommandName } from "../interface";
+import { getConfig } from "../maps";
+import { logInDev } from "../utils";
+import { addRoleAndUserToThread } from "../utils/add";
+import { checkThread } from "../utils/data_check";
+
 const fr = i18next.getFixedT("fr");
 const en = i18next.getFixedT("en");
 
@@ -147,7 +149,9 @@ async function updateThisThread(interaction: CommandInteraction) {
 		return;
 	}
 	const isFollowed = getConfig(CommandName.followOnlyChannel) && checkThread(interaction.channel, "follow");
-	if (checkThread(interaction.channel, "ignore") || !isFollowed) {
+	logInDev(`${interaction.channel.name} isFollowed: ${isFollowed}`);
+	logInDev(`${interaction.channel.name} isIgnored: ${checkThread(interaction.channel, "ignore")}`);
+	if (!getConfig(CommandName.followOnlyRoleIn) && (checkThread(interaction.channel, "ignore") || !isFollowed)) {
 		await interaction.reply({
 			content: i18next.t("ignore.message", {thread: channelMention(interaction.channel.id)}) as string,
 			ephemeral: true,
@@ -185,7 +189,8 @@ async function updateSpecificThread(interaction: CommandInteraction) {
 		return;
 	}
 	const isFollowed = getConfig(CommandName.followOnlyChannel) && checkThread(threadOption?.channel as ThreadChannel, "follow");
-	if (checkThread(threadOption?.channel as ThreadChannel, "ignore") || !isFollowed) {
+	
+	if (!getConfig(CommandName.followOnlyRoleIn) && (checkThread(threadOption?.channel as ThreadChannel, "ignore") || !isFollowed)) {
 		await interaction.reply({
 			content: i18next.t("ignore.message", {thread: mention}) as string,
 			ephemeral: true,

@@ -16,7 +16,6 @@ export default (client: Client): void => {
 			logInDev(`${oldMember.user.username} has been updated!`);
 			const guild = newMember.guild;
 			const channels = guild.channels.cache.filter(channel => channel.isThread());
-			logInDev(channels.map(channel => channel.name));
 			for (const channel of channels.values()) {
 				const threadChannel = channel as ThreadChannel;
 				logInDev("Role member is followed :", checkMemberRole(newMember.roles, "follow"));
