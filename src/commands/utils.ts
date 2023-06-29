@@ -137,7 +137,7 @@ export async function interactionRoleInChannel(interaction: CommandInteraction, 
 				content: i18next.t("roleIn.enabled.chan", {
 					mention: mention,
 					on: i18next.t(`roleIn.on.${on}`),
-					channel: channelMention(channel.channel?.id ?? "")
+					chan: channelMention(channel.channel?.id ?? "")
 				}) as string,
 				ephemeral: true,
 			});
@@ -156,7 +156,7 @@ export async function interactionRoleInChannel(interaction: CommandInteraction, 
 			content: i18next.t("roleIn.enabled.chan", {
 				mention: mention,
 				on: i18next.t(`roleIn.on.${on}`),
-				channel: channelMention(channel.channel?.id ?? "")
+				chan: channelMention(channel.channel?.id ?? "")
 			}) as string,
 			ephemeral: true,
 		});

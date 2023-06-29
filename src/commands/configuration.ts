@@ -349,8 +349,10 @@ async function getBooleanAndReply(
 			"__**",
 		followOnlyRoleIn:
 			"**__" +
-			"Update only for specific role in specific channel" +
-			"__**",
+			i18next.t("configuration.roleIn.description").split(".")[0] +
+			"__**" + "\n*" +
+			i18next.t("configuration.roleIn.description").split(".")[1] +
+			"*",
 	};
 	if (value) {
 		return interaction.reply({

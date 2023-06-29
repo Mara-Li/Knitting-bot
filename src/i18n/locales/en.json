@@ -64,7 +64,7 @@
         "title": "Mode Role only"
       },
       "thread": {
-        "description": "Only follow channel and update for all rol",
+        "description": "Only follow channel and update for all role",
         "name": "follow-only-channel",
         "title": "Mode channel only"
       }
