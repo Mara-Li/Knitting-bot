@@ -95,6 +95,10 @@ export default {
 	},
 };
 
+/**
+ * Update all thread, unless they are ignored
+ * @param interaction {@link CommandInteraction} The interaction, contains the guild to update + reply to it
+ */
 async function updateAllThreads(interaction: CommandInteraction) {
 	if (!interaction.guild) return;
 	const threads = interaction.guild.channels.cache.filter((channel) =>
@@ -122,6 +126,11 @@ async function updateAllThreads(interaction: CommandInteraction) {
 	});
 }
 
+/**
+ * Update the thread with adding the role and the user needed
+ * @param interaction {@link CommandInteraction} The interaction, contains the thread to update
+ * - If not thread is provided, the thread is the current channel
+ */
 async function updateThread(interaction: CommandInteraction) {
 	const threadOption = interaction.options.get(i18next.t("common.thread").toLowerCase()) ?? interaction;
 	const channel = threadOption?.channel;
@@ -153,6 +162,10 @@ async function updateThread(interaction: CommandInteraction) {
 	await addRoleAndUserToThread(channel);
 }
 
+/**
+ * Display the help message
+ * @param interaction {@link CommandInteraction} The trigger, to reply to it
+ */
 async function displayHelp(interaction: CommandInteraction) {
 	const constructDesc: string = ((((((i18next.t(
 		"commands.help.desc"

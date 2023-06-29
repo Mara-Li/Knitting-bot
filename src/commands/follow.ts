@@ -163,6 +163,14 @@ export default {
 	}
 };
 
+/**
+ * Display the list of the followed channels.
+ * Display the embed based on the configuration:
+ * - Followed categories if the CommandName.followOnlyChannel is true
+ * - Followed roles if the CommandName.followOnlyRole is true
+ * - Followed roles in chan
+ * @param interaction {@link CommandInteraction} The interaction to reply to.
+ */
 async function displayFollowed(interaction: CommandInteraction) {
 	const followedCategories = getMaps("follow",TypeName.category) as CategoryChannel[] ?? [];
 	const followedThreads = getMaps("follow",TypeName.thread) as ThreadChannel[] ?? [];
@@ -239,6 +247,11 @@ async function displayFollowed(interaction: CommandInteraction) {
 	});
 }
 
+/**
+ * Follow-unfollow a role
+ * @param interaction {@link CommandInteraction} The interaction to reply to.
+ * The role is required, linked to the option name.
+ */
 async function followThisRole(interaction: CommandInteraction) {
 	const role = interaction.options.get(en("common.role").toLowerCase());
 	if (!role || !(role.role instanceof Role)) {
@@ -274,6 +287,10 @@ async function followThisRole(interaction: CommandInteraction) {
 	}
 }
 
+/**
+ * Check the type of the channel and run {@link followThis} with the right type
+ * @param interaction {@link CommandInteraction} The interaction to reply to.
+ */
 async function followText(interaction: CommandInteraction) {
 	const toIgnore = interaction.options.get(en("common.channel").toLowerCase()) ?? interaction;
 	if (toIgnore.channel instanceof CategoryChannel) {
@@ -294,7 +311,12 @@ async function followText(interaction: CommandInteraction) {
 }
 
 
-
+/**
+ * Follow-unfollow a channel
+ * @param interaction {@link CommandInteraction} The interaction to reply to.
+ * @param typeName {@link TypeName} The type of the channel to follow.
+ * @param followChan {@link CategoryChannel} | {@link ThreadChannel} | {@link TextChannel} | {@link ForumChannel} The channel to follow.
+ */
 async function followThis(
 	interaction: CommandInteraction,
 	typeName: TypeName,

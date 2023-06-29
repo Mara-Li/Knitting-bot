@@ -157,6 +157,10 @@ export default {
 	},
 };
 
+/**
+ * Display all ignored channels, roles and categories, but also the channels ignored by roles
+ * @param interaction {@link CommandInteraction} the interaction to reply to
+ */
 async function listIgnored(interaction: CommandInteraction) {
 	const ignoredCategories = getMaps("ignore",TypeName.category) as CategoryChannel[] ?? [];
 	const ignoredThreads = getMaps("ignore",TypeName.thread) as ThreadChannel[] ?? [];
@@ -217,6 +221,11 @@ async function listIgnored(interaction: CommandInteraction) {
 	}
 }
 
+/**
+ * Ignore a role
+ * @param interaction {@link CommandInteraction} the interaction to reply to
+ * Also contains the role to ignore
+ */
 async function ignoreThisRole(interaction: CommandInteraction) {
 	const role = interaction.options.get(en("common.role").toLowerCase());
 	if (!role || !(role.role instanceof Role)) {
@@ -253,6 +262,12 @@ async function ignoreThisRole(interaction: CommandInteraction) {
 	}
 }
 
+/**
+ * Ignore a channel, a category or a thread
+ * Run the commands based on the type of the channel
+ * @param interaction {@link CommandInteraction} the interaction to reply to
+ * Also contains the channel to ignore
+ */
 async function ignoreText(interaction: CommandInteraction) {
 	const toIgnore = interaction.options.get(en("common.channel").toLowerCase()) ?? interaction;
 	if (toIgnore.channel instanceof CategoryChannel) {
@@ -272,6 +287,13 @@ async function ignoreText(interaction: CommandInteraction) {
 	}
 }
 
+/**
+ * Ignore specified a channel, a category or a thread.
+ * Get maps based on the type of the channel
+ * @param interaction {@link CommandInteraction} the interaction to reply to
+ * @param typeName {@link TypeName} the type of the channel
+ * @param ignoreCategory {@link CategoryChannel} the category to ignore
+ */
 async function ignoreThis(
 	interaction: CommandInteraction,
 	typeName: TypeName,

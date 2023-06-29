@@ -16,8 +16,8 @@ import { logInDev } from "./index";
 /**
  * Add a user to a thread, with verification the permission.
  * Check if the role is allowed by the settings for the thread.
- * @param thread {ThreadChannel} The thread to add the user
- * @param user {GuildMember} The user to add
+ * @param thread {@link ThreadChannel} The thread to add the user
+ * @param user {@link GuildMember} The user to add
  */
 export async function addUserToThread(thread: ThreadChannel, user: GuildMember) {
 	if (thread.permissionsFor(user).has("ViewChannel", true) && await checkIfUserNotInTheThread(thread, user)) {
@@ -72,8 +72,8 @@ export async function addUserToThread(thread: ThreadChannel, user: GuildMember) 
 
 /**
  * Add a list to user to a thread, with verification the permission. After, send a message to ping the user and remove it.
- * @param {ThreadChannel} thread The thread to add the user and send the message
- * @param {GuildMember} members The member to add to the thread
+ * @param {@link ThreadChannel} thread The thread to add the user and send the message
+ * @param {@link GuildMember} members The member to add to the thread
  */
 export async function getUsersToPing(thread: ThreadChannel, members: GuildMember[]) {
 	const usersToBeAdded: GuildMember[] = [];
@@ -96,8 +96,8 @@ export async function getUsersToPing(thread: ThreadChannel, members: GuildMember
 
 /**
  * Same as above, but for a role
- * @param {ThreadChannel} thread The thread to add the role and send the message
- * @param {Role[]} roles The role to add to the thread
+ * @param {@link ThreadChannel} thread The thread to add the role and send the message
+ * @param {@link Role[]} roles The role to add to the thread
  */
 export async function getRoleToPing(thread: ThreadChannel, roles: Role[]) {
 	const roleToBeAdded: Role[] = [];
@@ -125,7 +125,7 @@ export async function getRoleToPing(thread: ThreadChannel, roles: Role[]) {
 /**
  * Add all members that have the permission to view the thread, first check by their role and after add the member that have overwrite permission
  * if there is no role in the server, check all members directly
- * @param {ThreadChannel} thread The thread to add the members
+ * @param {@link ThreadChannel} thread The thread to add the members
  */
 export async function addRoleAndUserToThread(thread: ThreadChannel) {
 	const members = await thread.guild.members.fetch();

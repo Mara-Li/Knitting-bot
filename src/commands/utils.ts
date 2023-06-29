@@ -15,9 +15,11 @@ import { logInDev } from "../utils";
 const en = i18next.getFixedT("en");
 
 /**
- * Follow a role in a channel (text or thread) the rest of the server will be "normal", so no need to activate the follow-only mode!
- * @param interaction {CommandInteraction} The interaction that triggered the command
- * @param on
+ * Follow or ignore a role for a channel, get with the interaction
+ * @param interaction {@link CommandInteraction} The interaction that triggered the command. It will have all option for the command.
+ * - The role is required
+ * - The channel is not. If not given, the role will be deleted from the list
+ * @param on {"follow" | "ignore"} The mode to use
  */
 export async function interactionRoleInChannel(interaction: CommandInteraction, on: "follow" | "ignore") {
 	const opposite = on === "follow" ? "ignore" : "follow";

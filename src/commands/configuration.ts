@@ -315,6 +315,12 @@ export default {
 	},
 };
 
+/**
+ * Display the current configuration of the bot and reply to the interaction
+ * @param interaction {@link CommandInteraction} the interaction
+ * @param option {@link CommandName} the option to set
+ * @param value {boolean} the value to set
+ */
 async function getBooleanAndReply(
 	interaction: CommandInteraction,
 	option: CommandName,
@@ -373,7 +379,7 @@ function enabledOrDisabled(value: boolean) {
 
 /**
  * Display the configuration as an embed
- * @param {CommandInteraction} interaction The interaction that triggered the command
+ * @param {@link CommandInteraction} interaction The interaction that triggered the command
  */
 export async function display(interaction: CommandInteraction) {
 	const embed = new EmbedBuilder()
