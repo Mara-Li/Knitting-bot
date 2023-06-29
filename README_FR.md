@@ -26,18 +26,20 @@ La commande slash `/config` vous permet de configurer le bot. Vous pouvez :
 - Changer la langue (anglais ou français)
 - Désactiver/activer tous les événements (nouveaux membres, membres mis à jour, nouveau fil de discussion créé ou autorisations de canal/catégorie mises à jour).
 - Il est possible de tout désactiver avec la commande `/config mode-manuel`. Dans ce mode, vous devez utiliser les commandes slash pour mettre à jour les fils.
-- Activer le mode "follow-only" :
+- Activer les mode "follow-only" :
   - `/config follow-only-channel` : Seuls les channels enregistrés avec la commande `/follow channel [channel]` seront mis à jour.
   - `/config follow-only-role` : Seuls les rôles enregistrés avec la commande `/follow role [role]` seront mis à jour.
+  - `/config follow-only-in` : Combinaison des deux options précédentes : Les rôles enregistrés avec `/follow role-in [role] [channel]` seront mis à jour dans les channels spécifiés.
 
 ### Follow (suivre)
 
 Permet de ne ping uniquement certains channels ou rôle spécifique.
 
-Vous devez préalablement activer les modes "follow-only" avec la commande `/config follow-only-channel` ou `/config follow-only-role`.
+Vous devez préalablement activer les modes "follow-only" avec la commande `/config follow-only-channel`, `/config follow-only-role` ou `/config follow-only-in`.
 
 - `/follow channel [channel]` : Ajoute un channel à la liste des channels à suivre.
 - `/follow role [role]` : Ajoute un rôle à la liste des rôles à suivre.
+- `/follow role-in [role] [channel]` : Permet de suivre un rôle pour un channel spécifique. 
 - `/follow list` : Affiche la liste des channels et rôles à suivre.
 
 > **Note**  
@@ -45,26 +47,26 @@ Vous devez préalablement activer les modes "follow-only" avec la commande `/con
 
 ### Ignore
 
-Permet d'ignorer un channel ou un rôle spécifique : le bot ne pingera pas les utilisateurs qui ont ce rôle ou qui sont dans ce channel.
+Permet d'ignorer un channel ou un rôle spécifique : le bot ne mentionnera pas les utilisateurs qui ont ce rôle ou qui sont dans ce channel, ou les deux.
 
 - `/ignore channel [channel]` : Ajoute un channel à la liste des channels à ignorer.
 - `/ignore role [role]` : Ajoute un rôle à la liste des rôles à ignorer.
+- `/ignore role-in [role] [channel]` : Permet d'ignorer un rôle pour un channel spécifique.
 - `/ignore list` : Affiche la liste des channels et rôles ignorés.
 
 > **Note**  
 > Comme précédemment, pour arrêter d'ignorer un channel ou un rôle, vous devez refaire la commande avec le même channel/role.
 
 > **Warning**  
-> Vous ne pouvez "suivre"  et "ignorer" un channel en même temps. Par exemple:
+> Vous ne pouvez "suivre"  et "ignorer" un channel en même temps. Par exemple :
 > - Si vous avez activé le mode `follow-only-channel`, vous ne pouvez ignorer un channel.
 > - Si vous avez activé le mode `follow-only-role`, vous ne pouvez ignorer un rôle.
 > Dans les faits, la commande `follow` ignorera tous les rôles/channels sauf ceux spécifiés dans la commande `follow`.
 
 ### Mise à jour des fils
-Si vous voulez mettre à jour manuellement un fil, vous pouvez utiliser les commandes slash:
-- `/update thread [thread]`: Mettre à jour un fil spécifique.
+Si vous voulez mettre à jour manuellement un fil, vous pouvez utiliser les commandes slash :
+- `/update thread (thread)`: Mettre à jour un fil spécifique. Si aucun fil n'est spécifié, le fil actuel sera mis à jour.
 - `/update tout`: Mettre à jour tous les fils sur le serveur.
-- `/update ici`: Mettre à jour le fil sur lequel la commande est utilisée.
 - `/update aide` : Affiche l'aide pour les commandes slash.
 
 Ces commandes n'apparaissent pas pour les utilisateurs qui n'ont pas la permission `gérer les fils` (`manage thread` en anglais).

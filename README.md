@@ -30,6 +30,7 @@ The slash command `/config` allows you to configure the bot. You can:
 - Activate the `follow-only` modes:
   - `follow-only-channel` : Will only update on specific channels (you need to set them with `/follow channel [channel]`)
   - `follow-only-role` : Will only update on specifics roles (you need to set them with `/follow role [role]`)
+  - `follow-only-in` : Will update only specifics roles in specifics channels (you need to set them with `/follow role-in [role] [channel]`)
 
 ### Follow
 
@@ -39,6 +40,7 @@ You need to activate the `follow-only` mode to use these commands. You can do th
 
 - `/follow channel [channel]` : Add a channel to the list of followed channels
 - `/follow role [role]` : Add a role to the list of followed roles
+- `/follow role-in [role] [channel]` : Add a role to the list of followed roles in a specific channel
 - `/follow list` : List all followed channels and roles
 
 > **Note**  
@@ -49,6 +51,7 @@ You need to activate the `follow-only` mode to use these commands. You can do th
 The exact opposite of the follow command. It won't ping the channels or roles ignored.
 - `/ignore channel [channel]` : Add a channel to the list of ignored channels
 - `/ignore role [role]` : Add a role to the list of ignored roles
+- `/ignore role-in [role] [channel]` : Add a role to the list of ignored roles in a specific channel
 - `/ignore list` : List all ignored channels and roles
 
 > **Note**  
@@ -64,9 +67,8 @@ The exact opposite of the follow command. It won't ping the channels or roles ig
 
 ### Update
 If you want to manually update a thread, you can use the slash commands: 
-- `/update thread [thread]` : Update a specific thread
+- `/update thread (thread)` : Update a specific thread. If the thread is not specified, it will update the current thread.
 - `/update all` : Update all threads in the server
-- `/update here` : Update the thread where the command is used
 - `/update help` : Get help about the manual slash commands
 
 These commands don't appear for user that haven't the `manage thread` permission.
