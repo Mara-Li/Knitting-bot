@@ -1,7 +1,6 @@
 import { channelMention, roleMention } from "@discordjs/formatters";
 import {
 	CategoryChannel,
-	ChannelType,
 	CommandInteraction,
 	CommandInteractionOptionResolver,
 	EmbedBuilder,
@@ -14,8 +13,9 @@ import {
 } from "discord.js";
 import { default as i18next } from "../i18n/i18next";
 import { CommandName, RoleIn, TypeName } from "../interface";
-import { getConfig, getFollow, getRole, getRoleIn, setFollow, setRole, setRoleIn } from "../maps";
+import { getConfig, getMaps, getRole, getRoleIn, setFollow, setRole } from "../maps";
 import { logInDev } from "../utils";
+import { interactionRoleInChannel } from "./utils";
 
 const fr = i18next.getFixedT("fr");
 const en = i18next.getFixedT("en");
@@ -152,7 +152,7 @@ export default {
 			await displayFollowed(interaction);
 			break;
 		case "role-in":
-			await followRoleInChannel(interaction);
+			await interactionRoleInChannel(interaction, "follow");
 			break;
 		default:
 			await displayFollowed(interaction);
@@ -163,10 +163,10 @@ export default {
 };
 
 async function displayFollowed(interaction: CommandInteraction) {
-	const followedCategories = getFollow(TypeName.category) as CategoryChannel[] ?? [];
-	const followedThreads = getFollow(TypeName.thread) as ThreadChannel[] ?? [];
-	const followedChannels = getFollow(TypeName.channel) as TextChannel[] ?? [];
-	const followedForum = getFollow(TypeName.forum) as ForumChannel[] ?? [];
+	const followedCategories = getMaps("follow",TypeName.category) as CategoryChannel[] ?? [];
+	const followedThreads = getMaps("follow",TypeName.thread) as ThreadChannel[] ?? [];
+	const followedChannels = getMaps("follow",TypeName.channel) as TextChannel[] ?? [];
+	const followedForum = getMaps("follow",TypeName.forum) as ForumChannel[] ?? [];
 	const followedRoles = getRole("follow") as Role[] ?? [];
 	const followedRolesIn = getRoleIn("follow") as RoleIn[] ?? [];
 	/**
@@ -294,117 +294,7 @@ async function followText(interaction: CommandInteraction) {
 	}
 }
 
-/**
- * Follow a role in a channel (text or thread) the rest of the server will be "normal", so no need to activate the follow-only mode!
- * @param interaction {CommandInteraction} The interaction that triggered the command
- */
-async function followRoleInChannel(interaction: CommandInteraction) {
-	if (getConfig(CommandName.followOnlyChannel) || getConfig(CommandName.followOnlyRole)) {
-		await interaction.reply({
-			content: "You can't use this command with the other follow-only mode.",
-			ephemeral: true,
-		});
-		return;
-	}
-	if (!getConfig(CommandName.followOnlyRoleIn)) {
-		await interaction.reply({
-			content: "You need to activate the follow-only-role-in mode first.",
-			ephemeral: true,
-		});
-		return;
-	}
-	const role = interaction.options.get(en("common.role").toLowerCase());
-	const channel = interaction.options.get(en("common.channel").toLowerCase()) ?? interaction;
-	if (!role || !(role.role instanceof Role)) {
-		await interaction.reply({
-			content: i18next.t("ignore.role.error", {role: role}) as string,
-			ephemeral: true,
-		});
-		return;
-	}
-	const channelType = channel.channel?.type;
-	logInDev("channelType", channelType as ChannelType);
-	const validChannelTypes : ChannelType[] = [ChannelType.GuildCategory, ChannelType.GuildText, ChannelType.PublicThread, ChannelType.PrivateThread];
-	if (!channelType || !validChannelTypes.includes(channelType as ChannelType)) {
-		await interaction.reply({
-			content: "This channel type is not supported",
-			ephemeral: true,
-		});
-	}
-	/**
-	 * Get the RoleIn interface for the given role and channel
-	 */
-	const allRoleIn = getRoleIn("follow");
-	//search for the role in the array
-	const roleIn = allRoleIn.find(
-		(roleIn: RoleIn) =>
-			roleIn.role.id === role.role?.id
-	);
-	const ignoredRolesIn = getRoleIn("ignore");
-	const ignoredRoleIn = ignoredRolesIn.find(
-		(roleIn: RoleIn) => roleIn.role.id === role.role?.id
-	);
-	
-	const mention = roleMention(role.role?.id ?? "");
-	/** Verify that the role is not ignored for the same channel */
-	if (ignoredRoleIn && ignoredRoleIn.channels.some(
-		(followedChannel: ForumChannel | CategoryChannel | ThreadChannel | TextChannel) => followedChannel.id === channel.channel?.id
-	)) {
-		await interaction.reply({
-			content: "The role " + mention + " is already ignored in " + channel.channel?.toString(),
-			ephemeral: true,
-		});
-		return;
-	}
-	logInDev("roleIn", roleIn);
-	if (roleIn) {
-		/** Verify if the channel is already in the list */
-		const isAlreadyFollowed = roleIn.channels.some(
-			(followedChannel: ForumChannel | CategoryChannel | ThreadChannel | TextChannel) => followedChannel.id === channel.channel?.id
-		);
-		if (isAlreadyFollowed) {
-			roleIn.channels = roleIn.channels.filter(
-				(followedChannel: ForumChannel | CategoryChannel | ThreadChannel | TextChannel) => followedChannel.id !== channel.channel?.id
-			);
-			//save
-			setRoleIn("follow", allRoleIn);
-			await interaction.reply({
-				content: "The role " + mention + " is no longer followed in " + channel.channel?.toString(),
-				ephemeral: true,
-			});
-			/** If the role is not followed in any channel, remove it from the list */
-			if (roleIn.channels.length === 0) {
-				const newFollowRoles: RoleIn[] = allRoleIn.filter(
-					(followedRole: RoleIn) => followedRole.role.id !== role.role?.id
-				);
-				setRoleIn("follow", newFollowRoles);
-			}
-		} else {
-			/** Add the channel to the list */
-			roleIn.channels.push(channel.channel as CategoryChannel | ForumChannel | ThreadChannel | TextChannel);
-			//save
-			setRoleIn("follow", allRoleIn);
-			await interaction.reply({
-				content: "The role " + mention + " is now followed in " + channel.channel?.toString(),
-				ephemeral: true,
-			});
-		}
-		
-	}
-	//if not, create it
-	else {
-		const newRoleIn: RoleIn = {
-			role: role.role,
-			channels: [channel.channel as CategoryChannel | ForumChannel | ThreadChannel | TextChannel],
-		};
-		allRoleIn.push(newRoleIn);
-		setRoleIn("follow", allRoleIn);
-		await interaction.reply({
-			content: "The role " + mention + " is now followed in " + channel.channel?.toString(),
-			ephemeral: true,
-		});
-	}
-}
+
 
 async function followThis(
 	interaction: CommandInteraction,
@@ -423,13 +313,13 @@ async function followThis(
 	let allFollowed: (ThreadChannel | CategoryChannel | TextChannel | ForumChannel)[] = [];
 	switch (typeName) {
 	case TypeName.category:
-		allFollowed = getFollow(TypeName.category) as CategoryChannel[] ?? [];
+		allFollowed = getMaps("follow",TypeName.category) as CategoryChannel[] ?? [];
 		break;
 	case TypeName.thread:
-		allFollowed = getFollow(TypeName.thread) as ThreadChannel[] ?? [];
+		allFollowed = getMaps("follow",TypeName.thread) as ThreadChannel[] ?? [];
 		break;
 	case TypeName.channel:
-		allFollowed = getFollow(TypeName.channel) as TextChannel[] ?? [];
+		allFollowed = getMaps("follow",TypeName.channel) as TextChannel[] ?? [];
 		break;
 	}
 	const isAlreadyFollowed = allFollowed.some(

@@ -1,13 +1,13 @@
 import {Client} from "discord.js";
-import { getFollow, getIgnored, getRoleIn, setFollow, setIgnore, setRoleIn } from "../../maps";
+import {getMaps, getRoleIn, setFollow, setIgnore, setRoleIn } from "../../maps";
 import { TypeName } from "../../interface";
 import { logInDev } from "../../utils";
 
 
 export default (client: Client): void => {
 	client.on("threadDelete", async (thread) => {
-		const threadIsFollowed = getFollow(TypeName.thread).some((followed) => followed.id === thread.id);
-		const threadIsIgnored = getIgnored(TypeName.thread).some((ignored) => ignored.id === thread.id);
+		const threadIsFollowed = getMaps("follow", TypeName.thread).some((followed) => followed.id === thread.id);
+		const threadIsIgnored = getMaps("ignore",TypeName.thread).some((ignored) => ignored.id === thread.id);
 		const FollowedThreadInRoleIn = getRoleIn("follow").some((followed) =>{
 			const followedThread = followed.channels;
 			return followedThread.some((followedThread) => followedThread.id === thread.id);
@@ -41,14 +41,14 @@ export default (client: Client): void => {
 			logInDev(`Thread ${thread.name} removed from ignore list in a channel`);
 		}
 		if (threadIsFollowed) {
-			const followed = getFollow(TypeName.thread);
+			const followed = getMaps("follow",TypeName.thread);
 			const index = followed.findIndex((followed) => followed.id === thread.id);
 			followed.splice(index, 1);
 			setFollow(TypeName.thread, followed);
 			logInDev(`Thread ${thread.name} removed from follow list`);
 		}
 		if (threadIsIgnored) {
-			const ignored = getIgnored(TypeName.thread);
+			const ignored = getMaps("ignore",TypeName.thread);
 			const index = ignored.findIndex((ignored) => ignored.id === thread.id);
 			ignored.splice(index, 1);
 			setIgnore(TypeName.thread, ignored);

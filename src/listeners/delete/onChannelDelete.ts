@@ -1,5 +1,5 @@
 import { ChannelType, Client, DMChannel, NonThreadGuildBasedChannel } from "discord.js";
-import { getIgnored, getRoleIn, setIgnore, setRoleIn } from "../../maps";
+import { getMaps, getRoleIn, setIgnore, setRoleIn } from "../../maps";
 import { TypeName } from "../../interface";
 import { logInDev } from "../../utils";
 
@@ -49,8 +49,8 @@ export default (client: Client): void => {
 			/**
 			 * Remove the channel from the database "follow" and "ignore" maps
 			 */
-			const allIgnore = getIgnored(TypeName.channel);
-			const allFollow = getIgnored(TypeName.channel);
+			const allIgnore = getMaps("ignore",TypeName.channel);
+			const allFollow = getMaps("follow",TypeName.channel);
 			const isIgnored = allIgnore.some((ignored) => ignored.id === channel.id);
 			const isFollowed = allFollow.some((followed) => followed.id === channel.id);
 			if (isIgnored) {
@@ -69,8 +69,8 @@ export default (client: Client): void => {
 			/**
 			 * Remove the category from the database "follow" and "ignore" maps
 			 */
-			const allCategoryIgnore = getIgnored(TypeName.category);
-			const allCategoryFollow = getIgnored(TypeName.category);
+			const allCategoryIgnore = getMaps("ignore",TypeName.category);
+			const allCategoryFollow = getMaps("follow",TypeName.category);
 			const isCategoryIgnored = allCategoryIgnore.some((ignored) => ignored.id === channel.id);
 			const isCategoryFollowed = allCategoryFollow.some((followed) => followed.id === channel.id);
 			if (isCategoryIgnored) {
@@ -89,8 +89,8 @@ export default (client: Client): void => {
 			/**
 			 * Remove the forum from the database "follow" and "ignore" maps
 			 */
-			const allThreadIgnore = getIgnored(TypeName.forum);
-			const allThreadFollow = getIgnored(TypeName.forum);
+			const allThreadIgnore = getMaps("ignore",TypeName.forum);
+			const allThreadFollow = getMaps("follow",TypeName.forum);
 			const isForumIgnored = allThreadIgnore.some((ignored) => ignored.id === channel.id);
 			const isForumFollowed = allThreadFollow.some((followed) => followed.id === channel.id);
 			if (isForumIgnored) {

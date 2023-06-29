@@ -2,12 +2,10 @@ import { Client, ThreadChannel } from "discord.js";
 import {getConfig } from "../../maps";
 import { CommandName } from "../../interface";
 import {
-	addUserToThread,
-	checkMemberRole, checkThread,
-	checkIfThreadIsIgnored,
-	checkMemberRoleNotIgnored,
 	logInDev,
 } from "../../utils";
+import { addUserToThread } from "../../utils/add";
+import { checkMemberRole, checkThread } from "../../utils/data_check";
 
 /**
  * @param {Client} client - Discord.js Client
@@ -24,11 +22,11 @@ export default (client: Client): void => {
 		const channels = guild.channels.cache.filter(channel => channel.isThread());
 		for (const channel of channels.values()) {
 			const threadChannel = channel as ThreadChannel;
-			const roleIsAllowed = !checkMemberRole(member.roles) && !checkMemberRoleNotIgnored(member.roles);
+			const roleIsAllowed = !checkMemberRole(member.roles, "follow") && !checkMemberRole(member.roles, "ignore");
 			if (!getConfig(CommandName.followOnlyChannel)) {
-				if (!checkIfThreadIsIgnored(threadChannel) && roleIsAllowed) await addUserToThread(threadChannel, member);
+				if (!checkThread(threadChannel, "ignore") && roleIsAllowed) await addUserToThread(threadChannel, member);
 			} else {
-				if (roleIsAllowed && checkThread(threadChannel)) await addUserToThread(threadChannel, member);
+				if (roleIsAllowed && checkThread(threadChannel, "follow")) await addUserToThread(threadChannel, member);
 			}
 		}
 		

@@ -1,6 +1,6 @@
 import { channelMention, roleMention } from "@discordjs/formatters";
 import {
-	CategoryChannel, ChannelType,
+	CategoryChannel,
 	CommandInteraction,
 	CommandInteractionOptionResolver,
 	EmbedBuilder,
@@ -12,9 +12,10 @@ import {
 	ThreadChannel,
 } from "discord.js";
 import { default as i18next } from "../i18n/i18next";
-import { getConfig, getIgnored, getRole, getRoleIn, setIgnore, setRole, setRoleIn } from "../maps";
-import { TypeName, CommandName, RoleIn } from "../interface";
+import { getConfig, getMaps, getRole, setIgnore, setRole } from "../maps";
+import { TypeName, CommandName } from "../interface";
 import {logInDev } from "../utils";
+import { interactionRoleInChannel } from "./utils";
 
 const fr = i18next.getFixedT("fr");
 const en = i18next.getFixedT("en");
@@ -132,7 +133,7 @@ export default {
 			await ignoreThisRole(interaction);
 			break;
 		case "ignore-only-in":
-			await ignoreRoleInThread(interaction);
+			await interactionRoleInChannel(interaction, "ignore");
 			break;
 		case "list":
 			await listIgnored(interaction);
@@ -145,10 +146,10 @@ export default {
 };
 
 async function listIgnored(interaction: CommandInteraction) {
-	const ignoredCategories = getIgnored(TypeName.category) as CategoryChannel[] ?? [];
-	const ignoredThreads = getIgnored(TypeName.thread) as ThreadChannel[] ?? [];
-	const ignoredChannels = getIgnored(TypeName.channel) as TextChannel[] ?? [];
-	const ignoredForum = getIgnored(TypeName.forum) as ForumChannel[] ?? [];
+	const ignoredCategories = getMaps("ignore",TypeName.category) as CategoryChannel[] ?? [];
+	const ignoredThreads = getMaps("ignore",TypeName.thread) as ThreadChannel[] ?? [];
+	const ignoredChannels = getMaps("ignore",TypeName.channel) as TextChannel[] ?? [];
+	const ignoredForum = getMaps("ignore",TypeName.forum) as ForumChannel[] ?? [];
 	const ignoredRoles = getRole("ignore");
 	const ignoredCategoriesNames = "\n- " + ignoredCategories.map((category) => category.name).join("\n- ");
 	const ignoredThreadsNames = "\n- " + ignoredThreads.map((thread) => thread.name).join("\n-");
@@ -258,13 +259,13 @@ async function ignoreThis(
 	let allIgnored: (ThreadChannel<boolean> | CategoryChannel | TextChannel | ForumChannel)[] = [];
 	switch (typeName) {
 	case TypeName.category:
-		allIgnored = getIgnored(TypeName.category) as CategoryChannel[] ?? [];
+		allIgnored = getMaps("ignore",TypeName.category) as CategoryChannel[] ?? [];
 		break;
 	case TypeName.thread:
-		allIgnored = getIgnored(TypeName.thread) as ThreadChannel[] ?? [];
+		allIgnored = getMaps("ignore",TypeName.thread) as ThreadChannel[] ?? [];
 		break;
 	case TypeName.channel:
-		allIgnored = getIgnored(TypeName.channel) as TextChannel[] ?? [];
+		allIgnored = getMaps("ignore",TypeName.channel) as TextChannel[] ?? [];
 		break;
 	}
 	const isAlreadyIgnored = allIgnored.some(
@@ -292,96 +293,3 @@ async function ignoreThis(
 	}
 }
 
-async function ignoreRoleInThread(interaction: CommandInteraction) {
-	const role = interaction.options.get(en("common.role").toLowerCase());
-	const channel = interaction.options.get(en("common.channel").toLowerCase()) ?? interaction;
-	if (!role || !(role.role instanceof Role)) {
-		await interaction.reply({
-			content: i18next.t("ignore.role.error", {role: role}) as string,
-			ephemeral: true,
-		});
-		return;
-	}
-	const channelType = channel.channel?.type;
-	logInDev("channelType", channelType as ChannelType);
-	const validChannelTypes : ChannelType[] = [ChannelType.GuildCategory, ChannelType.GuildText, ChannelType.PublicThread, ChannelType.PrivateThread];
-	if (!channelType || !validChannelTypes.includes(channelType as ChannelType)) {
-		await interaction.reply({
-			content: "This channel type is not supported",
-			ephemeral: true,
-		});
-	}
-	/**
-	 * Get the RoleIn interface for the given role and channel
-	 */
-	const allRoleIn = getRoleIn("ignore");
-	//search for the role in the array
-	const roleIn = allRoleIn.find(
-		(roleIn: RoleIn) =>
-			roleIn.role.id === role.role?.id
-	);
-	const followedRoleIn = getRoleIn("follow");
-	const ignoredRoleIn = followedRoleIn.find(
-		(roleIn: RoleIn) => roleIn.role.id === role.role?.id
-	);
-	
-	const mention = roleMention(role.role?.id ?? "");
-	/** Verify that the role is not ignored for the same channel */
-	if (ignoredRoleIn && ignoredRoleIn.channels.some(
-		(followedChannel: ForumChannel | CategoryChannel | ThreadChannel | TextChannel) => followedChannel.id === channel.channel?.id
-	)) {
-		await interaction.reply({
-			content: "The role " + mention + " is followed ignored in " + channel.channel?.toString(),
-			ephemeral: true,
-		});
-		return;
-	}
-	logInDev("roleIn", roleIn);
-	if (roleIn) {
-		/** Verify if the channel is already in the list */
-		const isAlreadyIgnored = roleIn.channels.some(
-			(followedChannel: ForumChannel | CategoryChannel | ThreadChannel | TextChannel) => followedChannel.id === channel.channel?.id
-		);
-		if (isAlreadyIgnored) {
-			roleIn.channels = roleIn.channels.filter(
-				(followedChannel: ForumChannel | CategoryChannel | ThreadChannel | TextChannel) => followedChannel.id !== channel.channel?.id
-			);
-			//save
-			setRoleIn("ignore", allRoleIn);
-			await interaction.reply({
-				content: "The role " + mention + " is no longer ignored in " + channel.channel?.toString(),
-				ephemeral: true,
-			});
-			/** If the role is not followed in any channel, remove it from the list */
-			if (roleIn.channels.length === 0) {
-				const newFollowRoles: RoleIn[] = allRoleIn.filter(
-					(followedRole: RoleIn) => followedRole.role.id !== role.role?.id
-				);
-				setRoleIn("ignore", newFollowRoles);
-			}
-		} else {
-			/** Add the channel to the list */
-			roleIn.channels.push(channel.channel as CategoryChannel | ForumChannel | ThreadChannel | TextChannel);
-			//save
-			setRoleIn("ignore", allRoleIn);
-			await interaction.reply({
-				content: "The role " + mention + " is now ignored in " + channel.channel?.toString(),
-				ephemeral: true,
-			});
-		}
-		
-	}
-	//if not, create it
-	else {
-		const newRoleIn: RoleIn = {
-			role: role.role,
-			channels: [channel.channel as CategoryChannel | ForumChannel | ThreadChannel | TextChannel],
-		};
-		allRoleIn.push(newRoleIn);
-		setRoleIn("follow", allRoleIn);
-		await interaction.reply({
-			content: "The role " + mention + " is now followed in " + channel.channel?.toString(),
-			ephemeral: true,
-		});
-	}
-}

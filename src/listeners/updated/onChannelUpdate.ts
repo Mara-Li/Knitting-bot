@@ -1,7 +1,9 @@
 import { ChannelType, Client, Snowflake, TextChannel } from "discord.js";
 import { getConfig } from "../../maps";
-import { addRoleAndUserToThread, checkIfThreadIsIgnored, logInDev } from "../../utils";
+import { logInDev } from "../../utils";
 import { CommandName } from "../../interface";
+import { addRoleAndUserToThread } from "../../utils/add";
+import { checkThread } from "../../utils/data_check";
 
 /**
  * @param {Client} client - Discord.js Client
@@ -27,9 +29,9 @@ export default (client: Client): void => {
 		const threads = await newChannel.threads.cache;
 		threads.forEach(thread => {
 			if (!getConfig(CommandName.followOnlyChannel)) {
-				if (!checkIfThreadIsIgnored(thread)) addRoleAndUserToThread(thread);
+				if (!checkThread(thread, "ignore")) addRoleAndUserToThread(thread);
 			} else {
-				if (checkIfThreadIsIgnored(thread)) addRoleAndUserToThread(thread);
+				if (checkThread(thread, "follow")) addRoleAndUserToThread(thread);
 			}
 		});
 	});
