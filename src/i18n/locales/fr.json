@@ -34,6 +34,7 @@
     "category": "Catégorie",
     "channel": "Channel",
     "confirm": "Confirmer",
+    "disabled": "Désactivé",
     "error": "Une erreur est apparue : {{error}}",
     "forum": "Forum",
     "here": "ici",
@@ -41,6 +42,7 @@
     "no": "Non",
     "none": "/",
     "role": "Rôles",
+    "roleIn": "role-in",
     "thread": "Thread",
     "yes": "Oui"
   },
@@ -89,6 +91,10 @@
       "name": "sur-nouveau-membre",
       "title": "Arrivée d'un nouveau membre"
     },
+    "roleIn": {
+      "description": "Suivi d'un rôle spécifique dans un canal spécifique. Incompatible avec d'autres modes de suivi.",
+      "name": "follow-only-in"
+    },
     "show": {
       "description": "Affiche la configuration actuelle",
       "menu": {
@@ -106,7 +112,6 @@
     }
   },
   "disable": {
-    "disable": "Désactivé",
     "manual": "Mode manuel désactivé",
     "type": "Désactivation de : {{- type}}"
   },
@@ -120,6 +125,7 @@
     "disabled": "Vous ne pouvez pas utiliser ces commandes : le mode \"follow-only\" est désactivé.",
     "list": {
       "description": "Affiche les rôles et les channels suivis",
+      "roleIn": "Role suivi dans des salons spécifiques",
       "title": "Suivi"
     },
     "role": {
@@ -127,6 +133,13 @@
       "description": "Role à suivre ou ne plus suivre",
       "option": "Sélection le role",
       "removed": "{{- role}} non-suivi"
+    },
+    "roleIn": {
+      "description": "Suivre un role pour un salon spécifique",
+      "option": {
+        "channel": "Le salon à suivre. Si non spécifié, le rôle ne sera plus suivi.",
+        "role": "Le rôle à suivre"
+      }
     },
     "thread": {
       "description": "Sélectionne un salon, thread, catégorie, ou forum, à suivre",
@@ -155,6 +168,13 @@
       "option": "Selectionner le rôle à inclure/exclure",
       "removed": "Role {{- role}} dés-ignoré !"
     },
+    "roleIn": {
+      "description": "Ignore un rôle pour un channel spécifique",
+      "option": {
+        "chan": "Le channel dans lequel le rôle sera ignoré. S'il n'est pas défini, le rôle sera totalement désignoré.",
+        "role": "Le rôle à ignorer"
+      }
+    },
     "thread": {
       "description": "Ignore un thread, channel ou catégorie spécifique",
       "error": "Cette commande ne peut être utilisée que pour une catégorie, un channel ou un thread.",
@@ -163,6 +183,25 @@
       },
       "remove": "{{- thread}} n'est plus ignoré",
       "success": "{{- thread}} a été ignoré"
+    }
+  },
+  "roleIn": {
+    "already": "Le rôle {{- mention }} est déjà {{- opposite }} dans {{- channel }}.",
+    "enabled": {
+      "chan": "{{- chan}} est maintenant {{- on}} pour {{- mention }}"
+    },
+    "error": {
+      "need": "Vous devez d'abord activer le mode \"follow-only-in\".",
+      "otherMode": "Vous ne pouvez pas utiliser cette commande avec les autres modes de suivi.",
+      "support": "Ce type de salon n'est pas supporté"
+    },
+    "noLonger": {
+      "any": "Le role {{- mention }} n'est plus {{- on}} dans aucun channel.",
+      "chan": "{{- chan}} n'est plus {{- on }} pour {{- mention }}"
+    },
+    "on": {
+      "follow": "suivi",
+      "ignore": "ignoré"
     }
   }
 }

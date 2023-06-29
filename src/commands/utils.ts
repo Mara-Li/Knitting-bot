@@ -1,4 +1,4 @@
-import { roleMention } from "@discordjs/formatters";
+import { channelMention, roleMention } from "@discordjs/formatters";
 import {
 	CategoryChannel,
 	ChannelType,
@@ -12,7 +12,6 @@ import { CommandName, RoleIn } from "../interface";
 import { getConfig, getRoleIn, setRoleIn } from "../maps";
 import { default as i18next } from "../i18n/i18next";
 import { logInDev } from "../utils";
-const fr = i18next.getFixedT("fr");
 const en = i18next.getFixedT("en");
 
 /**
@@ -22,26 +21,42 @@ const en = i18next.getFixedT("en");
  */
 export async function interactionRoleInChannel(interaction: CommandInteraction, on: "follow" | "ignore") {
 	const opposite = on === "follow" ? "ignore" : "follow";
+	
 	if (on === "follow" && (getConfig(CommandName.followOnlyChannel) || getConfig(CommandName.followOnlyRole))) {
 		await interaction.reply({
-			content: "You can't use this command with the other follow-only mode.",
+			content: i18next.t("roleIn.error.otherMode") as string,
 			ephemeral: true,
 		});
 		return;
 	}
 	if (!getConfig(CommandName.followOnlyRoleIn) && on === "follow") {
 		await interaction.reply({
-			content: "You need to activate the follow-only-role-in mode first.",
+			content: i18next.t("roleIn.error.need"),
 			ephemeral: true,
 		});
 		return;
 	}
 	const role = interaction.options.get(en("common.role").toLowerCase());
-	const channel = interaction.options.get(en("common.channel").toLowerCase()) ?? interaction;
+	const channel = interaction.options.get(en("common.channel").toLowerCase());
+
 	if (!role || !(role.role instanceof Role)) {
 		await interaction.reply({
 			content: i18next.t("ignore.role.error", {role: role?.name}) as string,
 			ephemeral: true,
+		});
+		return;
+	}
+	const mention = roleMention(role.role?.id ?? "");
+
+	if (!channel) {
+		//delete the role from the list
+		const allRoleIn = getRoleIn(on);
+		const newRolesIn: RoleIn[] = allRoleIn.filter(
+			(r: RoleIn) => r.role.id !== role.role?.id);
+		setRoleIn(on, newRolesIn);
+		const translationOn = i18next.t(`roleIn.on.${on}`);
+		await interaction.reply({
+			content: i18next.t("roleIn.noLonger.any", {mention: mention, on: translationOn}) as string,
 		});
 		return;
 	}
@@ -52,7 +67,7 @@ export async function interactionRoleInChannel(interaction: CommandInteraction, 
 	logInDev(validChannelTypes.includes(channelType ?? 99));
 	if (!validChannelTypes.includes(channelType ?? 99)) {
 		await interaction.reply({
-			content: "This channel type is not supported",
+			content: i18next.t("roleIn.error.support"),
 			ephemeral: true,
 		});
 	}
@@ -70,13 +85,17 @@ export async function interactionRoleInChannel(interaction: CommandInteraction, 
 		(roleIn: RoleIn) => roleIn.role.id === role.role?.id
 	);
 	
-	const mention = roleMention(role.role?.id ?? "");
 	/** Verify that the role is not ignored for the same channel */
 	if (oppositeRoleFind && oppositeRoleFind.channels.some(
 		(chan: ForumChannel | CategoryChannel | ThreadChannel | TextChannel) => chan.id === channel.channel?.id
 	)) {
+		const translationOpposite = i18next.t(`roleIn.on.${opposite}`);
 		await interaction.reply({
-			content: "The role " + mention + " is already " + opposite + " in " + channel.channel?.toString(),
+			content: i18next.t("roleIn.already", {
+				mention: mention,
+				opposite: translationOpposite,
+				channel: channelMention(channel.channel?.id ?? ""),
+			}) as string,
 			ephemeral: true,
 		});
 		return;
@@ -93,7 +112,11 @@ export async function interactionRoleInChannel(interaction: CommandInteraction, 
 			//save
 			setRoleIn(on, allRoleIn);
 			await interaction.reply({
-				content: "The role " + mention + " is no longer " + on + " in " + channel.channel?.toString(),
+				content: i18next.t("roleIn.noLonger.chan", {
+					mention: mention,
+					on: i18next.t(`roleIn.on.${on}`),
+					channel: channelMention(channel.channel?.id ?? ""),
+				}),
 				ephemeral: true,
 			});
 			/** If the role is not followed in any channel, remove it from the list */
@@ -109,7 +132,11 @@ export async function interactionRoleInChannel(interaction: CommandInteraction, 
 			//save
 			setRoleIn(on, allRoleIn);
 			await interaction.reply({
-				content: "The role " + mention + " is now "+ on +" in " + channel.channel?.toString(),
+				content: i18next.t("roleIn.enabled.chan", {
+					mention: mention,
+					on: i18next.t(`roleIn.on.${on}`),
+					channel: channelMention(channel.channel?.id ?? "")
+				}),
 				ephemeral: true,
 			});
 		}
@@ -124,7 +151,11 @@ export async function interactionRoleInChannel(interaction: CommandInteraction, 
 		allRoleIn.push(newRoleIn);
 		setRoleIn(on, allRoleIn);
 		await interaction.reply({
-			content: "The role " + mention + " is now " + on + " in " + channel.channel?.toString(),
+			content: i18next.t("roleIn.enabled.chan", {
+				mention: mention,
+				on: i18next.t(`roleIn.on.${on}`),
+				channel: channelMention(channel.channel?.id ?? "")
+			}),
 			ephemeral: true,
 		});
 	}

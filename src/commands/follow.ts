@@ -90,13 +90,13 @@ export default {
 		)
 		.addSubcommand((subcommand) =>
 			subcommand
-				.setName("role-in")
+				.setName(en("common.roleIn"))
 				.setNameLocalizations({
-					fr: "role-dans",
+					fr: fr("common.roleIn"),
 				})
-				.setDescription("Follow a role in a channel")
+				.setDescription(en("follow.roleIn.description"))
 				.setDescriptionLocalizations({
-					fr: "Suivre un rôle dans un salon",
+					fr: fr("follow.roleIn.description"),
 				})
 				.addRoleOption((option) =>
 					option
@@ -104,9 +104,9 @@ export default {
 						.setNameLocalizations({
 							fr: fr("common.role").toLowerCase(),
 						})
-						.setDescription("The role to follow")
+						.setDescription(en("follow.roleIn.option.role"))
 						.setDescriptionLocalizations({
-							fr: "Le rôle à suivre",
+							fr: fr("follow.roleIn.option.role"),
 						})
 						.setRequired(true)
 				)
@@ -116,9 +116,9 @@ export default {
 						.setNameLocalizations({
 							fr: fr("common.channel").toLowerCase(),
 						})
-						.setDescription("The channel to follow")
+						.setDescription(en("follow.roleIn.option.channel"))
 						.setDescriptionLocalizations({
-							fr: "Le salon à suivre",
+							fr: fr("follow.roleIn.option.channel"),
 						})
 						.setRequired(false)
 				)
@@ -152,7 +152,7 @@ export default {
 		case en("common.list"):
 			await displayFollowed(interaction);
 			break;
-		case "role-in":
+		case en("common.roleIn"):
 			await interactionRoleInChannel(interaction, "follow");
 			break;
 		default:
@@ -225,12 +225,12 @@ async function displayFollowed(interaction: CommandInteraction) {
 	} else if (getConfig(CommandName.followOnlyRoleIn)) {
 		embed = new EmbedBuilder()
 			.setColor("#2f8e7d")
-			.setTitle(i18next.t("follow.list.title") as string)
+			.setTitle(i18next.t("follow.list.roleIn") as string)
 			.setDescription(followedRolesInNames || i18next.t("common.none") as string);
 	} else {
 		embed = new EmbedBuilder()
 			.setColor("#2f8e7d")
-			.setTitle("Disabled");
+			.setTitle(i18next.t("common.disabled"));
 	}
 
 	await interaction.reply({
@@ -241,7 +241,6 @@ async function displayFollowed(interaction: CommandInteraction) {
 
 async function followThisRole(interaction: CommandInteraction) {
 	const role = interaction.options.get(en("common.role").toLowerCase());
-	logInDev("role", role);
 	if (!role || !(role.role instanceof Role)) {
 		await interaction.reply({
 			content: i18next.t("ignore.role.error", {role: role}) as string,
@@ -250,7 +249,6 @@ async function followThisRole(interaction: CommandInteraction) {
 		return;
 	}
 	const followedRoles:Role[] = getRole("follow") as Role[] ?? [];
-	logInDev("allFollowRoles", followedRoles.map((role) => role.id));
 	const isAlreadyFollowed = followedRoles.some(
 		(followedRole: Role) => followedRole.id === role.role?.id
 	);

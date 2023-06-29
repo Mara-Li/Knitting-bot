@@ -78,7 +78,7 @@ export function checkRoleIn(on: "follow"|"ignore", role: Role, thread: ThreadCha
 
 
 export function checkThread(channel: ThreadChannel, on: "ignore" | "follow") {
-	logInDev(`Check if #${channel.name} is ${on}`);
+	logInDev("checkThread:",`Check if #${channel.name} is ${on}`);
 	const parentChannels = channel.parent;
 	const categoryOfParent = parentChannels?.parent;
 	const followedThread = getMaps(on,TypeName.thread) as ThreadChannel[] || [];

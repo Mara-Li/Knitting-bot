@@ -75,17 +75,14 @@ export async function getUsersToPing(thread: ThreadChannel, members: GuildMember
 	for (const member of members) {
 		if (thread.permissionsFor(member).has("ViewChannel", true) && await checkIfUserNotInTheThread(thread, member)) {
 			if (getConfig(CommandName.followOnlyRoleIn) && checkMemberRoleIn("follow", member.roles, thread)) {
-				logInDev(`followOnlyRoleIn: @${member.user.username} is in a followed role in #${thread.name}`);
 				usersToBeAdded.push(member);
-				logInDev(`Add @${member.user.username} to #${thread.name}`);
+				logInDev(`Add @${member.user.username} to #${thread.name} - Rules:\n- Follow Only Role In\n- Role followed in the thread`);
 			} else if (getConfig(CommandName.followOnlyRole) && checkMemberRole(member.roles, "follow") && !getConfig(CommandName.followOnlyRoleIn)) {
-				logInDev(`followOnlyRole: @${member.user.username} is in a followed role`);
 				usersToBeAdded.push(member);
-				logInDev(`Add @${member.user.username} to #${thread.name}`);
+				logInDev(`Add @${member.user.username} to #${thread.name} - Rules:\n- Follow Only Role\n- Role followed\n- Not follow Only Role In`);
 			} else if (!getConfig(CommandName.followOnlyRole) && !checkMemberRole(member.roles, "ignore") && !checkMemberRoleIn("ignore", member.roles, thread) && !getConfig(CommandName.followOnlyRoleIn)) {
-				logInDev(`followOnlyRole DISABLED && @${member.user.username} is not in an ignored role`);
 				usersToBeAdded.push(member);
-				logInDev(`Add @${member.user.username} to #${thread.name}`);
+				logInDev(`Add @${member.user.username} to #${thread.name} - Rules :\n- Not follow Only Role\n- Role not ignored globally\n- Role not ignored in the thread\n- Not follow Only Role In`);
 			}
 		}
 	}
@@ -104,16 +101,15 @@ export async function getRoleToPing(thread: ThreadChannel, roles: Role[]) {
 		const membersInTheThread = await thread.members.fetch();
 		const membersOfTheRoleNotInTheThread = role.members.filter(member => !membersInTheThread.has(member.id));
 		if (role.name !== "@everyone" && thread.permissionsFor(role).has("ViewChannel", true) && role.members.size >0 && membersOfTheRoleNotInTheThread.size > 0) {
-			logInDev(`@${role.name} role ignored for thread ?:`, checkRoleIn("ignore", role, thread));
 			if (checkRoleIn("follow",role, thread)) {
 				roleToBeAdded.push(role);
-				logInDev(`Add @${role.name} to #${thread.name}`);
+				logInDev(`Add @${role.name} to #${thread.name}\n **Role Followed in thread**`);
 			} else if (getConfig(CommandName.followOnlyRole) && checkRole(role, "follow")) {
 				roleToBeAdded.push(role);
-				logInDev(`Add @${role.name} to #${thread.name}`);
+				logInDev(`Add @${role.name} to #${thread.name}\n **FollowOnlyRole & Followed**`);
 			} else if (!getConfig(CommandName.followOnlyRole) && !checkRole(role, "ignore") && !checkRoleIn("ignore", role, thread)) {
 				roleToBeAdded.push(role);
-				logInDev(`Add @${role.name} to #${thread.name}`);
+				logInDev(`Add @${role.name} to #${thread.name}\n **Not FollowOnlyRole & Not Ignored && Not ignored for this thread**`);
 			}
 		}
 	}

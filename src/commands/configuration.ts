@@ -120,8 +120,11 @@ export default {
 		)
 		.addSubcommand((subcommand) =>
 			subcommand
-				.setName("follow-only-in")
-				.setDescription("follow specific role in specific channel. Incompatible with other follow-only mode.")
+				.setName(en("configuration.roleIn.name"))
+				.setDescription(en("configuration.roleIn.description"))
+				.setDescriptionLocalizations({
+					fr: fr("configuration.roleIn.description"),
+				})
 				.addBooleanOption((option) =>
 					option
 						.setName("switch")
@@ -365,7 +368,7 @@ async function getBooleanAndReply(
  * @param {boolean} value The value to check
  */
 function enabledOrDisabled(value: boolean) {
-	return value ? i18next.t("enable.enable") : i18next.t("disable.disable");
+	return value ? i18next.t("enable.enable") : i18next.t("common.disabled");
 }
 
 /**

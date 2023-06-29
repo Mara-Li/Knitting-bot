@@ -34,6 +34,7 @@
     "category": "Category",
     "channel": "Channel",
     "confirm": "Confirm",
+    "disabled": "Disabled",
     "error": "An error occurred: {{error}}",
     "forum": "Forum",
     "here": "here",
@@ -41,6 +42,7 @@
     "no": "No",
     "none": "/",
     "role": "Roles",
+    "roleIn": "role-in",
     "thread": "Thread",
     "yes": "Yes"
   },
@@ -89,6 +91,10 @@
       "name": "on-new-member",
       "title": "Change action on new member"
     },
+    "roleIn": {
+      "description": "Follow specific role in specific channel. Incompatible with other follow-only mode.",
+      "name": "follow-only-in"
+    },
     "show": {
       "description": "Show the current configuration",
       "menu": {
@@ -106,7 +112,6 @@
     }
   },
   "disable": {
-    "disable": "Disabled",
     "manual": "Disabled manual mode",
     "type": "Disabled: {{- type}}"
   },
@@ -120,6 +125,7 @@
     "disabled": "You can't use these commands : the follow-only mode is disabled.",
     "list": {
       "description": "Display the followed channels or roles",
+      "roleIn": "Roles followed in specifics chans",
       "title": "Follow"
     },
     "role": {
@@ -127,6 +133,13 @@
       "description": "Role to follow/unfollow",
       "option": "Select the role",
       "removed": "{{- role}} unfollowed"
+    },
+    "roleIn": {
+      "description": "Follow a role for a channel",
+      "option": {
+        "channel": "The channel to follow. If not specified, the role will be unfollowed.",
+        "role": "The role to follow"
+      }
     },
     "thread": {
       "description": "Select a thread, channel, forum, category, to follow",
@@ -155,6 +168,13 @@
       "option": "Select role to exclude/include",
       "removed": "Role {{- role}} un-ignored!"
     },
+    "roleIn": {
+      "description": "Ignore a channel for a specific role",
+      "option": {
+        "chan": "The channel where the role will be ignored. If not set, will delete the role rules completely.",
+        "role": "The role to ignore"
+      }
+    },
     "thread": {
       "description": "Ignore a specific thread",
       "error": "This command can only be used in a thread, or for a thread.",
@@ -163,6 +183,25 @@
       },
       "remove": "{{-thread}} is no longer ignored",
       "success": "{{- thread}} is now ignored"
+    }
+  },
+  "roleIn": {
+    "already": "The role {{- mention }} is already {{- opposite }} in {{- channel }}.",
+    "enabled": {
+      "chan": "{{- chan }} is now {{- on}} for {{- mention}}"
+    },
+    "error": {
+      "need": "You need to activate the follow-only-in mode first.",
+      "otherMode": "You can't use this command with the other follow-only mode.",
+      "support": "This channel type is not supported"
+    },
+    "noLonger": {
+      "any": "The role {{- mention}} is no longer {{- on}} in any channel.",
+      "chan": "{{- chan }} is no longer {{- on }} for {{- mention }}"
+    },
+    "on": {
+      "follow": "followed",
+      "ignore": "ignored"
     }
   }
 }

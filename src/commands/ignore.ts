@@ -78,18 +78,30 @@ export default {
 		)
 		.addSubcommand((subcommand) =>
 			subcommand
-				.setName("role-in")
-				.setDescription("Ignore only a role in a specific channel")
+				.setName(en("common.roleIn"))
+				.setNameLocalizations({
+					fr: fr("common.roleIn"),
+				})
+				.setDescription(en("ignore.roleIn.description"))
+				.setDescriptionLocalizations({
+					fr: fr("ignore.roleIn.description"),
+				})
 				.addRoleOption((option) =>
 					option
 						.setName(en("common.role").toLowerCase())
-						.setDescription("The role to ignore")
+						.setDescription(en("ignore.roleIn.option.role"))
+						.setDescriptionLocalizations({
+							fr: fr("ignore.roleIn.option.role"),
+						})
 						.setRequired(true)
 				)
 				.addChannelOption((option) =>
 					option
 						.setName(en("common.channel").toLowerCase())
-						.setDescription("The channel where the role will be ignored")
+						.setDescription(en("ignore.roleIn.option.chan"))
+						.setDescriptionLocalizations({
+							fr: fr("ignore.roleIn.option.chan"),
+						})
 						.setRequired(false)
 				)
 		)
@@ -132,7 +144,7 @@ export default {
 			}
 			await ignoreThisRole(interaction);
 			break;
-		case "role-in":
+		case en("common.roleIn"):
 			await interactionRoleInChannel(interaction, "ignore");
 			break;
 		case "list":
@@ -216,7 +228,6 @@ async function ignoreThisRole(interaction: CommandInteraction) {
 	}
 	const mention = role?.role.id ? roleMention(role.role.id) : role.role?.name;
 	const allIgnoreRoles:Role[] = getRole("ignore");
-	logInDev("allIgnoreRoles", allIgnoreRoles.map((role) => role.id));
 	const isAlreadyIgnored = allIgnoreRoles.some(
 		(ignoredRole: Role) => ignoredRole.id === role.role?.id
 	);
