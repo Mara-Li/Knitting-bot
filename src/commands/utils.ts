@@ -33,7 +33,7 @@ export async function interactionRoleInChannel(interaction: CommandInteraction, 
 	}
 	if (!getConfig(CommandName.followOnlyRoleIn) && on === "follow") {
 		await interaction.reply({
-			content: i18next.t("roleIn.error.need"),
+			content: i18next.t("roleIn.error.need") as string,
 			ephemeral: true,
 		});
 		return;
@@ -69,7 +69,7 @@ export async function interactionRoleInChannel(interaction: CommandInteraction, 
 	logInDev(validChannelTypes.includes(channelType ?? 99));
 	if (!validChannelTypes.includes(channelType ?? 99)) {
 		await interaction.reply({
-			content: i18next.t("roleIn.error.support"),
+			content: i18next.t("roleIn.error.support") as string,
 			ephemeral: true,
 		});
 	}
@@ -118,7 +118,7 @@ export async function interactionRoleInChannel(interaction: CommandInteraction, 
 					mention: mention,
 					on: i18next.t(`roleIn.on.${on}`),
 					channel: channelMention(channel.channel?.id ?? ""),
-				}),
+				}) as string,
 				ephemeral: true,
 			});
 			/** If the role is not followed in any channel, remove it from the list */
@@ -138,7 +138,7 @@ export async function interactionRoleInChannel(interaction: CommandInteraction, 
 					mention: mention,
 					on: i18next.t(`roleIn.on.${on}`),
 					channel: channelMention(channel.channel?.id ?? "")
-				}),
+				}) as string,
 				ephemeral: true,
 			});
 		}
@@ -157,7 +157,7 @@ export async function interactionRoleInChannel(interaction: CommandInteraction, 
 				mention: mention,
 				on: i18next.t(`roleIn.on.${on}`),
 				channel: channelMention(channel.channel?.id ?? "")
-			}),
+			}) as string,
 			ephemeral: true,
 		});
 	}

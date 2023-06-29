@@ -171,7 +171,7 @@
     "roleIn": {
       "description": "Ignore un rôle pour un channel spécifique",
       "option": {
-        "chan": "Le channel dans lequel le rôle sera ignoré. S'il n'est pas défini, le rôle sera totalement désignoré.",
+        "chan": "Le channel dans lequel le rôle sera ignoré. Si indéfini, supprime le rôle de la liste.",
         "role": "Le rôle à ignorer"
       }
     },
