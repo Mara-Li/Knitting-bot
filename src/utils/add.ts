@@ -1,23 +1,17 @@
 import { userMention } from "@discordjs/formatters";
-import {
-	GuildMember,
-	MessageFlags, MessagePayloadOption,
-	Role,
-	ThreadChannel,
-} from "discord.js";
+import { GuildMember, MessageFlags, MessagePayloadOption, Role, ThreadChannel } from "discord.js";
 import { emoji } from "../index";
-import { getConfig } from "../maps";
 import { CommandName } from "../interface";
+import { getConfig } from "../maps";
 import {
 	checkIfUserNotInTheThread,
 	checkMemberRole,
 	checkMemberRoleIn,
 	checkRole,
-	checkRoleIn, getMemberPermission,
+	checkRoleIn,
+	getMemberPermission,
 } from "./data_check";
 import { logInDev } from "./index";
-
-
 
 
 export async function addUserToThread(thread: ThreadChannel, user: GuildMember) {
@@ -27,7 +21,10 @@ export async function addUserToThread(thread: ThreadChannel, user: GuildMember) 
 		let message = fetchedMessage.filter(m => m.author.id === thread.client.user.id).first();
 		
 		if (getConfig(CommandName.followOnlyRoleIn)) {
-			if (message) message.edit(userMention(user.id));
+			if (message) {
+				await message.edit(userMention(user.id));
+				await message.edit(emoji);
+			}
 			else {
 				message = await thread.send({
 					content: emoji,
@@ -36,8 +33,11 @@ export async function addUserToThread(thread: ThreadChannel, user: GuildMember) 
 				await message.edit(userMention(user.id));
 				await message.edit(emoji);
 			}
-		} else if (!getConfig(CommandName.followOnlyRole) && !checkMemberRole(user.roles, "ignore")) {
-			if (message) message.edit(userMention(user.id));
+		} else if (!checkMemberRole(user.roles, "ignore")) {
+			if (message) {
+				await message.edit(userMention(user.id));
+				await message.edit(emoji);
+			}
 			else {
 				message = await thread.send({
 					content: emoji,
@@ -48,7 +48,10 @@ export async function addUserToThread(thread: ThreadChannel, user: GuildMember) 
 			}
 			logInDev(`Add @${user.user.username} to #${thread.name}`);
 		} else if (getConfig(CommandName.followOnlyRole) && checkMemberRole(user.roles, "follow")) {
-			if (message) message.edit(userMention(user.id));
+			if (message) {
+				await message.edit(userMention(user.id));
+				await message.edit(emoji);
+			}
 			else {
 				message = await thread.send({
 					content: emoji,
@@ -71,7 +74,7 @@ export async function getUsersToPing(thread: ThreadChannel, members: GuildMember
 	const usersToBeAdded: GuildMember[] = [];
 	for (const member of members) {
 		if (thread.permissionsFor(member).has("ViewChannel", true) && await checkIfUserNotInTheThread(thread, member)) {
-			if (checkMemberRoleIn("follow", member.roles, thread)) {
+			if (getConfig(CommandName.followOnlyRoleIn) && checkMemberRoleIn("follow", member.roles, thread)) {
 				logInDev(`followOnlyRoleIn: @${member.user.username} is in a followed role in #${thread.name}`);
 				usersToBeAdded.push(member);
 				logInDev(`Add @${member.user.username} to #${thread.name}`);
@@ -79,7 +82,7 @@ export async function getUsersToPing(thread: ThreadChannel, members: GuildMember
 				logInDev(`followOnlyRole: @${member.user.username} is in a followed role`);
 				usersToBeAdded.push(member);
 				logInDev(`Add @${member.user.username} to #${thread.name}`);
-			} else if (!getConfig(CommandName.followOnlyRole) && !checkMemberRole(member.roles, "ignore") && !getConfig(CommandName.followOnlyRoleIn)) {
+			} else if (!getConfig(CommandName.followOnlyRole) && !checkMemberRole(member.roles, "ignore") && !checkMemberRoleIn("ignore", member.roles, thread) && !getConfig(CommandName.followOnlyRoleIn)) {
 				logInDev(`followOnlyRole DISABLED && @${member.user.username} is not in an ignored role`);
 				usersToBeAdded.push(member);
 				logInDev(`Add @${member.user.username} to #${thread.name}`);
@@ -101,13 +104,14 @@ export async function getRoleToPing(thread: ThreadChannel, roles: Role[]) {
 		const membersInTheThread = await thread.members.fetch();
 		const membersOfTheRoleNotInTheThread = role.members.filter(member => !membersInTheThread.has(member.id));
 		if (role.name !== "@everyone" && thread.permissionsFor(role).has("ViewChannel", true) && role.members.size >0 && membersOfTheRoleNotInTheThread.size > 0) {
+			logInDev(`@${role.name} role ignored for thread ?:`, checkRoleIn("ignore", role, thread));
 			if (checkRoleIn("follow",role, thread)) {
 				roleToBeAdded.push(role);
 				logInDev(`Add @${role.name} to #${thread.name}`);
 			} else if (getConfig(CommandName.followOnlyRole) && checkRole(role, "follow")) {
 				roleToBeAdded.push(role);
 				logInDev(`Add @${role.name} to #${thread.name}`);
-			} else if (!getConfig(CommandName.followOnlyRole) && !checkRole(role, "ignore")) {
+			} else if (!getConfig(CommandName.followOnlyRole) && !checkRole(role, "ignore") && !checkRoleIn("ignore", role, thread)) {
 				roleToBeAdded.push(role);
 				logInDev(`Add @${role.name} to #${thread.name}`);
 			}
@@ -161,7 +165,6 @@ export async function addRoleAndUserToThread(thread: ThreadChannel) {
 			flags: MessageFlags.SuppressNotifications
 		};
 		const fetchedMessage = await thread.messages.fetch();
-		logInDev("****", fetchedMessage.filter(m => m.author.id === thread.client.user.id).first()?.id, "****");
 		const message = fetchedMessage.filter(m => m.author.id === thread.client.user.id).first() ?? await thread.send(messagePayload);
 		await message.edit(toPing.map(member => `<@${member.id}>`).join(" "));
 		await message.edit(emoji);

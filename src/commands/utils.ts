@@ -40,15 +40,17 @@ export async function interactionRoleInChannel(interaction: CommandInteraction, 
 	const channel = interaction.options.get(en("common.channel").toLowerCase()) ?? interaction;
 	if (!role || !(role.role instanceof Role)) {
 		await interaction.reply({
-			content: i18next.t("ignore.role.error", {role: role}) as string,
+			content: i18next.t("ignore.role.error", {role: role?.name}) as string,
 			ephemeral: true,
 		});
 		return;
 	}
 	const channelType = channel.channel?.type;
 	logInDev("channelType", channelType as ChannelType);
-	const validChannelTypes : ChannelType[] = [ChannelType.GuildCategory, ChannelType.GuildText, ChannelType.PublicThread, ChannelType.PrivateThread];
-	if (!channelType || !validChannelTypes.includes(channelType as ChannelType)) {
+	const validChannelTypes : ChannelType[] = [ChannelType.GuildCategory, ChannelType.GuildText, ChannelType.PublicThread, ChannelType.PrivateThread, ChannelType.GuildForum];
+	logInDev("validChannelTypes", validChannelTypes);
+	logInDev(validChannelTypes.includes(channelType ?? 99));
+	if (!validChannelTypes.includes(channelType ?? 99)) {
 		await interaction.reply({
 			content: "This channel type is not supported",
 			ephemeral: true,
@@ -79,7 +81,6 @@ export async function interactionRoleInChannel(interaction: CommandInteraction, 
 		});
 		return;
 	}
-	logInDev("roleIn", roleIn);
 	if (roleIn) {
 		/** Verify if the channel is already in the list */
 		const some = roleIn.channels.some(

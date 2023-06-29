@@ -12,7 +12,7 @@ import {
 	ThreadChannel,
 } from "discord.js";
 import { default as i18next } from "../i18n/i18next";
-import { getConfig, getMaps, getRole, setIgnore, setRole } from "../maps";
+import { getConfig, getMaps, getRole, getRoleIn, setIgnore, setRole } from "../maps";
 import { TypeName, CommandName } from "../interface";
 import {logInDev } from "../utils";
 import { interactionRoleInChannel } from "./utils";
@@ -78,17 +78,17 @@ export default {
 		)
 		.addSubcommand((subcommand) =>
 			subcommand
-				.setName("ignore-only-in")
+				.setName("role-in")
 				.setDescription("Ignore only a role in a specific channel")
 				.addRoleOption((option) =>
 					option
-						.setName("role")
+						.setName(en("common.role").toLowerCase())
 						.setDescription("The role to ignore")
 						.setRequired(true)
 				)
 				.addChannelOption((option) =>
 					option
-						.setName("channel")
+						.setName(en("common.channel").toLowerCase())
 						.setDescription("The channel where the role will be ignored")
 						.setRequired(true)
 				)
@@ -132,7 +132,7 @@ export default {
 			}
 			await ignoreThisRole(interaction);
 			break;
-		case "ignore-only-in":
+		case "role-in":
 			await interactionRoleInChannel(interaction, "ignore");
 			break;
 		case "list":
@@ -151,11 +151,19 @@ async function listIgnored(interaction: CommandInteraction) {
 	const ignoredChannels = getMaps("ignore",TypeName.channel) as TextChannel[] ?? [];
 	const ignoredForum = getMaps("ignore",TypeName.forum) as ForumChannel[] ?? [];
 	const ignoredRoles = getRole("ignore");
-	const ignoredCategoriesNames = "\n- " + ignoredCategories.map((category) => category.name).join("\n- ");
-	const ignoredThreadsNames = "\n- " + ignoredThreads.map((thread) => thread.name).join("\n-");
+	
+	const ignoredRolesIn = getRoleIn("ignore");
+	const ignoredRolesInMaps = ignoredRolesIn.map((roleIn) =>{
+		const role = roleIn.role.id;
+		const channels = roleIn.channels.map((channel) => channelMention(channel.id)).join("\n - ");
+		return `${roleMention(role)}:\n - ${channels}`;
+	}).join("");
+	
+	const ignoredCategoriesNames = "\n- " + ignoredCategories.map((category) => channelMention(category.id)).join("\n- ");
+	const ignoredThreadsNames = "\n- " + ignoredThreads.map((thread) => channelMention(thread.id)).join("\n-");
 	const ignoredChannelsNames = "\n- " + ignoredChannels.map((channel) => channel.name).join("\n-");
-	const ignoredRolesNames = "\n- " + ignoredRoles.map((role) => role.name).join("\n-");
-	const ignoredForumNames = "\n- " + ignoredForum.map((forum) => forum.name).join("\n-");
+	const ignoredRolesNames = "\n- " + ignoredRoles.map((role) => roleMention(role.id)).join("\n-");
+	const ignoredForumNames = "\n- " + ignoredForum.map((forum) => channelMention(forum.id)).join("\n-");
 
 	const embed = new EmbedBuilder()
 		.setColor("#2f8e7d")
@@ -180,10 +188,21 @@ async function listIgnored(interaction: CommandInteraction) {
 			name: i18next.t("common.role") as string,
 			value: ignoredRolesNames || i18next.t("ignore.list.none") as string,
 		});
-	await interaction.reply({
-		embeds: [embed],
-		ephemeral: true,
-	});
+	
+	if (ignoredRolesIn.length > 0) {
+		const embed2 = new EmbedBuilder()
+			.setColor("#2f8e7d")
+			.setDescription(ignoredRolesInMaps);
+		await interaction.reply({
+			embeds: [embed, embed2],
+			ephemeral: true,
+		});
+	} else {
+		await interaction.reply({
+			embeds: [embed],
+			ephemeral: true,
+		});
+	}
 }
 
 async function ignoreThisRole(interaction: CommandInteraction) {

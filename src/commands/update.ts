@@ -50,19 +50,8 @@ export default {
 						.setDescriptionLocalizations({
 							fr: fr("commands.updateSpecificThread.option.description"),
 						})
-						.setRequired(true)
+						.setRequired(false)
 				)
-		)
-		.addSubcommand((subcommand) =>
-			subcommand
-				.setName(en("common.here"))
-				.setNameLocalizations({
-					fr: fr("common.here"),
-				})
-				.setDescription(en("commands.updateThread.description"))
-				.setDescriptionLocalizations({
-					fr: fr("commands.updateThread.description"),
-				})
 		)
 		.addSubcommand((subcommand) =>
 			subcommand
@@ -94,11 +83,8 @@ export default {
 		case en("commands.updateAllThreads.name"):
 			await updateAllThreads(interaction);
 			break;
-		case en("common.here"):
-			await updateThisThread(interaction);
-			break;
 		case en("common.thread").toLowerCase():
-			await updateSpecificThread(interaction);
+			await updateThread(interaction);
 			break;
 		case en("commands.help.name"):
 			await displayHelp(interaction);
@@ -121,15 +107,11 @@ async function updateAllThreads(interaction: CommandInteraction) {
 	const count = threads.size;
 	for (const thread of threads.values()) {
 		const threadChannel = thread as ThreadChannel;
-		if (!getConfig(CommandName.followOnlyChannel)) {
-			if (!checkThread(threadChannel, "ignore")) {
-				await addRoleAndUserToThread(threadChannel);
-			}
+		if (!getConfig(CommandName.followOnlyChannel) && !checkThread(threadChannel, "ignore")) {
+			await addRoleAndUserToThread(threadChannel);
 		}
-		else {
-			if (checkThread(threadChannel, "follow")) {
-				await addRoleAndUserToThread(threadChannel);
-			}
+		else if (checkThread(threadChannel, "follow")) {
+			await addRoleAndUserToThread(threadChannel);
 		}
 	}
 	await interaction.followUp({
@@ -140,57 +122,23 @@ async function updateAllThreads(interaction: CommandInteraction) {
 	});
 }
 
-async function updateThisThread(interaction: CommandInteraction) {
-	if (!interaction.channel || !(interaction.channel instanceof ThreadChannel)) {
+async function updateThread(interaction: CommandInteraction) {
+	const threadOption = interaction.options.get(i18next.t("common.thread").toLowerCase()) ?? interaction;
+	const channel = threadOption?.channel;
+	if (!channel || !(channel instanceof ThreadChannel)) {
 		await interaction.reply({
 			content: i18next.t("commands.error") as string,
 			ephemeral: true,
 		});
 		return;
 	}
-	const isFollowed = getConfig(CommandName.followOnlyChannel) && checkThread(interaction.channel, "follow");
-	logInDev(`${interaction.channel.name} isFollowed: ${isFollowed}`);
-	logInDev(`${interaction.channel.name} isIgnored: ${checkThread(interaction.channel, "ignore")}`);
-	if (!getConfig(CommandName.followOnlyRoleIn) && (checkThread(interaction.channel, "ignore") || !isFollowed)) {
-		await interaction.reply({
-			content: i18next.t("ignore.message", {thread: channelMention(interaction.channel.id)}) as string,
-			ephemeral: true,
-		});
-		return;
-	}
-	try {
-		await interaction.reply({
-			content: `${
-				i18next.t("commands.success", {
-					channel: channelMention(interaction.channel.id),
-				}) as string
-			}`,
-			ephemeral: true,
-		});
-		const thread = interaction.channel as ThreadChannel;
-		await addRoleAndUserToThread(thread);
-	} catch (e) {
-		console.error(e);
-		await interaction.reply({
-			content: i18next.t("common.error", { error: e }) as string,
-			ephemeral: true,
-		});
-	}
-}
-
-async function updateSpecificThread(interaction: CommandInteraction) {
-	const threadOption = interaction.options.get(i18next.t("common.thread").toLowerCase() as string);
-	const mention = threadOption?.channel ? channelMention(threadOption.channel.id) : "";
-	if (!threadOption?.channel) {
-		await interaction.reply({
-			content: i18next.t("commands.error") as string,
-			ephemeral: true,
-		});
-		return;
-	}
+	logInDev(channel as ThreadChannel);
+	const mention = channelMention(channel?.id as string);
 	const isFollowed = getConfig(CommandName.followOnlyChannel) && checkThread(threadOption?.channel as ThreadChannel, "follow");
-	
-	if (!getConfig(CommandName.followOnlyRoleIn) && (checkThread(threadOption?.channel as ThreadChannel, "ignore") || !isFollowed)) {
+	logInDev(`${channel.name} — Configuration ROLE IN :`, !getConfig(CommandName.followOnlyRoleIn));
+	logInDev(`${channel.name} isFollowed:`, !isFollowed);
+	logInDev(`${channel.name} isIgnored:`, checkThread(threadOption?.channel as ThreadChannel, "ignore"));
+	if (!getConfig(CommandName.followOnlyRoleIn) && (checkThread(threadOption?.channel as ThreadChannel, "ignore") && !isFollowed)) {
 		await interaction.reply({
 			content: i18next.t("ignore.message", {thread: mention}) as string,
 			ephemeral: true,
@@ -202,15 +150,7 @@ async function updateSpecificThread(interaction: CommandInteraction) {
 		ephemeral: true,
 	});
 	if (!interaction.guild) return;
-	const thread = threadOption?.channel as ThreadChannel;
-	if (!thread || !thread.isThread()) {
-		await interaction.followUp({
-			content: i18next.t("commands.error") as string,
-			ephemeral: true,
-		});
-		return;
-	}
-	await addRoleAndUserToThread(thread);
+	await addRoleAndUserToThread(channel);
 }
 
 async function displayHelp(interaction: CommandInteraction) {

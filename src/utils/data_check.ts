@@ -50,9 +50,7 @@ export function checkMemberRoleIn(on: "follow" | "ignore", roleManager: GuildMem
 	const roleIn = getRoleIn(on);
 	return roles.some(role => {
 		const find = roleIn.find(r => r.role.id === role.id);
-		if (!find) {
-			return on !== "follow";
-		}
+		if (!find) return false;
 		return find.channels.some(channel => {
 			if (channel.id === thread.id) return true;
 			else if (channel.id === parentChannel?.id) return true;
@@ -70,9 +68,9 @@ export function checkRoleIn(on: "follow"|"ignore", role: Role, thread: ThreadCha
 	const find = roleIns.find(followedRole => followedRole.role.id === role.id);
 	if (!find) return false;
 	return find.channels.some(channel => {
-		if (channel === thread) return true;
-		else if (channel === parentChannel) return true;
-		else if (channel === categoryOfParent) return true;
+		if (channel.id === thread.id) return true;
+		else if (channel.id === parentChannel?.id) return true;
+		else if (channel.id === categoryOfParent?.id) return true;
 		return false;
 	});
 	

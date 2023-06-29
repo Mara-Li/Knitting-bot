@@ -29,7 +29,7 @@ export default (client: Client): void => {
 				
 				let roleIsAllowed = true;
 				if (!checkMemberRoleIn("follow", newMember.roles, threadChannel)) {
-					roleIsAllowed = checkMemberRole(newMember.roles, "follow") && !checkMemberRole(newMember.roles, "ignore");
+					roleIsAllowed = checkMemberRole(newMember.roles, "follow") && !checkMemberRole(newMember.roles, "ignore") && checkMemberRoleIn("ignore", newMember.roles, threadChannel);
 				}
 				
 				logInDev(`Role is allowed: ${roleIsAllowed}`);
@@ -38,7 +38,7 @@ export default (client: Client): void => {
 					 * followOnlyChannel is disabled && followOnlyRole can be enabled or disabled
 					 */
 					logInDev("followOnlyChannel is disabled");
-					logInDev(`checkIfThreadIsIgnored: ${checkThread(threadChannel, "ignore")}`);
+					logInDev(`${threadChannel.name} is ignored ? ${checkThread(threadChannel, "ignore")}`);
 					if (!checkThread(threadChannel, "ignore") && roleIsAllowed) await addUserToThread(threadChannel, newMember);
 				} else {
 					/**
