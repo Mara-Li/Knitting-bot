@@ -6,8 +6,8 @@ import {
 	SlashCommandBuilder,
 } from "discord.js";
 import { default as i18next, languageValue } from "../i18n/i18next";
-import { DefaultMenuBuilder } from "../interface";
-import { set, CommandName, get } from "../maps";
+import { DefaultMenuBuilder, CommandName } from "../interface";
+import { set, get } from "../maps";
 
 const fr = i18next.getFixedT("fr");
 const en = i18next.getFixedT("en");
@@ -120,6 +120,19 @@ export default {
 		)
 		.addSubcommand((subcommand) =>
 			subcommand
+				.setName("follow-only-in")
+				.setDescription("follow specific role in specific channel. Incompatible with other follow-only mode.")
+				.addBooleanOption((option) =>
+					option
+						.setName("switch")
+						.setDescription(en("configuration.switch"))
+						.setDescriptionLocalizations({
+							fr: fr("configuration.switch"), })
+						.setRequired(true)
+				)
+		)
+		.addSubcommand((subcommand) =>
+			subcommand
 				.setName(en("configuration.member.name"))
 				.setNameLocalizations({
 					fr: fr("configuration.member.name"),
@@ -210,6 +223,7 @@ export default {
 				"on-new-member": CommandName.newMember,
 				"follow-only-role" : CommandName.followOnlyRole,
 				"follow-only-channel" : CommandName.followOnlyChannel,
+				"follow-only-in": CommandName.followOnlyRoleIn
 			};
 			if (commands === DefaultMenuBuilder.language) {
 				const newValue = options.getString(CommandName.language) ?? "en";
@@ -270,6 +284,19 @@ export default {
 					mapsCommands[DefaultMenuBuilder.followOnlyChannel],
 					options.getBoolean("switch") ?? false
 				);
+			} else if (commands === DefaultMenuBuilder.followOnlyRoleIn) {
+				if (get(CommandName.followOnlyChannel) || get(CommandName.followOnlyRole)) {
+					await interaction.reply({
+						content: "You can't combine these options",
+						ephemeral: true,
+					});
+					return;
+				}
+				await getBooleanAndReply(
+					interaction,
+					mapsCommands[DefaultMenuBuilder.followOnlyRoleIn],
+					options.getBoolean("switch") ?? false
+				);
 			} else if (commands === DefaultMenuBuilder.show) {
 				await display(interaction);
 			} else {
@@ -310,6 +337,10 @@ async function getBooleanAndReply(
 		followOnlyRole:
 			"**__" +
 			i18next.t("configuration.follow.role.description").toLowerCase() +
+			"__**",
+		followOnlyRoleIn:
+			"**__" +
+			"Update only for specific role in specific channel" +
 			"__**",
 	};
 	if (value) {
@@ -362,6 +393,11 @@ export async function display(interaction: CommandInteraction) {
 			{
 				name: i18next.t("configuration.follow.thread.title"),
 				value: enabledOrDisabled(get(CommandName.followOnlyChannel)),
+				inline: true,
+			},
+			{
+				name: "Role In",
+				value: enabledOrDisabled(get(CommandName.followOnlyRoleIn)),
 				inline: true,
 			})
 		.addFields({ name: "\u200A", value: "\u200A" })

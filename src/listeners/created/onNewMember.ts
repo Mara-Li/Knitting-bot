@@ -1,5 +1,6 @@
 import { Client, ThreadChannel } from "discord.js";
-import { CommandName, get } from "../../maps";
+import {get } from "../../maps";
+import { CommandName } from "../../interface";
 import {
 	addUserToThread,
 	checkIfMemberRoleIsFollowed, checkIfTheadIsFollowed,
@@ -25,17 +26,9 @@ export default (client: Client): void => {
 			const threadChannel = channel as ThreadChannel;
 			const roleIsAllowed = !checkIfMemberRoleIsFollowed(member.roles) && !checkMemberRoleNotIgnored(member.roles);
 			if (!get(CommandName.followOnlyChannel)) {
-				/**
-				 * followOnlyChannel is disabled && followOnlyRole can be enabled or disabled
-				 */
 				if (!checkIfThreadIsIgnored(threadChannel) && roleIsAllowed) await addUserToThread(threadChannel, member);
-			
 			} else {
-				/**
-				 * followOnlyChannel is enabled && followOnlyRole can be enabled or disabled
-				 */
-				const followedThread = checkIfTheadIsFollowed(threadChannel);
-				if (roleIsAllowed && followedThread) await addUserToThread(threadChannel, member);
+				if (roleIsAllowed && checkIfTheadIsFollowed(threadChannel)) await addUserToThread(threadChannel, member);
 			}
 		}
 		

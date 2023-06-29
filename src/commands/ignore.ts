@@ -12,7 +12,8 @@ import {
 	ThreadChannel,
 } from "discord.js";
 import { default as i18next } from "../i18n/i18next";
-import { CommandName, get, getIgnored, setIgnore, TypeName } from "../maps";
+import { get, getIgnored, getRole, setIgnore, setRole } from "../maps";
+import { TypeName, CommandName } from "../interface";
 import {logInDev } from "../utils";
 
 const fr = i18next.getFixedT("fr");
@@ -128,7 +129,7 @@ async function listIgnored(interaction: CommandInteraction) {
 	const ignoredThreads = getIgnored(TypeName.thread) as ThreadChannel[] ?? [];
 	const ignoredChannels = getIgnored(TypeName.channel) as TextChannel[] ?? [];
 	const ignoredForum = getIgnored(TypeName.forum) as ForumChannel[] ?? [];
-	const ignoredRoles = getIgnored(TypeName.role) as Role[] ?? [];
+	const ignoredRoles = getRole("ignore");
 	const ignoredCategoriesNames = "\n- " + ignoredCategories.map((category) => category.name).join("\n- ");
 	const ignoredThreadsNames = "\n- " + ignoredThreads.map((thread) => thread.name).join("\n-");
 	const ignoredChannelsNames = "\n- " + ignoredChannels.map((channel) => channel.name).join("\n-");
@@ -174,7 +175,7 @@ async function ignoreThisRole(interaction: CommandInteraction) {
 		return;
 	}
 	const mention = role?.role.id ? roleMention(role.role.id) : role.role?.name;
-	const allIgnoreRoles:Role[] = getIgnored(TypeName.role) as Role[] ?? [];
+	const allIgnoreRoles:Role[] = getRole("ignore");
 	logInDev("allIgnoreRoles", allIgnoreRoles.map((role) => role.id));
 	const isAlreadyIgnored = allIgnoreRoles.some(
 		(ignoredRole: Role) => ignoredRole.id === role.role?.id
@@ -185,7 +186,7 @@ async function ignoreThisRole(interaction: CommandInteraction) {
 		const newIgnoreRoles: Role[] = allIgnoreRoles.filter(
 			(ignoredRole: Role) => ignoredRole.id !== role.role?.id
 		);
-		setIgnore(TypeName.role, newIgnoreRoles);
+		setRole("ignore", newIgnoreRoles);
 		await interaction.reply({
 			content: i18next.t("ignore.role.removed", {role: mention}) as string,
 			ephemeral: true,
@@ -193,7 +194,7 @@ async function ignoreThisRole(interaction: CommandInteraction) {
 	} else {
 		//add to ignore list
 		allIgnoreRoles.push(role.role);
-		setIgnore(TypeName.role, allIgnoreRoles);
+		setRole("ignore", allIgnoreRoles);
 		await interaction.reply({
 			content: i18next.t("ignore.role.added", {role: mention}) as string,
 			ephemeral: true,

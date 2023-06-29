@@ -1,5 +1,6 @@
 import { ChannelType, Client, ThreadChannel } from "discord.js";
-import { CommandName, get } from "../../maps";
+import { get } from "../../maps";
+import { CommandName } from "../../interface";
 import { addRoleAndUserToThread, checkIfTheadIsFollowed, checkIfThreadIsIgnored, logInDev } from "../../utils";
 
 /**

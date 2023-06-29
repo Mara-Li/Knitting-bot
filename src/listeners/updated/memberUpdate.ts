@@ -1,13 +1,14 @@
 import { Client, ThreadChannel } from "discord.js";
-import { CommandName, get } from "../../maps";
+import { get } from "../../maps";
 import {
 	addUserToThread,
 	checkIfMemberRoleIsFollowed,
 	checkIfTheadIsFollowed,
-	checkIfThreadIsIgnored,
+	checkIfThreadIsIgnored, checkMemberRoleInFollowed,
 	checkMemberRoleNotIgnored,
 	logInDev,
 } from "../../utils";
+import { CommandName } from "../../interface";
 
 export default (client: Client): void => {
 	client.on("guildMemberUpdate", async (oldMember, newMember) => {
@@ -21,9 +22,20 @@ export default (client: Client): void => {
 			logInDev(channels.map(channel => channel.name));
 			for (const channel of channels.values()) {
 				const threadChannel = channel as ThreadChannel;
-				const roleIsAllowed = !checkIfMemberRoleIsFollowed(newMember.roles) && !checkMemberRoleNotIgnored(newMember.roles);
 				logInDev("Role member is followed :", checkIfMemberRoleIsFollowed(newMember.roles));
 				logInDev("Role member is ignored :", checkMemberRoleNotIgnored(newMember.roles));
+				logInDev("Role member is in followed :", checkMemberRoleInFollowed(newMember.roles, threadChannel));
+				
+				/**
+				 * If checkMemberRoleInFollowed is true, ignore the two others condition and add the member to the thread
+				 * Else, check the two others condition and add the member to the thread if they are true
+				 */
+				
+				let roleIsAllowed = true;
+				if (!checkMemberRoleInFollowed(newMember.roles, threadChannel)) {
+					roleIsAllowed = checkIfMemberRoleIsFollowed(newMember.roles) && !checkMemberRoleNotIgnored(newMember.roles);
+				}
+				
 				logInDev(`Role is allowed: ${roleIsAllowed}`);
 				if (!get(CommandName.followOnlyChannel)) {
 					/**

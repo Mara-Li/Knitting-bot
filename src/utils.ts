@@ -12,7 +12,8 @@ import {
 } from "discord.js";
 import * as process from "process";
 import { emoji } from "./index";
-import { CommandName, get, getFollow, getIgnored, TypeName } from "./maps";
+import { get, getFollow, getIgnored, getRole, getRoleIn } from "./maps";
+import { CommandName, TypeName } from "./interface";
 
 
 /**
@@ -45,7 +46,9 @@ export function getMemberPermission(members: Collection<string, GuildMember>, th
 
 export async function addUserToThread(thread: ThreadChannel, user: GuildMember) {
 	if (thread.permissionsFor(user).has("ViewChannel", true) && await checkIfUserNotInTheThread(thread, user)) {
-		if (!get(CommandName.followOnlyRole) && !checkMemberRoleNotIgnored(user.roles)) {
+		if (get(CommandName.followOnlyRoleIn)) {
+			await thread.members.add(user);
+		} else if (!get(CommandName.followOnlyRole) && !checkMemberRoleNotIgnored(user.roles)) {
 			await thread.members.add(user);
 			logInDev(`Add @${user.user.username} to #${thread.name}`);
 		} else if (get(CommandName.followOnlyRole) && checkIfMemberRoleIsFollowed(user.roles)) {
@@ -64,10 +67,16 @@ export async function getUsersToPing(thread: ThreadChannel, members: GuildMember
 	const usersToBeAdded: GuildMember[] = [];
 	for (const member of members) {
 		if (thread.permissionsFor(member).has("ViewChannel", true) && await checkIfUserNotInTheThread(thread, member)) {
-			if (get(CommandName.followOnlyRole) && checkIfMemberRoleIsFollowed(member.roles)) {
+			if (checkMemberRoleInFollowed(member.roles, thread)) {
+				logInDev(`followOnlyRoleIn: @${member.user.username} is in a followed role in #${thread.name}`);
 				usersToBeAdded.push(member);
 				logInDev(`Add @${member.user.username} to #${thread.name}`);
-			} else if (!get(CommandName.followOnlyRole) && !checkMemberRoleNotIgnored(member.roles)) {
+			} else if (get(CommandName.followOnlyRole) && checkIfMemberRoleIsFollowed(member.roles) && !get(CommandName.followOnlyRoleIn)) {
+				logInDev(`followOnlyRole: @${member.user.username} is in a followed role`);
+				usersToBeAdded.push(member);
+				logInDev(`Add @${member.user.username} to #${thread.name}`);
+			} else if (!get(CommandName.followOnlyRole) && !checkMemberRoleNotIgnored(member.roles) && !get(CommandName.followOnlyRoleIn)) {
+				logInDev(`followOnlyRole DISABLED && @${member.user.username} is not in an ignored role`);
 				usersToBeAdded.push(member);
 				logInDev(`Add @${member.user.username} to #${thread.name}`);
 			}
@@ -88,7 +97,10 @@ export async function getRoleToPing(thread: ThreadChannel, roles: Role[]) {
 		const membersInTheThread = await thread.members.fetch();
 		const membersOfTheRoleNotInTheThread = role.members.filter(member => !membersInTheThread.has(member.id));
 		if (role.name !== "@everyone" && thread.permissionsFor(role).has("ViewChannel", true) && role.members.size >0 && membersOfTheRoleNotInTheThread.size > 0) {
-			if (get(CommandName.followOnlyRole) && checkIfRoleIsFollowed(role)) {
+			if (checkRoleInFollowed(role, thread)) {
+				roleToBeAdded.push(role);
+				logInDev(`Add @${role.name} to #${thread.name}`);
+			} else if (get(CommandName.followOnlyRole) && checkIfRoleIsFollowed(role)) {
 				roleToBeAdded.push(role);
 				logInDev(`Add @${role.name} to #${thread.name}`);
 			} else if (!get(CommandName.followOnlyRole) && !checkRoleNotIgnored(role)) {
@@ -123,26 +135,76 @@ export async function checkIfUserNotInTheThread(thread: ThreadChannel, memberToC
  * @returns {boolean} Return true if the member has a role that is ignored
  */
 export function checkMemberRoleNotIgnored(role: GuildMemberRoleManager) {
-	const allIgnoredRoles = getIgnored(TypeName.role) as Role[] || [];
+	const allIgnoredRoles = getRole("ignore");
 	const allMemberRoles = role.cache;
 	return allMemberRoles.some(memberRole => allIgnoredRoles.some(ignoredRole => ignoredRole.id === memberRole.id));
 }
 
 export function checkRoleNotIgnored(role: Role) {
-	const allIgnoredRoles = getIgnored(TypeName.role) as Role[] || [];
+	const allIgnoredRoles = getRole("ignore");
 	return allIgnoredRoles.some(ignoredRole => ignoredRole.id === role.id);
+}
+
+export function checkRoleInIgnored(role: Role, thread: ThreadChannel) {
+	const parentChannel = thread.parent;
+	const categoryOfParent = parentChannel?.parent;
+	const roleInIgnored = getRoleIn("ignore");
+	const ignoredRole = roleInIgnored.find(ignoredRole => ignoredRole.role.id === role.id);
+	if (!ignoredRole) return false;
+	return ignoredRole.channels.some(channel => {
+		if (channel === thread) return true;
+		else if (channel === parentChannel) return true;
+		else if (channel === categoryOfParent) return true;
+		return false;
+	});
+	
+}
+
+export function checkMemberRoleInFollowed(role: GuildMemberRoleManager, thread: ThreadChannel) {
+	if (!get(CommandName.followOnlyRoleIn)) return true;
+	const roles = role.cache;
+	const parentChannel = thread.parent;
+	const categoryOfParent = parentChannel?.parent;
+	const roleInFollowed = getRoleIn("follow");
+	
+	return roles.some(role => {
+		const followedRole = roleInFollowed.find(followedRole => followedRole.role.id === role.id);
+		if (!followedRole) return false; //if the role is not in the follow list, it's not followed
+		return followedRole.channels.some(channel => {
+			if (channel === thread) return true;
+			else if (channel === parentChannel) return true;
+			else if (channel === categoryOfParent) return true;
+			return false;
+		});
+	});
+}
+
+export function checkRoleInFollowed(role: Role, thread: ThreadChannel) {
+	if (!get(CommandName.followOnlyRoleIn)) return true;
+	const parentChannel = thread.parent;
+	const categoryOfParent = parentChannel?.parent;
+	const roleInFollowed = getRoleIn("follow");
+	const followedRole = roleInFollowed.find(followedRole => followedRole.role.id === role.id);
+	if (!followedRole) return false;
+	return followedRole.channels.some(channel => {
+		if (channel === thread) return true;
+		else if (channel === parentChannel) return true;
+		else if (channel === categoryOfParent) return true;
+		return false;
+	});
+	
 }
 
 export function checkIfMemberRoleIsFollowed(role: GuildMemberRoleManager) {
 	if (get(CommandName.followOnlyRole) === "false") return true;
-	const allFollowedRoles = getFollow(TypeName.role) as Role[] || [];
+	const allFollowedRoles = getRole("follow");
 	const allMemberRoles = role.cache;
 	return allMemberRoles.some(memberRole => allFollowedRoles.some(followedRole => followedRole.id === memberRole.id));
 }
 
 export function checkIfRoleIsFollowed(role: Role) {
 	if (get(CommandName.followOnlyRole) === "false") return true;
-	const allFollowedRoles = getFollow(TypeName.role) as Role[] || [];
+	const allFollowedRoles = getRole("follow");
 	return allFollowedRoles.some(followedRole => followedRole.id === role.id);
 }
 

@@ -1,29 +1,14 @@
-import Enmap from "enmap";
-import { logInDev } from "./utils";
 import { CategoryChannel, ForumChannel, Role, TextChannel, ThreadChannel } from "discord.js";
+import Enmap from "enmap";
+import { CommandName, RoleIn, TypeName } from "./interface";
+import { logInDev } from "./utils";
 
 export const optionMaps = new Enmap({ name: "Configuration" });
 export const translationLanguage = optionMaps.get("language") || "en";
 const ignoreMaps = new Enmap({ name: "Ignore" });
 const followOnlyMaps = new Enmap({ name: "FollowOnly" });
 
-export enum CommandName {
-	language = "language",
-	member = "onMemberUpdate",
-	thread = "onThreadCreated",
-	channel = "onChannelUpdate",
-	newMember = "onNewMember",
-	followOnlyRole = "followOnlyRole",
-	followOnlyChannel = "followOnlyChannel",
-}
 
-export enum TypeName {
-	thread = "thread",
-	role = "role",
-	category = "category",
-	channel = "channel",
-	forum = "forum",
-}
 
 /**
  * Set a value in Emaps "configuration"
@@ -45,7 +30,7 @@ export function set(
 
 export function setIgnore(
 	name: TypeName,
-	value: (ThreadChannel<boolean> | CategoryChannel | Role | TextChannel | ForumChannel)[],
+	value: (ThreadChannel<boolean> | CategoryChannel | TextChannel | ForumChannel)[]
 ) {
 	ignoreMaps.set(name, value);
 	logInDev(`Set ${name}`,
@@ -58,12 +43,36 @@ export function setIgnore(
 
 export function setFollow(
 	name: TypeName,
-	value: (ThreadChannel<boolean> | CategoryChannel | Role | TextChannel | ForumChannel)[]) {
+	value: (ThreadChannel | CategoryChannel | TextChannel | ForumChannel)[]) {
 	followOnlyMaps.set(name, value);
 	logInDev(`Set ${name}`,
 		value.map((v) => v.name).join(", "));
+	return;
 }
 
+export function setRole(
+	on: "follow" | "ignore",
+	value: Role[]) {
+	if (on === "follow") {
+		followOnlyMaps.set(TypeName.role, value);
+	} else {
+		ignoreMaps.set(TypeName.role, value);
+	}
+	logInDev(`Set ${on}Role`,
+		value.map((v) => v.name).join(", "));
+}
+
+export function setRoleIn(
+	on: "follow" | "ignore",
+	value: RoleIn[]) {
+	if (on === "follow") {
+		followOnlyMaps.set(TypeName.OnlyRoleIn, value);
+	} else {
+		ignoreMaps.set(TypeName.OnlyRoleIn, value);
+	}
+	logInDev(`Set ${on}OnlyRoleIn`,
+		value.map((v) => v.role.name + " " + v.channels.map((v) => v.name).join(", ")).join(", "));
+}
 
 
 /**
@@ -76,7 +85,7 @@ export function setFollow(
 export function get(name: CommandName): any {
 	if (name === CommandName.language) {
 		return optionMaps.get(name) || "en";
-	} else if (name === CommandName.followOnlyRole || name === CommandName.followOnlyChannel) {
+	} else if (name === CommandName.followOnlyRole || name === CommandName.followOnlyChannel || name === CommandName.followOnlyRoleIn) {
 		return optionMaps.get(name) ?? false;
 	}
 	return optionMaps.get(name) ?? true;
@@ -88,9 +97,8 @@ export function get(name: CommandName): any {
  * @returns {ThreadChannel[] | CategoryChannel[] | Role[] | TextChannel[]}
  */
 export function getIgnored(ignore: TypeName):
-	ThreadChannel[]
+	| ThreadChannel[]
 	| CategoryChannel[]
-	| Role[]
 	| TextChannel[]
 	| ForumChannel[]{
 	if (!ignoreMaps.has(ignore)) {
@@ -101,12 +109,38 @@ export function getIgnored(ignore: TypeName):
 		return ignoreMaps.get(TypeName.thread) as ThreadChannel[] ?? [];
 	case TypeName.category:
 		return ignoreMaps.get(TypeName.category) as CategoryChannel[] ?? [];
-	case TypeName.role:
-		return ignoreMaps.get(TypeName.role) as Role[] ?? [];
 	case TypeName.channel:
 		return ignoreMaps.get(TypeName.channel) as TextChannel[] ?? [];
 	case TypeName.forum:
 		return ignoreMaps.get(TypeName.forum) as ForumChannel[] ?? [];
+	default:
+		return [];
+	}
+}
+
+export function getRoleIn(ignore: "follow" | "ignore"):
+	RoleIn[] {
+	if (!ignoreMaps.has(TypeName.OnlyRoleIn)) {
+		setRoleIn(ignore, []);
+	}
+	switch(ignore) {
+	case "follow":
+		return followOnlyMaps.get(TypeName.OnlyRoleIn) as RoleIn[] ?? [];
+	case "ignore":
+		return ignoreMaps.get(TypeName.OnlyRoleIn) as RoleIn[] ?? [];
+	}
+}
+
+export function getRole(ignore: "follow" | "ignore"):
+	Role[] {
+	if (!ignoreMaps.has(TypeName.role)) {
+		setRole(ignore, []);
+	}
+	switch(ignore) {
+	case "follow":
+		return followOnlyMaps.get(TypeName.role) as Role[] ?? [];
+	case "ignore":
+		return ignoreMaps.get(TypeName.role) as Role[] ?? [];
 	}
 }
 
@@ -116,9 +150,8 @@ export function getIgnored(ignore: TypeName):
  * @returns {ThreadChannel[] | CategoryChannel[] | Role[] | TextChannel[]}
  */
 export function getFollow(follow: TypeName):
-	ThreadChannel[]
+	| ThreadChannel[]
 	| CategoryChannel[]
-	| Role[]
 	| TextChannel[]
 	| ForumChannel[] {
 	if (!followOnlyMaps.has(follow)) {
@@ -129,11 +162,11 @@ export function getFollow(follow: TypeName):
 		return followOnlyMaps.get(TypeName.thread) as ThreadChannel[] ?? [];
 	case TypeName.category:
 		return followOnlyMaps.get(TypeName.category) as CategoryChannel[] ?? [];
-	case TypeName.role:
-		return followOnlyMaps.get(TypeName.role) as Role[] ?? [];
 	case TypeName.channel:
 		return followOnlyMaps.get(TypeName.channel) as TextChannel[] ?? [];
 	case TypeName.forum:
 		return followOnlyMaps.get(TypeName.forum) as ForumChannel[] ?? [];
+	default:
+		return [];
 	}
 }

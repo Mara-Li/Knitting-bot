@@ -1,5 +1,6 @@
 import { ChannelType, Client, DMChannel, NonThreadGuildBasedChannel } from "discord.js";
-import { getIgnored, setIgnore, TypeName } from "../../maps";
+import { getIgnored, getRoleIn, setIgnore, setRoleIn } from "../../maps";
+import { TypeName } from "../../interface";
 import { logInDev } from "../../utils";
 
 /**
@@ -15,6 +16,35 @@ export default (client: Client): void => {
 		if (channel instanceof DMChannel) return;
 		const channelGuild = channel as NonThreadGuildBasedChannel ;
 		const channelType = channelGuild.type;
+		const ignoredRoleIn = getRoleIn("ignore").some((ignored) => {
+			const channels = ignored.channels;
+			return channels.some((ignored) => channel.id === ignored.id);
+		});
+		const followedRoleIn = getRoleIn("follow").some((followed) => {
+			const channels = followed.channels;
+			return channels.some((followed) => channel.id === followed.id);
+		});
+		if (ignoredRoleIn) {
+			//remove the channel from the role.channels array
+			const ignored = getRoleIn("ignore");
+			ignored.forEach((ignored) => {
+				const channels = ignored.channels;
+				const index = channels.findIndex((channel) => channel.id === channel.id);
+				channels.splice(index, 1);
+				ignored.channels = channels;
+			});
+			setRoleIn("ignore", ignored);
+		} if (followedRoleIn) {
+			//remove the channel from the role.channels array
+			const followed = getRoleIn("follow");
+			followed.forEach((followed) => {
+				const channels = followed.channels;
+				const index = channels.findIndex((channel) => channel.id === channel.id);
+				channels.splice(index, 1);
+				followed.channels = channels;
+			});
+			setRoleIn("follow", followed);
+		}
 		if (channelType === ChannelType.GuildText) {
 			/**
 			 * Remove the channel from the database "follow" and "ignore" maps
@@ -55,7 +85,7 @@ export default (client: Client): void => {
 				setIgnore(TypeName.category, allCategoryFollow);
 				logInDev(`Category ${channel.name} removed from follow list`);
 			}
-		} else if (channelType === ChannelType.GuildNews) {
+		} else if (channelType === ChannelType.GuildForum) {
 			/**
 			 * Remove the forum from the database "follow" and "ignore" maps
 			 */

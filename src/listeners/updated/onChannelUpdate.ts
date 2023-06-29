@@ -1,6 +1,7 @@
 import { ChannelType, Client, Snowflake, TextChannel } from "discord.js";
-import { CommandName, get } from "../../maps";
+import { get } from "../../maps";
 import { addRoleAndUserToThread, checkIfThreadIsIgnored, logInDev } from "../../utils";
+import { CommandName } from "../../interface";
 
 /**
  * @param {Client} client - Discord.js Client

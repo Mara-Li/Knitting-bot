@@ -1,3 +1,5 @@
+import { CategoryChannel, ForumChannel, Role, TextChannel, ThreadChannel } from "discord.js";
+
 export enum DefaultMenuBuilder {
 	language = "language",
 	member = "on-member-update",
@@ -8,4 +10,35 @@ export enum DefaultMenuBuilder {
 	show = "show",
 	followOnlyRole = "follow-only-role",
 	followOnlyChannel = "follow-only-channel",
+	followOnlyRoleIn = "follow-only-in",
+}
+
+
+export enum CommandName {
+	language = "language",
+	member = "onMemberUpdate",
+	thread = "onThreadCreated",
+	channel = "onChannelUpdate",
+	newMember = "onNewMember",
+	followOnlyRole = "followOnlyRole",
+	followOnlyChannel = "followOnlyChannel",
+	followOnlyRoleIn = "followOnlyRoleIn",
+}
+
+export enum TypeName {
+	thread = "thread",
+	role = "role",
+	category = "category",
+	channel = "channel",
+	forum = "forum",
+	OnlyRoleIn = "OnlyRoleIn",
+}
+
+export interface RoleIn {
+	role: Role;
+	channels:
+		(ThreadChannel
+		| CategoryChannel
+		| TextChannel
+		| ForumChannel)[]
 }

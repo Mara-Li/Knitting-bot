@@ -7,7 +7,8 @@ import {
 	SlashCommandBuilder,
 	ThreadChannel,
 } from "discord.js";
-import { CommandName, get } from "../maps";
+import { get } from "../maps";
+import { CommandName } from "../interface";
 import { addRoleAndUserToThread, checkIfTheadIsFollowed, checkIfThreadIsIgnored } from "../utils";
 import { default as i18next } from "../i18n/i18next";
 const fr = i18next.getFixedT("fr");
