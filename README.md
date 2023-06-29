@@ -40,7 +40,10 @@ You need to activate the `follow-only` mode to use these commands. You can do th
 
 - `/follow channel [channel]` : Add a channel to the list of followed channels
 - `/follow role [role]` : Add a role to the list of followed roles
-- `/follow role-in [role] [channel]` : Add a role to the list of followed roles in a specific channel
+- `/follow role-in [role] [channel]` : Add a role to the list of followed roles in a specific channel. 
+  - You can repeat the command with the same role to add multiple channels.
+  - To remove a channel, you need to redo the command with the same channel and role.
+  - To remove a role completely, you need to do the command without the channel.
 - `/follow list` : List all followed channels and roles
 
 > **Note**  
@@ -52,6 +55,9 @@ The exact opposite of the follow command. It won't ping the channels or roles ig
 - `/ignore channel [channel]` : Add a channel to the list of ignored channels
 - `/ignore role [role]` : Add a role to the list of ignored roles
 - `/ignore role-in [role] [channel]` : Add a role to the list of ignored roles in a specific channel
+  - You can repeat the command with the same role to add multiple channels.
+  - To remove a channel, you need to redo the command with the same channel and role.
+  - To remove a role completely, you need to do the command without the channel.
 - `/ignore list` : List all ignored channels and roles
 
 > **Note**  

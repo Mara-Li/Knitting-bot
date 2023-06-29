@@ -90,7 +90,7 @@ export default {
 					option
 						.setName(en("common.channel").toLowerCase())
 						.setDescription("The channel where the role will be ignored")
-						.setRequired(true)
+						.setRequired(false)
 				)
 		)
 		.addSubcommand((subcommand) =>

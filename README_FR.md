@@ -39,7 +39,10 @@ Vous devez préalablement activer les modes "follow-only" avec la commande `/con
 
 - `/follow channel [channel]` : Ajoute un channel à la liste des channels à suivre.
 - `/follow role [role]` : Ajoute un rôle à la liste des rôles à suivre.
-- `/follow role-in [role] [channel]` : Permet de suivre un rôle pour un channel spécifique. 
+- `/follow role-in [role] [channel]` : Permet de suivre un rôle pour un channel spécifique.
+  - Vous pouvez utiliser cette commande plusieurs fois pour ajouter plusieurs channels. 
+  - Si vous voulez supprimer un channel pour un rôle, vous devez refaire la commande avec le même channel. 
+  - Pour supprimer un rôle, vous devez refaire la commande sans spécifier de channel. 
 - `/follow list` : Affiche la liste des channels et rôles à suivre.
 
 > **Note**  
@@ -52,6 +55,9 @@ Permet d'ignorer un channel ou un rôle spécifique : le bot ne mentionnera pas 
 - `/ignore channel [channel]` : Ajoute un channel à la liste des channels à ignorer.
 - `/ignore role [role]` : Ajoute un rôle à la liste des rôles à ignorer.
 - `/ignore role-in [role] [channel]` : Permet d'ignorer un rôle pour un channel spécifique.
+  - Vous pouvez utiliser cette commande plusieurs fois pour ajouter plusieurs channels. 
+  - Si vous voulez supprimer un channel pour un rôle, vous devez refaire la commande avec le même channel. 
+  - Pour supprimer un rôle, vous devez refaire la commande sans spécifier de channel.
 - `/ignore list` : Affiche la liste des channels et rôles ignorés.
 
 > **Note**  
@@ -61,6 +67,7 @@ Permet d'ignorer un channel ou un rôle spécifique : le bot ne mentionnera pas 
 > Vous ne pouvez "suivre"  et "ignorer" un channel en même temps. Par exemple :
 > - Si vous avez activé le mode `follow-only-channel`, vous ne pouvez ignorer un channel.
 > - Si vous avez activé le mode `follow-only-role`, vous ne pouvez ignorer un rôle.
+> - Vous ne pouvez pas utiliser les autres configurations si vous avez activé `follow-only-in`.
 > Dans les faits, la commande `follow` ignorera tous les rôles/channels sauf ceux spécifiés dans la commande `follow`.
 
 ### Mise à jour des fils

@@ -75,6 +75,7 @@ export default {
 						})
 						.setRequired(true)
 				)
+				
 		)
 		.addSubcommand((subcommand) =>
 			subcommand
@@ -119,7 +120,7 @@ export default {
 						.setDescriptionLocalizations({
 							fr: "Le salon à suivre",
 						})
-						.setRequired(true)
+						.setRequired(false)
 				)
 		),
 	async execute(interaction: CommandInteraction) {
