@@ -8,6 +8,7 @@ import {
 import { default as i18next, languageValue } from "../i18n/i18next";
 import { DefaultMenuBuilder, CommandName } from "../interface";
 import { setConfig, getConfig } from "../maps";
+import { logInDev } from "../utils";
 
 const fr = i18next.getFixedT("fr");
 const en = i18next.getFixedT("en");
@@ -327,6 +328,8 @@ async function getBooleanAndReply(
 	value: boolean
 ) {
 	setConfig(option, value);
+	const msg = i18next.t("configuration.roleIn.description").split(".");
+	logInDev(msg[0], msg[1]);
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const optionTranslation: any = {
 		onMemberUpdate:
@@ -350,10 +353,9 @@ async function getBooleanAndReply(
 		followOnlyRoleIn:
 			"**__" +
 			i18next.t("configuration.roleIn.description").split(".")[0] +
-			"__**" + "\n*" +
-			i18next.t("configuration.roleIn.description").split(".")[1] +
-			"*",
+			"__** " + "\n *" + i18next.t("configuration.roleIn.description").split(".")[1].trim() + "*",
 	};
+	logInDev(i18next.t("configuration.roleIn.description").split(".")[0])
 	if (value) {
 		return interaction.reply({
 			content: `${i18next.t("enable.type", {
