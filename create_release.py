@@ -2,7 +2,6 @@ import argparse
 import os
 from git import Repo
 import json
-import dotenv
 
 def create_tag(tag_name: str):
     repo = Repo(os.path.dirname(os.path.realpath(__file__)))
@@ -31,7 +30,7 @@ def generate_changelog(VERSION: str):
 def update_package(VERSION: str):
     with open("package.json", "r") as f:
         package = json.load(f)
-    package["VERSION"] = VERSION
+    package["version"] = VERSION
     with open("package.json", "w") as f:
         json.dump(package, f, indent=4)
     print("Package.json updated")
