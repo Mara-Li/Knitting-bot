@@ -14,10 +14,9 @@ export default (client: Client): void => {
 		try {
 			await command.execute(interaction);
 		} catch (error) {
-			console.error(error);
-			await interaction.reply({
+			console.log(error);
+			await interaction.channel?.send({
 				content: i18next.t("common.error", { error: error }) as string,
-				ephemeral: true,
 			});
 		}
 	});
