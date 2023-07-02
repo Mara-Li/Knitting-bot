@@ -18,22 +18,44 @@ export default (client: Client): void => {
 		newChannel) => {
 		if (getConfig(CommandName.channel) === false) return;
 		logInDev(`Channel #${getChannelName(oldChannel.id, client)} updated`);
-		if (oldChannel.type !== ChannelType.GuildText
-			|| newChannel.type !== ChannelType.GuildText
+		logInDev("Channel type :", oldChannel.type, newChannel.type);
+		const validChannelTypes : ChannelType[] = [ChannelType.GuildCategory, ChannelType.GuildText, ChannelType.PublicThread, ChannelType.PrivateThread, ChannelType.GuildForum];
+		if (oldChannel.type === ChannelType.DM || newChannel.type === ChannelType.DM) return;
+		if (!validChannelTypes.includes(oldChannel.type)
+			|| !validChannelTypes.includes(newChannel.type)
 			|| oldChannel.permissionOverwrites.cache === newChannel.permissionOverwrites.cache) {
 			logInDev("Channel is not a text channel or permission are not changed");
 			return;
 		}
 		//getConfig all threads of this channel
 		logInDev(`Updating threads of ${newChannel.name}`);
-		const threads = await newChannel.threads.cache;
-		threads.forEach(thread => {
-			if (!getConfig(CommandName.followOnlyChannel)) {
-				if (!checkThread(thread, "ignore")) addRoleAndUserToThread(thread);
-			} else {
-				if (checkThread(thread, "follow")) addRoleAndUserToThread(thread);
-			}
-		});
+		const isCategory = newChannel.type === ChannelType.GuildCategory;
+		if (isCategory) {
+			//get all threads of the channels in the category
+			const children = newChannel.children.cache;
+			children.forEach(child => {
+				if (child.type === ChannelType.GuildText) {
+					const threads = (child as TextChannel).threads.cache;
+					threads.forEach(thread => {
+						if (!getConfig(CommandName.followOnlyChannel)) {
+							if (!checkThread(thread, "ignore")) addRoleAndUserToThread(thread);
+						} else {
+							if (checkThread(thread, "follow")) addRoleAndUserToThread(thread);
+						}
+					});
+				}
+			});
+		} else {
+			const newTextChannel = newChannel as TextChannel;
+			const threads = newTextChannel.threads.cache;
+			threads.forEach(thread => {
+				if (!getConfig(CommandName.followOnlyChannel)) {
+					if (!checkThread(thread, "ignore")) addRoleAndUserToThread(thread);
+				} else {
+					if (checkThread(thread, "follow")) addRoleAndUserToThread(thread);
+				}
+			});
+		}
 	});
 };
 
