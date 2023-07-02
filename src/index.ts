@@ -23,7 +23,14 @@ const client = new Client({
 	partials: [Partials.Channel],
 });
 
-export const emoji = process.env.MESSAGE && process.env.MESSAGE.trim().length > 0 ? process.env.MESSAGE : "🔄";
+export const EMOJI = process.env.MESSAGE && process.env.MESSAGE.trim().length > 0 ? process.env.MESSAGE : "🔄";
+export const VERSION = process.env.VERSION;
+
+export const INFO_EMOJI = {
+	"github" : process.env.GITHUB_EMOJI ?? "??",
+	"kofi" : process.env.KOFI ?? "??",
+	"discord" : process.env.DISCORD ?? "??",
+};
 
 
 try {

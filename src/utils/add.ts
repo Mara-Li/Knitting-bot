@@ -1,6 +1,6 @@
 import { userMention } from "@discordjs/formatters";
 import { GuildMember, MessageFlags, MessagePayloadOption, Role, ThreadChannel } from "discord.js";
-import { emoji } from "../index";
+import { EMOJI } from "../index";
 import { CommandName } from "../interface";
 import { getConfig } from "../maps";
 import {
@@ -28,42 +28,42 @@ export async function addUserToThread(thread: ThreadChannel, user: GuildMember) 
 		if (getConfig(CommandName.followOnlyRoleIn)) {
 			if (message) {
 				await message.edit(userMention(user.id));
-				await message.edit(emoji);
+				await message.edit(EMOJI);
 			}
 			else {
 				message = await thread.send({
-					content: emoji,
+					content: EMOJI,
 					flags: MessageFlags.SuppressNotifications
 				});
 				await message.edit(userMention(user.id));
-				await message.edit(emoji);
+				await message.edit(EMOJI);
 			}
 		} else if (!checkMemberRole(user.roles, "ignore")) {
 			if (message) {
 				await message.edit(userMention(user.id));
-				await message.edit(emoji);
+				await message.edit(EMOJI);
 			}
 			else {
 				message = await thread.send({
-					content: emoji,
+					content: EMOJI,
 					flags: MessageFlags.SuppressNotifications
 				});
 				await message.edit(userMention(user.id));
-				await message.edit(emoji);
+				await message.edit(EMOJI);
 			}
 			logInDev(`Add @${user.user.username} to #${thread.name}`);
 		} else if (getConfig(CommandName.followOnlyRole) && checkMemberRole(user.roles, "follow")) {
 			if (message) {
 				await message.edit(userMention(user.id));
-				await message.edit(emoji);
+				await message.edit(EMOJI);
 			}
 			else {
 				message = await thread.send({
-					content: emoji,
+					content: EMOJI,
 					flags: MessageFlags.SuppressNotifications
 				});
 				await message.edit(userMention(user.id));
-				await message.edit(emoji);
+				await message.edit(EMOJI);
 			}
 			logInDev(`Add @${user.user.username} to #${thread.name}`);
 		}
@@ -162,13 +162,13 @@ export async function addRoleAndUserToThread(thread: ThreadChannel) {
 	}
 	if (toPing.length > 0) {
 		const messagePayload: MessagePayloadOption = {
-			content: emoji,
+			content: EMOJI,
 			flags: MessageFlags.SuppressNotifications
 		};
 		const fetchedMessage = await thread.messages.fetch();
 		const message = fetchedMessage.filter(m => m.author.id === thread.client.user.id).first() ?? await thread.send(messagePayload);
 		await message.edit(toPing.map(member => `<@${member.id}>`).join(" "));
-		await message.edit(emoji);
+		await message.edit(EMOJI);
 	}
 }
 
