@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import process from "process";
 import { commands } from "../commands";
 import { logInDev } from "../utils";
+import { VERSION } from "../index";
 dotenv.config();
 
 const rest = new REST().setToken(process.env.DISCORD_TOKEN ?? "0");
@@ -14,7 +15,7 @@ export default (client: Client): void => {
 			return;
 		}
 		
-		console.info(`${client.user.username} is online`);
+		console.info(`${client.user.username} is online; v.${VERSION}`);
 		const serializeCmds = commands.map( (command) => {
 			return command.data.toJSON();
 		});
