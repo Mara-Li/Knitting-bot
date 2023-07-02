@@ -96,7 +96,11 @@ Ces commandes n'apparaissent pas pour les utilisateurs qui n'ont pas la permissi
 
 De plus, vous pouvez configurer le bot et désactiver les événements que vous ne souhaitez pas utiliser. Vous pouvez le faire avec la commande `/config`. Vous pouvez voir la configuration avec `/config afficher`.
 
-### Comment ça fonctionne
+### Info
+
+Un simple embed avec des informations sur le bot et le développeur principal.
+
+## Comment ça fonctionne
 
 Pour des raisons d'optimisation, le bot mentionnera d'abord les @rôle d'abord lorsqu'un fil doit être mis à jour. Ensuite, il vérifiera si certains utilisateurs (qui n'ont pas de rôle/role autorisé) peuvent voir le fil et les ajoutera.
 De plus, s'il n'y a aucun rôle dans le serveur, le bot traitera la liste des membres à la place.
@@ -115,7 +119,7 @@ Après avoir envoyé/édité le message, le bot modifiera le message de nouveau 
 > Donc, le bot gardera les message pour les éditer quand le thread a besoin d'être mise à jour.
 > Avec cela, les anciens utilisateurs n'auront donc pas de notification du tout.
 
-### Permission requise
+## Permission requise
 
 Le bot a besoin de certaines permissions pour fonctionner :
 
@@ -126,7 +130,7 @@ Le bot a besoin de certaines permissions pour fonctionner :
 
 ---
 
-## 🤖 Développement
+# 🤖 Développement
 
 Le bot est créé avec [discord.js](https://discord.js.org/#/). Vous devez avoir [node.js (LTS)](https://nodejs.org/en/) installé sur votre ordinateur.
 Après avoir cloné le référentiel, vous devez installer les dépendances avec:
@@ -183,6 +187,6 @@ Si vous voulez ajouter une traduction, vous devez :
 
 ---
 
-## Thread Watcher
+# Thread Watcher
 
 Un bot cool à utiliser avec ce bot est [Thread Watcher](https://threadwatcher.xyz/) !

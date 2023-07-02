@@ -104,7 +104,7 @@ More over, you can configure the bot and disable event that you don't want to us
 
 A simple embed with some information about the bot and the main developer.
 
-### How it's work
+## How it's work
 
 For some optimization purpose, the bot will first @role when a thread must be updated. After it will check if some users (that don't have role/allowed role) can see the thread and add them.
 Moreover, if there is no role in the server, the bot process on the members list instead.
@@ -134,7 +134,7 @@ The bot needs some intents to work:
 
 ---
 
-## 🤖 Development
+# 🤖 Development
 
 The bot is made with [discord.js](https://discord.js.org/#/). You need to have [node.js (LTS)](https://nodejs.org/en/) installed on your computer.
 After cloning the repo, you need to install the dependencies with:
@@ -191,6 +191,6 @@ If you want to add a translation, you need to:
 
 ---
 
-## Thread Watcher
+# Thread Watcher
 
 A cool bot to use with this bot is [Thread Watcher](https://threadwatcher.xyz/)!
