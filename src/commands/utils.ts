@@ -65,9 +65,8 @@ export async function interactionRoleInChannel(interaction: CommandInteraction, 
 	const channelType = channel.channel?.type;
 	logInDev("channelType", channelType as ChannelType);
 	const validChannelTypes : ChannelType[] = [ChannelType.GuildCategory, ChannelType.GuildText, ChannelType.PublicThread, ChannelType.PrivateThread, ChannelType.GuildForum];
-	logInDev("validChannelTypes", validChannelTypes);
-	logInDev(validChannelTypes.includes(channelType ?? 99));
-	if (!validChannelTypes.includes(channelType ?? 99)) {
+	logInDev(validChannelTypes.includes(channelType as number ?? 99));
+	if (!validChannelTypes.includes(channelType as number ?? 99)) {
 		await interaction.reply({
 			content: i18next.t("roleIn.error.support") as string,
 			ephemeral: true,
@@ -117,7 +116,7 @@ export async function interactionRoleInChannel(interaction: CommandInteraction, 
 				content: i18next.t("roleIn.noLonger.chan", {
 					mention: mention,
 					on: i18next.t(`roleIn.on.${on}`),
-					channel: channelMention(channel.channel?.id ?? ""),
+					chan: channelMention(channel.channel?.id ?? ""),
 				}) as string,
 				ephemeral: true,
 			});
