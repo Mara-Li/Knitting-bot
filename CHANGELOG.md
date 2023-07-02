@@ -1,6 +1,32 @@
 
-<a name="v1.2.1"></a>
-## [v1.2.1](https://github.com/Lisandra-dev/Knitting-bot/compare/1.2.0...v1.2.1) (2023-07-02)
+<a name="v1.2.2"></a>
+## [v1.2.2](https://github.com/Lisandra-dev/Knitting-bot/compare/1.2.1...v1.2.2) (2023-07-02)
+
+### Chore
+
+* bump v1.2.1
+* **install:** update new value
+* **package:** start wrong place
+
+### Docs
+
+* add info about forum
+* change hierarchy title
+* add info about /config
+* add new .env
+
+### Fix
+
+* forgot "category" permission and forum permission edited
+* update commands name for role-in
+
+### Refactor
+
+* **style:** some embeds adjustement
+
+
+<a name="1.2.1"></a>
+## [1.2.1](https://github.com/Lisandra-dev/Knitting-bot/compare/1.2.0...1.2.1) (2023-07-02)
 
 ### Chore
 

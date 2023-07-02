@@ -1,39 +1,39 @@
 {
-	"name": "knitting-bot",
-	"version": "1.2.0",
-	"description": "A bot used to add new user automatically in thread, without pinging them!",
-	"main": "dist/index.js",
-	"scripts": {
-		"init": "npm i && node install.js",
-		"build": "tsc",
-		"prestart": "npm run build",
-		"start": "pm2 start dist/src/index.js --name knitting-bot --log-date-format=\"YYYY-MM-DD HH:mm Z\"",
-		"stop": "pm2 stop knitting-bot",
-		"restart": "pm2 restart knitting-bot",
-		"delete": "pm2 delete knitting-bot",
-		"dev": "ts-node-dev --respawn -- src/index.ts",
-		"lint": "eslint --ext .ts src/",
-		"lint:fix": "eslint --ext .ts src/ --fix"
-	},
-	"dependencies": {
-		"@typescript-eslint/eslint-plugin": "^5.60.1",
-		"ansi-colors": "^4.1.3",
-		"discord.js": "^14.11.0",
-		"dotenv": "^16.3.1",
-		"enmap": "^5.9.8",
-		"eslint": "^8.43.0",
-		"eslint-plugin-jsonc": "^2.9.0",
-		"i18next": "^22.5.1",
-		"pm2": "^5.3.0",
-		"readline-sync": "^1.4.10",
-		"sequelize": "^6.32.1",
-		"sqlite3": "^5.1.6"
-	},
-	"devDependencies": {
-		"nodemon": "^2.0.22",
-		"ts-node": "^10.9.1",
-		"ts-node-dev": "^2.0.0",
-		"typescript": "^4.9.5"
-	},
-	"VERSION": "1.2.1"
+    "name": "knitting-bot",
+    "version": "1.2.0",
+    "description": "A bot used to add new user automatically in thread, without pinging them!",
+    "main": "dist/index.js",
+    "scripts": {
+        "init": "npm i && node install.js",
+        "build": "tsc",
+        "prestart": "npm run build",
+        "start": "pm2 start dist/src/index.js --name knitting-bot --log-date-format=\"YYYY-MM-DD HH:mm Z\"",
+        "stop": "pm2 stop knitting-bot",
+        "restart": "pm2 restart knitting-bot",
+        "delete": "pm2 delete knitting-bot",
+        "dev": "ts-node-dev --respawn -- src/index.ts",
+        "lint": "eslint --ext .ts src/",
+        "lint:fix": "eslint --ext .ts src/ --fix"
+    },
+    "dependencies": {
+        "@typescript-eslint/eslint-plugin": "^5.60.1",
+        "ansi-colors": "^4.1.3",
+        "discord.js": "^14.11.0",
+        "dotenv": "^16.3.1",
+        "enmap": "^5.9.8",
+        "eslint": "^8.43.0",
+        "eslint-plugin-jsonc": "^2.9.0",
+        "i18next": "^22.5.1",
+        "pm2": "^5.3.0",
+        "readline-sync": "^1.4.10",
+        "sequelize": "^6.32.1",
+        "sqlite3": "^5.1.6"
+    },
+    "devDependencies": {
+        "nodemon": "^2.0.22",
+        "ts-node": "^10.9.1",
+        "ts-node-dev": "^2.0.0",
+        "typescript": "^4.9.5"
+    },
+    "VERSION": "1.2.2"
 }
