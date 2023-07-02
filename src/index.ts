@@ -1,6 +1,7 @@
 import { Client, GatewayIntentBits, Partials } from "discord.js";
 import dotenv from "dotenv";
 import * as process from "process";
+import * as pkg from "../package.json";
 import interactionCreate from "./listeners/interactionCreate";
 import onBotEnter from "./listeners/onBotEnter";
 import onChannelDelete from "./listeners/delete/onChannelDelete";
@@ -24,7 +25,7 @@ const client = new Client({
 });
 
 export const EMOJI = process.env.MESSAGE && process.env.MESSAGE.trim().length > 0 ? process.env.MESSAGE : "🔄";
-export const VERSION = process.env.VERSION;
+export const VERSION = pkg.version ?? "0.0.0";
 
 export const INFO_EMOJI = {
 	"github" : process.env.GITHUB_EMOJI ?? "??",
