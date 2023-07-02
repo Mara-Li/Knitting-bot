@@ -101,7 +101,7 @@ export async function display() {
 				inline: true,
 			},
 			{
-				name: "Role In",
+				name: i18next.t("configuration.follow.roleIn"),
 				value: enabledOrDisabled(getConfig(CommandName.followOnlyRoleIn)),
 				inline: true,
 			})
@@ -138,7 +138,7 @@ export async function display() {
  * @param {boolean} value The value to check
  */
 function enabledOrDisabled(value: boolean) {
-	return value ? i18next.t("enable.enable") : i18next.t("common.disabled");
+	return value ? i18next.t("common.enable") : i18next.t("common.disabled");
 }
 
 /**
