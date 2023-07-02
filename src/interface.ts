@@ -16,6 +16,7 @@ export enum DefaultMenuBuilder {
 
 export enum CommandName {
 	language = "language",
+	manualMode = "manualMode",
 	member = "onMemberUpdate",
 	thread = "onThreadCreated",
 	channel = "onChannelUpdate",

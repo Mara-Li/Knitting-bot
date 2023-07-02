@@ -34,7 +34,9 @@
     "category": "Catégorie",
     "channel": "Channel",
     "confirm": "Confirmer",
+    "disable": "Désactiver",
     "disabled": "Désactivé",
+    "enable": "Activer",
     "error": "Une erreur est apparue : {{error}}",
     "forum": "Forum",
     "here": "ici",
@@ -49,29 +51,29 @@
   "configuration": {
     "channel": {
       "description": "Active/désactive l'ajout des membres aux threads lors de l'édition des permissions d'un channel.",
-      "name": "sur-mise-a-jour-channel",
+      "name": "Sur mise à jour de salon ou catégorie",
       "title": "Salon/catégorie"
     },
     "disable": {
       "description": "Active ou désactive tous les évènements pour passer le bot en mode manuel ou automatique",
-      "name": "mode-manuel",
+      "name": "Mode manuel",
       "option": "Active ou désactive le mode manuel"
     },
     "follow": {
       "role": {
         "description": "Ne mettre à jour le channel que pour un rôle spécifique",
-        "name": "follow-only-role",
+        "name": "Mode - Suivre certains rôles",
         "title": "Mode Rôle uniquement"
       },
       "thread": {
         "description": "Suivre uniquement le channel et mettre à jour pour tous les rôles",
-        "name": "follow-only-channel",
+        "name": "Mode - Suivre certains channels",
         "title": "Mode channel uniquement"
       }
     },
     "language": {
       "description": "Modifie la langue du bot",
-      "name": "Langue",
+      "name": "Changer de langue",
       "options": "Langue à utiliser",
       "reply": "Langue changée pour : {{- lang}}"
     },
@@ -82,19 +84,19 @@
     "member": {
       "description": "Active/désactive l'ajout de membres aux threads lors de l'édition de leurs permissions.",
       "display": "Membre modifié ",
-      "name": "sur-mise-a-jour-membre",
+      "name": "Sur mise à jour d'un membre",
       "title": "Mise-à-jour de membre"
     },
     "newMember": {
       "description": "Active ou désactive l'ajout d'un nouveau membre lorsqu'il rejoint le serveur.",
       "display": "Nouveau membre",
-      "name": "sur-nouveau-membre",
+      "name": "Sur les nouveaux membres",
       "title": "Arrivée d'un nouveau membre"
     },
     "roleIn": {
       "description": "Suivi d'un rôle spécifique dans un canal spécifique. Incompatible avec d'autres modes de suivi.",
       "error": "Vous ne pouvez combiner follow role-in avec only-role et only-channel.",
-      "name": "follow-only-in"
+      "name": "Mode - Suivre [role] dans [channel]"
     },
     "show": {
       "description": "Affiche la configuration actuelle",
@@ -108,7 +110,7 @@
     "thread": {
       "description": "Active ou désactive l'ajout des membres aux threads lors de leur création",
       "display": "Creation de thread",
-      "name": "sur-creation-thread",
+      "name": "À la création d'un thread",
       "title": "Création d'un thread"
     }
   },

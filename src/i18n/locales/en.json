@@ -34,7 +34,9 @@
     "category": "Category",
     "channel": "Channel",
     "confirm": "Confirm",
+    "disable": "Disable",
     "disabled": "Disabled",
+    "enable": "enable",
     "error": "An error occurred: {{error}}",
     "forum": "Forum",
     "here": "here",
@@ -49,29 +51,29 @@
   "configuration": {
     "channel": {
       "description": "Enable or disable the adding of members when channel/category permission are changed.",
-      "name": "on-channel-update",
+      "name": "On channel or category update",
       "title": "Channel/category"
     },
     "disable": {
       "description": "Enable or disable all events to switch the bot to manual or automatic mode",
-      "name": "manual-mode",
+      "name": "Manual mode",
       "option": "Enable or disable the manual mode"
     },
     "follow": {
       "role": {
         "description": "Only update channel for specific role",
-        "name": "follow-only-role",
+        "name": "Mode - Follow some roles",
         "title": "Mode Role only"
       },
       "thread": {
         "description": "Only follow channel and update for all role",
-        "name": "follow-only-channel",
+        "name": "Mode - Follow some channels",
         "title": "Mode channel only"
       }
     },
     "language": {
       "description": "Change the bot language",
-      "name": "Language",
+      "name": "Switch language",
       "options": "Language to use",
       "reply": "Language changed to {{- lang}}"
     },
@@ -82,19 +84,19 @@
     "member": {
       "description": "Enable or disable the thread update on member permission modifications",
       "display": "Modified member",
-      "name": "on-member-update",
+      "name": "On member update",
       "title": "Member update"
     },
     "newMember": {
       "description": "Enable or disable the adding of members when they join the server.",
       "display": "New member",
-      "name": "on-new-member",
+      "name": "On new member",
       "title": "Change action on new member"
     },
     "roleIn": {
       "description": "Follow specific role in specific channel. Incompatible with other follow-only mode.",
       "error": "You can't combine follow role-in with only-role or only-channel",
-      "name": "follow-only-in"
+      "name": "Mode - Follow [role] in [channel]"
     },
     "show": {
       "description": "Show the current configuration",
@@ -108,7 +110,7 @@
     "thread": {
       "description": "Enable or disable the adding of members when thread are created.",
       "display": "Thread creation",
-      "name": "on-thread-created",
+      "name": "On thread created",
       "title": "Change action on thread creation"
     }
   },
