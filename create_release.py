@@ -11,7 +11,6 @@ def create_tag(tag_name: str):
     # commit changelog
     repo.git.add("CHANGELOG.md")
     repo.git.add("package.json")
-    repo.git.add("pnpm-lock.json")
     repo.index.commit("chore(VERSION): update VERSION")
     print("Changelog updated | Version file updated")
     # push tag

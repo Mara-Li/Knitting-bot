@@ -1,6 +1,15 @@
 
-<a name="v1.2.0"></a>
-## [v1.2.0](https://github.com/Lisandra-dev/Knitting-bot/compare/1.1.0...v1.2.0) (2023-07-02)
+<a name="v1.2.1"></a>
+## [v1.2.1](https://github.com/Lisandra-dev/Knitting-bot/compare/1.2.0...v1.2.1) (2023-07-02)
+
+### Chore
+
+* **VERSION:** update VERSION
+* **version:** get version from package
+
+
+<a name="1.2.0"></a>
+## [1.2.0](https://github.com/Lisandra-dev/Knitting-bot/compare/1.1.0...1.2.0) (2023-07-02)
 
 ### Chore
 
