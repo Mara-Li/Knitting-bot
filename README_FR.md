@@ -1,6 +1,6 @@
 # Knitting
 
-→  [English translation](README.md)
+→ [English translation](README.md)
 
 [Lien d'invitation](https://discord.com/api/oauth2/authorize?client_id=1101559076086886500&permissions=292057785360&scope=bot)
 
@@ -12,6 +12,7 @@ Un bot qui vous aide à ajouter un utilisateur à un fil de discussion, pour que
 > L'utilisateur ajouté au fil doit avoir la permission de le voir.
 
 Le bot ajoutera automatiquement un utilisateur à un fil de discussion lorsque :
+
 - Un utilisateur rejoint le serveur et a la permission de voir le fil.
 - Un utilisateur est mis à jour et reçoit un nouveau rôle.
 - Lorsqu'un canal ou une catégorie ont leurs autorisations modifiées.
@@ -20,9 +21,11 @@ Le bot ajoutera automatiquement un utilisateur à un fil de discussion lorsque :
 Le bot ne fera rien lorsqu'il rejoindra le serveur. Si vous voulez mettre à jour tous les fils, vous pouvez utiliser la commande slash `/update-all-threads` (voir ci-dessous).
 
 ## Commandes Slash
+
 ### Configuration
 
 La commande slash `/config` vous permet de configurer le bot. Vous pouvez :
+
 - Changer la langue (anglais ou français)
 - Désactiver/activer tous les événements (nouveaux membres, membres mis à jour, nouveau fil de discussion créé ou autorisations de canal/catégorie mises à jour).
 - Il est possible de tout désactiver avec la commande `/config mode-manuel`. Dans ce mode, vous devez utiliser les commandes slash pour mettre à jour les fils.
@@ -40,9 +43,9 @@ Vous devez préalablement activer les modes "follow-only" avec la commande `/con
 - `/follow channel [channel]` : Ajoute un channel à la liste des channels à suivre.
 - `/follow role [role]` : Ajoute un rôle à la liste des rôles à suivre.
 - `/follow role-in [role] [channel]` : Permet de suivre un rôle pour un channel spécifique.
-  - Vous pouvez utiliser cette commande plusieurs fois pour ajouter plusieurs channels. 
-  - Si vous voulez supprimer un channel pour un rôle, vous devez refaire la commande avec le même channel. 
-  - Pour supprimer un rôle, vous devez refaire la commande sans spécifier de channel. 
+  - Vous pouvez utiliser cette commande plusieurs fois pour ajouter plusieurs channels.
+  - Si vous voulez supprimer un channel pour un rôle, vous devez refaire la commande avec le même channel.
+  - Pour supprimer un rôle, vous devez refaire la commande sans spécifier de channel.
 - `/follow list` : Affiche la liste des channels et rôles à suivre.
 
 > **Note**  
@@ -55,8 +58,8 @@ Permet d'ignorer un channel ou un rôle spécifique : le bot ne mentionnera pas 
 - `/ignore channel [channel]` : Ajoute un channel à la liste des channels à ignorer.
 - `/ignore role [role]` : Ajoute un rôle à la liste des rôles à ignorer.
 - `/ignore role-in [role] [channel]` : Permet d'ignorer un rôle pour un channel spécifique.
-  - Vous pouvez utiliser cette commande plusieurs fois pour ajouter plusieurs channels. 
-  - Si vous voulez supprimer un channel pour un rôle, vous devez refaire la commande avec le même channel. 
+  - Vous pouvez utiliser cette commande plusieurs fois pour ajouter plusieurs channels.
+  - Si vous voulez supprimer un channel pour un rôle, vous devez refaire la commande avec le même channel.
   - Pour supprimer un rôle, vous devez refaire la commande sans spécifier de channel.
 - `/ignore list` : Affiche la liste des channels et rôles ignorés.
 
@@ -64,14 +67,17 @@ Permet d'ignorer un channel ou un rôle spécifique : le bot ne mentionnera pas 
 > Comme précédemment, pour arrêter d'ignorer un channel ou un rôle, vous devez refaire la commande avec le même channel/role.
 
 > **Warning**  
-> Vous ne pouvez "suivre"  et "ignorer" un channel en même temps. Par exemple :
+> Vous ne pouvez "suivre" et "ignorer" un channel en même temps. Par exemple :
+>
 > - Si vous avez activé le mode `follow-only-channel`, vous ne pouvez ignorer un channel.
 > - Si vous avez activé le mode `follow-only-role`, vous ne pouvez ignorer un rôle.
 > - Vous ne pouvez pas utiliser les autres configurations si vous avez activé `follow-only-in`.
-> Dans les faits, la commande `follow` ignorera tous les rôles/channels sauf ceux spécifiés dans la commande `follow`.
+>   Dans les faits, la commande `follow` ignorera tous les rôles/channels sauf ceux spécifiés dans la commande `follow`.
 
 ### Mise à jour des fils
+
 Si vous voulez mettre à jour manuellement un fil, vous pouvez utiliser les commandes slash :
+
 - `/update thread (thread)`: Mettre à jour un fil spécifique. Si aucun fil n'est spécifié, le fil actuel sera mis à jour.
 - `/update tout`: Mettre à jour tous les fils sur le serveur.
 - `/update aide` : Affiche l'aide pour les commandes slash.
@@ -86,21 +92,29 @@ Ces commandes n'apparaissent pas pour les utilisateurs qui n'ont pas la permissi
 
 De plus, vous pouvez configurer le bot et désactiver les événements que vous ne souhaitez pas utiliser. Vous pouvez le faire avec la commande `/config`. Vous pouvez voir la configuration avec `/config afficher`.
 
-
 ### Comment ça fonctionne
-
 
 Pour des raisons d'optimisation, le bot mentionnera d'abord les @rôle d'abord lorsqu'un fil doit être mis à jour. Ensuite, il vérifiera si certains utilisateurs (qui n'ont pas de rôle/role autorisé) peuvent voir le fil et les ajoutera.
 De plus, s'il n'y a aucun rôle dans le serveur, le bot traitera la liste des membres à la place.
 
 Notez que le rôle sera mentionné si certains utilisateurs ayant le rôle ne sont pas dans le fil de discussion.
 
-Le bot enverra un message contenant "//", l'éditera avec la liste des utilisateurs/rôles qui peuvent voir le fil, puis supprimera le message. Comme l'utilisateur a été mentionné, le fil sera visible pour eux et un seul message sera envoyé.
-Aucun message ne sera envoyé s'il n'y a pas de membre / rôle à mentionner.
+Après avoir fait la liste des utilisateurs et rôles à mentionner, il y a deux possibilités :
+
+- Si un ancien message du bot existe, le bot le modifiera avec la liste.
+- Sinon, le bot enverra un nouveau message avec `_ _` (pour éviter de mentionner les utilisateurs) puis le modifiera avec la liste.
+
+Après avoir envoyé/édité le message, le bot modifiera le message de nouveau pour le rendre vide (en utilisant `_ _`).
+
+> **Warning**  
+> Le message ne sera donc pas supprimé, car j'ai découvert que mentionner un utilisateur dans un ancien message ne faisait pas de notification "blanche".
+> Donc, le bot gardera les message pour les éditer quand le thread a besoin d'être mise à jour.
+> Avec cela, les anciens utilisateurs n'auront donc pas de notification du tout.
 
 ### Permission requise
 
 Le bot a besoin de certaines permissions pour fonctionner :
+
 - Présence
 - Membres du serveur
 
@@ -108,16 +122,18 @@ Le bot a besoin de certaines permissions pour fonctionner :
 
 ---
 
-## 🤖 Développement 
+## 🤖 Développement
 
 Le bot est créé avec [discord.js](https://discord.js.org/#/). Vous devez avoir [node.js (LTS)](https://nodejs.org/en/) installé sur votre ordinateur.
 Après avoir cloné le référentiel, vous devez installer les dépendances avec:
+
 ```bash
 npm run init
 ```
 
-Le script vous demandera vos variables `.env` et le fichier sera automatiquement créé. 
+Le script vous demandera vos variables `.env` et le fichier sera automatiquement créé.
 Le fichier doit ressembler à ceci :
+
 ```dotenv
 BOT_TOKEN=your_token
 CLIENT_ID=your_client_id
@@ -135,26 +151,28 @@ MESSAGE= #N'importe quoi
 - `NODE_ENV` est l'environnement de développement. Cela peut être `development` ou `production`. En mode développement, les logs seront plus détaillés.
 - `MESSAGE` est le message que le bot enverra lors du chargement des rôles/utilisateurs. Vous pouvez un simple message, un emoji, des stickers, ou encore des émojis personnalisés. Si vous utilisez ces derniers, vous devez vous assurer que le bot est sur le même serveur que l'émoji (mais il peut les utiliser partout).
 
-Le bot utilise Enmap pour stocker des données. Vous pouvez trouver la documentation [ici](https://enmap.evie.dev/). Vous avez besoin d'une installation spéciale pour cela, donc suivez les instructions [ici](https://enmap.evie.dev/install). 
+Le bot utilise Enmap pour stocker des données. Vous pouvez trouver la documentation [ici](https://enmap.evie.dev/). Vous avez besoin d'une installation spéciale pour cela, donc suivez les instructions [ici](https://enmap.evie.dev/install).
 
-## 🎼 Traduction 
+## 🎼 Traduction
 
 Le bot est traduit en :
+
 - [x] Français
 - [x] Anglais
 
 J'utilise i18next pour traduire le bot. Vous pouvez trouver la documentation [ici](https://www.i18next.com/).
 
 Si vous voulez ajouter une traduction, vous devez :
+
 - Dupliquer `src/i18next/locales/en.json` et le renommer avec le code de la langue (ex: `fr.json`)
 - Traduire le fichier
 - Mettre à jour le fichier `src/i18next/index.ts` et ajouter la langue dans l'objet `ressources`, sans oublier de l'importer (ex: `import * as fr from "./locales/fr.json";`)
 - Vous devez mettre à jour **tous** les fichiers de commandes (`src/commands`), et mettre à jour:
-    - Ajout de `const lang = i18next.getFixedT("lang");` en haut du fichier
-    - Ajout de `setNameLocalizations({lang: lang("même clé que pour l'autre langue")})` 
-    - Ajout de la langue directement dans `setDescriptionLocalizations`.
-  Vous pouvez obtenir plus d'informations sur la [localisation des commandes dans la documentation officielle de DiscordJS](https://discordjs.guide/slash-commands/advanced-creation.html#localizations).
-  La langue des commandes slash est directement basée sur la langue de votre client Discord.
+  - Ajout de `const lang = i18next.getFixedT("lang");` en haut du fichier
+  - Ajout de `setNameLocalizations({lang: lang("même clé que pour l'autre langue")})`
+  - Ajout de la langue directement dans `setDescriptionLocalizations`.
+    Vous pouvez obtenir plus d'informations sur la [localisation des commandes dans la documentation officielle de DiscordJS](https://discordjs.guide/slash-commands/advanced-creation.html#localizations).
+    La langue des commandes slash est directement basée sur la langue de votre client Discord.
 
 ---
 
