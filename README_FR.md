@@ -46,7 +46,7 @@ Vous devez préalablement activer les modes "follow-only" avec la commande `/con
 
 - `/follow channel [channel]` : Ajoute un channel à la liste des channels à suivre.
 - `/follow role [role]` : Ajoute un rôle à la liste des rôles à suivre.
-- `/follow role-in [role] [channel]` : Permet de suivre un rôle pour un channel spécifique.
+- `/follow spécifique [role] [channel]` : Permet de suivre un rôle pour un channel spécifique.
   - Vous pouvez utiliser cette commande plusieurs fois pour ajouter plusieurs channels.
   - Si vous voulez supprimer un channel pour un rôle, vous devez refaire la commande avec le même channel.
   - Pour supprimer un rôle, vous devez refaire la commande sans spécifier de channel.
@@ -61,7 +61,7 @@ Permet d'ignorer un channel ou un rôle spécifique : le bot ne mentionnera pas 
 
 - `/ignore channel [channel]` : Ajoute un channel à la liste des channels à ignorer.
 - `/ignore role [role]` : Ajoute un rôle à la liste des rôles à ignorer.
-- `/ignore role-in [role] [channel]` : Permet d'ignorer un rôle pour un channel spécifique.
+- `/ignore spécifique [role] [channel]` : Permet d'ignorer un rôle pour un channel spécifique.
   - Vous pouvez utiliser cette commande plusieurs fois pour ajouter plusieurs channels.
   - Si vous voulez supprimer un channel pour un rôle, vous devez refaire la commande avec le même channel.
   - Pour supprimer un rôle, vous devez refaire la commande sans spécifier de channel.

@@ -43,8 +43,8 @@
 		"list": "liste",
 		"no": "Non",
 		"none": "/",
-		"role": "Rôles",
-		"roleIn": "role-in",
+		"role": "role",
+		"roleIn": "spécifique",
 		"thread": "Thread",
 		"yes": "Oui"
 	},
@@ -60,17 +60,17 @@
 		},
 		"follow": {
 			"role": {
-				"name": "Mode - Suivre certains rôles",
+				"name": "[Mode] Suivre certains rôles",
 				"title": "Mode Rôle uniquement"
 			},
 			"roleIn": "Mode [@role] dans [#channel]",
 			"thread": {
-				"name": "Mode - Suivre certains channels",
+				"name": "[Mode] Suivre certains channels",
 				"title": "Mode channel uniquement"
 			}
 		},
 		"language": {
-			"name": "Changer de langue"
+			"name": "Langue"
 		},
 		"main": {
 			"description": "Modifier la configuration du serveur, autorisant à modifier certains évènements.",
@@ -86,7 +86,7 @@
 		},
 		"roleIn": {
 			"error": "Vous ne pouvez combiner follow role-in avec only-role et only-channel.",
-			"name": "Mode - Suivre [@role] dans [#channel]"
+			"name": "[Mode] Suivre [@role] dans [#channel]"
 		},
 		"show": {
 			"menu": {
