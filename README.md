@@ -24,21 +24,28 @@ The bot won't do anything when joining the server. If you want to update all thr
 
 ### Configuration
 
-The slash command `/config` allows you to configure the bot. You can:
+The slash command `/config` allows you to configure the bot. It will open a embed with button to change the configuration. You can change:
 
-- Change the language (English or French)
-- Disable/Enable all events (new members, members update permission, new thread created or channel/category permission update).
-- It is possible to disable all events with `/config manual-mode`. In this mode, you need to use the slash commands to update the threads.
-- Activate the `follow-only` modes:
-  - `follow-only-channel` : Will only update on specific channels (you need to set them with `/follow channel [channel]`)
-  - `follow-only-role` : Will only update on specifics roles (you need to set them with `/follow role [role]`)
-  - `follow-only-in` : Will update only specifics roles in specifics channels (you need to set them with `/follow role-in [role] [channel]`)
+- The language ;
+- Enable the manual mode: It will disable all automatic event, and you will need to use the slash command `/update` to update a thread ;
+- Enable / disable manually each automatic event:
+  - Member update (changing role of member) ;
+  - Thread creation (including forum thread) ;
+  - Channel or category permission update ;
+  - Member join the server ;
+- And, also, some configuration about which channel/role will be followed by the bot:
+  - Follow only specific channel ;
+  - Follow only specific role ;
+  - Follow [@role] in [#channel]. This mode can't be used with the other mode.
+
+> **Note**  
+> The button will be red if activate it will disable the event, and green if it will enable it.
 
 ### Follow
 
 Allow to only "ping" specific channels or roles.
 
-You need to activate the `follow-only` mode to use these commands. You can do that with `/config follow-only-channel` or `/config follow-only-role`.
+You need to activate the `follow-only` mode to use these commands. You can do that with the `/config` command.
 
 - `/follow channel [channel]` : Add a channel to the list of followed channels
 - `/follow role [role]` : Add a role to the list of followed roles
@@ -93,6 +100,10 @@ These commands don't appear for user that haven't the `manage thread` permission
 
 More over, you can configure the bot and disable event that you don't want to use. You can do that with the `/config` command. You can see the configuration with `/config show`
 
+### Info
+
+A simple embed with some information about the bot and the main developer.
+
 ### How it's work
 
 For some optimization purpose, the bot will first @role when a thread must be updated. After it will check if some users (that don't have role/allowed role) can see the thread and add them.
@@ -139,7 +150,7 @@ It can look like this:
 BOT_TOKEN=your_token
 CLIENT_ID=your_client_id
 NODE_ENV=development# or production
-MESSAGE= #N'importe quoi
+MESSAGE= #Anything you want
 GITHUB_EMOJI="1125070935855222845" #Emoji ID
 KOFI="1125071623658164274" #Emoji ID
 DISCORD="1125072006937849876" #Emoji ID

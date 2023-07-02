@@ -24,21 +24,25 @@ Le bot ne fera rien lorsqu'il rejoindra le serveur. Si vous voulez mettre à jou
 
 ### Configuration
 
-La commande slash `/config` vous permet de configurer le bot. Vous pouvez :
+La commande slash `/config` vous permet de configurer le bot. Elle ouvrira une fenêtre avec des boutons pour changer la configuration. Vous pouvez changer :
 
-- Changer la langue (anglais ou français)
-- Désactiver/activer tous les événements (nouveaux membres, membres mis à jour, nouveau fil de discussion créé ou autorisations de canal/catégorie mises à jour).
-- Il est possible de tout désactiver avec la commande `/config mode-manuel`. Dans ce mode, vous devez utiliser les commandes slash pour mettre à jour les fils.
-- Activer les mode "follow-only" :
-  - `/config follow-only-channel` : Seuls les channels enregistrés avec la commande `/follow channel [channel]` seront mis à jour.
-  - `/config follow-only-role` : Seuls les rôles enregistrés avec la commande `/follow role [role]` seront mis à jour.
-  - `/config follow-only-in` : Combinaison des deux options précédentes : Les rôles enregistrés avec `/follow role-in [role] [channel]` seront mis à jour dans les channels spécifiés.
+- La langue ;
+- Activer le mode manuel : Cela désactivera tous les événements automatiques, et vous devrez utiliser la commande slash `/update` pour mettre à jour un fil de discussion ;
+- Activer / désactiver manuellement chaque événement automatique :
+  - Mise à jour d'un membre (changement de rôle d'un membre) ;
+  - Création d'un fil de discussion (y compris un fil de discussion du forum) ;
+  - Mise à jour de la permission d'un channel ou d'une catégorie ;
+  - Membre rejoignant le serveur ;
+- Vous pouvez également configurer le channel/rôle qui sera suivi par le robot :
+  - Suivre uniquement un channel spécifique ;
+  - Suivre uniquement un rôle spécifique ;
+  - Suivre [@rôle] dans [#channel]. Ce mode ne peut pas être utilisé avec les autres modes.
 
 ### Follow (suivre)
 
 Permet de ne ping uniquement certains channels ou rôle spécifique.
 
-Vous devez préalablement activer les modes "follow-only" avec la commande `/config follow-only-channel`, `/config follow-only-role` ou `/config follow-only-in`.
+Vous devez préalablement activer les modes "follow-only" avec la commande `/config`.
 
 - `/follow channel [channel]` : Ajoute un channel à la liste des channels à suivre.
 - `/follow role [role]` : Ajoute un rôle à la liste des rôles à suivre.
