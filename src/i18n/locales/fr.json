@@ -6,9 +6,8 @@
 			"all": "- `/update tout` : Pour ajouter sur tous les threads du serveur.\n",
 			"desc": "Met à jour manuellement les threads en ajoutant les utilisateurs manquants, avec l'aide des commandes ci-dessous :\n",
 			"description": "Affiche l'aide des commandes manuelles",
-			"here": "- `/update ici` : Pour ajouter sur le thread dans lequel la commande est utilisée.\n",
 			"name": "aide",
-			"thread": "- `/update thread <thread>` : Pour ajouter dans un thread spécifique (à sélectionner depuis la liste).\n",
+			"thread": "- `/update thread <thread>` : Pour ajouter dans un thread spécifique (à sélectionner depuis la liste). Si aucun channel n'est sélectionné, utilise celui utilisé pour la commande.\n",
 			"title": "Aide des commandes manuelles"
 		},
 		"name": "update",
@@ -49,10 +48,14 @@
 		"yes": "Oui"
 	},
 	"configuration": {
+		"title": {
+			"mode": "MODE",
+			"autoUpdate": "MISE À JOUR AUTOMATIQUE"
+		},
 		"channel": {
 			"description": "Active/désactive l'ajout des membres aux threads lors de l'édition des permissions d'un channel.",
-			"name": "Sur mise à jour de salon ou catégorie",
-			"title": "Salon/catégorie"
+			"name": "Sur mise à jour de salon, forum ou catégorie",
+			"title": "Salon, catégorie, forum"
 		},
 		"disable": {
 			"description": "Active ou désactive tous les évènements pour passer le bot en mode manuel ou automatique",
@@ -61,12 +64,12 @@
 		"follow": {
 			"role": {
 				"name": "[Mode] Suivre certains rôles",
-				"title": "Mode Rôle uniquement"
+				"title": "Rôle uniquement"
 			},
-			"roleIn": "Mode [@role] dans [#channel]",
+			"roleIn": "[@role] dans [#channel]",
 			"thread": {
 				"name": "[Mode] Suivre certains channels",
-				"title": "Mode channel uniquement"
+				"title": "Channel uniquement"
 			}
 		},
 		"language": {
@@ -78,7 +81,7 @@
 		},
 		"member": {
 			"name": "Sur mise à jour d'un membre",
-			"title": "Mise-à-jour de membre"
+			"title": "Membre"
 		},
 		"newMember": {
 			"display": "Nouveau membre",
@@ -95,7 +98,7 @@
 			}
 		},
 		"thread": {
-			"display": "Creation de thread",
+			"display": "Création de thread",
 			"name": "À la création d'un thread"
 		}
 	},
@@ -131,7 +134,7 @@
 	},
 	"ignore": {
 		"description": "Exclure des channels ou rôle des mises-à-jours",
-		"error": "Le channel, thread ou catégorie n'a pas été reconnu.",
+		"error": "Le channel, thread, forum ou catégorie n'a pas été reconnu.",
 		"followError": "Les commandes \"ignore\" ne peuvent pas être utilisées en mode \"follow-only\".",
 		"list": {
 			"description": "Liste de tous les canaux, fils de discussion, catégories et rôles ignorés",
@@ -155,10 +158,10 @@
 			}
 		},
 		"thread": {
-			"description": "Ignore un thread, channel ou catégorie spécifique",
-			"error": "Cette commande ne peut être utilisée que pour une catégorie, un channel ou un thread.",
+			"description": "Ignore un thread, channel, forum ou catégorie spécifique",
+			"error": "Cette commande ne peut être utilisée que pour une catégorie, forum, channel ou un thread.",
 			"option": {
-				"description": "Sélectionner le thread/channel/catégorie à ignorer ou à dés-ignorer"
+				"description": "Sélectionner le thread/channel/catégorie/forum à ignorer ou à dés-ignorer"
 			},
 			"remove": "{{- thread}} n'est plus ignoré",
 			"success": "{{- thread}} a été ignoré"

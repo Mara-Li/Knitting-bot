@@ -78,6 +78,7 @@ export default {
  * Display the configuration as an embed
  */
 export async function display() {
+	const space = "_ _ ".repeat(10); //yeah. I know. It's ugly but it works
 	return new EmbedBuilder()
 		.setColor("#0099ff")
 		.setTitle(i18next.t("configuration.show.menu.title"))
@@ -90,6 +91,12 @@ export async function display() {
 		
 		.addFields({ name: "\u200A", value: "\u200A" })
 		.addFields(
+			{ name: "\u200A", value: "\u200A", inline: true },
+			{name: `${space} ${i18next.t("configuration.title.mode")} ${space}`, value: "_ _", inline: true},
+			{ name: "\u200A", value: "\u200A", inline: true }
+		)
+		.addFields({ name: "\u200A", value: "\u200A" })
+		.addFields(
 			{
 				name: i18next.t("configuration.follow.role.title"),
 				value: enabledOrDisabled(getConfig(CommandName.followOnlyRole)),
@@ -100,12 +107,20 @@ export async function display() {
 				value: enabledOrDisabled(getConfig(CommandName.followOnlyChannel)),
 				inline: true,
 			},
+		)
+		.addFields({ name: "\u200A", value: "\u200A" })
+		.addFields(
 			{
 				name: i18next.t("configuration.follow.roleIn"),
 				value: enabledOrDisabled(getConfig(CommandName.followOnlyRoleIn)),
 				inline: true,
-			})
+			},
+			{ name: "\u200A", value: "\u200A", inline: true })
 		.addFields({ name: "\u200A", value: "\u200A" })
+		.addFields(
+			{ name: "\u200A", value: "\u200A", inline: true },
+			{name: i18next.t("configuration.title.autoUpdate"), value: "\u200A", inline: true},
+			{ name: "\u200A", value: "\u200A", inline: true })
 		.addFields(
 			{
 				name: i18next.t("configuration.channel.title"),

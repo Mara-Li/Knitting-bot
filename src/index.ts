@@ -33,7 +33,6 @@ export const INFO_EMOJI = {
 	"discord" : process.env.DISCORD ?? "??",
 };
 
-
 try {
 	ready(client);
 	memberUpdate(client);

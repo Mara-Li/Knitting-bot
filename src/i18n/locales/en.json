@@ -6,9 +6,8 @@
 			"all": "- `/update all`: to add on all threads of the guild.\n",
 			"desc": "Update the threads manually with adding missing users, using these commands:\n",
 			"description": "Show the help of the command",
-			"here": "- `/update here`: to update the thread where the command is used.\n",
 			"name": "help",
-			"thread": "- `/update thread <thread>`: to update a specific thread (select it from the list).\n",
+			"thread": "- `/update thread <thread>`: to update a specific thread (select it from the list). If no channel is selected, use where the command is used.\n",
 			"title": "Manual commands help"
 		},
 		"name": "update",
@@ -50,9 +49,9 @@
 	},
 	"configuration": {
 		"channel": {
-			"description": "Enable or disable the adding of members when channel/category permission are changed.",
-			"name": "On channel or category update",
-			"title": "Channel/category"
+			"description": "Enable or disable the adding of members when channel, forum, or category permission are changed.",
+			"name": "On channel, forum or category update",
+			"title": "Channel, category, forum"
 		},
 		"disable": {
 			"description": "Enable or disable all events to switch the bot to manual or automatic mode",
@@ -61,12 +60,12 @@
 		"follow": {
 			"role": {
 				"name": "[Mode] - Follow some roles",
-				"title": "Mode Role only"
+				"title": "Role only"
 			},
-			"roleIn": "Mode [@role] in [#channel]",
+			"roleIn": "[@role] in [#channel]",
 			"thread": {
 				"name": "[Mode] - Follow some channels",
-				"title": "Mode channel only"
+				"title": "Channel only"
 			}
 		},
 		"language": {
@@ -78,7 +77,7 @@
 		},
 		"member": {
 			"name": "On member update",
-			"title": "Member update"
+			"title": "Member"
 		},
 		"newMember": {
 			"display": "New member",
@@ -90,13 +89,17 @@
 		},
 		"show": {
 			"menu": {
-				"description": "The bot can be activated on:\n- Changing the permission of a member, a channel, a category,\n- When a thread is created,\n- When a new member arrives.\n\nYou can also disable all update, and follow only some channel or roles.",
+				"description": "The bot can be activated on:\n- Changing the permission of a member, a channel, a category or forum\n- When a thread is created,\n- When a new member arrives.\n\nYou can also disable all update, and follow only some channel or roles.",
 				"title": "Configuration"
 			}
 		},
 		"thread": {
 			"display": "Thread creation",
 			"name": "On thread created"
+		},
+		"title": {
+			"autoUpdate": "AUTO-UPDATE",
+			"mode": "MODE"
 		}
 	},
 	"follow": {
@@ -104,7 +107,7 @@
 		"disabled": "You can't use these commands : the follow-only mode is disabled.",
 		"list": {
 			"description": "Display the followed channels or roles",
-			"roleIn": "Roles followed in specifics chans",
+			"roleIn": "Roles followed in specifics channels",
 			"title": "Follow"
 		},
 		"role": {
@@ -131,7 +134,7 @@
 	},
 	"ignore": {
 		"description": "Exclude channel/roles from update.",
-		"error": "The channel, thread or category was not recognized.",
+		"error": "The channel, thread, forum or category was not recognized.",
 		"followError": "The ignore commands can't be used under the follow-only mode.",
 		"list": {
 			"description": "List all ignored channels, threads, categories and role",
@@ -156,9 +159,9 @@
 		},
 		"thread": {
 			"description": "Ignore a specific thread",
-			"error": "This command can only be used in a thread, or for a thread.",
+			"error": "This command can only be used for a thread, channel, forum or category.",
 			"option": {
-				"description": "Select channel/thread or category to ignore or to un-ignore"
+				"description": "Select channel, thread, forum or category to ignore or to un-ignore"
 			},
 			"remove": "{{-thread}} is no longer ignored",
 			"success": "{{- thread}} is now ignored"
