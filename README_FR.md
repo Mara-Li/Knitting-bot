@@ -18,7 +18,7 @@ Le bot ajoutera automatiquement un utilisateur à un fil de discussion lorsque :
 - Lorsqu'un canal ou une catégorie ont leurs autorisations modifiées.
 - Lorsqu'un fil de discussion est créé.
 
-Le bot ne fera rien lorsqu'il rejoindra le serveur. Si vous voulez mettre à jour tous les fils, vous pouvez utiliser la commande slash `/update-all-threads` (voir ci-dessous).
+Le bot ne fera rien lorsqu'il rejoindra le serveur. Si vous voulez mettre à jour tous les fils, vous pouvez utiliser la commande slash `/update all` (voir ci-dessous).
 
 ## Commandes Slash
 
@@ -31,10 +31,10 @@ La commande slash `/config` vous permet de configurer le bot. Elle ouvrira une f
 - Activer / désactiver manuellement chaque événement automatique :
   - Mise à jour d'un membre (changement de rôle d'un membre) ;
   - Création d'un fil de discussion (y compris un fil de discussion du forum) ;
-  - Mise à jour de la permission d'un channel ou d'une catégorie ;
+  - Mise à jour de la permission d'un channel, d'une catégorie ou d'un forum ;
   - Membre rejoignant le serveur ;
 - Vous pouvez également configurer le channel/rôle qui sera suivi par le robot :
-  - Suivre uniquement un channel spécifique ;
+  - Suivre uniquement un channel spécifique (Note: Channel inclut ici catégorie, forum, channel et thread).
   - Suivre uniquement un rôle spécifique ;
   - Suivre [@rôle] dans [#channel]. Ce mode ne peut pas être utilisé avec les autres modes.
 
@@ -44,9 +44,9 @@ Permet de ne ping uniquement certains channels ou rôle spécifique.
 
 Vous devez préalablement activer les modes "follow-only" avec la commande `/config`.
 
-- `/follow channel [channel]` : Ajoute un channel à la liste des channels à suivre.
+- `/follow channel (channel)` : Ajoute un channel à la liste des channels[^1] à suivre. Si aucun channel n'est spécifié, le channel actuel sera ajouté.
 - `/follow role [role]` : Ajoute un rôle à la liste des rôles à suivre.
-- `/follow spécifique [role] [channel]` : Permet de suivre un rôle pour un channel spécifique.
+- `/follow spécifique [role] [channel]` : Permet de suivre un rôle pour un channel[^1] spécifique.
   - Vous pouvez utiliser cette commande plusieurs fois pour ajouter plusieurs channels.
   - Si vous voulez supprimer un channel pour un rôle, vous devez refaire la commande avec le même channel.
   - Pour supprimer un rôle, vous devez refaire la commande sans spécifier de channel.
@@ -59,13 +59,13 @@ Vous devez préalablement activer les modes "follow-only" avec la commande `/con
 
 Permet d'ignorer un channel ou un rôle spécifique : le bot ne mentionnera pas les utilisateurs qui ont ce rôle ou qui sont dans ce channel, ou les deux.
 
-- `/ignore channel [channel]` : Ajoute un channel à la liste des channels à ignorer.
+- `/ignore channel (channel)` : Ajoute un channel à la liste des channels à ignorer[^1]. Si aucun channel n'est spécifié, le channel actuel sera ajouté.
 - `/ignore role [role]` : Ajoute un rôle à la liste des rôles à ignorer.
-- `/ignore spécifique [role] [channel]` : Permet d'ignorer un rôle pour un channel spécifique.
+- `/ignore spécifique [role] [channel]` : Permet d'ignorer un rôle pour un channel[^1] spécifique.
   - Vous pouvez utiliser cette commande plusieurs fois pour ajouter plusieurs channels.
   - Si vous voulez supprimer un channel pour un rôle, vous devez refaire la commande avec le même channel.
   - Pour supprimer un rôle, vous devez refaire la commande sans spécifier de channel.
-- `/ignore list` : Affiche la liste des channels et rôles ignorés.
+- `/ignore liste` : Affiche la liste des channels et rôles ignorés.
 
 > **Note**  
 > Comme précédemment, pour arrêter d'ignorer un channel ou un rôle, vous devez refaire la commande avec le même channel/role.
@@ -73,9 +73,9 @@ Permet d'ignorer un channel ou un rôle spécifique : le bot ne mentionnera pas 
 > **Warning**  
 > Vous ne pouvez "suivre" et "ignorer" un channel en même temps. Par exemple :
 >
-> - Si vous avez activé le mode `follow-only-channel`, vous ne pouvez ignorer un channel.
-> - Si vous avez activé le mode `follow-only-role`, vous ne pouvez ignorer un rôle.
-> - Vous ne pouvez pas utiliser les autres configurations si vous avez activé `follow-only-in`.
+> - Si vous avez activé le mode `follow channel`, vous ne pouvez ignorer un channel.
+> - Si vous avez activé le mode `follow role`, vous ne pouvez ignorer un rôle.
+> - Vous ne pouvez pas utiliser les autres configurations si vous avez activé `follow spécifique`.
 >   Dans les faits, la commande `follow` ignorera tous les rôles/channels sauf ceux spécifiés dans la commande `follow`.
 
 ### Mise à jour des fils
@@ -190,3 +190,5 @@ Si vous voulez ajouter une traduction, vous devez :
 # Thread Watcher
 
 Un bot cool à utiliser avec ce bot est [Thread Watcher](https://threadwatcher.xyz/) !
+
+[^1]: Channel inclut ici catégorie, channel, thread et forum.

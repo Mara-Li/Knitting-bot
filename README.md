@@ -34,7 +34,7 @@ The slash command `/config` allows you to configure the bot. It will open a embe
   - Channel or category permission update ;
   - Member join the server ;
 - And, also, some configuration about which channel/role will be followed by the bot:
-  - Follow only specific channel ;
+  - Follow only specific channel (Note: channel includes here: category, forum and channel)
   - Follow only specific role ;
   - Follow [@role] in [#channel]. This mode can't be used with the other mode.
 
@@ -47,9 +47,9 @@ Allow to only "ping" specific channels or roles.
 
 You need to activate the `follow-only` mode to use these commands. You can do that with the `/config` command.
 
-- `/follow channel [channel]` : Add a channel to the list of followed channels
+- `/follow channel (channel)` : Add a channel to the list of followed channels[^1]. If the channel is not specified, it will use the current channel.
 - `/follow role [role]` : Add a role to the list of followed roles
-- `/follow specific [role] [channel]` : Add a role to the list of followed roles in a specific channel.
+- `/follow specific [role] [channel]` : Add a role to the list of followed roles in a specific channel[^1].
   - You can repeat the command with the same role to add multiple channels.
   - To remove a channel, you need to redo the command with the same channel and role.
   - To remove a role completely, you need to do the command without the channel.
@@ -62,9 +62,9 @@ You need to activate the `follow-only` mode to use these commands. You can do th
 
 The exact opposite of the follow command. It won't ping the channels or roles ignored.
 
-- `/ignore channel [channel]` : Add a channel to the list of ignored channels
+- `/ignore channel (channel)` : Add a channel to the list of ignored channels[^1]. If the channel is not specified, it will use the current channel.
 - `/ignore role [role]` : Add a role to the list of ignored roles
-- `/ignore specific [role] [channel]` : Add a role to the list of ignored roles in a specific channel
+- `/ignore specific [role] [channel]` : Add a role to the list of ignored roles in a specific channel[^1].
   - You can repeat the command with the same role to add multiple channels.
   - To remove a channel, you need to redo the command with the same channel and role.
   - To remove a role completely, you need to do the command without the channel.
@@ -194,3 +194,5 @@ If you want to add a translation, you need to:
 # Thread Watcher
 
 A cool bot to use with this bot is [Thread Watcher](https://threadwatcher.xyz/)!
+
+[^1]: Channel includes here thread, channel, forum and category.
