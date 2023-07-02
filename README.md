@@ -140,6 +140,9 @@ BOT_TOKEN=your_token
 CLIENT_ID=your_client_id
 NODE_ENV=development# or production
 MESSAGE= #N'importe quoi
+GITHUB_EMOJI="1125070935855222845" #Emoji ID
+KOFI="1125071623658164274" #Emoji ID
+DISCORD="1125072006937849876" #Emoji ID
 ```
 
 > **Note**  
