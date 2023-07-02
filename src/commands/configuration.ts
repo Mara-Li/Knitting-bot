@@ -291,7 +291,7 @@ export default {
 			} else if (commands === DefaultMenuBuilder.followOnlyRoleIn) {
 				if (getConfig(CommandName.followOnlyChannel) || getConfig(CommandName.followOnlyRole)) {
 					await interaction.reply({
-						content: "You can't combine these options",
+						content: `${i18next.t("configuration.roleIn.error")}`,
 						ephemeral: true,
 					});
 					return;

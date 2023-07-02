@@ -93,6 +93,7 @@
     },
     "roleIn": {
       "description": "Suivi d'un rôle spécifique dans un canal spécifique. Incompatible avec d'autres modes de suivi.",
+      "error": "Vous ne pouvez combiner follow role-in avec only-role et only-channel.",
       "name": "follow-only-in"
     },
     "show": {
