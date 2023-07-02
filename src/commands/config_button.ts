@@ -56,6 +56,7 @@ export default {
 				components: row
 			});
 		
+		//eslint-disable-next-line @typescript-eslint/no-explicit-any
 		const filter = (i: any) => i.user.id === interaction.user.id;
 		try {
 			interaction.channel?.createMessageComponentCollector({ filter})?.on("collect", async i => {
@@ -243,6 +244,7 @@ export function createRows(buttons: ButtonBuilder[]) {
 
 function reloadButton() {
 	const labelButton = (id: CommandName) => {
+		//eslint-disable-next-line @typescript-eslint/no-explicit-any
 		const translation:any = {
 			[CommandName.manualMode] : i18next.t("configuration.disable.name"),
 			[CommandName.channel] : i18next.t("configuration.channel.name"),
