@@ -23,7 +23,7 @@
 
 ### Docs
 
-* add info about node version
+* add info about node VERSION
 * add description to function
 * add info about the white notif and message not deleted
 * add info sur role-in
@@ -83,7 +83,7 @@
 ### Fix
 
 * french translation missing key
-* forgot that ping send a notification, return to emoji
+* forgot that ping send a notification, return to EMOJI
 * use await for thread.members.add
 * remove user when role change
 * prevent crash when bot is kick
@@ -96,7 +96,7 @@
 * toIgnore has type not related to CategoryChannel thanks webstorm
 * check if channel/category/thread is ignored for the update
 * use another way to loads commands
-* rename emoji to message for env variable
+* rename EMOJI to message for env variable
 * add color for log
 * update log for using environment variable
 * message for online
@@ -133,7 +133,7 @@
 * add logs for commands loading in serv
 * fusion "ignore" and "follow" function and use string to know which one is used
 * remove unused import
-* remove emoji/message
+* remove EMOJI/message
 * remove unused import
 * optimization with get allMember/role to add and thereafter edit the message with the complete list
 * remove useless files
