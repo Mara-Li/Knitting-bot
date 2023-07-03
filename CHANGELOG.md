@@ -1,6 +1,35 @@
 
-<a name="v1.2.2"></a>
-## [v1.2.2](https://github.com/Lisandra-dev/Knitting-bot/compare/1.2.1...v1.2.2) (2023-07-02)
+<a name="v1.2.4"></a>
+## [v1.2.4](https://github.com/Lisandra-dev/Knitting-bot/compare/1.2.2...v1.2.4) (2023-07-03)
+
+### Chore
+
+* add prerestart
+* update version number
+* **VERSION:** update VERSION
+* **dep:** update version
+
+### Docs
+
+* add config commands
+
+### Feat
+
+* **config:** rework embed to have cleaner menu
+
+### Fix
+
+* **config:** prevent double interaction if two cmd are send
+* **config:** "auto" not recognized
+
+### Refactor
+
+* add version number to console.info
+* **translation:** better french button name
+
+
+<a name="1.2.2"></a>
+## [1.2.2](https://github.com/Lisandra-dev/Knitting-bot/compare/1.2.1...1.2.2) (2023-07-02)
 
 ### Chore
 
