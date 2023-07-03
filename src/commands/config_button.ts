@@ -99,7 +99,7 @@ export default {
 			const row = reloadButtonMode();
 			// eslint-disable-next-line no-case-declarations
 			const embed = displayModeMenu();
-			await interaction.reply(
+			interaction.reply(
 				{
 					embeds: [embed],
 					components: row
@@ -109,7 +109,7 @@ export default {
 			const rows = reloadButtonAuto();
 			// eslint-disable-next-line no-case-declarations
 			const embeds = autoUpdateMenu();
-			await interaction.reply(
+			interaction.reply(
 				{
 					embeds: [embeds],
 					components: rows
@@ -117,7 +117,7 @@ export default {
 		} else if (en("configuration.language.name").toLowerCase() === commands) {
 			const rows = reloadButtonLanguage();
 			const embeds = displayLanguageMenu();
-			await interaction.reply(
+			interaction.reply(
 				{
 					embeds: [embeds],
 					components: rows
@@ -135,23 +135,28 @@ export default {
 			await interaction.reply(
 				{
 					embeds: [embeds],
-					components: [row]
-				});
+					components: [row],
+					fetchReply: true
+				},);
 		}
 		//eslint-disable-next-line @typescript-eslint/no-explicit-any
-		const filter = (i: any) => i.user.id === interaction.user.id;
+		const filter = (i: any) => {
+			/** filter on message id */
+			return i.user.id === interaction.user.id;
+		};
 		try {
-			interaction.channel?.createMessageComponentCollector({ filter})?.on("collect", async i => {
-				await i.deferUpdate();
-				await updateConfig(i.customId as CommandName, i as ButtonInteraction<CacheType>);
-			});
-			/** Remove buttons after 1 minute */
-			setTimeout(async () => {
-				await interaction.editReply({ components: [] });
-			}, 60000);
+			const message = await interaction.fetchReply();
+			message.createMessageComponentCollector({ filter, time: 60000})
+				?.on("collect", async i => {
+					await i.deferUpdate();
+					await updateConfig(i.customId as CommandName, i as ButtonInteraction<CacheType>);
+				})
+				?.on("end", async () => {
+					interaction.editReply({ components: [] });
+				});
 		} catch (error) {
 			logInDev(error);
-			await interaction.editReply({ components: [] });
+			interaction.editReply({ components: [] });
 		}
 	}
 };
@@ -283,7 +288,7 @@ async function updateConfig(command: CommandName, interaction: ButtonInteraction
 		const embed = displayLanguageMenu();
 		//reload buttons
 		const rows = reloadButtonLanguage();
-		await interaction.editReply({ embeds: [embed], components: rows });
+		interaction.editReply({ embeds: [embed], components: rows });
 	} else if (
 		command === CommandName.followOnlyRoleIn
 			&& (followOnlyChannel || followOnlyRole)
@@ -292,10 +297,8 @@ async function updateConfig(command: CommandName, interaction: ButtonInteraction
 				|| command === CommandName.followOnlyRole))
 	) {
 		const embed = displayModeMenu();
-		//reload buttons
 		const rows = reloadButtonMode();
-		await interaction.editReply({ embeds: [embed], components: rows });
-		interaction.editReply({ content: `**${i18next.t("configuration.roleIn.error")}**` });
+		interaction.editReply({ embeds: [embed], components: rows });
 	} else if (command === CommandName.manualMode) {
 		const truc = [CommandName.channel, CommandName.member, CommandName.thread, CommandName.newMember];
 		const allTruc = truc.map((command) => getConfig(command));
@@ -303,10 +306,10 @@ async function updateConfig(command: CommandName, interaction: ButtonInteraction
 		for (const command of truc) {
 			setConfig(command, !manualMode);
 		}
-		const embed = await autoUpdateMenu();
+		const embed = autoUpdateMenu();
 		//reload buttons
 		const rows = reloadButtonAuto();
-		await interaction.editReply({ embeds: [embed], components: rows });
+		interaction.editReply({ embeds: [embed], components: rows });
 	} else {
 		newConfig = !getConfig(command);
 		interaction.editReply({ content: ""});
@@ -319,12 +322,12 @@ async function updateConfig(command: CommandName, interaction: ButtonInteraction
 			embed = displayModeMenu();
 		} else if (commandType["AutoUpdate"].includes(command)) {
 			rows = reloadButtonAuto();
-			embed = await autoUpdateMenu();
+			embed = autoUpdateMenu();
 		} else {
 			rows = reloadButtonLanguage();
 			embed = displayLanguageMenu();
 		}
-		await interaction.editReply({ embeds: [embed], components: rows });
+		interaction.editReply({ embeds: [embed], components: rows });
 	}
 	
 }
@@ -362,6 +365,7 @@ function createButton(command: CommandName, label: string) {
 		.setCustomId(command)
 		.setStyle(style)
 		.setLabel(label);
+	
 }
 
 function reloadButtonLanguage() {
@@ -382,6 +386,24 @@ function reloadButtonMode() {
 	const buttons: ButtonBuilder[] = [];
 	for (const command of [CommandName.followOnlyRoleIn, CommandName.followOnlyRole, CommandName.followOnlyChannel].values()) {
 		buttons.push(createButton(command, labelButton(command, translation)));
+	}
+	if (getConfig(CommandName.followOnlyRoleIn)) {
+		/**
+		 * Disable the button if followRoleIn is enable
+		 */
+		buttons[1] = buttons[1].setDisabled(true);
+		buttons[2] = buttons[2].setDisabled(true);
+	} else if (getConfig(CommandName.followOnlyRole) || getConfig(CommandName.followOnlyChannel)) {
+		/**
+		 * Disable the button if followRole or followChannel is enable
+		 */
+		buttons[0] = buttons[0].setDisabled(true);
+	} else {
+		/**
+		 * Enable all buttons */
+		buttons[0] = buttons[0].setDisabled(false);
+		buttons[1] = buttons[1].setDisabled(false);
+		buttons[2] = buttons[2].setDisabled(false);
 	}
 	return [
 		{
