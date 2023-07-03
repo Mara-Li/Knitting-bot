@@ -51,8 +51,8 @@
   "configuration": {
     "channel": {
       "description": "Active/désactive l'ajout des membres aux threads lors de l'édition des permissions d'un channel.",
-      "name": "Sur mise à jour de salon, forum ou catégorie",
-      "title": "Salon, catégorie, forum"
+      "name": "Modification de salon",
+      "title": "Modification de salon, catégorie, forum"
     },
     "disable": {
       "description": "Active ou désactive tous les évènements pour passer le bot en mode manuel ou automatique",
@@ -77,8 +77,8 @@
       "name": "config"
     },
     "member": {
-      "name": "Sur mise à jour d'un membre",
-      "title": "Membre"
+      "name": "Modification de membre",
+      "title": "Modification des membres"
     },
     "menu": {
       "autoUpdate": {
@@ -100,8 +100,8 @@
       }
     },
     "newMember": {
-      "display": "Nouveau membre",
-      "name": "Sur les nouveaux membres"
+      "display": "Arrivée d'un nouveau membre",
+      "name": "Arrivée d'un membre"
     },
     "roleIn": {
       "error": "Vous ne pouvez combiner follow role-in avec only-role et only-channel.",
