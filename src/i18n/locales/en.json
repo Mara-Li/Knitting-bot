@@ -1,195 +1,211 @@
 {
-	"commands": {
-		"description": "Update the threads manually with adding missing users",
-		"error": "This command can only be used in or for a thread.",
-		"help": {
-			"all": "- `/update all`: to add on all threads of the guild.\n",
-			"desc": "Update the threads manually with adding missing users, using these commands:\n",
-			"description": "Show the help of the command",
-			"name": "help",
-			"thread": "- `/update thread <thread>`: to update a specific thread (select it from the list). If no channel is selected, use where the command is used.\n",
-			"title": "Manual commands help"
-		},
-		"name": "update",
-		"success": "Updating thread: {{- channel}}",
-		"updateAllThreads": {
-			"description": "Update all threads with adding missing users",
-			"name": "all",
-			"reply": "Update of all threads…",
-			"success": "Updating success of {{- count}} threads"
-		},
-		"updateSpecificThread": {
-			"description": "Update a specific thread with adding missing users",
-			"option": {
-				"description": "Select the thread to update"
-			}
-		},
-		"updateThread": {
-			"description": "Update this thread with adding missing users"
-		}
-	},
-	"common": {
-		"cancel": "Cancel",
-		"category": "Category",
-		"channel": "Channel",
-		"confirm": "Confirm",
-		"disable": "Disable",
-		"disabled": "Disabled",
-		"enable": "enable",
-		"error": "An error occurred:\n```\n{{error}}\n```",
-		"forum": "Forum",
-		"here": "here",
-		"list": "list",
-		"no": "No",
-		"none": "/",
-		"role": "role",
-		"roleIn": "specific",
-		"thread": "Thread",
-		"yes": "Yes"
-	},
-	"configuration": {
-		"channel": {
-			"description": "Enable or disable the adding of members when channel, forum, or category permission are changed.",
-			"name": "On channel, forum or category update",
-			"title": "Channel, category, forum"
-		},
-		"disable": {
-			"description": "Enable or disable all events to switch the bot to manual or automatic mode",
-			"name": "Manual mode"
-		},
-		"follow": {
-			"role": {
-				"name": "[Mode] - Follow some roles",
-				"title": "Role only"
-			},
-			"roleIn": "[@role] in [#channel]",
-			"thread": {
-				"name": "[Mode] - Follow some channels",
-				"title": "Channel only"
-			}
-		},
-		"language": {
-			"name": "Language"
-		},
-		"main": {
-			"description": "Edit the server configuration. Allow to disable / enable some events",
-			"name": "config"
-		},
-		"member": {
-			"name": "On member update",
-			"title": "Member"
-		},
-		"newMember": {
-			"display": "New member",
-			"name": "On new member"
-		},
-		"roleIn": {
-			"error": "You can't combine follow role-in with only-role or only-channel",
-			"name": "[Mode] - Follow [@role] in [#channel]"
-		},
-		"show": {
-			"menu": {
-				"description": "The bot can be activated on:\n- Changing the permission of a member, a channel, a category or forum\n- When a thread is created,\n- When a new member arrives.\n\nYou can also disable all update, and follow only some channel or roles.",
-				"title": "Configuration"
-			}
-		},
-		"thread": {
-			"display": "Thread creation",
-			"name": "On thread created"
-		},
-		"title": {
-			"autoUpdate": "AUTO-UPDATE",
-			"mode": "MODE"
-		}
-	},
-	"follow": {
-		"description": "Update only on the followed role/channels",
-		"disabled": "You can't use these commands : the follow-only mode is disabled.",
-		"list": {
-			"description": "Display the followed channels or roles",
-			"roleIn": "Roles followed in specifics channels",
-			"title": "Follow"
-		},
-		"role": {
-			"added": "{{- role}} followed",
-			"description": "Role to follow/unfollow",
-			"option": "Select the role",
-			"removed": "{{- role}} unfollowed"
-		},
-		"roleIn": {
-			"description": "Follow a role for a channel",
-			"option": {
-				"channel": "The channel to follow. If not specified, the role will be unfollowed.",
-				"role": "The role to follow"
-			}
-		},
-		"thread": {
-			"description": "Select a thread, channel, forum, category, to follow",
-			"option": {
-				"description": "Salon à suivre"
-			},
-			"remove": "{{- thread}} is unfollowed.",
-			"success": "{{- thread}} is now followed."
-		}
-	},
-	"ignore": {
-		"description": "Exclude channel/roles from update.",
-		"error": "The channel, thread, forum or category was not recognized.",
-		"followError": "The ignore commands can't be used under the follow-only mode.",
-		"list": {
-			"description": "List all ignored channels, threads, categories and role",
-			"none": "Empty",
-			"title": "List of ignored channels, categories, threads and roles"
-		},
-		"message": "{{- thread}} is ignored in parameters!",
-		"name": "Ignore",
-		"role": {
-			"added": "Role {{- role}} ignored.",
-			"description": "Exclude role from update",
-			"error": "{{- role }} is not found",
-			"option": "Select role to exclude/include",
-			"removed": "Role {{- role}} un-ignored!"
-		},
-		"roleIn": {
-			"description": "Ignore a channel for a specific role",
-			"option": {
-				"chan": "The channel where the role will be ignored. If not set, will delete the role from list.",
-				"role": "The role to ignore"
-			}
-		},
-		"thread": {
-			"description": "Ignore a specific thread",
-			"error": "This command can only be used for a thread, channel, forum or category.",
-			"option": {
-				"description": "Select channel, thread, forum or category to ignore or to un-ignore"
-			},
-			"remove": "{{-thread}} is no longer ignored",
-			"success": "{{- thread}} is now ignored"
-		}
-	},
-	"info": {
-		"desc": "A little discord bot write in TypeScript that automatically add / remove member in thread, without pinging them!",
-		"footer": "Made with 💖 by Mara__Li",
-		"readMe": "https://github.com/Lisandra-dev/Knitting-bot",
-		"title": "Information"
-	},
-	"roleIn": {
-		"already": "The role {{- mention }} is already {{- opposite }} in {{- channel }}.",
-		"enabled": {
-			"chan": "{{- chan }} is now {{- on}} for {{- mention}}"
-		},
-		"error": {
-			"need": "You need to activate the follow-only-in mode first.",
-			"otherMode": "You can't use this command with the other follow-only mode.",
-			"support": "This channel type is not supported"
-		},
-		"noLonger": {
-			"any": "The role {{- mention}} is no longer {{- on}} in any channel.",
-			"chan": "{{- chan }} is no longer {{- on }} for {{- mention }}"
-		},
-		"on": {
-			"follow": "followed",
-			"ignore": "ignored"
-		}
-	}
+  "commands": {
+    "description": "Update the threads manually with adding missing users",
+    "error": "This command can only be used in or for a thread.",
+    "help": {
+      "all": "- `/update all`: to add on all threads of the guild.\n",
+      "desc": "Update the threads manually with adding missing users, using these commands:\n",
+      "description": "Show the help of the command",
+      "name": "help",
+      "thread": "- `/update thread <thread>`: to update a specific thread (select it from the list). If no channel is selected, use where the command is used.\n",
+      "title": "Manual commands help"
+    },
+    "name": "update",
+    "success": "Updating thread: {{- channel}}",
+    "updateAllThreads": {
+      "description": "Update all threads with adding missing users",
+      "name": "all",
+      "reply": "Update of all threads…",
+      "success": "Updating success of {{- count}} threads"
+    },
+    "updateSpecificThread": {
+      "description": "Update a specific thread with adding missing users",
+      "option": {
+        "description": "Select the thread to update"
+      }
+    },
+    "updateThread": {
+      "description": "Update this thread with adding missing users"
+    }
+  },
+  "common": {
+    "cancel": "Cancel",
+    "category": "Category",
+    "channel": "Channel",
+    "confirm": "Confirm",
+    "disable": "Disable",
+    "disabled": "Disabled",
+    "enable": "enable",
+    "enabled": "enabled",
+    "error": "An error occurred:\n```\n{{error}}\n```",
+    "forum": "Forum",
+    "here": "here",
+    "list": "list",
+    "no": "No",
+    "none": "/",
+    "role": "role",
+    "roleIn": "specific",
+    "thread": "Thread",
+    "yes": "Yes"
+  },
+  "configuration": {
+    "channel": {
+      "description": "Enable or disable the adding of members when channel, forum, or category permission are changed.",
+      "name": "On channel, forum or category update",
+      "title": "Channel, category, forum"
+    },
+    "disable": {
+      "description": "Enable or disable all events to switch the bot to manual or automatic mode",
+      "name": "Manual mode"
+    },
+    "follow": {
+      "role": {
+        "name": "[Mode] - Follow some roles",
+        "title": "Role only"
+      },
+      "roleIn": "[@role] in [#channel]",
+      "thread": {
+        "name": "[Mode] - Follow some channels",
+        "title": "Channel only"
+      }
+    },
+    "language": {
+      "name": "Language"
+    },
+    "main": {
+      "description": "Edit the server configuration. Allow to disable / enable some events",
+      "name": "config"
+    },
+    "member": {
+      "name": "On member update",
+      "title": "Member"
+    },
+    "menu": {
+      "autoUpdate": {
+        "cmd": "auto",
+        "desc": "Auto-update channel configuration",
+        "title": "AUTO-UPDATE"
+      },
+      "help": {
+        "desc": "Display general informations about configuration",
+        "readme": "Documentation"
+      },
+      "language": {
+        "desc": "Actual used language",
+        "title": "language"
+      },
+      "mode": {
+        "desc": "Configuration's follow's mode",
+        "title": "MODE"
+      }
+    },
+    "newMember": {
+      "display": "New member",
+      "name": "On new member"
+    },
+    "roleIn": {
+      "error": "You can't combine follow role-in with only-role or only-channel",
+      "name": "[Mode] - Follow [@role] in [#channel]"
+    },
+    "show": {
+      "menu": {
+        "description": "The bot can be activated on:\n- Changing the permission of a member, a channel, a category or forum\n- When a thread is created,\n- When a new member arrives.\n\nYou can also disable all update, and follow only some channel or roles.\n\n The configuration commands are:",
+        "title": "Configuration"
+      }
+    },
+    "thread": {
+      "display": "Thread creation",
+      "name": "On thread created"
+    }
+  },
+  "follow": {
+    "description": "Update only on the followed role/channels",
+    "disabled": "You can't use these commands : the follow-only mode is disabled.",
+    "list": {
+      "description": "Display the followed channels or roles",
+      "roleIn": "Roles followed in specifics channels",
+      "title": "Follow"
+    },
+    "role": {
+      "added": "{{- role}} followed",
+      "description": "Role to follow/unfollow",
+      "option": "Select the role",
+      "removed": "{{- role}} unfollowed"
+    },
+    "roleIn": {
+      "description": "Follow a role for a channel",
+      "option": {
+        "channel": "The channel to follow. If not specified, the role will be unfollowed.",
+        "role": "The role to follow"
+      }
+    },
+    "thread": {
+      "description": "Select a thread, channel, forum, category, to follow",
+      "option": {
+        "description": "Salon à suivre"
+      },
+      "remove": "{{- thread}} is unfollowed.",
+      "success": "{{- thread}} is now followed."
+    }
+  },
+  "ignore": {
+    "description": "Exclude channel/roles from update.",
+    "error": "The channel, thread, forum or category was not recognized.",
+    "followError": "The ignore commands can't be used under the follow-only mode.",
+    "list": {
+      "description": "List all ignored channels, threads, categories and role",
+      "none": "Empty",
+      "title": "List of ignored channels, categories, threads and roles"
+    },
+    "message": "{{- thread}} is ignored in parameters!",
+    "name": "Ignore",
+    "role": {
+      "added": "Role {{- role}} ignored.",
+      "description": "Exclude role from update",
+      "error": "{{- role }} is not found",
+      "option": "Select role to exclude/include",
+      "removed": "Role {{- role}} un-ignored!"
+    },
+    "roleIn": {
+      "description": "Ignore a channel for a specific role",
+      "option": {
+        "chan": "The channel where the role will be ignored. If not set, will delete the role from list.",
+        "role": "The role to ignore"
+      }
+    },
+    "thread": {
+      "description": "Ignore a specific thread",
+      "error": "This command can only be used for a thread, channel, forum or category.",
+      "option": {
+        "description": "Select channel, thread, forum or category to ignore or to un-ignore"
+      },
+      "remove": "{{-thread}} is no longer ignored",
+      "success": "{{- thread}} is now ignored"
+    }
+  },
+  "info": {
+    "desc": "A little discord bot write in TypeScript that automatically add / remove member in thread, without pinging them!",
+    "footer": "Made with 💖 by Mara__Li",
+    "readMe": "https://github.com/Lisandra-dev/Knitting-bot",
+    "title": "Information"
+  },
+  "roleIn": {
+    "already": "The role {{- mention }} is already {{- opposite }} in {{- channel }}.",
+    "enabled": {
+      "chan": "{{- chan }} is now {{- on}} for {{- mention}}"
+    },
+    "error": {
+      "need": "You need to activate the follow-only-in mode first.",
+      "otherMode": "You can't use this command with the other follow-only mode.",
+      "support": "This channel type is not supported"
+    },
+    "noLonger": {
+      "any": "The role {{- mention}} is no longer {{- on}} in any channel.",
+      "chan": "{{- chan }} is no longer {{- on }} for {{- mention }}"
+    },
+    "on": {
+      "follow": "followed",
+      "ignore": "ignored"
+    }
+  }
 }

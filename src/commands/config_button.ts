@@ -13,12 +13,15 @@
  */
 import { SlashCommandBuilder } from "@discordjs/builders";
 import {
+	ActionRowBuilder,
 	ButtonBuilder,
 	ButtonInteraction,
 	ButtonStyle,
 	CacheType,
 	CommandInteraction,
+	CommandInteractionOptionResolver,
 	EmbedBuilder,
+	PermissionFlagsBits,
 	StringSelectMenuBuilder,
 	StringSelectMenuInteraction,
 	StringSelectMenuOptionBuilder,
@@ -31,6 +34,7 @@ import { logInDev } from "../utils";
 const fr = i18next.getFixedT("fr");
 const en = i18next.getFixedT("en");
 
+
 export default {
 	data: new SlashCommandBuilder()
 		.setName(en("configuration.main.name"))
@@ -40,22 +44,100 @@ export default {
 		.setDescription(en("configuration.main.description"))
 		.setDescriptionLocalizations({
 			"fr": fr("configuration.main.description")
-		}),
+		})
+		.setDefaultMemberPermissions(PermissionFlagsBits.ManageThreads)
+		.addSubcommand(subcommand =>
+			subcommand
+				.setName(en("configuration.menu.language.title").toLowerCase())
+				.setNameLocalizations({
+					"fr": fr("configuration.menu.language.title").toLowerCase()
+				})
+				.setDescription(en("configuration.menu.language.desc"))
+				.setDescriptionLocalizations({
+					"fr": fr("configuration.menu.language.desc")
+				})
+		)
+		.addSubcommand(subcommand =>
+			subcommand
+				.setName(en("commands.help.name").toLowerCase())
+				.setNameLocalizations({
+					"fr": fr("commands.help.name").toLowerCase()
+				})
+				.setDescription(en("configuration.menu.help.desc"))
+				.setDescriptionLocalizations({
+					"fr": fr("configuration.menu.help.desc")
+				})
+		)
+		.addSubcommand(subcommand =>
+			subcommand
+				.setName(en("configuration.menu.mode.title").toLowerCase())
+				.setNameLocalizations({
+					"fr": fr("configuration.menu.mode.title").toLowerCase()
+				})
+				.setDescription(en("configuration.menu.mode.desc"))
+				.setDescriptionLocalizations({
+					"fr": fr("configuration.menu.mode.desc")
+				})
+		)
+		.addSubcommand(subcommand =>
+			subcommand
+				.setName(en("configuration.menu.autoUpdate.cmd").toLowerCase())
+				.setNameLocalizations({
+					"fr": fr("configuration.menu.autoUpdate.cmd").toLowerCase()
+				})
+				.setDescription(en("configuration.menu.autoUpdate.desc"))
+				.setDescriptionLocalizations({
+					"fr": fr("configuration.menu.autoUpdate.desc")
+				})
+		),
 	async execute(interaction: CommandInteraction) {
-		
-		
-		/** Add buttons to row */
-		
-		const row = reloadButton();
-
-		const embed = await display();
-		
-		await interaction.reply(
-			{
-				embeds: [embed],
-				components: row
-			});
-		
+		if (!interaction.guild) return;
+		const options = interaction.options as CommandInteractionOptionResolver;
+		const commands = options.getSubcommand();
+		if (en("configuration.menu.mode.title").toLowerCase() === commands) {
+			// eslint-disable-next-line no-case-declarations
+			const row = reloadButtonMode();
+			// eslint-disable-next-line no-case-declarations
+			const embed = displayModeMenu();
+			await interaction.reply(
+				{
+					embeds: [embed],
+					components: row
+				});
+		} else if (en("configuration.menu.autoUpdate.title").toLowerCase() === commands) {
+			// eslint-disable-next-line no-case-declarations
+			const rows = reloadButtonAuto();
+			// eslint-disable-next-line no-case-declarations
+			const embeds = autoUpdateMenu();
+			await interaction.reply(
+				{
+					embeds: [embeds],
+					components: rows
+				});
+		} else if (en("configuration.language.name").toLowerCase() === commands) {
+			const rows = reloadButtonLanguage();
+			const embeds = displayLanguageMenu();
+			await interaction.reply(
+				{
+					embeds: [embeds],
+					components: rows
+				});
+		} else {
+			const embeds = await display();
+			const row = new ActionRowBuilder<ButtonBuilder>()
+				.addComponents(
+					new ButtonBuilder()
+						.setEmoji("📖")
+						.setURL(`${i18next.t("info.readMe")}`)
+						.setLabel(i18next.t("configuration.menu.help.readme"))
+						.setStyle(ButtonStyle.Link)
+				);
+			await interaction.reply(
+				{
+					embeds: [embeds],
+					components: [row]
+				});
+		}
 		//eslint-disable-next-line @typescript-eslint/no-explicit-any
 		const filter = (i: any) => i.user.id === interaction.user.id;
 		try {
@@ -75,27 +157,13 @@ export default {
 };
 
 /**
- * Display the configuration as an embed
+ * Display Mode menu as an embed
+ * @returns {@link EmbedBuilder}
  */
-export async function display() {
-	const space = "_ _ ".repeat(10); //yeah. I know. It's ugly but it works
+function displayModeMenu() {
 	return new EmbedBuilder()
 		.setColor("#0099ff")
-		.setTitle(i18next.t("configuration.show.menu.title"))
-		.setDescription(i18next.t("configuration.show.menu.description"))
-		.addFields(
-			{
-				name: i18next.t("configuration.language.name"),
-				value: languageValue[getConfig(CommandName.language) as string]
-			})
-		
-		.addFields({ name: "\u200A", value: "\u200A" })
-		.addFields(
-			{ name: "\u200A", value: "\u200A", inline: true },
-			{name: `${space} ${i18next.t("configuration.title.mode")} ${space}`, value: "_ _", inline: true},
-			{ name: "\u200A", value: "\u200A", inline: true }
-		)
-		.addFields({ name: "\u200A", value: "\u200A" })
+		.setTitle(i18next.t("configuration.menu.mode.title"))
 		.addFields(
 			{
 				name: i18next.t("configuration.follow.role.title"),
@@ -115,12 +183,13 @@ export async function display() {
 				value: enabledOrDisabled(getConfig(CommandName.followOnlyRoleIn)),
 				inline: true,
 			},
-			{ name: "\u200A", value: "\u200A", inline: true })
-		.addFields({ name: "\u200A", value: "\u200A" })
-		.addFields(
-			{ name: "\u200A", value: "\u200A", inline: true },
-			{name: i18next.t("configuration.title.autoUpdate"), value: "\u200A", inline: true},
-			{ name: "\u200A", value: "\u200A", inline: true })
+			{ name: "\u200A", value: "\u200A", inline: true });
+}
+
+function autoUpdateMenu() {
+	return new EmbedBuilder()
+		.setColor("#0099ff")
+		.setTitle(i18next.t("configuration.menu.autoUpdate.title"))
 		.addFields(
 			{
 				name: i18next.t("configuration.channel.title"),
@@ -148,12 +217,46 @@ export async function display() {
 		);
 }
 
+function displayLanguageMenu() {
+	return new EmbedBuilder()
+		.setColor("#0099ff")
+		.setTitle(i18next.t("configuration.menu.language.desc"))
+		.setDescription(languageValue[getConfig(CommandName.language) as string]);
+}
+
+/**
+ * Display the configuration as an embed
+ */
+function display() {
+	return new EmbedBuilder()
+		.setColor("#0099ff")
+		.setTitle(i18next.t("configuration.show.menu.title"))
+		.setDescription(i18next.t("configuration.show.menu.description"))
+		.addFields(
+			{
+				name: i18next.t("configuration.language.name"),
+				value: `\`/config ${i18next.t("configuration.language.name").toLowerCase()}\``,
+			})
+		.addFields({ name: "\u200A", value: "\u200A" })
+		.addFields(
+			{
+				name: i18next.t("configuration.menu.mode.title"),
+				value: `\`/config ${i18next.t("configuration.menu.mode.title").toLowerCase()}\``,
+			})
+		.addFields({ name: "\u200A", value: "\u200A" })
+		.addFields(
+			{
+				name: i18next.t("configuration.menu.autoUpdate.title"),
+				value: `\`/config ${i18next.t("configuration.menu.autoUpdate.cmd").toLowerCase()}\``,
+			});
+}
+
 /**
  * Return the translation if value is true or false
  * @param {boolean} value The value to check
  */
 function enabledOrDisabled(value: boolean) {
-	return value ? i18next.t("common.enable") : i18next.t("common.disabled");
+	return value ? i18next.t("common.enabled") : i18next.t("common.disabled");
 }
 
 /**
@@ -163,20 +266,34 @@ function enabledOrDisabled(value: boolean) {
  */
 async function updateConfig(command: CommandName, interaction: ButtonInteraction<CacheType> | StringSelectMenuInteraction) {
 	let newConfig: string | boolean;
+	const commandType= {
+		"Language" : CommandName.language,
+		"Mode" : [CommandName.followOnlyRole, CommandName.followOnlyChannel, CommandName.followOnlyRoleIn],
+		"AutoUpdate" : [CommandName.channel, CommandName.member, CommandName.newMember, CommandName.thread, CommandName.manualMode]
+	};
+	const followOnlyRole = getConfig(CommandName.followOnlyRole);
+	const followOnlyChannel = getConfig(CommandName.followOnlyChannel);
+	const followOnlyRoleIn = getConfig(CommandName.followOnlyRoleIn);
 	if (command === CommandName.language) {
 		const interactSelect = interaction as StringSelectMenuInteraction;
 		newConfig = interactSelect.values[0];
 		// reload i18next
 		await i18next.changeLanguage(newConfig as string);
 		setConfig(command, newConfig);
-		const embed = await display();
+		const embed = displayLanguageMenu();
 		//reload buttons
-		const rows = reloadButton();
+		const rows = reloadButtonLanguage();
 		await interaction.editReply({ embeds: [embed], components: rows });
-	} else if (command === CommandName.followOnlyRoleIn && (getConfig(CommandName.followOnlyChannel) || getConfig(CommandName.followOnlyRole))) {
-		const embed = await display();
+	} else if (
+		command === CommandName.followOnlyRoleIn
+			&& (followOnlyChannel || followOnlyRole)
+		|| (followOnlyRoleIn
+			&& (command === CommandName.followOnlyChannel
+				|| command === CommandName.followOnlyRole))
+	) {
+		const embed = displayModeMenu();
 		//reload buttons
-		const rows = reloadButton();
+		const rows = reloadButtonMode();
 		await interaction.editReply({ embeds: [embed], components: rows });
 		interaction.editReply({ content: `**${i18next.t("configuration.roleIn.error")}**` });
 	} else if (command === CommandName.manualMode) {
@@ -186,17 +303,27 @@ async function updateConfig(command: CommandName, interaction: ButtonInteraction
 		for (const command of truc) {
 			setConfig(command, !manualMode);
 		}
-		const embed = await display();
+		const embed = await autoUpdateMenu();
 		//reload buttons
-		const rows = reloadButton();
+		const rows = reloadButtonAuto();
 		await interaction.editReply({ embeds: [embed], components: rows });
 	} else {
 		newConfig = !getConfig(command);
 		interaction.editReply({ content: ""});
 		setConfig(command, newConfig);
-		const embed = await display();
+		let embed = display();
 		//reload buttons
-		const rows = reloadButton();
+		let rows = [];
+		if (commandType["Mode"].includes(command)) {
+			rows = reloadButtonMode();
+			embed = displayModeMenu();
+		} else if (commandType["AutoUpdate"].includes(command)) {
+			rows = reloadButtonAuto();
+			embed = await autoUpdateMenu();
+		} else {
+			rows = reloadButtonLanguage();
+			embed = displayLanguageMenu();
+		}
 		await interaction.editReply({ embeds: [embed], components: rows });
 	}
 	
@@ -237,53 +364,62 @@ function createButton(command: CommandName, label: string) {
 		.setLabel(label);
 }
 
-export function createRows(buttons: ButtonBuilder[]) {
-	return[
-		{
-			type: 1,
-			components: [createLanguageButton()]
-		},
-		{
-			type: 1,
-			components: [buttons[1]]
-		},
-		{
-			type: 1,
-			components: [buttons[2], buttons[3], buttons[4], buttons[5]]
-		},
-		{
-			type: 1,
-			components: [buttons[6], buttons[7], buttons[8]]
-		}];
+function reloadButtonLanguage() {
+	return [{
+		type: 1,
+		components: [createLanguageButton()]
+	}];
 }
 
-function reloadButton() {
-	const labelButton = (id: CommandName) => {
-		//eslint-disable-next-line @typescript-eslint/no-explicit-any
-		const translation:any = {
-			[CommandName.manualMode] : i18next.t("configuration.disable.name"),
-			[CommandName.channel] : i18next.t("configuration.channel.name"),
-			[CommandName.member] : i18next.t("configuration.member.name"),
-			[CommandName.newMember] : i18next.t("configuration.newMember.name"),
-			[CommandName.thread] : i18next.t("configuration.thread.name"),
-			[CommandName.followOnlyRoleIn] : i18next.t("configuration.roleIn.name"),
-			[CommandName.followOnlyRole] : i18next.t("configuration.follow.role.name"),
-			[CommandName.followOnlyChannel] : i18next.t("configuration.follow.thread.name"),
-		};
-		const idIndex = Object.values(CommandName).indexOf(id);
-		const value = Object.values(CommandName)[idIndex];
-		const translated = translation[value];
-		if (id === CommandName.manualMode) {
-			const truc = [CommandName.channel, CommandName.member, CommandName.thread, CommandName.newMember].map((command) => getConfig(command));
-			const manualMode = truc.some((value) => value);
-			return manualMode ? `${i18next.t("common.enable")} : ${translated}` : `${i18next.t("common.disable")} : ${translated}`;
-		}
-		return getConfig(id) ? `${i18next.t("common.disable")} : ${translated}` : `${i18next.t("common.enable")} : ${translated}`;
+function reloadButtonMode() {
+	//eslint-disable-next-line @typescript-eslint/no-explicit-any
+	const translation: any = {
+		[CommandName.followOnlyRoleIn]: i18next.t("configuration.roleIn.name"),
+		[CommandName.followOnlyRole]: i18next.t("configuration.follow.role.name"),
+		[CommandName.followOnlyChannel]: i18next.t("configuration.follow.thread.name"),
 	};
-	const buttons: ButtonBuilder[] = [];
 	
-	for (const id of Object.values(CommandName)) {
-		buttons.push(createButton(id as CommandName, labelButton(id as CommandName)));
+	const buttons: ButtonBuilder[] = [];
+	for (const command of [CommandName.followOnlyRoleIn, CommandName.followOnlyRole, CommandName.followOnlyChannel].values()) {
+		buttons.push(createButton(command, labelButton(command, translation)));
 	}
-	return createRows(buttons);
+	return [
+		{
+			type: 1,
+			components: buttons
+		}
+	];
 }
+
+//eslint-disable-next-line @typescript-eslint/no-explicit-any
+function labelButton(id: CommandName, translation: any) {
+	const idIndex = Object.values(CommandName).indexOf(id);
+	const value = Object.values(CommandName)[idIndex];
+	const translated = translation[value];
+	if (id === CommandName.manualMode) {
+		const truc = [CommandName.channel, CommandName.member, CommandName.thread, CommandName.newMember].map((command) => getConfig(command));
+		const manualMode = truc.some((value) => value);
+		return manualMode ? `${i18next.t("common.enable")} : ${translated}` : `${i18next.t("common.disable")} : ${translated}`;
+	}
+	return getConfig(id) ? `${i18next.t("common.disable")} : ${translated}` : `${i18next.t("common.enable")} : ${translated}`;
+}
+
+function reloadButtonAuto() {
+	//eslint-disable-next-line @typescript-eslint/no-explicit-any
+	const translation:any = {
+		[CommandName.manualMode]: i18next.t("configuration.disable.name"),
+		[CommandName.channel]: i18next.t("configuration.channel.name"),
+		[CommandName.member]: i18next.t("configuration.member.name"),
+		[CommandName.newMember]: i18next.t("configuration.newMember.name"),
+		[CommandName.thread]: i18next.t("configuration.thread.name"),
+	};
+	const buttons = [];
+	for (const command of [CommandName.manualMode, CommandName.channel, CommandName.member, CommandName.newMember, CommandName.thread].values()) {
+		buttons.push(createButton(command, labelButton(command, translation)));
+	}
+	return [{
+		type: 1,
+		components: buttons
+	}];
+}
+
