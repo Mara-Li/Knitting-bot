@@ -104,7 +104,7 @@ export default {
 					embeds: [embed],
 					components: row
 				});
-		} else if (en("configuration.menu.autoUpdate.title").toLowerCase() === commands) {
+		} else if (en("configuration.menu.autoUpdate.cmd").toLowerCase() === commands) {
 			// eslint-disable-next-line no-case-declarations
 			const rows = reloadButtonAuto();
 			// eslint-disable-next-line no-case-declarations
@@ -413,13 +413,17 @@ function reloadButtonAuto() {
 		[CommandName.newMember]: i18next.t("configuration.newMember.name"),
 		[CommandName.thread]: i18next.t("configuration.thread.name"),
 	};
-	const buttons = [];
+	const buttons:ButtonBuilder[] = [];
 	for (const command of [CommandName.manualMode, CommandName.channel, CommandName.member, CommandName.newMember, CommandName.thread].values()) {
 		buttons.push(createButton(command, labelButton(command, translation)));
 	}
 	return [{
 		type: 1,
-		components: buttons
+		components: [buttons[0]]
+	},
+	{
+		type: 1,
+		components: buttons.slice(1, buttons.length)
 	}];
 }
 
