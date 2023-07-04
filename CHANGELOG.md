@@ -1,6 +1,28 @@
 
-<a name="v1.2.4"></a>
-## [v1.2.4](https://github.com/Lisandra-dev/Knitting-bot/compare/1.2.2...v1.2.4) (2023-07-03)
+<a name="v2.0.0"></a>
+## [v2.0.0](https://github.com/Lisandra-dev/Knitting-bot/compare/1.2.4...v2.0.0) (2023-07-04)
+
+### Chore
+
+* **VERSION:** update VERSION
+
+### Fix
+
+* **db:** remove db on guild removed also load db for first time when added
+* **db:** reconfigure completely the db
+
+### Refactor
+
+* remove unused import & redundant variable
+
+### BREAKING CHANGE
+
+
+the db must be destroyed, removing ALL change from user
+
+
+<a name="1.2.4"></a>
+## [1.2.4](https://github.com/Lisandra-dev/Knitting-bot/compare/1.2.2...1.2.4) (2023-07-03)
 
 ### Chore
 
