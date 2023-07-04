@@ -26,6 +26,7 @@ const client = new Client({
 
 export const EMOJI = process.env.MESSAGE && process.env.MESSAGE.trim().length > 0 ? process.env.MESSAGE : "🔄";
 export const VERSION = pkg.version ?? "0.0.0";
+export const DESTROY_DATABASE = process.env.DESTROY ?? false;
 
 export const INFO_EMOJI = {
 	"github" : process.env.GITHUB_EMOJI ?? "??",

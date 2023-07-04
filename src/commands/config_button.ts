@@ -319,9 +319,9 @@ async function updateConfig(command: CommandName, interaction: ButtonInteraction
 		newConfig = !getConfig(command, interaction.guild.id);
 		interaction.editReply({ content: ""});
 		setConfig(command, interaction.guild.id, newConfig);
-		let embed = display();
+		let embed: EmbedBuilder;
 		//reload buttons
-		let rows = [];
+		let rows;
 		if (commandType["Mode"].includes(command)) {
 			rows = reloadButtonMode(interaction.guild.id);
 			embed = displayModeMenu(interaction.guild.id);
