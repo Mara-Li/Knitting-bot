@@ -3,6 +3,7 @@ import { Client, Routes } from "discord.js";
 import dotenv from "dotenv";
 import process from "process";
 import { commands } from "../commands";
+import { destroyDB, exportDB } from "../maps";
 import { logInDev } from "../utils";
 import { VERSION } from "../index";
 dotenv.config();
@@ -33,5 +34,8 @@ export default (client: Client): void => {
 			);
 			logInDev(`Load in ${guild.name} done`);
 		}
+		//destroy all maps
+		//destroyDB();
+		//exportDB();
 	});
 };

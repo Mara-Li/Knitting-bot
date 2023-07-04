@@ -117,6 +117,7 @@ export default {
 		),
 	async execute(interaction: CommandInteraction) {
 		if (!interaction.guild) return;
+		const guild = interaction.guild;
 		const options = interaction.options as CommandInteractionOptionResolver;
 		const commands = options.getSubcommand();
 		/**
@@ -124,7 +125,7 @@ export default {
 		 */
 		switch (commands) {
 		case en("common.channel").toLowerCase():
-			if (getConfig(CommandName.followOnlyChannel)) {
+			if (getConfig(CommandName.followOnlyChannel, guild.id)) {
 				await interaction.reply({
 					content: i18next.t("ignore.followError") as string,
 					ephemeral: true,
@@ -134,7 +135,7 @@ export default {
 			await ignoreText(interaction);
 			break;
 		case en("common.role").toLowerCase():
-			if (getConfig(CommandName.followOnlyRole)) {
+			if (getConfig(CommandName.followOnlyRole, guild.id)) {
 				await interaction.reply({
 					content: i18next.t("ignore.followError") as string,
 					ephemeral: true,
@@ -161,13 +162,15 @@ export default {
  * @param interaction {@link CommandInteraction} the interaction to reply to
  */
 async function listIgnored(interaction: CommandInteraction) {
-	const ignoredCategories = getMaps("ignore",TypeName.category) as CategoryChannel[] ?? [];
-	const ignoredThreads = getMaps("ignore",TypeName.thread) as ThreadChannel[] ?? [];
-	const ignoredChannels = getMaps("ignore",TypeName.channel) as TextChannel[] ?? [];
-	const ignoredForum = getMaps("ignore",TypeName.forum) as ForumChannel[] ?? [];
-	const ignoredRoles = getRole("ignore");
+	if (!interaction.guild) return;
+	const guild = interaction.guild.id;
+	const ignoredCategories = getMaps("ignore",TypeName.category, guild) as CategoryChannel[] ?? [];
+	const ignoredThreads = getMaps("ignore",TypeName.thread, guild) as ThreadChannel[] ?? [];
+	const ignoredChannels = getMaps("ignore",TypeName.channel, guild) as TextChannel[] ?? [];
+	const ignoredForum = getMaps("ignore",TypeName.forum, guild) as ForumChannel[] ?? [];
+	const ignoredRoles = getRole("ignore", guild);
 	
-	const ignoredRolesIn = getRoleIn("ignore");
+	const ignoredRolesIn = getRoleIn("ignore", guild);
 	const ignoredRolesInMaps = ignoredRolesIn.map((roleIn) =>{
 		const role = roleIn.role.id;
 		const channels = roleIn.channels.map((channel) => channelMention(channel.id)).join("\n - ");
@@ -226,6 +229,8 @@ async function listIgnored(interaction: CommandInteraction) {
  * Also contains the role to ignore
  */
 async function ignoreThisRole(interaction: CommandInteraction) {
+	if (!interaction.guild) return;
+	const guild = interaction.guild.id;
 	const role = interaction.options.get(en("common.role").toLowerCase());
 	if (!role || !(role.role instanceof Role)) {
 		await interaction.reply({
@@ -235,7 +240,7 @@ async function ignoreThisRole(interaction: CommandInteraction) {
 		return;
 	}
 	const mention = role?.role.id ? roleMention(role.role.id) : role.role?.name;
-	const allIgnoreRoles:Role[] = getRole("ignore");
+	const allIgnoreRoles:Role[] = getRole("ignore", guild);
 	const isAlreadyIgnored = allIgnoreRoles.some(
 		(ignoredRole: Role) => ignoredRole.id === role.role?.id
 	);
@@ -245,7 +250,7 @@ async function ignoreThisRole(interaction: CommandInteraction) {
 		const newIgnoreRoles: Role[] = allIgnoreRoles.filter(
 			(ignoredRole: Role) => ignoredRole.id !== role.role?.id
 		);
-		setRole("ignore", newIgnoreRoles);
+		setRole("ignore", guild, newIgnoreRoles);
 		await interaction.reply({
 			content: i18next.t("ignore.role.removed", {role: mention}) as string,
 			ephemeral: true,
@@ -253,7 +258,7 @@ async function ignoreThisRole(interaction: CommandInteraction) {
 	} else {
 		//add to ignore list
 		allIgnoreRoles.push(role.role);
-		setRole("ignore", allIgnoreRoles);
+		setRole("ignore", guild, allIgnoreRoles);
 		await interaction.reply({
 			content: i18next.t("ignore.role.added", {role: mention}) as string,
 			ephemeral: true,
@@ -300,6 +305,8 @@ async function ignoreThis(
 		| ThreadChannel
 		| TextChannel
 		| ForumChannel) {
+	if (!interaction.guild) return;
+	const guild = interaction.guild.id;
 	if (!ignoreCategory) {
 		await interaction.reply({
 			content: i18next.t("commands.error") as string,
@@ -310,13 +317,13 @@ async function ignoreThis(
 	let allIgnored: (ThreadChannel<boolean> | CategoryChannel | TextChannel | ForumChannel)[] = [];
 	switch (typeName) {
 	case TypeName.category:
-		allIgnored = getMaps("ignore",TypeName.category) as CategoryChannel[] ?? [];
+		allIgnored = getMaps("ignore",TypeName.category, guild) as CategoryChannel[] ?? [];
 		break;
 	case TypeName.thread:
-		allIgnored = getMaps("ignore",TypeName.thread) as ThreadChannel[] ?? [];
+		allIgnored = getMaps("ignore",TypeName.thread, guild) as ThreadChannel[] ?? [];
 		break;
 	case TypeName.channel:
-		allIgnored = getMaps("ignore",TypeName.channel) as TextChannel[] ?? [];
+		allIgnored = getMaps("ignore",TypeName.channel, guild) as TextChannel[] ?? [];
 		break;
 	}
 	const isAlreadyIgnored = allIgnored.some(
@@ -328,7 +335,7 @@ async function ignoreThis(
 		const newIgnoredCategories = allIgnored.filter(
 			(ignoredCategory: CategoryChannel | ForumChannel | ThreadChannel | TextChannel | Role) => ignoredCategory.id !== ignoreCategory?.id
 		);
-		setIgnore(typeName, newIgnoredCategories);
+		setIgnore(typeName,guild, newIgnoredCategories as ThreadChannel[] | CategoryChannel[] | TextChannel[] | ForumChannel[]);
 		await interaction.reply({
 			content: i18next.t("ignore.thread.remove", {thread: mention}) as string,
 			ephemeral: true,
@@ -336,7 +343,7 @@ async function ignoreThis(
 	} else {
 		//add to ignore list
 		allIgnored.push(ignoreCategory);
-		setIgnore(typeName, allIgnored);
+		setIgnore(typeName, guild, allIgnored as ThreadChannel[] | CategoryChannel[] | TextChannel[] | ForumChannel[]);
 		await interaction.reply({
 			content: i18next.t("ignore.thread.success", {thread: mention}) as string,
 			ephemeral: true,

@@ -14,10 +14,11 @@ import { checkThread } from "../../utils/data_check";
 export default (client: Client): void => {
 	client.on("threadCreate", async (thread: ThreadChannel) => {
 		//return if the thread is not a public thread
+		const guild = thread.guild.id;
 		if (thread.type !== ChannelType.PublicThread) return;
-		if (getConfig(CommandName.thread) === false) return;
+		if (getConfig(CommandName.thread, guild) === false) return;
 		logInDev(`Thread ${thread.name} created!`);
-		if (!getConfig(CommandName.followOnlyChannel)) {
+		if (!getConfig(CommandName.followOnlyChannel, guild)) {
 			if (!checkThread(thread, "ignore")) await addRoleAndUserToThread(thread);
 		} else {
 			if (checkThread(thread, "follow")) await addRoleAndUserToThread(thread);

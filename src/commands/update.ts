@@ -101,6 +101,7 @@ export default {
  */
 async function updateAllThreads(interaction: CommandInteraction) {
 	if (!interaction.guild) return;
+	const guild = interaction.guild.id;
 	const threads = interaction.guild.channels.cache.filter((channel) =>
 		channel.isThread()
 	);
@@ -111,7 +112,7 @@ async function updateAllThreads(interaction: CommandInteraction) {
 	const count = threads.size;
 	for (const thread of threads.values()) {
 		const threadChannel = thread as ThreadChannel;
-		if (!getConfig(CommandName.followOnlyChannel) && !checkThread(threadChannel, "ignore")) {
+		if (!getConfig(CommandName.followOnlyChannel, guild) && !checkThread(threadChannel, "ignore")) {
 			await addRoleAndUserToThread(threadChannel);
 		}
 		else if (checkThread(threadChannel, "follow")) {
@@ -132,6 +133,8 @@ async function updateAllThreads(interaction: CommandInteraction) {
  * - If not thread is provided, the thread is the current channel
  */
 async function updateThread(interaction: CommandInteraction) {
+	if (!interaction.guild) return;
+	const guild = interaction.guild.id;
 	const threadOption = interaction.options.get(i18next.t("common.thread").toLowerCase()) ?? interaction;
 	const channel = threadOption?.channel;
 	if (!channel || !(channel instanceof ThreadChannel)) {
@@ -143,11 +146,11 @@ async function updateThread(interaction: CommandInteraction) {
 	}
 	logInDev(channel as ThreadChannel);
 	const mention = channelMention(channel?.id as string);
-	const isFollowed = getConfig(CommandName.followOnlyChannel) && checkThread(threadOption?.channel as ThreadChannel, "follow");
-	logInDev(`${channel.name} — Configuration ROLE IN :`, !getConfig(CommandName.followOnlyRoleIn));
+	const isFollowed = getConfig(CommandName.followOnlyChannel, guild) && checkThread(threadOption?.channel as ThreadChannel, "follow");
+	logInDev(`${channel.name} — Configuration ROLE IN :`, !getConfig(CommandName.followOnlyRoleIn, guild));
 	logInDev(`${channel.name} isFollowed:`, !isFollowed);
 	logInDev(`${channel.name} isIgnored:`, checkThread(threadOption?.channel as ThreadChannel, "ignore"));
-	if (!getConfig(CommandName.followOnlyRoleIn) && (checkThread(threadOption?.channel as ThreadChannel, "ignore") && !isFollowed)) {
+	if (!getConfig(CommandName.followOnlyRoleIn, guild) && (checkThread(threadOption?.channel as ThreadChannel, "ignore") && !isFollowed)) {
 		await interaction.reply({
 			content: i18next.t("ignore.message", {thread: mention}) as string,
 			ephemeral: true,

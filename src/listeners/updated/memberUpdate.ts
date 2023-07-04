@@ -12,7 +12,8 @@ export default (client: Client): void => {
 		//trigger only on role change
 		try {
 			if (oldMember.roles.cache.size === newMember.roles.cache.size) return;
-			if (getConfig(CommandName.member) === false) return;
+			const guildID = newMember.guild.id;
+			if (getConfig(CommandName.member, guildID) === false) return;
 			logInDev(`${oldMember.user.username} has been updated!`);
 			const guild = newMember.guild;
 			const channels = guild.channels.cache.filter(channel => channel.isThread());
@@ -33,7 +34,7 @@ export default (client: Client): void => {
 				}
 				
 				logInDev(`Role is allowed: ${roleIsAllowed}`);
-				if (!getConfig(CommandName.followOnlyChannel)) {
+				if (!getConfig(CommandName.followOnlyChannel, guildID)) {
 					/**
 					 * followOnlyChannel is disabled && followOnlyRole can be enabled or disabled
 					 */

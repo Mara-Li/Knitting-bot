@@ -20,12 +20,13 @@ import { logInDev } from "./index";
  * @param user {@link GuildMember} The user to add
  */
 export async function addUserToThread(thread: ThreadChannel, user: GuildMember) {
+	const guild = thread.guild.id;
 	if (thread.permissionsFor(user).has("ViewChannel", true) && await checkIfUserNotInTheThread(thread, user)) {
 
 		const fetchedMessage = await thread.messages.fetch();
 		let message = fetchedMessage.filter(m => m.author.id === thread.client.user.id).first();
 		
-		if (getConfig(CommandName.followOnlyRoleIn)) {
+		if (getConfig(CommandName.followOnlyRoleIn, guild)) {
 			if (message) {
 				await message.edit(userMention(user.id));
 				await message.edit(EMOJI);
@@ -52,7 +53,7 @@ export async function addUserToThread(thread: ThreadChannel, user: GuildMember) 
 				await message.edit(EMOJI);
 			}
 			logInDev(`Add @${user.user.username} to #${thread.name}`);
-		} else if (getConfig(CommandName.followOnlyRole) && checkMemberRole(user.roles, "follow")) {
+		} else if (getConfig(CommandName.followOnlyRole, guild) && checkMemberRole(user.roles, "follow")) {
 			if (message) {
 				await message.edit(userMention(user.id));
 				await message.edit(EMOJI);
@@ -76,16 +77,17 @@ export async function addUserToThread(thread: ThreadChannel, user: GuildMember) 
  * @param {@link GuildMember} members The member to add to the thread
  */
 export async function getUsersToPing(thread: ThreadChannel, members: GuildMember[]) {
+	const guild = thread.guild.id;
 	const usersToBeAdded: GuildMember[] = [];
 	for (const member of members) {
 		if (thread.permissionsFor(member).has("ViewChannel", true) && await checkIfUserNotInTheThread(thread, member)) {
-			if (getConfig(CommandName.followOnlyRoleIn) && checkMemberRoleIn("follow", member.roles, thread)) {
+			if (getConfig(CommandName.followOnlyRoleIn, guild) && checkMemberRoleIn("follow", member.roles, thread)) {
 				usersToBeAdded.push(member);
 				logInDev(`Add @${member.user.username} to #${thread.name} - Rules:\n- Follow Only Role In\n- Role followed in the thread`);
-			} else if (getConfig(CommandName.followOnlyRole) && checkMemberRole(member.roles, "follow") && !getConfig(CommandName.followOnlyRoleIn)) {
+			} else if (getConfig(CommandName.followOnlyRole, guild) && checkMemberRole(member.roles, "follow") && !getConfig(CommandName.followOnlyRoleIn, guild)) {
 				usersToBeAdded.push(member);
 				logInDev(`Add @${member.user.username} to #${thread.name} - Rules:\n- Follow Only Role\n- Role followed\n- Not follow Only Role In`);
-			} else if (!getConfig(CommandName.followOnlyRole) && !checkMemberRole(member.roles, "ignore") && !checkMemberRoleIn("ignore", member.roles, thread) && !getConfig(CommandName.followOnlyRoleIn)) {
+			} else if (!getConfig(CommandName.followOnlyRole, guild) && !checkMemberRole(member.roles, "ignore") && !checkMemberRoleIn("ignore", member.roles, thread) && !getConfig(CommandName.followOnlyRoleIn, guild)) {
 				usersToBeAdded.push(member);
 				logInDev(`Add @${member.user.username} to #${thread.name} - Rules :\n- Not follow Only Role\n- Role not ignored globally\n- Role not ignored in the thread\n- Not follow Only Role In`);
 			}
@@ -100,6 +102,7 @@ export async function getUsersToPing(thread: ThreadChannel, members: GuildMember
  * @param {@link Role[]} roles The role to add to the thread
  */
 export async function getRoleToPing(thread: ThreadChannel, roles: Role[]) {
+	const guild = thread.guild.id;
 	const roleToBeAdded: Role[] = [];
 	for (const role of roles) {
 		//check if all members of the role are in the thread
@@ -109,10 +112,10 @@ export async function getRoleToPing(thread: ThreadChannel, roles: Role[]) {
 			if (checkRoleIn("follow",role, thread)) {
 				roleToBeAdded.push(role);
 				logInDev(`Add @${role.name} to #${thread.name}\n **Role Followed in thread**`);
-			} else if (getConfig(CommandName.followOnlyRole) && checkRole(role, "follow")) {
+			} else if (getConfig(CommandName.followOnlyRole, guild) && checkRole(role, "follow")) {
 				roleToBeAdded.push(role);
 				logInDev(`Add @${role.name} to #${thread.name}\n **FollowOnlyRole & Followed**`);
-			} else if (!getConfig(CommandName.followOnlyRole) && !checkRole(role, "ignore") && !checkRoleIn("ignore", role, thread)) {
+			} else if (!getConfig(CommandName.followOnlyRole, guild) && !checkRole(role, "ignore") && !checkRoleIn("ignore", role, thread)) {
 				roleToBeAdded.push(role);
 				logInDev(`Add @${role.name} to #${thread.name}\n **Not FollowOnlyRole & Not Ignored && Not ignored for this thread**`);
 			}

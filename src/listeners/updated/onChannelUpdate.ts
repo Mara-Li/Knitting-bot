@@ -16,11 +16,13 @@ export default (client: Client): void => {
 	client.on("channelUpdate", async (
 		oldChannel,
 		newChannel) => {
-		if (getConfig(CommandName.channel) === false) return;
+		if (oldChannel.type === ChannelType.DM || newChannel.type === ChannelType.DM) return;
+		if (!oldChannel.guild) return;
+		const guild = oldChannel.guild.id;
+		if (getConfig(CommandName.channel, guild) === false) return;
 		logInDev(`Channel #${getChannelName(oldChannel.id, client)} updated`);
 		logInDev("Channel type :", oldChannel.type, newChannel.type);
 		const validChannelTypes : ChannelType[] = [ChannelType.GuildCategory, ChannelType.GuildText, ChannelType.PublicThread, ChannelType.PrivateThread, ChannelType.GuildForum];
-		if (oldChannel.type === ChannelType.DM || newChannel.type === ChannelType.DM) return;
 		if (!validChannelTypes.includes(oldChannel.type)
 			|| !validChannelTypes.includes(newChannel.type)
 			|| oldChannel.permissionOverwrites.cache === newChannel.permissionOverwrites.cache) {
@@ -37,7 +39,7 @@ export default (client: Client): void => {
 				if (child.type === ChannelType.GuildText) {
 					const threads = (child as TextChannel).threads.cache;
 					threads.forEach(thread => {
-						if (!getConfig(CommandName.followOnlyChannel)) {
+						if (!getConfig(CommandName.followOnlyChannel, guild)) {
 							if (!checkThread(thread, "ignore")) addRoleAndUserToThread(thread);
 						} else {
 							if (checkThread(thread, "follow")) addRoleAndUserToThread(thread);
@@ -49,7 +51,7 @@ export default (client: Client): void => {
 			const newTextChannel = newChannel as TextChannel;
 			const threads = newTextChannel.threads.cache;
 			threads.forEach(thread => {
-				if (!getConfig(CommandName.followOnlyChannel)) {
+				if (!getConfig(CommandName.followOnlyChannel, guild)) {
 					if (!checkThread(thread, "ignore")) addRoleAndUserToThread(thread);
 				} else {
 					if (checkThread(thread, "follow")) addRoleAndUserToThread(thread);

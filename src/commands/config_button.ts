@@ -96,9 +96,9 @@ export default {
 		const commands = options.getSubcommand();
 		if (en("configuration.menu.mode.title").toLowerCase() === commands) {
 			// eslint-disable-next-line no-case-declarations
-			const row = reloadButtonMode();
+			const row = reloadButtonMode(interaction.guild.id);
 			// eslint-disable-next-line no-case-declarations
-			const embed = displayModeMenu();
+			const embed = displayModeMenu(interaction.guild.id);
 			interaction.reply(
 				{
 					embeds: [embed],
@@ -106,9 +106,9 @@ export default {
 				});
 		} else if (en("configuration.menu.autoUpdate.cmd").toLowerCase() === commands) {
 			// eslint-disable-next-line no-case-declarations
-			const rows = reloadButtonAuto();
+			const rows = reloadButtonAuto(interaction.guild.id);
 			// eslint-disable-next-line no-case-declarations
-			const embeds = autoUpdateMenu();
+			const embeds = autoUpdateMenu(interaction.guild.id);
 			interaction.reply(
 				{
 					embeds: [embeds],
@@ -116,14 +116,14 @@ export default {
 				});
 		} else if (en("configuration.language.name").toLowerCase() === commands) {
 			const rows = reloadButtonLanguage();
-			const embeds = displayLanguageMenu();
+			const embeds = displayLanguageMenu(interaction.guild.id);
 			interaction.reply(
 				{
 					embeds: [embeds],
 					components: rows
 				});
 		} else {
-			const embeds = await display();
+			const embeds = display();
 			const row = new ActionRowBuilder<ButtonBuilder>()
 				.addComponents(
 					new ButtonBuilder()
@@ -165,19 +165,19 @@ export default {
  * Display Mode menu as an embed
  * @returns {@link EmbedBuilder}
  */
-function displayModeMenu() {
+function displayModeMenu(guildID: string) {
 	return new EmbedBuilder()
 		.setColor("#0099ff")
 		.setTitle(i18next.t("configuration.menu.mode.title"))
 		.addFields(
 			{
 				name: i18next.t("configuration.follow.role.title"),
-				value: enabledOrDisabled(getConfig(CommandName.followOnlyRole)),
+				value: enabledOrDisabled(getConfig(CommandName.followOnlyRole, guildID) as boolean),
 				inline: true,
 			},
 			{
 				name: i18next.t("configuration.follow.thread.title"),
-				value: enabledOrDisabled(getConfig(CommandName.followOnlyChannel)),
+				value: enabledOrDisabled(getConfig(CommandName.followOnlyChannel, guildID) as boolean),
 				inline: true,
 			},
 		)
@@ -185,25 +185,25 @@ function displayModeMenu() {
 		.addFields(
 			{
 				name: i18next.t("configuration.follow.roleIn"),
-				value: enabledOrDisabled(getConfig(CommandName.followOnlyRoleIn)),
+				value: enabledOrDisabled(getConfig(CommandName.followOnlyRoleIn, guildID) as boolean),
 				inline: true,
 			},
 			{ name: "\u200A", value: "\u200A", inline: true });
 }
 
-function autoUpdateMenu() {
+function autoUpdateMenu(guildID: string) {
 	return new EmbedBuilder()
 		.setColor("#0099ff")
 		.setTitle(i18next.t("configuration.menu.autoUpdate.title"))
 		.addFields(
 			{
 				name: i18next.t("configuration.channel.title"),
-				value: enabledOrDisabled(getConfig(CommandName.channel)),
+				value: enabledOrDisabled(getConfig(CommandName.channel, guildID) as boolean),
 				inline: true,
 			},
 			{
 				name: i18next.t("configuration.member.title"),
-				value: enabledOrDisabled(getConfig(CommandName.member)),
+				value: enabledOrDisabled(getConfig(CommandName.member, guildID) as boolean),
 				inline: true,
 			}
 		)
@@ -211,22 +211,22 @@ function autoUpdateMenu() {
 		.addFields(
 			{
 				name: i18next.t("configuration.newMember.display"),
-				value: enabledOrDisabled(getConfig(CommandName.newMember)),
+				value: enabledOrDisabled(getConfig(CommandName.newMember, guildID) as boolean),
 				inline: true,
 			},
 			{
 				name: i18next.t("configuration.thread.display"),
-				value: enabledOrDisabled(getConfig(CommandName.thread)),
+				value: enabledOrDisabled(getConfig(CommandName.thread, guildID) as boolean),
 				inline: true,
 			}
 		);
 }
 
-function displayLanguageMenu() {
+function displayLanguageMenu(guildID: string) {
 	return new EmbedBuilder()
 		.setColor("#0099ff")
 		.setTitle(i18next.t("configuration.menu.language.desc"))
-		.setDescription(languageValue[getConfig(CommandName.language) as string]);
+		.setDescription(languageValue[getConfig(CommandName.language, guildID) as string]);
 }
 
 /**
@@ -270,22 +270,23 @@ function enabledOrDisabled(value: boolean) {
  * @param interaction
  */
 async function updateConfig(command: CommandName, interaction: ButtonInteraction<CacheType> | StringSelectMenuInteraction) {
+	if (!interaction.guild) return;
 	let newConfig: string | boolean;
 	const commandType= {
 		"Language" : CommandName.language,
 		"Mode" : [CommandName.followOnlyRole, CommandName.followOnlyChannel, CommandName.followOnlyRoleIn],
 		"AutoUpdate" : [CommandName.channel, CommandName.member, CommandName.newMember, CommandName.thread, CommandName.manualMode]
 	};
-	const followOnlyRole = getConfig(CommandName.followOnlyRole);
-	const followOnlyChannel = getConfig(CommandName.followOnlyChannel);
-	const followOnlyRoleIn = getConfig(CommandName.followOnlyRoleIn);
+	const followOnlyRole = getConfig(CommandName.followOnlyRole, interaction.guild.id);
+	const followOnlyChannel = getConfig(CommandName.followOnlyChannel, interaction.guild.id);
+	const followOnlyRoleIn = getConfig(CommandName.followOnlyRoleIn, interaction.guild.id);
 	if (command === CommandName.language) {
 		const interactSelect = interaction as StringSelectMenuInteraction;
-		newConfig = interactSelect.values[0];
+		newConfig = interactSelect.values[0] as string;
 		// reload i18next
 		await i18next.changeLanguage(newConfig as string);
-		setConfig(command, newConfig);
-		const embed = displayLanguageMenu();
+		setConfig(command, interaction.guild.id, newConfig);
+		const embed = displayLanguageMenu(interaction.guild.id);
 		//reload buttons
 		const rows = reloadButtonLanguage();
 		interaction.editReply({ embeds: [embed], components: rows });
@@ -296,36 +297,40 @@ async function updateConfig(command: CommandName, interaction: ButtonInteraction
 			&& (command === CommandName.followOnlyChannel
 				|| command === CommandName.followOnlyRole))
 	) {
-		const embed = displayModeMenu();
-		const rows = reloadButtonMode();
+		const embed = displayModeMenu(interaction.guild.id);
+		const rows = reloadButtonMode(interaction.guild.id);
 		interaction.editReply({ embeds: [embed], components: rows });
 	} else if (command === CommandName.manualMode) {
 		const truc = [CommandName.channel, CommandName.member, CommandName.thread, CommandName.newMember];
-		const allTruc = truc.map((command) => getConfig(command));
+		
+		const allTruc = truc.map((command) => {
+			if (!interaction.guild) return false;
+			return getConfig(command, interaction.guild.id);
+		});
 		const manualMode = allTruc.every((value) => value);
 		for (const command of truc) {
-			setConfig(command, !manualMode);
+			setConfig(command, interaction.guild.id, !manualMode);
 		}
-		const embed = autoUpdateMenu();
+		const embed = autoUpdateMenu(interaction.guild.id);
 		//reload buttons
-		const rows = reloadButtonAuto();
+		const rows = reloadButtonAuto(interaction.guild.id);
 		interaction.editReply({ embeds: [embed], components: rows });
 	} else {
-		newConfig = !getConfig(command);
+		newConfig = !getConfig(command, interaction.guild.id);
 		interaction.editReply({ content: ""});
-		setConfig(command, newConfig);
+		setConfig(command, interaction.guild.id, newConfig);
 		let embed = display();
 		//reload buttons
 		let rows = [];
 		if (commandType["Mode"].includes(command)) {
-			rows = reloadButtonMode();
-			embed = displayModeMenu();
+			rows = reloadButtonMode(interaction.guild.id);
+			embed = displayModeMenu(interaction.guild.id);
 		} else if (commandType["AutoUpdate"].includes(command)) {
-			rows = reloadButtonAuto();
-			embed = autoUpdateMenu();
+			rows = reloadButtonAuto(interaction.guild.id);
+			embed = autoUpdateMenu(interaction.guild.id);
 		} else {
 			rows = reloadButtonLanguage();
-			embed = displayLanguageMenu();
+			embed = displayLanguageMenu(interaction.guild.id);
 		}
 		interaction.editReply({ embeds: [embed], components: rows });
 	}
@@ -352,13 +357,14 @@ function createLanguageButton() {
  * Create a button with the command name as custom id and the label as label
  * @param command {@link CommandName}
  * @param label {string} The label of the button
+ * @param guildID
  */
 
-function createButton(command: CommandName, label: string) {
-	let style = getConfig(command) ? ButtonStyle.Danger : ButtonStyle.Success;
+function createButton(command: CommandName, label: string, guildID: string) {
+	let style = getConfig(command, guildID) ? ButtonStyle.Danger : ButtonStyle.Success;
 	if (command === CommandName.manualMode) {
 		const truc = [CommandName.channel, CommandName.member, CommandName.thread, CommandName.newMember];
-		const allTruc = truc.map((command) => getConfig(command));
+		const allTruc = truc.map((command) => getConfig(command, guildID));
 		style = allTruc.some((value) => value) ? ButtonStyle.Danger : ButtonStyle.Success;
 	}
 	return new ButtonBuilder()
@@ -375,7 +381,7 @@ function reloadButtonLanguage() {
 	}];
 }
 
-function reloadButtonMode() {
+function reloadButtonMode(guildID: string) {
 	//eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const translation: any = {
 		[CommandName.followOnlyRoleIn]: i18next.t("configuration.roleIn.name"),
@@ -385,15 +391,15 @@ function reloadButtonMode() {
 	
 	const buttons: ButtonBuilder[] = [];
 	for (const command of [CommandName.followOnlyRoleIn, CommandName.followOnlyRole, CommandName.followOnlyChannel].values()) {
-		buttons.push(createButton(command, labelButton(command, translation)));
+		buttons.push(createButton(command, labelButton(command, translation, guildID), guildID));
 	}
-	if (getConfig(CommandName.followOnlyRoleIn)) {
+	if (getConfig(CommandName.followOnlyRoleIn, guildID)) {
 		/**
 		 * Disable the button if followRoleIn is enable
 		 */
 		buttons[1] = buttons[1].setDisabled(true);
 		buttons[2] = buttons[2].setDisabled(true);
-	} else if (getConfig(CommandName.followOnlyRole) || getConfig(CommandName.followOnlyChannel)) {
+	} else if (getConfig(CommandName.followOnlyRole, guildID) || getConfig(CommandName.followOnlyChannel, guildID)) {
 		/**
 		 * Disable the button if followRole or followChannel is enable
 		 */
@@ -414,19 +420,19 @@ function reloadButtonMode() {
 }
 
 //eslint-disable-next-line @typescript-eslint/no-explicit-any
-function labelButton(id: CommandName, translation: any) {
+function labelButton(id: CommandName, translation: any, guildID: string) {
 	const idIndex = Object.values(CommandName).indexOf(id);
 	const value = Object.values(CommandName)[idIndex];
 	const translated = translation[value];
 	if (id === CommandName.manualMode) {
-		const truc = [CommandName.channel, CommandName.member, CommandName.thread, CommandName.newMember].map((command) => getConfig(command));
+		const truc = [CommandName.channel, CommandName.member, CommandName.thread, CommandName.newMember].map((command) => getConfig(command, guildID));
 		const manualMode = truc.some((value) => value);
 		return manualMode ? `${i18next.t("common.enable")} : ${translated}` : `${i18next.t("common.disable")} : ${translated}`;
 	}
-	return getConfig(id) ? `${i18next.t("common.disable")} : ${translated}` : `${i18next.t("common.enable")} : ${translated}`;
+	return getConfig(id, guildID) ? `${i18next.t("common.disable")} : ${translated}` : `${i18next.t("common.enable")} : ${translated}`;
 }
 
-function reloadButtonAuto() {
+function reloadButtonAuto(guildID: string) {
 	//eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const translation:any = {
 		[CommandName.manualMode]: i18next.t("configuration.disable.name"),
@@ -437,7 +443,7 @@ function reloadButtonAuto() {
 	};
 	const buttons:ButtonBuilder[] = [];
 	for (const command of [CommandName.manualMode, CommandName.channel, CommandName.member, CommandName.newMember, CommandName.thread].values()) {
-		buttons.push(createButton(command, labelButton(command, translation)));
+		buttons.push(createButton(command, labelButton(command, translation, guildID), guildID));
 	}
 	return [{
 		type: 1,

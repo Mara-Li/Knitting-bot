@@ -36,8 +36,9 @@ export async function checkIfUserNotInTheThread(thread: ThreadChannel, memberToC
  * @param on {"ignore" | "follow"} The settings map to check
  */
 export function checkMemberRole(role: GuildMemberRoleManager, on: "ignore" | "follow") {
-	if (on==="follow" && getConfig(CommandName.followOnlyRole) === "false") return true;
-	const roles = getRole(on);
+	const guild = role.guild.id;
+	if (on === "follow" && !getConfig(CommandName.followOnlyRole, guild)) return true;
+	const roles = getRole(on, guild);
 	const allMemberRoles = role.cache;
 	return allMemberRoles.some(memberRole => roles.some(r => r.id === memberRole.id));
 }
@@ -50,8 +51,9 @@ export function checkMemberRole(role: GuildMemberRoleManager, on: "ignore" | "fo
  * @param on {"ignore" | "follow"} The settings map to check
  */
 export function checkRole(role: Role, on: "ignore" | "follow") {
-	if (on === "follow" && getConfig(CommandName.followOnlyRole) === "false") return true;
-	const allFollowedRoles = getRole(on);
+	const guild = role.guild.id;
+	if (on === "follow" && !getConfig(CommandName.followOnlyRole, guild)) return true;
+	const allFollowedRoles = getRole(on, guild);
 	return allFollowedRoles.some(followedRole => followedRole.id === role.id);
 }
 
@@ -64,12 +66,13 @@ export function checkRole(role: Role, on: "ignore" | "follow") {
  * @param thread {@link ThreadChannel} The thread to check
  */
 export function checkMemberRoleIn(on: "follow" | "ignore", roleManager: GuildMemberRoleManager, thread: ThreadChannel) {
-	if (on === "follow" && !getConfig(CommandName.followOnlyRoleIn)) return true;
+	const guild = thread.guild.id;
+	if (on === "follow" && !getConfig(CommandName.followOnlyRoleIn, guild)) return true;
 	logInDev(`THREAD CHECKED : ${thread.name}`);
 	const roles = roleManager.cache;
 	const parentChannel = thread.parent;
 	const categoryOfParent = parentChannel?.parent;
-	const roleIn = getRoleIn(on);
+	const roleIn = getRoleIn(on, guild);
 	return roles.some(role => {
 		const find = roleIn.find(r => r.role.id === role.id);
 		if (!find) return false;
@@ -91,10 +94,11 @@ export function checkMemberRoleIn(on: "follow" | "ignore", roleManager: GuildMem
  * @param thread {@link ThreadChannel} The thread to check
  */
 export function checkRoleIn(on: "follow"|"ignore", role: Role, thread: ThreadChannel) {
-	if (on === "follow" && !getConfig(CommandName.followOnlyRoleIn)) return true;
+	const guild = thread.guild.id;
+	if (on === "follow" && !getConfig(CommandName.followOnlyRoleIn, guild)) return true;
 	const parentChannel = thread.parent;
 	const categoryOfParent = parentChannel?.parent;
-	const roleIns = getRoleIn(on);
+	const roleIns = getRoleIn(on, guild);
 	const find = roleIns.find(followedRole => followedRole.role.id === role.id);
 	if (!find) return false;
 	return find.channels.some(channel => {
@@ -116,12 +120,13 @@ export function checkRoleIn(on: "follow"|"ignore", role: Role, thread: ThreadCha
 
 export function checkThread(channel: ThreadChannel, on: "ignore" | "follow") {
 	logInDev("checkThread:",`Check if #${channel.name} is ${on}`);
+	const guild = channel.guild.id;
 	const parentChannels = channel.parent;
 	const categoryOfParent = parentChannels?.parent;
-	const followedThread = getMaps(on,TypeName.thread) as ThreadChannel[] || [];
-	const followedChannels = getMaps(on,TypeName.channel) as TextChannel[] || [];
-	const followedCategories = getMaps(on,TypeName.category) as CategoryChannel[] || [];
-	const followedForum = getMaps(on,TypeName.forum) as ForumChannel[] || [];
+	const followedThread = getMaps(on,TypeName.thread, guild) as ThreadChannel[] || [];
+	const followedChannels = getMaps(on,TypeName.channel, guild) as TextChannel[] || [];
+	const followedCategories = getMaps(on,TypeName.category, guild) as CategoryChannel[] || [];
+	const followedForum = getMaps(on,TypeName.forum, guild) as ForumChannel[] || [];
 	return followedChannels.some(followedChannel => followedChannel.id === channel.id) ||
 		followedForum.some(followedForum => followedForum.id === channel.id) ||
 		followedCategories.some(followedCategory => followedCategory.id === categoryOfParent?.id) ||

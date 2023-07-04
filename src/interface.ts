@@ -43,3 +43,44 @@ export interface RoleIn {
 		| TextChannel
 		| ForumChannel)[]
 }
+
+export interface Configuration {
+	[CommandName.channel] : boolean;
+	[CommandName.member] : boolean;
+	[CommandName.newMember] : boolean;
+	[CommandName.thread] : boolean;
+	[CommandName.followOnlyChannel] : boolean;
+	[CommandName.followOnlyRole] : boolean;
+	[CommandName.followOnlyRoleIn] : boolean;
+	[CommandName.language] : string;
+	[key: string] : boolean | string;
+}
+
+export interface IgnoreFollow {
+	[TypeName.thread] : ThreadChannel[];
+	[TypeName.role] : Role[];
+	[TypeName.category] : CategoryChannel[];
+	[TypeName.channel] : TextChannel[];
+	[TypeName.forum] : ForumChannel[];
+	[TypeName.OnlyRoleIn] : RoleIn[];
+}
+
+export const DEFAULT_CONFIGURATION : Configuration = {
+	[CommandName.channel] : true,
+	[CommandName.member] : true,
+	[CommandName.newMember] : true,
+	[CommandName.thread] : true,
+	[CommandName.followOnlyChannel] : false,
+	[CommandName.followOnlyRole] : false,
+	[CommandName.followOnlyRoleIn] :false,
+	[CommandName.language] : "en"
+};
+
+export const DEFAULT_IGNORE_FOLLOW : IgnoreFollow = {
+	[TypeName.thread] : [],
+	[TypeName.role] : [],
+	[TypeName.category] : [],
+	[TypeName.channel] : [],
+	[TypeName.forum] : [],
+	[TypeName.OnlyRoleIn] : []
+};
