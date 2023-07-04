@@ -69,6 +69,7 @@ export async function addUserToThread(thread: ThreadChannel, user: GuildMember) 
 			logInDev(`Add @${user.user.username} to #${thread.name}`);
 		}
 	}
+	logInDev("DONE");
 }
 
 /**
@@ -173,6 +174,7 @@ export async function addRoleAndUserToThread(thread: ThreadChannel) {
 		await message.edit(toPing.map(member => `<@${member.id}>`).join(" "));
 		await message.edit(EMOJI);
 	}
+	logInDev("DONE");
 }
 
 

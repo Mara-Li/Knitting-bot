@@ -7,6 +7,7 @@ import onBotEnter from "./listeners/onBotEnter";
 import onChannelDelete from "./listeners/delete/onChannelDelete";
 import onRoleDeleted from "./listeners/delete/onRoleDeleted";
 import onThreadDeleted from "./listeners/delete/onThreadDeleted";
+import onGuildQuit from "./listeners/onGuildQuit";
 import ready from "./listeners/ready";
 import memberUpdate from "./listeners/updated/memberUpdate";
 import onThreadCreated from "./listeners/created/onThreadCreated";
@@ -26,7 +27,7 @@ const client = new Client({
 
 export const EMOJI = process.env.MESSAGE && process.env.MESSAGE.trim().length > 0 ? process.env.MESSAGE : "🔄";
 export const VERSION = pkg.version ?? "0.0.0";
-export const DESTROY_DATABASE = process.env.DESTROY ?? false;
+export const DESTROY_DATABASE = process.env.DESTROY === "true";
 
 export const INFO_EMOJI = {
 	"github" : process.env.GITHUB_EMOJI ?? "??",
@@ -45,6 +46,7 @@ try {
 	onRoleDeleted(client);
 	onThreadDeleted(client);
 	interactionCreate(client);
+	onGuildQuit(client);
 } catch (error) {
 	console.error(error);
 }

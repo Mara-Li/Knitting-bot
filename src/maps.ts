@@ -302,3 +302,10 @@ export function deleteGuild(id: string) {
 	optionMaps.delete(id);
 	logInDev("Deleted Guild", id);
 }
+
+export function loadDBFirstTime(guild: string) {
+	followOnlyMaps.set(guild, DEFAULT_IGNORE_FOLLOW);
+	ignoreMaps.set(guild, DEFAULT_IGNORE_FOLLOW);
+	optionMaps.set(guild, DEFAULT_CONFIGURATION);
+	logInDev("Loaded DB for the first time", guild);
+}

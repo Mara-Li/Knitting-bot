@@ -1,5 +1,6 @@
 import { Client } from "discord.js";
 import { commands } from "../commands";
+import { loadDBFirstTime } from "../maps";
 import { logInDev } from "../utils";
 
 /**
@@ -19,5 +20,6 @@ export default (client: Client):void => {
 			console.error(error);
 		}
 		logInDev(`${client.user?.username} has been added to ${guild.name}`);
+		loadDBFirstTime(guild.id);
 	});
 };
