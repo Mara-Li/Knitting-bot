@@ -286,7 +286,7 @@ export function destroyDB(): void {
 	followOnlyMaps.deleteAll();
 	ignoreMaps.deleteAll();
 	optionMaps.deleteAll();
-	logInDev("Destroyed DB");
+	console.log("Destroyed DB");
 }
 
 export function exportDB() {
