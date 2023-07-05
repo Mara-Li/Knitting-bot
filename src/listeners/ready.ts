@@ -3,9 +3,11 @@ import { Client, Routes } from "discord.js";
 import dotenv from "dotenv";
 import process from "process";
 import { commands } from "../commands";
-import { destroyDB } from "../maps";
+import { destroyDB, getConfig } from "../maps";
 import { logInDev } from "../utils";
 import { DESTROY_DATABASE, VERSION } from "../index";
+import { CommandName } from "src/interface.js";
+import i18next from "src/i18n/i18next.js";
 dotenv.config();
 
 const rest = new REST().setToken(process.env.DISCORD_TOKEN ?? "0");
@@ -33,6 +35,8 @@ export default (client: Client): void => {
 				{ body: serializeCmds }
 			);
 			logInDev(`Load in ${guild.name} done`);
+			const language = getConfig(CommandName.language, guild.id) ?? "en";
+			i18next.changeLanguage(language);
 		}
 		//destroy all maps
 		if (DESTROY_DATABASE) destroyDB();
