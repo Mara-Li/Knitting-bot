@@ -1,5 +1,4 @@
-import { userMention } from "@discordjs/formatters";
-import { GuildMember, MessageFlags, MessagePayloadOption, Role, ThreadChannel } from "discord.js";
+import { GuildMember, MessageFlags, MessagePayloadOption, Role, ThreadChannel, userMention } from "discord.js";
 import { EMOJI } from "../index";
 import { CommandName } from "../interface";
 import { getConfig } from "../maps";

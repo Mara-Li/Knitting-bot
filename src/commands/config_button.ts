@@ -11,7 +11,6 @@
  * - Thread created {true, false}
  * - Channel updated
  */
-import { SlashCommandBuilder } from "@discordjs/builders";
 import {
 	ActionRowBuilder,
 	ButtonBuilder,
@@ -25,6 +24,7 @@ import {
 	StringSelectMenuBuilder,
 	StringSelectMenuInteraction,
 	StringSelectMenuOptionBuilder,
+	SlashCommandBuilder
 } from "discord.js";
 import { default as i18next, languageValue } from "../i18n/i18next";
 import { CommandName } from "../interface";
