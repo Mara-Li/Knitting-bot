@@ -113,12 +113,16 @@ export async function getRoleToPing(thread: ThreadChannel, roles: Role[]) {
 			if (checkRoleIn("follow",role, thread)) {
 				roleToBeAdded.push(role);
 				logInDev(`Add @${role.name} to #${thread.name}\n **Role Followed in thread**`);
-			} else if (getConfig(CommandName.followOnlyRole, guild) && checkRole(role, "follow")) {
-				roleToBeAdded.push(role);
-				logInDev(`Add @${role.name} to #${thread.name}\n **FollowOnlyRole & Followed**`);
-			} else if (!getConfig(CommandName.followOnlyRole, guild) && !checkRole(role, "ignore") && !checkRoleIn("ignore", role, thread)) {
-				roleToBeAdded.push(role);
-				logInDev(`Add @${role.name} to #${thread.name}\n **Not FollowOnlyRole & Not Ignored && Not ignored for this thread**`);
+			} else if (!getConfig(CommandName.followOnlyRoleIn, guild)) {
+				if (getConfig(CommandName.followOnlyRole, guild) && checkRole(role, "follow")) {
+					roleToBeAdded.push(role);
+					logInDev(`Add @${role.name} to #${thread.name}\n **FollowOnlyRole & Followed**`);
+				} else if (!getConfig(CommandName.followOnlyRoleIn, guild) && !getConfig(CommandName.followOnlyRole, guild) && !checkRole(role, "ignore") && !checkRoleIn("ignore", role, thread)) {
+					roleToBeAdded.push(role);
+					logInDev(`Add @${role.name} to #${thread.name}\n **Not FollowOnlyRole & Not Ignored && Not ignored for this thread**`);
+				}
+			} else {
+				logInDev(`@${role.name} not added to #${thread.name}\n **Role not followed in thread**`);
 			}
 		}
 	}
