@@ -1,5 +1,4 @@
-import { REST } from "@discordjs/rest";
-import { Client, Routes } from "discord.js";
+import { Client, Routes, REST } from "discord.js";
 import dotenv from "dotenv";
 import process from "process";
 import { commands } from "../commands";
@@ -35,7 +34,7 @@ export default (client: Client): void => {
 				{ body: serializeCmds }
 			);
 			logInDev(`Load in ${guild.name} done`);
-			const language = getConfig(CommandName.language, guild.id) ?? "en";
+			const language = getConfig(CommandName.language, guild.id) as string ?? "en";
 			i18next.changeLanguage(language);
 		}
 		//destroy all maps

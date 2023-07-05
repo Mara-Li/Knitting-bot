@@ -1,5 +1,6 @@
-import { channelMention, roleMention } from "@discordjs/formatters";
 import {
+	channelMention, 
+	roleMention,
 	CategoryChannel,
 	CommandInteraction,
 	CommandInteractionOptionResolver,

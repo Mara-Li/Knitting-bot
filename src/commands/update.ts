@@ -1,5 +1,5 @@
-import { channelMention } from "@discordjs/formatters";
 import {
+	channelMention,
 	CommandInteraction,
 	CommandInteractionOptionResolver,
 	EmbedBuilder,
