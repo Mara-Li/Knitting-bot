@@ -5,8 +5,8 @@ import { commands } from "../commands";
 import { destroyDB, getConfig } from "../maps";
 import { logInDev } from "../utils";
 import { DESTROY_DATABASE, VERSION } from "../index";
-import { CommandName } from "src/interface.js";
-import i18next from "src/i18n/i18next.js";
+import { CommandName } from "../interface";
+import i18next from "../i18n/i18next";
 dotenv.config();
 
 const rest = new REST().setToken(process.env.DISCORD_TOKEN ?? "0");

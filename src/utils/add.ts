@@ -81,6 +81,7 @@ export async function getUsersToPing(thread: ThreadChannel, members: GuildMember
 	const usersToBeAdded: GuildMember[] = [];
 	for (const member of members) {
 		if (thread.permissionsFor(member).has("ViewChannel", true) && await checkIfUserNotInTheThread(thread, member)) {
+			
 			if (getConfig(CommandName.followOnlyRoleIn, guild) && checkMemberRoleIn("follow", member.roles, thread)) {
 				usersToBeAdded.push(member);
 				logInDev(`Add @${member.user.username} to #${thread.name} - Rules:\n- Follow Only Role In\n- Role followed in the thread`);
