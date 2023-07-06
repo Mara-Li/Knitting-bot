@@ -2,7 +2,6 @@ import { CategoryChannel, ForumChannel, Role, TextChannel, ThreadChannel } from 
 import Enmap from "enmap";
 import {
 	CommandName,
-	Configuration,
 	DEFAULT_CONFIGURATION,
 	DEFAULT_IGNORE_FOLLOW,
 	IgnoreFollow,
@@ -69,10 +68,8 @@ export function setConfig(
 	value: string 
 	| boolean
 ) {
-	const guildConfig = optionMaps.get(guildID) as Configuration ?? DEFAULT_CONFIGURATION;
 	if (name === CommandName.manualMode) return;
-	guildConfig[name as keyof Configuration] = value;
-	optionMaps.set(guildID, guildConfig);
+	optionMaps.set(guildID, value, name);
 	logInDev(`Set ${name} to ${value}`);
 }
 
@@ -168,13 +165,7 @@ export function setRoleIn(
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function getConfig(name: CommandName, guildID: string): string |boolean {
-	const guildConfig = optionMaps.get(guildID) as Configuration ?? DEFAULT_CONFIGURATION;
-	if (name === CommandName.language) {
-		return guildConfig[name as keyof Configuration] || "en";
-	} else if (name === CommandName.followOnlyRole || name === CommandName.followOnlyChannel || name === CommandName.followOnlyRoleIn) {
-		return guildConfig[name as keyof Configuration]  ?? false;
-	}
-	return guildConfig[name as keyof Configuration] ?? true;
+	return optionMaps.get(guildID, name) as string | boolean;
 }
 
 
