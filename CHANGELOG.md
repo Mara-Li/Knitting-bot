@@ -1,6 +1,38 @@
 
-<a name="v2.0.0"></a>
-## [v2.0.0](https://github.com/Lisandra-dev/Knitting-bot/compare/1.2.4...v2.0.0) (2023-07-04)
+<a name="v2.1.0"></a>
+## [v2.1.0](https://github.com/Lisandra-dev/Knitting-bot/compare/2.0.0...v2.1.0) (2023-07-08)
+
+### Chore
+
+* **VERSION:** update VERSION
+* **dep:** update dependancies
+
+### Feat
+
+* add tslib dependency
+* **info.ts:** add localization for bot information command ([#2](https://github.com/Lisandra-dev/Knitting-bot/issues/2)b5443cc)
+* **maps:** Refactor setting and getting config values
+
+### Fix
+
+* **channelType:** improve channel check logic
+* **language:** lang reset when ready
+* **utils:** fix condition check in getUsersToPing function
+
+### Refactor
+
+* Remove unnecessary imports and fix import order
+* Simplify role adding logic in getRoleToPing function
+* use console log for important command info
+* **commands:** reorganize import statements
+
+### Style
+
+* format imports in follow.ts
+
+
+<a name="2.0.0"></a>
+## [2.0.0](https://github.com/Lisandra-dev/Knitting-bot/compare/1.2.4...2.0.0) (2023-07-04)
 
 ### Chore
 
