@@ -2,11 +2,16 @@ import { ActionRowBuilder, ButtonBuilder, ButtonStyle, CommandInteraction, Embed
 import i18next from "../i18n/i18next";
 import { INFO_EMOJI, VERSION } from "../index";
 
+const en = i18next.getFixedT("en");
+const fr = i18next.getFixedT("fr");
+
 export default {
 	data: new SlashCommandBuilder()
 		.setName("info")
-		.setDescription("Get info about the bot"),
-	
+		.setDescription(en("info.cmds"))
+		.setDescriptionLocalizations({
+			fr: fr("info.cmds"),
+		}),
 	async execute(interaction: CommandInteraction) {
 		const embed = new EmbedBuilder()
 			.setTitle(i18next.t("info.title"))
