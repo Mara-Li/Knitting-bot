@@ -1,5 +1,6 @@
 import {
 	channelMention,
+	ChannelType,
 	CommandInteraction,
 	CommandInteractionOptionResolver,
 	EmbedBuilder,
@@ -51,6 +52,7 @@ export default {
 							fr: fr("commands.updateSpecificThread.option.description"),
 						})
 						.setRequired(false)
+						.addChannelTypes(ChannelType.PrivateThread, ChannelType.PublicThread)
 				)
 		)
 		.addSubcommand((subcommand) =>

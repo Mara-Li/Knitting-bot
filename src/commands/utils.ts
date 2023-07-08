@@ -2,7 +2,6 @@ import {
 	channelMention, 
 	roleMention,
 	CategoryChannel,
-	ChannelType,
 	CommandInteraction,
 	ForumChannel,
 	Role,
@@ -12,7 +11,7 @@ import {
 import { CommandName, RoleIn } from "../interface";
 import { getConfig, getRoleIn, setRoleIn } from "../maps";
 import { default as i18next } from "../i18n/i18next";
-import { logInDev } from "../utils";
+
 const en = i18next.getFixedT("en");
 
 /**
@@ -63,16 +62,6 @@ export async function interactionRoleInChannel(interaction: CommandInteraction, 
 			content: i18next.t("roleIn.noLonger.any", {mention: mention, on: translationOn}) as string,
 		});
 		return;
-	}
-	const channelType = channel.channel?.type;
-	logInDev("channelType", channelType as ChannelType);
-	const validChannelTypes : ChannelType[] = [ChannelType.GuildCategory, ChannelType.GuildText, ChannelType.PublicThread, ChannelType.PrivateThread, ChannelType.GuildForum];
-	logInDev(validChannelTypes.includes(channelType as number ?? 99));
-	if (!validChannelTypes.includes(channelType as number ?? 99)) {
-		await interaction.reply({
-			content: i18next.t("roleIn.error.support") as string,
-			ephemeral: true,
-		});
 	}
 	/**
 	 * Get the RoleIn interface for the given role and channel

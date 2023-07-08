@@ -1,7 +1,9 @@
 import {
 	CategoryChannel,
+	ChannelType,
 	Collection,
 	ForumChannel,
+	GuildBasedChannel,
 	GuildMember,
 	GuildMemberRoleManager,
 	Role,
@@ -14,10 +16,24 @@ import { getConfig, getMaps, getRole, getRoleIn } from "../maps";
 import { logInDev } from "./index";
 
 /**
+ * Verify that the channel type is :
+ * - GuildCategory
+ * - GuildText
+ * - PublicThread
+ * - PrivateThread
+ * @param channel {GuildBasedChannel} The channel to check
+ * @returns {boolean} true if the channel is valid
+ */
+export function validateChannelType(channel: GuildBasedChannel) {
+	const validChannelTypes : ChannelType[] = [ChannelType.GuildCategory, ChannelType.GuildText, ChannelType.PublicThread, ChannelType.PrivateThread, ChannelType.GuildForum];
+	return validChannelTypes.includes(channel.type);
+}
+
+/**
  * Check if a user is not in the thread
  * Return true if the user is not in the thread
- * @param {ThreadChannel} thread The thread to check
- * @param {GuildMember} memberToCheck The member to check
+ * @param {ThreadChannel} thread - The thread to check
+ * @param {GuildMember} memberToCheck - The member to check
  */
 export async function checkIfUserNotInTheThread(thread: ThreadChannel, memberToCheck: GuildMember) {
 	const members = await thread.members.fetch();

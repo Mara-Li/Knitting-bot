@@ -3,7 +3,7 @@ import { getConfig } from "../../maps";
 import { logInDev } from "../../utils";
 import { CommandName } from "../../interface";
 import { addRoleAndUserToThread } from "../../utils/add";
-import { checkThread } from "../../utils/data_check";
+import { checkThread, validateChannelType } from "../../utils/data_check";
 
 /**
  * @param {Client} client - Discord.js Client
@@ -22,9 +22,8 @@ export default (client: Client): void => {
 		if (getConfig(CommandName.channel, guild) === false) return;
 		logInDev(`Channel #${getChannelName(oldChannel.id, client)} updated`);
 		logInDev("Channel type :", oldChannel.type, newChannel.type);
-		const validChannelTypes : ChannelType[] = [ChannelType.GuildCategory, ChannelType.GuildText, ChannelType.PublicThread, ChannelType.PrivateThread, ChannelType.GuildForum];
-		if (!validChannelTypes.includes(oldChannel.type)
-			|| !validChannelTypes.includes(newChannel.type)
+		if (!validateChannelType(oldChannel)
+			|| !validateChannelType(newChannel)
 			|| oldChannel.permissionOverwrites.cache === newChannel.permissionOverwrites.cache) {
 			logInDev("Channel is not a text channel or permission are not changed");
 			return;

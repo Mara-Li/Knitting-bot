@@ -11,6 +11,7 @@ import {
 	SlashCommandBuilder,
 	TextChannel,
 	ThreadChannel,
+    ChannelType,
 } from "discord.js";
 import { default as i18next } from "../i18n/i18next";
 import { CommandName, RoleIn, TypeName } from "../interface";
@@ -52,6 +53,8 @@ export default {
 						.setDescriptionLocalizations({
 							fr: fr("follow.thread.option.description"),
 						})
+						.addChannelTypes(ChannelType.GuildCategory, ChannelType.GuildText, ChannelType.PublicThread, ChannelType.PrivateThread, ChannelType.GuildForum)
+
 				)
 		)
 		.addSubcommand((subcommand) =>
@@ -121,6 +124,7 @@ export default {
 						.setDescriptionLocalizations({
 							fr: fr("follow.roleIn.option.channel"),
 						})
+						.addChannelTypes(ChannelType.GuildCategory, ChannelType.GuildText, ChannelType.PublicThread, ChannelType.PrivateThread, ChannelType.GuildForum)
 						.setRequired(false)
 				)
 		),
