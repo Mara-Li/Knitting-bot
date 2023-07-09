@@ -165,15 +165,32 @@ export function setRoleIn(
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function getConfig(name: CommandName, guildID: string): string |boolean {
-	return optionMaps.get(guildID, name) as string | boolean;
+	try {
+		return optionMaps.get(guildID, name) as string | boolean;
+	} catch (e) {
+		switch (name) {
+		case CommandName.language:
+			return optionMaps.ensure(guildID, "en", name) as string;
+		case CommandName.manualMode:
+			return optionMaps.ensure(guildID, false, name) as boolean;
+		case CommandName.followOnlyChannel:
+			return optionMaps.ensure(guildID, false, name) as boolean;
+		case CommandName.followOnlyRole:
+			return optionMaps.ensure(guildID, false, name) as boolean;
+		case CommandName.followOnlyRoleIn:
+			return optionMaps.ensure(guildID, false, name) as boolean;
+		default:
+			return optionMaps.ensure(guildID, true, name) as boolean;
+		}
+	}
 }
 
 
 
 export function getRoleIn(ignore: "follow" | "ignore", guildID: string):
 	RoleIn[] {
-	const ignoreConfig = ignoreMaps.get(guildID) as IgnoreFollow ?? DEFAULT_IGNORE_FOLLOW;
-	const followConfig = followOnlyMaps.get(guildID) as IgnoreFollow ?? DEFAULT_IGNORE_FOLLOW;
+	const ignoreConfig = ignoreMaps.ensure(guildID, DEFAULT_IGNORE_FOLLOW) as IgnoreFollow;
+	const followConfig = followOnlyMaps.ensure(guildID, DEFAULT_IGNORE_FOLLOW) as IgnoreFollow;
 
 	if (!ignoreConfig[TypeName.OnlyRoleIn] || !followConfig[TypeName.OnlyRoleIn]) {
 		setRoleIn(ignore, guildID, []);
@@ -188,8 +205,8 @@ export function getRoleIn(ignore: "follow" | "ignore", guildID: string):
 
 export function getRole(ignore: "follow" | "ignore", guildID: string):
 	Role[] {
-	const ignoreConfig = ignoreMaps.get(guildID) as IgnoreFollow ?? DEFAULT_IGNORE_FOLLOW;
-	const followConfig = followOnlyMaps.get(guildID) as IgnoreFollow ?? DEFAULT_IGNORE_FOLLOW;
+	const ignoreConfig = ignoreMaps.ensure(guildID, DEFAULT_IGNORE_FOLLOW) as IgnoreFollow;
+	const followConfig = followOnlyMaps.ensure(guildID, DEFAULT_IGNORE_FOLLOW) as IgnoreFollow;
 
 	if (!ignoreConfig[TypeName.role] || !followConfig[TypeName.role]) {
 		setRole(ignore, guildID, []);
@@ -226,7 +243,7 @@ function getFollow(follow: TypeName, guildID: string):
 	| CategoryChannel[]
 	| TextChannel[]
 	| ForumChannel[] {
-	const followConfig = followOnlyMaps.get(guildID) as IgnoreFollow ?? DEFAULT_IGNORE_FOLLOW;
+	const followConfig = followOnlyMaps.ensure(guildID, DEFAULT_IGNORE_FOLLOW) as IgnoreFollow;
 	if (!followConfig[follow]) {
 		setFollow(follow, guildID, []);
 	}
@@ -255,7 +272,7 @@ function getIgnored(ignore: TypeName, guildID: string):
 	| CategoryChannel[]
 	| TextChannel[]
 	| ForumChannel[]{
-	const ignoreConfig = ignoreMaps.get(guildID) as IgnoreFollow ?? DEFAULT_IGNORE_FOLLOW;
+	const ignoreConfig = ignoreMaps.ensure(guildID, DEFAULT_IGNORE_FOLLOW) as IgnoreFollow;
 	if (!ignoreConfig[ignore]) {
 		setIgnore(ignore, guildID, []);
 	}
