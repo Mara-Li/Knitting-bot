@@ -32,6 +32,7 @@ export default (client: Client): void => {
 			});
 			//add all commands
 			await rest.put(
+				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 				//@ts-ignore
 				Routes.applicationGuildCommands(config?.CLIENT_ID, guild.id),
 				{ body: serializeCmds }
