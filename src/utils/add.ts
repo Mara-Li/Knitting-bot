@@ -109,6 +109,7 @@ export async function getRoleToPing(thread: ThreadChannel, roles: Role[]) {
 		//check if all members of the role are in the thread
 		const membersInTheThread = await thread.members.fetch();
 		const membersOfTheRoleNotInTheThread = role.members.filter(member => !membersInTheThread.has(member.id));
+		logInDev(`${role.name} can be view ?`, thread.permissionsFor(role).has("ViewChannel", true));
 		if (role.name !== "@everyone" && thread.permissionsFor(role).has("ViewChannel", true) && role.members.size >0 && membersOfTheRoleNotInTheThread.size > 0) {
 			if (checkRoleIn("follow",role, thread)) {
 				roleToBeAdded.push(role);
@@ -138,15 +139,9 @@ export async function getRoleToPing(thread: ThreadChannel, roles: Role[]) {
 export async function addRoleAndUserToThread(thread: ThreadChannel) {
 	const members = await thread.guild.members.fetch();
 	const toPing: GuildMember[] = [];
-	const rolesWithAccess: Role[] = thread
-		.guild.roles.cache
-		.filter((role) => {
-			const permissions = role.permissions.toArray();
-			return permissions.includes("ViewChannel");
-		})
-		.toJSON();
-	
-
+	const rolesWithAccess: Role[] = thread.guild.roles.cache.toJSON();
+	logInDev(rolesWithAccess.map(role => role.name));
+	logInDev(`Roles with access to #${thread.name} : ${rolesWithAccess.length}`);
 	if (rolesWithAccess.length > 0) {
 		getRoleToPing(thread, rolesWithAccess).then(roles => {
 			roles.forEach(role => {
@@ -168,6 +163,7 @@ export async function addRoleAndUserToThread(thread: ThreadChannel) {
 			toPing.push(...users);
 		});
 	}
+	logInDev(toPing.map(member => member.user.username));
 	if (toPing.length > 0) {
 		const messagePayload: MessagePayloadOption = {
 			content: EMOJI,

@@ -84,7 +84,6 @@ export function checkRole(role: Role, on: "ignore" | "follow") {
 export function checkMemberRoleIn(on: "follow" | "ignore", roleManager: GuildMemberRoleManager, thread: ThreadChannel) {
 	const guild = thread.guild.id;
 	if (on === "follow" && !getConfig(CommandName.followOnlyRoleIn, guild)) return true;
-	logInDev(`THREAD CHECKED : ${thread.name}`);
 	const roles = roleManager.cache;
 	const parentChannel = thread.parent;
 	const categoryOfParent = parentChannel?.parent;
@@ -116,6 +115,7 @@ export function checkRoleIn(on: "follow"|"ignore", role: Role, thread: ThreadCha
 	const categoryOfParent = parentChannel?.parent;
 	const roleIns = getRoleIn(on, guild);
 	const find = roleIns.find(followedRole => followedRole.role.id === role.id);
+	logInDev("checkRoleIn:",`Check if ${role.name} is ${on} in #${thread.name}`);
 	if (!find) return false;
 	return find.channels.some(channel => {
 		if (channel.id === thread.id) return true;

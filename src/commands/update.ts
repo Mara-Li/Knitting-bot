@@ -159,12 +159,15 @@ async function updateThread(interaction: CommandInteraction) {
 		});
 		return;
 	}
-	await interaction.reply({
-		content: i18next.t("commands.success", { channel: mention }) as string,
+	if (!interaction.guild) return;
+	await interaction.deferReply({
 		ephemeral: true,
 	});
-	if (!interaction.guild) return;
 	await addRoleAndUserToThread(channel);
+	await interaction.editReply({
+		content: i18next.t("commands.success", { channel: mention }) as string,
+	});
+
 }
 
 /**
