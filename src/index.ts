@@ -14,7 +14,10 @@ import onThreadCreated from "./listeners/created/onThreadCreated";
 import onChannelUpdate from "./listeners/updated/onChannelUpdate";
 import onNewMember from "./listeners/created/onNewMember";
 
-dotenv.config();
+let config = dotenv.config({ path: ".env" });
+if (process.env.ENV === "production") {
+	config = dotenv.config({ path: ".env.prod" });
+}
 
 const client = new Client({
 	intents: [
@@ -50,5 +53,5 @@ try {
 } catch (error) {
 	console.error(error);
 }
-client.login(process.env.DISCORD_TOKEN);
+client.login(config.parsed?.DISCORD_TOKEN);
 

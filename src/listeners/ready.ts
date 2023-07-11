@@ -7,9 +7,11 @@ import { logInDev } from "../utils";
 import { DESTROY_DATABASE, VERSION } from "../index";
 import { CommandName } from "../interface";
 import i18next from "../i18n/i18next";
-dotenv.config();
-
-const rest = new REST().setToken(process.env.DISCORD_TOKEN ?? "0");
+let config = dotenv.config({ path: ".env" }).parsed;
+if (process.env.ENV === "production") {
+	config = dotenv.config({ path: ".env.prod" }).parsed;
+}
+const rest = new REST().setToken(config?.DISCORD_TOKEN ?? "0");
 
 export default (client: Client): void => {
 	client.on("ready", async () => {
@@ -30,7 +32,8 @@ export default (client: Client): void => {
 			});
 			//add all commands
 			await rest.put(
-				Routes.applicationGuildCommands(process.env.CLIENT_ID, guild.id),
+				//@ts-ignore
+				Routes.applicationGuildCommands(config?.CLIENT_ID, guild.id),
 				{ body: serializeCmds }
 			);
 			logInDev(`Load in ${guild.name} done`);
