@@ -5,13 +5,17 @@ import {
 } from "../../utils";
 import { CommandName } from "../../interface";
 import { addUserToThread } from "../../utils/add";
-import { checkMemberRole, checkMemberRoleIn, checkThread } from "../../utils/data_check";
+import { checkMemberRole, checkMemberRoleIn, checkRoleIn, checkThread } from "../../utils/data_check";
 
 export default (client: Client): void => {
 	client.on("guildMemberUpdate", async (oldMember, newMember) => {
 		//trigger only on role change
 		try {
 			if (oldMember.roles.cache.size === newMember.roles.cache.size) return;
+			/** Search updated roles */
+			const oldRoles = oldMember.roles.cache;
+			const newRoles = newMember.roles.cache;
+			const updatedRoles = newRoles.filter(role => !oldRoles.has(role.id));
 			const guildID = newMember.guild.id;
 			if (getConfig(CommandName.member, guildID) === false) return;
 			logInDev(`${oldMember.user.username} has been updated!`);
@@ -19,9 +23,16 @@ export default (client: Client): void => {
 			const channels = guild.channels.cache.filter(channel => channel.isThread());
 			for (const channel of channels.values()) {
 				const threadChannel = channel as ThreadChannel;
-				logInDev("Role member is followed :", checkMemberRole(newMember.roles, "follow"));
-				logInDev("Role member is ignored :", checkMemberRole(newMember.roles, "ignore"));
-				logInDev("Role member is in thread followed :", checkMemberRoleIn("follow",newMember.roles, threadChannel));
+				const updatedRoleAutorized = updatedRoles.filter(role => checkRoleIn("follow", role, threadChannel));
+				const ignoredUpdatedRole = updatedRoles.filter(role => checkRoleIn("ignore", role, threadChannel));
+				logInDev(`Updated Role FOLLOWED IN ROLE IN:`, updatedRoleAutorized.map(role => role.name), "in", threadChannel.name, "UPDATED role IGNORED in ROLE IN:", ignoredUpdatedRole.map(role => role.name));
+				if (updatedRoleAutorized.size === 0) return;
+				if (ignoredUpdatedRole.size > 0) return;
+				logInDev(
+					"Role member is followed :", checkMemberRole(newMember.roles, "follow"),
+					"Role member is ignored :", checkMemberRole(newMember.roles, "ignore"),
+					"Role member is in thread followed :", checkMemberRoleIn("follow",newMember.roles, threadChannel)
+				);
 				
 				/**
 				 * If checkMemberRoleInFollowed is true, ignore the two others condition and add the member to the thread
