@@ -1,6 +1,7 @@
 import { Client, ThreadChannel } from "discord.js";
 import { getConfig } from "../../maps";
 import {
+	discordLogs,
 	logInDev,
 } from "../../utils";
 import { CommandName } from "../../interface";
@@ -19,15 +20,24 @@ export default (client: Client): void => {
 			const guildID = newMember.guild.id;
 			if (getConfig(CommandName.member, guildID) === false) return;
 			logInDev(`${oldMember.user.username} has been updated!`);
+			discordLogs(guildID, client, `${oldMember.user.username} has been updated!`);
 			const guild = newMember.guild;
 			const channels = guild.channels.cache.filter(channel => channel.isThread());
 			for (const channel of channels.values()) {
 				const threadChannel = channel as ThreadChannel;
-				const updatedRoleAutorized = updatedRoles.filter(role => checkRoleIn("follow", role, threadChannel));
+				const updatedRoleAllowed = updatedRoles.filter(role => checkRoleIn("follow", role, threadChannel));
 				const ignoredUpdatedRole = updatedRoles.filter(role => checkRoleIn("ignore", role, threadChannel));
-				logInDev(`Updated Role FOLLOWED IN ROLE IN:`, updatedRoleAutorized.map(role => role.name), "in", threadChannel.name, "UPDATED role IGNORED in ROLE IN:", ignoredUpdatedRole.map(role => role.name));
-				if (updatedRoleAutorized.size === 0) return;
-				if (ignoredUpdatedRole.size > 0) return;
+				logInDev("Updated Role FOLLOWED IN ROLE IN:", updatedRoleAllowed.map(role => role.name), "in", threadChannel.name, "UPDATED role IGNORED in ROLE IN:", ignoredUpdatedRole.map(role => role.name));
+				if (updatedRoleAllowed.size === 0) {
+					logInDev("No role updated in", threadChannel.name);
+					discordLogs(guildID, client, `No role allowed for ${threadChannel.name}`);
+					return;
+				}
+				if (ignoredUpdatedRole.size > 0) {
+					logInDev("Role ignored for", threadChannel.name);
+					discordLogs(guildID, client, `The updated roles of ${oldMember.user.username} are ignored for ${threadChannel.name}.`);
+					return;
+				}
 				logInDev(
 					"Role member is followed :", checkMemberRole(newMember.roles, "follow"),
 					"Role member is ignored :", checkMemberRole(newMember.roles, "ignore"),

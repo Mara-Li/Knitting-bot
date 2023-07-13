@@ -63,7 +63,7 @@ const followOnlyMaps = new Enmap({
  * @param {string | boolean} value
  */
 export function setConfig(
-	name: CommandName,
+	name: CommandName | string,
 	guildID: string,
 	value: string 
 	| boolean
@@ -164,8 +164,11 @@ export function setRoleIn(
  * @param guildID
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function getConfig(name: CommandName, guildID: string): string |boolean {
+export function getConfig(name: CommandName, guildID: string, channel?: boolean): string |boolean | null {
 	try {
+		if (channel) {
+			return optionMaps.get(guildID, `${name}.channel`);
+		}
 		return optionMaps.get(guildID, name) as string | boolean;
 	} catch (e) {
 		switch (name) {
@@ -178,6 +181,11 @@ export function getConfig(name: CommandName, guildID: string): string |boolean {
 		case CommandName.followOnlyRole:
 			return optionMaps.ensure(guildID, false, name) as boolean;
 		case CommandName.followOnlyRoleIn:
+			return optionMaps.ensure(guildID, false, name) as boolean;
+		case CommandName.log:
+			if (channel) {
+				return optionMaps.ensure(guildID, "", `${name}.channel`) as string;
+			}
 			return optionMaps.ensure(guildID, false, name) as boolean;
 		default:
 			return optionMaps.ensure(guildID, true, name) as boolean;

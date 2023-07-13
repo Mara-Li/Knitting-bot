@@ -10,7 +10,7 @@ import {
 	checkRoleIn,
 	getMemberPermission,
 } from "./data_check";
-import { logInDev } from "./index";
+import { discordLogs, logInDev } from "./index";
 
 /**
  * Add a user to a thread, with verification the permission.
@@ -52,6 +52,7 @@ export async function addUserToThread(thread: ThreadChannel, user: GuildMember) 
 				await message.edit(EMOJI);
 			}
 			logInDev(`Add @${user.user.username} to #${thread.name}`);
+			discordLogs(guild, thread.client, `Add @${user.user.username} to #${thread.name}`);
 		} else if (getConfig(CommandName.followOnlyRole, guild) && checkMemberRole(user.roles, "follow")) {
 			if (message) {
 				await message.edit(userMention(user.id));
@@ -66,6 +67,7 @@ export async function addUserToThread(thread: ThreadChannel, user: GuildMember) 
 				await message.edit(EMOJI);
 			}
 			logInDev(`Add @${user.user.username} to #${thread.name}`);
+			discordLogs(guild, thread.client, `Add @${user.user.username} to #${thread.name}`);
 		}
 	}
 	logInDev("DONE");
@@ -173,6 +175,7 @@ export async function addRoleAndUserToThread(thread: ThreadChannel) {
 		const message = fetchedMessage.filter(m => m.author.id === thread.client.user.id).first() ?? await thread.send(messagePayload);
 		await message.edit(toPing.map(member => `<@${member.id}>`).join(" "));
 		await message.edit(EMOJI);
+		discordLogs(thread.guild.id, thread.client, `Add ${toPing.length} members to #${thread.name}:\n- ${toPing.map(member => member.user.username).join("\n-")}`);
 	}
 	logInDev("DONE");
 }

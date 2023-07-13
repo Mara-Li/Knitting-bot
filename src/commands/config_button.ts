@@ -24,12 +24,15 @@ import {
 	StringSelectMenuBuilder,
 	StringSelectMenuInteraction,
 	StringSelectMenuOptionBuilder,
-	SlashCommandBuilder
+	SlashCommandBuilder,
+	ChannelType,
+	channelMention
 } from "discord.js";
 import { default as i18next, languageValue } from "../i18n/i18next";
 import { CommandName } from "../interface";
 import { getConfig, setConfig } from "../maps";
 import { logInDev } from "../utils";
+import {dedent} from "ts-dedent";
 
 const fr = i18next.getFixedT("fr");
 const en = i18next.getFixedT("en");
@@ -46,17 +49,50 @@ export default {
 			"fr": fr("configuration.main.description")
 		})
 		.setDefaultMemberPermissions(PermissionFlagsBits.ManageThreads)
-		.addSubcommand(subcommand =>
-			subcommand
-				.setName(en("configuration.menu.language.title").toLowerCase())
+		.addSubcommandGroup(subcommandGroup =>
+			subcommandGroup
+				.setName(en("configuration.menu.general.name").toLowerCase())
 				.setNameLocalizations({
-					"fr": fr("configuration.menu.language.title").toLowerCase()
+					"fr": fr("configuration.menu.general.name").toLowerCase()
 				})
-				.setDescription(en("configuration.menu.language.desc"))
-				.setDescriptionLocalizations({
-					"fr": fr("configuration.menu.language.desc")
-				})
+				.setDescription(en("configuration.menu.general.desc"))
+				.addSubcommand(subcommand =>
+					subcommand
+						.setName(en("configuration.menu.general.display.title").toLowerCase())
+						.setNameLocalizations({
+							"fr": fr("configuration.menu.general.display.title").toLowerCase()
+						})
+						.setDescription(en("configuration.menu.general.display.desc"))
+						.setDescriptionLocalizations({
+							"fr": fr("configuration.menu.general.display.desc")
+						})
+				)
+				.addSubcommand(subcommand =>
+					subcommand
+						.setName(en("configuration.menu.log.channel.title").toLowerCase())
+						.setNameLocalizations({
+							"fr": fr("configuration.menu.log.channel.title").toLowerCase()
+						})
+						.setDescription(en("configuration.menu.log.desc"))
+						.setDescriptionLocalizations({
+							"fr": fr("configuration.menu.log.desc")
+						})
+						.addChannelOption(option =>
+							option
+								.setName(en("common.channel").toLowerCase())
+								.setNameLocalizations({
+									"fr": fr("common.channel").toLowerCase()
+								})
+								.setDescription(en("configuration.menu.log.channel.desc"))
+								.setDescriptionLocalizations({
+									"fr": fr("configuration.menu.log.channel.desc")
+								})
+								.setRequired(true)
+								.addChannelTypes(ChannelType.GuildText, ChannelType.AnnouncementThread, ChannelType.PublicThread, ChannelType.PrivateThread, ChannelType.GuildAnnouncement)
+						)
+				)
 		)
+			
 		.addSubcommand(subcommand =>
 			subcommand
 				.setName(en("commands.help.name").toLowerCase())
@@ -94,7 +130,17 @@ export default {
 		if (!interaction.guild) return;
 		const options = interaction.options as CommandInteractionOptionResolver;
 		const commands = options.getSubcommand();
-		if (en("configuration.menu.mode.title").toLowerCase() === commands) {
+		const group = options.getSubcommandGroup();
+		logInDev("configuration", commands, group);
+		if (en("configuration.menu.log.channel.title").toLowerCase() === commands) {
+			const channel = options.getChannel(en("common.channel").toLowerCase(), true);
+			if (!channel) return;
+			setConfig(`${CommandName.log}.channelID`, interaction.guild.id, channel.id);
+			interaction.reply({
+				content: (i18next.t("configuration.menu.log.channel.success", { channel: channelMention(channel.id) }) as string),
+				ephemeral: true
+			});
+		} else if (en("configuration.menu.mode.title").toLowerCase() === commands) {
 			// eslint-disable-next-line no-case-declarations
 			const row = reloadButtonMode(interaction.guild.id);
 			// eslint-disable-next-line no-case-declarations
@@ -114,8 +160,8 @@ export default {
 					embeds: [embeds],
 					components: rows
 				});
-		} else if (en("configuration.language.name").toLowerCase() === commands) {
-			const rows = reloadButtonLanguage();
+		} else if ( group === "general" && en("configuration.menu.general.display.title").toLowerCase() === commands) {
+			const rows = reloadButtonLanguage(interaction.guild.id);
 			const embeds = displayLanguageMenu(interaction.guild.id);
 			interaction.reply(
 				{
@@ -165,7 +211,7 @@ export default {
  * Display Mode menu as an embed
  * @returns {@link EmbedBuilder}
  */
-function displayModeMenu(guildID: string) {
+function displayModeMenu(guildID: string) : EmbedBuilder {
 	return new EmbedBuilder()
 		.setColor("#0099ff")
 		.setTitle(i18next.t("configuration.menu.mode.title"))
@@ -191,7 +237,7 @@ function displayModeMenu(guildID: string) {
 			{ name: "\u200A", value: "\u200A", inline: true });
 }
 
-function autoUpdateMenu(guildID: string) {
+function autoUpdateMenu(guildID: string): EmbedBuilder {
 	return new EmbedBuilder()
 		.setColor("#0099ff")
 		.setTitle(i18next.t("configuration.menu.autoUpdate.title"))
@@ -223,10 +269,26 @@ function autoUpdateMenu(guildID: string) {
 }
 
 function displayLanguageMenu(guildID: string) {
+	const activatedLog = getConfig(CommandName.log, guildID) as boolean;
+	let msg = i18next.t("configuration.log.display", { channel: i18next.t("common.disabled")});
+	let logChannel :null | boolean | string = i18next.t("common.none");
+	if (activatedLog) {
+		logChannel = getConfig(CommandName.log, guildID, true);
+		logInDev(logChannel);
+		if (logChannel !== undefined) {
+			logChannel = channelMention(logChannel as string);
+		} else {
+			logChannel = i18next.t("common.none");
+		}
+		msg = i18next.t("configuration.log.display", { channel: logChannel });
+	}
+	const desc = dedent(`
+	- ${languageValue[getConfig(CommandName.language, guildID) as string]}
+	- ${msg}`);
 	return new EmbedBuilder()
 		.setColor("#0099ff")
-		.setTitle(i18next.t("configuration.menu.language.desc"))
-		.setDescription(languageValue[getConfig(CommandName.language, guildID) as string]);
+		.setTitle(i18next.t("configuration.general"))
+		.setDescription(desc);
 }
 
 /**
@@ -288,7 +350,7 @@ async function updateConfig(command: CommandName, interaction: ButtonInteraction
 		setConfig(command, interaction.guild.id, newConfig);
 		const embed = displayLanguageMenu(interaction.guild.id);
 		//reload buttons
-		const rows = reloadButtonLanguage();
+		const rows = reloadButtonLanguage(interaction.guild.id);
 		interaction.editReply({ embeds: [embed], components: rows });
 	} else if (
 		command === CommandName.followOnlyRoleIn
@@ -329,7 +391,7 @@ async function updateConfig(command: CommandName, interaction: ButtonInteraction
 			rows = reloadButtonAuto(interaction.guild.id);
 			embed = autoUpdateMenu(interaction.guild.id);
 		} else {
-			rows = reloadButtonLanguage();
+			rows = reloadButtonLanguage(interaction.guild.id);
 			embed = displayLanguageMenu(interaction.guild.id);
 		}
 		interaction.editReply({ embeds: [embed], components: rows });
@@ -371,13 +433,16 @@ function createButton(command: CommandName, label: string, guildID: string) {
 		.setCustomId(command)
 		.setStyle(style)
 		.setLabel(label);
-	
 }
 
-function reloadButtonLanguage() {
+function reloadButtonLanguage(guildID: string) {
 	return [{
 		type: 1,
 		components: [createLanguageButton()]
+	},
+	{
+		type: 1,
+		components: [createButton(CommandName.log, i18next.t("configuration.log.name"), guildID)]
 	}];
 }
 
@@ -454,4 +519,5 @@ function reloadButtonAuto(guildID: string) {
 		components: buttons.slice(1, buttons.length)
 	}];
 }
+
 

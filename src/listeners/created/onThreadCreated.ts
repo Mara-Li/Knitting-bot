@@ -1,7 +1,7 @@
 import { ChannelType, Client, ThreadChannel } from "discord.js";
 import { getConfig } from "../../maps";
 import { CommandName } from "../../interface";
-import { logInDev } from "../../utils";
+import { discordLogs, logInDev } from "../../utils";
 import { addRoleAndUserToThread } from "../../utils/add";
 import { checkThread } from "../../utils/data_check";
 
@@ -18,6 +18,7 @@ export default (client: Client): void => {
 		if (thread.type !== ChannelType.PublicThread) return;
 		if (getConfig(CommandName.thread, guild) === false) return;
 		logInDev(`Thread ${thread.name} created!`);
+		discordLogs(guild, client, `Thread ${thread.name} created!`);
 		/** automatically add the bot to the thread */
 		await thread.join();
 		if (!getConfig(CommandName.followOnlyChannel, guild)) {

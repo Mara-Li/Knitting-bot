@@ -1,6 +1,6 @@
 import { ChannelType, Client, Snowflake, TextChannel } from "discord.js";
 import { getConfig } from "../../maps";
-import { logInDev } from "../../utils";
+import { discordLogs, logInDev } from "../../utils";
 import { CommandName } from "../../interface";
 import { addRoleAndUserToThread } from "../../utils/add";
 import { checkThread, validateChannelType } from "../../utils/data_check";
@@ -30,6 +30,7 @@ export default (client: Client): void => {
 		}
 		//getConfig all threads of this channel
 		logInDev(`Updating threads of ${newChannel.name}`);
+		discordLogs(guild, client, `Updating threads of ${newChannel.name}`);
 		const isCategory = newChannel.type === ChannelType.GuildCategory;
 		if (isCategory) {
 			//get all threads of the channels in the category
