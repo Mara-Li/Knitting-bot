@@ -21,7 +21,6 @@ export default (client: Client): void => {
 		
 		console.info(`${client.user.username} is online; v.${VERSION}`);
 		const serializeCmds = commands.map( (command) => {
-			console.log(command.data);
 			return command.data.toJSON();
 		});
 		for (const guild of client.guilds.cache.values()) {
