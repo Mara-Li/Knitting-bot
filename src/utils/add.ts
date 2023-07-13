@@ -38,6 +38,7 @@ export async function addUserToThread(thread: ThreadChannel, user: GuildMember) 
 				await message.edit(userMention(user.id));
 				await message.edit(EMOJI);
 			}
+			discordLogs(guild, thread.client, `Add @${user.user.username} to #${thread.name}`);
 		} else if (!checkMemberRole(user.roles, "ignore")) {
 			if (message) {
 				await message.edit(userMention(user.id));

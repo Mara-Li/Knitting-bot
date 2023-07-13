@@ -1,7 +1,7 @@
 import { Client, TextChannel, ThreadChannel } from "discord.js";
 import process from "process";
-import { CommandName } from "src/interface.js";
-import { getConfig } from "src/maps.js";
+import { CommandName } from "../interface";
+import { getConfig } from "../maps";
 
 export function logInDev(...text: unknown[]) {
 	const time= new Date();

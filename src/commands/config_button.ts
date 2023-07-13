@@ -135,7 +135,7 @@ export default {
 		if (en("configuration.menu.log.channel.title").toLowerCase() === commands) {
 			const channel = options.getChannel(en("common.channel").toLowerCase(), true);
 			if (!channel) return;
-			setConfig(`${CommandName.log}.channelID`, interaction.guild.id, channel.id);
+			setConfig(`${CommandName.log}.channel`, interaction.guild.id, channel.id);
 			interaction.reply({
 				content: (i18next.t("configuration.menu.log.channel.success", { channel: channelMention(channel.id) }) as string),
 				ephemeral: true
