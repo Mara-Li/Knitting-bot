@@ -2,17 +2,17 @@ import { Client, GatewayIntentBits, Partials } from "discord.js";
 import dotenv from "dotenv";
 import * as process from "process";
 import * as pkg from "../package.json";
-import interactionCreate from "./listeners/interactionCreate";
-import onBotEnter from "./listeners/onBotEnter";
-import onChannelDelete from "./listeners/delete/onChannelDelete";
-import onRoleDeleted from "./listeners/delete/onRoleDeleted";
-import onThreadDeleted from "./listeners/delete/onThreadDeleted";
-import onGuildQuit from "./listeners/onGuildQuit";
-import ready from "./listeners/ready";
-import memberUpdate from "./listeners/updated/memberUpdate";
-import onThreadCreated from "./listeners/created/onThreadCreated";
-import onChannelUpdate from "./listeners/updated/onChannelUpdate";
-import onNewMember from "./listeners/created/onNewMember";
+import onNewMember from "./events/created/onNewMember";
+import onThreadCreated from "./events/created/onThreadCreated";
+import onChannelDelete from "./events/delete/onChannelDelete";
+import onRoleDeleted from "./events/delete/onRoleDeleted";
+import onThreadDeleted from "./events/delete/onThreadDeleted";
+import interactionCreate from "./events/interactionCreate";
+import onBotEnter from "./events/onBotEnter";
+import onGuildQuit from "./events/onGuildQuit";
+import ready from "./events/ready";
+import memberUpdate from "./events/updated/memberUpdate";
+import onChannelUpdate from "./events/updated/onChannelUpdate";
 
 let config = dotenv.config({ path: ".env" });
 if (process.env.ENV === "production") {
