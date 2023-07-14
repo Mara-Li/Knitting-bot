@@ -1,7 +1,7 @@
 import { ChannelType, Client, Snowflake, TextChannel } from "discord.js";
+import { CommandName } from "../../interface";
 import { getConfig } from "../../maps";
 import { discordLogs, logInDev } from "../../utils";
-import { CommandName } from "../../interface";
 import { addRoleAndUserToThread } from "../../utils/add";
 import { checkThread, validateChannelType } from "../../utils/data_check";
 

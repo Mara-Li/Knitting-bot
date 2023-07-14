@@ -1,10 +1,7 @@
 import { Client, ThreadChannel } from "discord.js";
-import {getConfig } from "../../maps";
 import { CommandName } from "../../interface";
-import {
-	discordLogs,
-	logInDev,
-} from "../../utils";
+import { getConfig } from "../../maps";
+import { discordLogs, logInDev } from "../../utils";
 import { addUserToThread } from "../../utils/add";
 import { checkMemberRole, checkThread } from "../../utils/data_check";
 

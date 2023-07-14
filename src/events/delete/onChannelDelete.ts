@@ -1,7 +1,14 @@
-import { CategoryChannel, ChannelType, Client, DMChannel,
-	ForumChannel, NonThreadGuildBasedChannel, TextChannel } from "discord.js";
-import { getMaps, getRoleIn, setIgnore, setRoleIn } from "../../maps";
+import {
+	CategoryChannel,
+	ChannelType,
+	Client,
+	DMChannel,
+	ForumChannel,
+	NonThreadGuildBasedChannel,
+	TextChannel,
+} from "discord.js";
 import { TypeName } from "../../interface";
+import { getMaps, getRoleIn, setIgnore, setRoleIn } from "../../maps";
 import { logInDev } from "../../utils";
 
 /**

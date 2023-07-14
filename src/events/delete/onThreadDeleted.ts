@@ -1,6 +1,6 @@
-import {Client, ThreadChannel} from "discord.js";
-import {getMaps, getRoleIn, setFollow, setIgnore, setRoleIn } from "../../maps";
+import { Client, ThreadChannel } from "discord.js";
 import { TypeName } from "../../interface";
+import { getMaps, getRoleIn, setFollow, setIgnore, setRoleIn } from "../../maps";
 import { logInDev } from "../../utils";
 
 
