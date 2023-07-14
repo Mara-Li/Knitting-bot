@@ -1,3 +1,22 @@
+# Changelog
+
+All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
+
+## [2.2.0](https://github.com/Lisandra-dev/DiscordThreadMember/compare/2.1.0...2.2.0) (2023-07-14)
+
+
+### Features
+
+* add logs ([69e6691](https://github.com/Lisandra-dev/DiscordThreadMember/commit/69e66918b49529571eedf329f8da31965246cc85))
+
+
+### Bug Fixes
+
+* **index:** fix import path ([2e84399](https://github.com/Lisandra-dev/DiscordThreadMember/commit/2e84399e330f008abd478944790143b0d4257d92))
+* **listener:** automatically join the bot to the thread ([7eb2cd5](https://github.com/Lisandra-dev/DiscordThreadMember/commit/7eb2cd52de6ae6360c552177aa60b129e6de76b4))
+* **listener:** member update logs ([d09bf11](https://github.com/Lisandra-dev/DiscordThreadMember/commit/d09bf1126417fbbaf13b1719f810b263e5168d8c))
+* **maps:** the key doesn't exist on configuration map ([0a5c6ae](https://github.com/Lisandra-dev/DiscordThreadMember/commit/0a5c6ae4c40d17c763105bb1096c88b5fa085e80))
+* user not added in thread ([efd0b3f](https://github.com/Lisandra-dev/DiscordThreadMember/commit/efd0b3fdc92ddbbcc29aef5d5a1ccbfc7160d8e1))
 
 <a name="v2.1.0"></a>
 ## [v2.1.0](https://github.com/Lisandra-dev/Knitting-bot/compare/2.0.0...v2.1.0) (2023-07-08)
@@ -284,4 +303,3 @@ the db must be destroyed, removing ALL change from user
 * **eslint:** update eslint to ignore js
 * **eslint:** fix
 * **import:** style import
-
