@@ -1,12 +1,13 @@
-import { Client, Routes, REST } from "discord.js";
+import { Client, REST, Routes } from "discord.js";
 import dotenv from "dotenv";
 import process from "process";
 import { commands } from "../commands";
-import { destroyDB, getConfig } from "../maps";
-import { logInDev } from "../utils";
+import i18next from "../i18n/i18next";
 import { DESTROY_DATABASE, VERSION } from "../index";
 import { CommandName } from "../interface";
-import i18next from "../i18n/i18next";
+import { destroyDB, getConfig } from "../maps";
+import { logInDev } from "../utils";
+
 let config = dotenv.config({ path: ".env" }).parsed;
 if (process.env.ENV === "production") {
 	config = dotenv.config({ path: ".env.prod" }).parsed;
