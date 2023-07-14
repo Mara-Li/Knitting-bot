@@ -18,10 +18,10 @@ export default (client: Client): void => {
 			if (getConfig(CommandName.member, guildID) === false) return;
 			logInDev(`${oldMember.user.username} has been updated!`);
 			if (updatedRoles.size === 0) {
-				discordLogs(guildID, client, `${oldMember.user.username} has been updated but no role has been added.`);
+				await discordLogs(guildID, client, `${oldMember.user.username} has been updated but no role has been added.`);
 				return;
 			}
-			discordLogs(guildID, client, `${oldMember.user.username} has been updated: ${updatedRoles.map(role => role.name)} added.`);
+			await discordLogs(guildID, client, `${oldMember.user.username} has been updated: ${updatedRoles.map(role => role.name)} added.`);
 			const guild = newMember.guild;
 			const channels = guild.channels.cache.filter(channel => channel.isThread());
 			for (const channel of channels.values()) {

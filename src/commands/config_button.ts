@@ -51,9 +51,9 @@ export default {
 		.setDefaultMemberPermissions(PermissionFlagsBits.ManageThreads)
 		.addSubcommandGroup(subcommandGroup =>
 			subcommandGroup
-				.setName(en("configuration.menu.general.name").toLowerCase())
+				.setName(en("configuration.menu.general.title").toLowerCase())
 				.setNameLocalizations({
-					"fr": fr("configuration.menu.general.name").toLowerCase()
+					"fr": fr("configuration.menu.general.title").toLowerCase()
 				})
 				.setDescription(en("configuration.menu.general.desc"))
 				.addSubcommand(subcommand =>
