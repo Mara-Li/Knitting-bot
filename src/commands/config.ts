@@ -169,7 +169,7 @@ export default {
 					components: rows
 				});
 		} else {
-			const embeds = display();
+			const embeds = help();
 			const row = new ActionRowBuilder<ButtonBuilder>()
 				.addComponents(
 					new ButtonBuilder()
@@ -294,16 +294,22 @@ function displayLanguageMenu(guildID: string) {
 /**
  * Display the configuration as an embed
  */
-function display() {
+function help() {
 	return new EmbedBuilder()
 		.setColor("#0099ff")
 		.setTitle(i18next.t("configuration.show.menu.title"))
 		.setDescription(i18next.t("configuration.show.menu.description"))
 		.addFields(
 			{
-				name: i18next.t("configuration.language.name"),
-				value: `\`/config ${i18next.t("configuration.language.name").toLowerCase()}\``,
+				name: `${i18next.t("configuration.language.name")}`,
+				value: `\`/config ${i18next.t("configuration.menu.general.title")} ${i18next.t("configuration.menu.general.display")}\``,
 			})
+		.addFields(
+			{
+				name: `${i18next.t("configuration.log.name")}`,
+				value: `\`/config ${i18next.t("configuration.menu.general.title")} ${i18next.t("configuration.menu.log.channel.title")}\``, 
+			}
+		)
 		.addFields({ name: "\u200A", value: "\u200A" })
 		.addFields(
 			{
