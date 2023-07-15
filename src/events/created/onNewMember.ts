@@ -17,7 +17,7 @@ export default (client: Client): void => {
 		if (getConfig(CommandName.newMember, guildID) === false) return;
 		if (member.user.bot) return;
 		logInDev(`${member.user.username} joined the server`);
-		discordLogs(guildID, client, `${member.user.username} joined the server`);
+		await discordLogs(guildID, client, `${member.user.username} joined the server`);
 		const guild = member.guild;
 		const channels = guild.channels.cache.filter(channel => channel.isThread());
 		for (const channel of channels.values()) {

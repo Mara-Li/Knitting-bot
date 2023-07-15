@@ -176,7 +176,7 @@ export async function addRoleAndUserToThread(thread: ThreadChannel) {
 		const message = fetchedMessage.filter(m => m.author.id === thread.client.user.id).first() ?? await thread.send(messagePayload);
 		await message.edit(toPing.map(member => `<@${member.id}>`).join(" "));
 		await message.edit(EMOJI);
-		discordLogs(thread.guild.id, thread.client, `Add ${toPing.length} members to #${thread.name}:\n- ${toPing.map(member => member.user.username).join("\n-")}`);
+		discordLogs(thread.guild.id, thread.client, `Add ${toPing.length} members to #${thread.name}:\n- ${toPing.map(member => member.user.username).join("\n- ")}`);
 	}
 	logInDev("DONE");
 }

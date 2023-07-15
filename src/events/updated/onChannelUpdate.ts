@@ -16,12 +16,10 @@ export default (client: Client): void => {
 	client.on("channelUpdate", async (
 		oldChannel,
 		newChannel) => {
-		if (oldChannel.type === ChannelType.DM || newChannel.type === ChannelType.DM) return;
-		if (!oldChannel.guild) return;
+		if (oldChannel.type === ChannelType.DM || newChannel.type === ChannelType.DM || !oldChannel.guild) return;
 		const guild = oldChannel.guild.id;
 		if (getConfig(CommandName.channel, guild) === false) return;
-		logInDev(`Channel #${getChannelName(oldChannel.id, client)} updated`);
-		logInDev("Channel type :", oldChannel.type, newChannel.type);
+		logInDev(`Channel #${getChannelName(oldChannel.id, client)} updated\n. Channel type:`, oldChannel.type, newChannel.type);
 		if (!validateChannelType(oldChannel)
 			|| !validateChannelType(newChannel)
 			|| oldChannel.permissionOverwrites.cache === newChannel.permissionOverwrites.cache) {
@@ -31,11 +29,11 @@ export default (client: Client): void => {
 		//getConfig all threads of this channel
 		const isCategory = newChannel.type === ChannelType.GuildCategory;
 		if (isCategory) {
-			logInDev(`Updating threads of ${newChannel.name}`);
 			//get all threads of the channels in the category
 			const children = newChannel.children.cache;
-			if (!children) return;
-			await discordLogs(guild, client, `Updating threads of ${newChannel.name}`);
+			logInDev(`Updating ${children.size} channels of ${newChannel.name}`);
+			if (children.size === 0) return;
+			await discordLogs(guild, client, `Updating ${children.size} channels of ${newChannel.name}`);
 			children.forEach(child => {
 				if (child.type === ChannelType.GuildText) {
 					const threads = (child as TextChannel).threads.cache;
@@ -51,8 +49,9 @@ export default (client: Client): void => {
 		} else {
 			const newTextChannel = newChannel as TextChannel;
 			const threads = newTextChannel.threads.cache;
-			if (!threads) return;
-			await discordLogs(guild, client, `Updating threads of ${newChannel.name}`);
+			logInDev(`Updating ${threads.size} channels of ${newChannel.name}`);
+			if (threads.size === 0) return;
+			await discordLogs(guild, client, `Updating ${threads.size} channels of ${newChannel.name}`);
 			threads.forEach(thread => {
 				if (!getConfig(CommandName.followOnlyChannel, guild)) {
 					if (!checkThread(thread, "ignore")) addRoleAndUserToThread(thread);

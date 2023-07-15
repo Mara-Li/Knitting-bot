@@ -18,7 +18,7 @@ export default (client: Client): void => {
 		if (thread.type !== ChannelType.PublicThread) return;
 		if (getConfig(CommandName.thread, guild) === false) return;
 		logInDev(`Thread ${thread.name} created!`);
-		discordLogs(guild, client, `Thread ${thread.name} created!`);
+		await discordLogs(guild, client, `Thread ${thread.name} created!`);
 		/** automatically add the bot to the thread */
 		await thread.join();
 		if (!getConfig(CommandName.followOnlyChannel, guild)) {
