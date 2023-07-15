@@ -31,12 +31,11 @@ export default (client: Client): void => {
 		if (isCategory) {
 			//get all threads of the channels in the category
 			const children = newChannel.children.cache;
-			logInDev(`Updating ${children.size} channels of ${newChannel.name}`);
 			if (children.size === 0) return;
-			await discordLogs(guild, client, `Updating ${children.size} channels of ${newChannel.name}`);
 			children.forEach(child => {
 				if (child.type === ChannelType.GuildText) {
 					const threads = (child as TextChannel).threads.cache;
+					if (threads.size > 0) discordLogs(guild, client, `Updating ${threads.size} thread of ${child.name}`);
 					threads.forEach(thread => {
 						if (!getConfig(CommandName.followOnlyChannel, guild)) {
 							if (!checkThread(thread, "ignore")) addRoleAndUserToThread(thread);
@@ -51,7 +50,7 @@ export default (client: Client): void => {
 			const threads = newTextChannel.threads.cache;
 			logInDev(`Updating ${threads.size} channels of ${newChannel.name}`);
 			if (threads.size === 0) return;
-			await discordLogs(guild, client, `Updating ${threads.size} channels of ${newChannel.name}`);
+			await discordLogs(guild, client, `Updating ${threads.size} threads of ${newChannel.name}`);
 			threads.forEach(thread => {
 				if (!getConfig(CommandName.followOnlyChannel, guild)) {
 					if (!checkThread(thread, "ignore")) addRoleAndUserToThread(thread);
