@@ -17,22 +17,22 @@ import {
 	ButtonInteraction,
 	ButtonStyle,
 	CacheType,
+	channelMention,
+	ChannelType,
 	CommandInteraction,
 	CommandInteractionOptionResolver,
 	EmbedBuilder,
 	PermissionFlagsBits,
+	SlashCommandBuilder,
 	StringSelectMenuBuilder,
 	StringSelectMenuInteraction,
 	StringSelectMenuOptionBuilder,
-	SlashCommandBuilder,
-	ChannelType,
-	channelMention
 } from "discord.js";
+import { dedent } from "ts-dedent";
 import { default as i18next, languageValue } from "../i18n/i18next";
 import { CommandName } from "../interface";
 import { getConfig, setConfig } from "../maps";
 import { logInDev } from "../utils";
-import {dedent} from "ts-dedent";
 
 const fr = i18next.getFixedT("fr");
 const en = i18next.getFixedT("en");
