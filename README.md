@@ -8,7 +8,7 @@ If you want to try out the bot, you can join [this discord server](https://disco
 
 A bot that helps you to add user to a thread, to keep the thread always visible for everyone, and without pinging them!
 
-> **Note**  
+> [!NOTE] 
 > The user added to the thread needs to have the permission to see it.
 
 The bot will automatically add a user to a thread when:
@@ -50,7 +50,7 @@ You can also enable the "manual" mode, which disables all automatic events.
 
 Displays general information about bot configuration, as well as a link to the README.
 
-> **Note**  
+> [!NOTE]  
 > The button will be red if activate it will disable the event, and green if it will enable it.
 
 ### Follow
@@ -67,7 +67,7 @@ You need to activate the `follow-only` mode to use these commands. You can do th
   - To remove a role completely, you need to do the command without the channel.
 - `/follow list` : List all followed channels and roles
 
-> **Note**  
+> [!NOTE]  
 > To unfollow a channel/role, you need to redo the command with the same channel/role.
 
 ### Ignore
@@ -82,10 +82,10 @@ The exact opposite of the follow command. It won't ping the channels or roles ig
   - To remove a role completely, you need to do the command without the channel.
 - `/ignore list` : List all ignored channels and roles
 
-> **Note**  
+> [!NOTE]  
 > To un-ignore a channel, you need to redo the command with the same channel. Same for the role.
 
-> **Warning**  
+> [!WARNING]  
 > You can't follow and ignore "role" or "channel" at the same time.
 > For example:
 >
@@ -103,10 +103,10 @@ If you want to manually update a thread, you can use the slash commands:
 
 These commands don't appear for user that haven't the `manage thread` permission.
 
-> **Warning**  
+> [!WARNING]  
 > It will re-add all users that leave the thread, even if they left it on purpose.
 
-> **Note**  
+> [!NOTE]  
 > There is no way that I can code something that don't add any notification on the thread.
 > You **always** will have the thread that becomes white when the bot activates.
 
@@ -130,7 +130,7 @@ After making the list of user/role to ping, there is two possibility:
 
 After sending/editing the message, the bot will edit the message again to `_ _`.
 
-> **Warning**  
+> [!WARNING]  
 > The message send won't be deleted, because I discover that if a ping with editing an old message doesn't make a notification.
 > So the bot will keep this message to edit it when the thread need to be updated.
 > With that, user already in the thread won't get a white notification on the thread.
@@ -168,7 +168,7 @@ KOFI="1125071623658164274" #Emoji ID
 DISCORD="1125072006937849876" #Emoji ID
 ```
 
-> **Note**  
+> [!NOTE]  
 > If you want try your bot, you need to create an application in the [discord developer portal](https://discord.com/developers/applications).
 > [Here a tutorial](https://github.com/reactiflux/discord-irc/wiki/Creating-a-discord-bot-&-getting-a-token)
 > Don't forget to invite your bot in a testing discord server!
