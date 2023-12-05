@@ -8,7 +8,7 @@ Si vous voulez essayer le bot, vous pouvez rejoindre [ce serveur discord](https:
 
 Un bot qui vous aide à ajouter un utilisateur à un fil de discussion, pour que le fil soit toujours visible pour tout le monde, sans les mentionner !
 
-> **Note**  
+> [!NOTE] 
 > L'utilisateur ajouté au fil doit avoir la permission de le voir.
 
 Le bot ajoutera automatiquement un utilisateur à un fil de discussion lorsque :
@@ -50,7 +50,7 @@ Vous pouvez aussi activer le mode `manuel`, qui désactive tous les évènements
 
 Affiche les informations générale sur la configuration du bot, ainsi qu'un lien vers le README.
 
-> **Note**  
+> [!NOTE] 
 > Les boutons seront verts si leur activation autorise un mode ou un évènement, et rouge si elle le désactive.
 
 ### Follow (suivre)
@@ -67,7 +67,7 @@ Vous devez préalablement activer les modes "follow-only" avec la commande `/con
   - Pour supprimer un rôle, vous devez refaire la commande sans spécifier de channel.
 - `/follow list` : Affiche la liste des channels et rôles à suivre.
 
-> **Note**  
+> [!NOTE] 
 > Pour arrêter de suivre un channel ou un rôle, vous devez refaire la commande avec le même channel/role.
 
 ### Ignore
@@ -82,10 +82,10 @@ Permet d'ignorer un channel ou un rôle spécifique : le bot ne mentionnera pas 
   - Pour supprimer un rôle, vous devez refaire la commande sans spécifier de channel.
 - `/ignore liste` : Affiche la liste des channels et rôles ignorés.
 
-> **Note**  
+> [!NOTE] 
 > Comme précédemment, pour arrêter d'ignorer un channel ou un rôle, vous devez refaire la commande avec le même channel/role.
 
-> **Warning**  
+> [!WARNING]
 > Vous ne pouvez "suivre" et "ignorer" un channel en même temps. Par exemple :
 >
 > - Si vous avez activé le mode `follow channel`, vous ne pouvez ignorer un channel.
@@ -103,10 +103,10 @@ Si vous voulez mettre à jour manuellement un fil, vous pouvez utiliser les comm
 
 Ces commandes n'apparaissent pas pour les utilisateurs qui n'ont pas la permission `gérer les fils` (`manage thread` en anglais).
 
-> **Warning**  
+> [!WARNING]
 > Tous les utilisateurs qui quittent le fil seront ré-ajoutés, même s'ils l'ont quitté volontairement.
 
-> **Note**  
+> [!NOTE] 
 > Il n'y a aucun moyen que je puisse coder quelque chose qui n'ajoute aucune notification (c'est-à-dire la bordure blanche) sur le fil. Vous aurez toujours le fil qui deviendra blanc lorsque le bot s'active.
 
 De plus, vous pouvez configurer le bot et désactiver les événements que vous ne souhaitez pas utiliser. Vous pouvez le faire avec la commande `/config`. Vous pouvez voir la configuration avec `/config afficher`.
@@ -129,7 +129,7 @@ Après avoir fait la liste des utilisateurs et rôles à mentionner, il y a deux
 
 Après avoir envoyé/édité le message, le bot modifiera le message de nouveau pour le rendre vide (en utilisant `_ _`).
 
-> **Warning**  
+> [!WARNING]
 > Le message ne sera donc pas supprimé, car j'ai découvert que mentionner un utilisateur dans un ancien message ne faisait pas de notification "blanche".
 > Donc, le bot gardera les message pour les éditer quand le thread a besoin d'être mise à jour.
 > Avec cela, les anciens utilisateurs n'auront donc pas de notification du tout.
@@ -167,7 +167,7 @@ KOFI="1125071623658164274" #Emoji ID
 DISCORD="1125072006937849876" #Emoji ID
 ```
 
-> **Note**  
+> [!NOTE] 
 > Si vous voulez test le bot, vous devez d'abord créer une application sur le [discord developer portal](https://discord.com/developers/applications).
 > [Vous trouverez ici un tutoriel](https://devcommunity.gitbook.io/bot/robot-discord-pas-a-pas/creez-lapplication-de-votre-bot)
 > N'oubliez pas d'inviter le bot sur un serveur de test !
