@@ -1,4 +1,4 @@
-import { Client, CommandInteraction, TextChannel, ThreadChannel } from "discord.js";
+import { Client, CommandInteraction, Guild, TextChannel, ThreadChannel } from "discord.js";
 import process from "process";
 import { CommandName } from "../interface";
 import { getConfig } from "../maps";
@@ -43,4 +43,16 @@ export function changeLanguage(interaction: CommandInteraction) {
 	const lang = interaction.locale as keyof typeof resources;
 	const userLang = resources[lang] ? lang : "en";
 	i18next.changeLanguage(userLang);
+}
+
+export function changeGuildLanguage(guild: Guild) {
+	if (guild.preferredLocale === null) return "en";
+	if (guild.preferredLocale.includes("en")) {
+		i18next.changeLanguage("en");
+		return;
+	}
+	const lang = guild.preferredLocale as keyof typeof resources;
+	const userLang = resources[lang] ? lang : "en";
+	i18next.changeLanguage(userLang);
+	return;
 }

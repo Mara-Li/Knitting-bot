@@ -1,7 +1,7 @@
 import { ChannelType, Client, Snowflake, TextChannel } from "discord.js";
 import { CommandName } from "../../interface";
 import { getConfig } from "../../maps";
-import { discordLogs, logInDev } from "../../utils";
+import { changeGuildLanguage, discordLogs, logInDev } from "../../utils";
 import { addRoleAndUserToThread } from "../../utils/add";
 import { checkThread, validateChannelType } from "../../utils/data_check";
 import i18next from "i18next";
@@ -19,6 +19,7 @@ export default (client: Client): void => {
 		newChannel) => {
 		if (oldChannel.type === ChannelType.DM || newChannel.type === ChannelType.DM || !oldChannel.guild) return;
 		const guild = oldChannel.guild.id;
+		changeGuildLanguage(oldChannel.guild);
 		if (getConfig(CommandName.channel, guild) === false) return;
 		logInDev(`Channel #${getChannelName(oldChannel.id, client)} updated\n. Channel type:`, oldChannel.type, newChannel.type);
 		if (!validateChannelType(oldChannel)

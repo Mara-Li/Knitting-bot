@@ -1,7 +1,7 @@
 import { Client, ThreadChannel } from "discord.js";
 import { CommandName } from "../../interface";
 import { getConfig } from "../../maps";
-import { discordLogs, logInDev } from "../../utils";
+import { changeGuildLanguage, discordLogs, logInDev } from "../../utils";
 import { addUserToThread } from "../../utils/add";
 import { checkMemberRole, checkThread } from "../../utils/data_check";
 import i18next from "i18next";
@@ -18,7 +18,7 @@ export default (client: Client): void => {
 		if (getConfig(CommandName.newMember, guildID) === false) return;
 		if (member.user.bot) return;
 		logInDev(`${member.user.username} joined the server`);
-		//get guild locale
+		changeGuildLanguage(member.guild);
 		await discordLogs(guildID, client, i18next.t("logs.joined", {user : member.user.username}));
 		const guild = member.guild;
 		const channels = guild.channels.cache.filter(channel => channel.isThread());

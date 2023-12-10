@@ -1,7 +1,7 @@
 import { Client, ThreadChannel } from "discord.js";
 import { CommandName } from "../../interface";
 import { getConfig } from "../../maps";
-import { discordLogs, logInDev } from "../../utils";
+import { changeGuildLanguage, discordLogs, logInDev } from "../../utils";
 import { addUserToThread } from "../../utils/add";
 import { checkMemberRole, checkMemberRoleIn, checkRoleIn, checkThread } from "../../utils/data_check";
 import i18next from "i18next";
@@ -10,6 +10,7 @@ export default (client: Client): void => {
 	client.on("guildMemberUpdate", async (oldMember, newMember) => {
 		//trigger only on role change
 		try {
+			changeGuildLanguage(newMember.guild);
 			if (oldMember.roles.cache.size === newMember.roles.cache.size) return;
 			/** Search updated roles */
 			const oldRoles = oldMember.roles.cache;

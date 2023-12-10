@@ -1,7 +1,7 @@
 import { ChannelType, Client, ThreadChannel } from "discord.js";
 import { CommandName } from "../../interface";
 import { getConfig } from "../../maps";
-import { discordLogs, logInDev } from "../../utils";
+import { changeGuildLanguage, discordLogs, logInDev } from "../../utils";
 import { addRoleAndUserToThread } from "../../utils/add";
 import { checkThread } from "../../utils/data_check";
 import i18next from "i18next";
@@ -19,6 +19,7 @@ export default (client: Client): void => {
 		if (thread.type !== ChannelType.PublicThread) return;
 		if (getConfig(CommandName.thread, guild) === false) return;
 		logInDev(`Thread ${thread.name} created!`);
+		changeGuildLanguage(thread.guild);
 		await discordLogs(guild, client, i18next.t("logs.thread.created", {thread : thread.name}));
 		/** automatically add the bot to the thread */
 		await thread.join();
