@@ -1,5 +1,5 @@
 import {
-	channelMention, 
+	channelMention,
 	roleMention,
 	CategoryChannel,
 	CommandInteraction,
@@ -65,7 +65,7 @@ export default {
 				.setDescriptionLocalizations({
 					fr: fr("ignore.role.description"),
 				})
-				
+
 				.addRoleOption((option) =>
 					option
 						.setName(en("common.role").toLowerCase())
@@ -175,14 +175,14 @@ async function listIgnored(interaction: CommandInteraction) {
 	const ignoredChannels = getMaps("ignore",TypeName.channel, guild) as TextChannel[] ?? [];
 	const ignoredForum = getMaps("ignore",TypeName.forum, guild) as ForumChannel[] ?? [];
 	const ignoredRoles = getRole("ignore", guild);
-	
+
 	const ignoredRolesIn = getRoleIn("ignore", guild);
 	const ignoredRolesInMaps = ignoredRolesIn.map((roleIn) =>{
 		const role = roleIn.role.id;
 		const channels = roleIn.channels.map((channel) => channelMention(channel.id)).join("\n - ");
 		return `${roleMention(role)}:\n - ${channels}`;
 	}).join("");
-	
+
 	const ignoredCategoriesNames = "\n- " + ignoredCategories.map((category) => channelMention(category.id)).join("\n- ");
 	const ignoredThreadsNames = "\n- " + ignoredThreads.map((thread) => channelMention(thread.id)).join("\n-");
 	const ignoredChannelsNames = "\n- " + ignoredChannels.map((channel) => channel.name).join("\n-");
@@ -212,7 +212,7 @@ async function listIgnored(interaction: CommandInteraction) {
 			name: i18next.t("common.role") as string,
 			value: ignoredRolesNames || i18next.t("ignore.list.none") as string,
 		});
-	
+
 	if (ignoredRolesIn.length > 0) {
 		const embed2 = new EmbedBuilder()
 			.setColor("#2f8e7d")

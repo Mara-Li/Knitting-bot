@@ -71,7 +71,10 @@
     },
     "general": "Configuration générale",
     "language": {
-      "name": "Langue"
+      "desc": "Changer la langue du serveur (pour les logs)",
+      "name": "Langue",
+      "options": "langue à changer",
+      "validate": "Langue du serveur changée à `{{- lang}}`"
     },
     "log": {
       "description": "Voir les logs du bot sur un channel (utiliser /log pour choisir le channel)",
@@ -210,6 +213,21 @@
     "footer": "Fait avec 💖 par Mara__Li",
     "readMe": "https://github.com/Lisandra-dev/Knitting-bot/blob/master/README_FR.md",
     "title": "Information"
+  },
+  "logs": {
+    "joined": "{{- user}} a rejoint le serveur",
+    "member": {
+      "updated": {
+        "noRole": "{{- user}} a été mis à jour, mais aucun rôle n'a été ajouté.",
+        "roleList": "{{- user}} a été mis à jour avec les rôles : {{- role}}"
+      }
+    },
+    "thread": {
+      "created": "Le thread {{- thread}} a été créé !"
+    },
+    "updated": {
+      "channel": "Mise à jour de {{- number}} threads de {{- child}}"
+    }
   },
   "roleIn": {
     "already": "Le rôle {{- mention }} est déjà {{- opposite }} dans {{- channel }}.",

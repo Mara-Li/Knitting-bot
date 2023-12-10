@@ -4,6 +4,7 @@ import { getConfig } from "../../maps";
 import { discordLogs, logInDev } from "../../utils";
 import { addRoleAndUserToThread } from "../../utils/add";
 import { checkThread } from "../../utils/data_check";
+import i18next from "i18next";
 
 /**
  * @param {Client} client - Discord.js Client
@@ -18,7 +19,7 @@ export default (client: Client): void => {
 		if (thread.type !== ChannelType.PublicThread) return;
 		if (getConfig(CommandName.thread, guild) === false) return;
 		logInDev(`Thread ${thread.name} created!`);
-		await discordLogs(guild, client, `Thread ${thread.name} created!`);
+		await discordLogs(guild, client, i18next.t("logs.thread.created", {thread : thread.name}));
 		/** automatically add the bot to the thread */
 		await thread.join();
 		if (!getConfig(CommandName.followOnlyChannel, guild)) {

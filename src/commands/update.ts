@@ -75,7 +75,7 @@ export default {
 				.setDescription(en("commands.help.description"))
 				.setDescriptionLocalizations({
 					fr: fr("commands.help.description"),
-				})		
+				})
 		),
 	async execute(interaction: CommandInteraction) {
 		if (!interaction.guild) return;
@@ -176,7 +176,7 @@ async function updateThread(interaction: CommandInteraction) {
  */
 async function displayHelp(interaction: CommandInteraction) {
 	const constructDesc: string = ((((
-		i18next.t("commands.help.desc") as string) 
+		i18next.t("commands.help.desc") as string)
 		+ i18next.t("commands.help.all")) as string)
 		+ i18next.t("commands.help.thread")) as string;
 	const embed = new EmbedBuilder()

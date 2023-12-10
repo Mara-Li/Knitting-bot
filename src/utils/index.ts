@@ -1,7 +1,9 @@
-import { Client, TextChannel, ThreadChannel } from "discord.js";
+import { Client, CommandInteraction, TextChannel, ThreadChannel } from "discord.js";
 import process from "process";
 import { CommandName } from "../interface";
 import { getConfig } from "../maps";
+import i18next from "i18next";
+import { resources } from "../i18n/i18next";
 
 export function logInDev(...text: unknown[]) {
 	const time= new Date();
@@ -9,7 +11,7 @@ export function logInDev(...text: unknown[]) {
 	/** get the called function name */
 	const stack = new Error().stack;
 	const caller = stack?.split("\n")[2].trim().split(" ")[1];
-	
+
 	if (process.env.NODE_ENV === "development") {
 		if (text.length === 1 && typeof text[0] === "string") {
 			console.log(`${timeString} (${caller}) - ${text}`);
@@ -35,4 +37,10 @@ export async function discordLogs(guildID: string, bot: Client, ...text: unknown
 			}
 		}
 	}
+}
+
+export function changeLanguage(interaction: CommandInteraction) {
+	const lang = interaction.locale as keyof typeof resources;
+	const userLang = resources[lang] ? lang : "en";
+	i18next.changeLanguage(userLang);
 }

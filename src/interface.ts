@@ -1,7 +1,6 @@
 import { CategoryChannel, ForumChannel, Role, TextChannel, ThreadChannel } from "discord.js";
 
 export enum DefaultMenuBuilder {
-	language = "language",
 	member = "on-member-update",
 	thread = "on-thread-created",
 	channel = "on-channel-update",
@@ -15,7 +14,6 @@ export enum DefaultMenuBuilder {
 
 
 export enum CommandName {
-	language = "language",
 	manualMode = "manualMode",
 	member = "onMemberUpdate",
 	thread = "onThreadCreated",
@@ -53,7 +51,6 @@ export interface Configuration {
 	[CommandName.followOnlyChannel] : boolean;
 	[CommandName.followOnlyRole] : boolean;
 	[CommandName.followOnlyRoleIn] : boolean;
-	[CommandName.language] : string;
 	[key: string] : boolean | string;
 }
 
@@ -74,7 +71,6 @@ export const DEFAULT_CONFIGURATION : Configuration = {
 	[CommandName.followOnlyChannel] : false,
 	[CommandName.followOnlyRole] : false,
 	[CommandName.followOnlyRoleIn] :false,
-	[CommandName.language] : "en"
 };
 
 export const DEFAULT_IGNORE_FOLLOW : IgnoreFollow = {

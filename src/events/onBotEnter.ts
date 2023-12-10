@@ -20,6 +20,7 @@ export default (client: Client):void => {
 			console.error(error);
 		}
 		logInDev(`${client.user?.username} has been added to ${guild.name}`);
+		console.log(guild.preferredLocale);
 		loadDBFirstTime(guild.id);
 	});
 };

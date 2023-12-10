@@ -11,7 +11,7 @@ import {
 	SlashCommandBuilder,
 	TextChannel,
 	ThreadChannel,
-    ChannelType,
+	ChannelType,
 } from "discord.js";
 import { default as i18next } from "../i18n/i18next";
 import { CommandName, RoleIn, TypeName } from "../interface";
@@ -79,7 +79,7 @@ export default {
 						})
 						.setRequired(true)
 				)
-				
+
 		)
 		.addSubcommand((subcommand) =>
 			subcommand
@@ -164,7 +164,7 @@ export default {
 		default:
 			await displayFollowed(interaction);
 			break;
-			
+
 		}
 	}
 };
@@ -200,7 +200,7 @@ async function displayFollowed(interaction: CommandInteraction) {
 		const channels = roleIn.channels.map((channel) => channelMention(channel.id)).join("\n - ");
 		return `\n- ${roleMention(role)}:\n - ${channels}`;
 	}).join("");
-	
+
 	const followedCategoriesNames = "\n- " + followedCategories.map((category) => channelMention(category.id)).join("\n- ");
 	const followedThreadsNames = "\n- " + followedThreads.map((thread) => channelMention(thread.id)).join("\n-");
 	const followedChannelsNames = "\n- " + followedChannels.map((channel) => channelMention(channel.id)).join("\n-");

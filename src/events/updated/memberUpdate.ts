@@ -4,6 +4,7 @@ import { getConfig } from "../../maps";
 import { discordLogs, logInDev } from "../../utils";
 import { addUserToThread } from "../../utils/add";
 import { checkMemberRole, checkMemberRoleIn, checkRoleIn, checkThread } from "../../utils/data_check";
+import i18next from "i18next";
 
 export default (client: Client): void => {
 	client.on("guildMemberUpdate", async (oldMember, newMember) => {
@@ -18,10 +19,10 @@ export default (client: Client): void => {
 			if (getConfig(CommandName.member, guildID) === false) return;
 			logInDev(`${oldMember.user.username} has been updated!`);
 			if (updatedRoles.size === 0) {
-				await discordLogs(guildID, client, `${oldMember.user.username} has been updated but no role has been added.`);
+				await discordLogs(guildID, client, i18next.t("logs.member.updated.noRole", {user : oldMember.user.username}));
 				return;
 			}
-			await discordLogs(guildID, client, `${oldMember.user.username} has been updated: ${updatedRoles.map(role => role.name)} added.`);
+			await discordLogs(guildID, client, i18next.t("logs.member.updated.roleList", {user : oldMember.user.username, role : updatedRoles.map(role => role.name).join(", ")}));
 			const guild = newMember.guild;
 			const channels = guild.channels.cache.filter(channel => channel.isThread());
 			for (const channel of channels.values()) {
@@ -41,17 +42,17 @@ export default (client: Client): void => {
 						"Role member is ignored :", checkMemberRole(newMember.roles, "ignore"),
 						"Role member is in thread followed :", checkMemberRoleIn("follow",newMember.roles, threadChannel)
 					);
-				
+
 					/**
 				 * If checkMemberRoleInFollowed is true, ignore the two others condition and add the member to the thread
 				 * Else, check the two others condition and add the member to the thread if they are true
 				 */
-				
+
 					let roleIsAllowed = true;
 					if (!checkMemberRoleIn("follow", newMember.roles, threadChannel)) {
 						roleIsAllowed = checkMemberRole(newMember.roles, "follow") && !checkMemberRole(newMember.roles, "ignore") && checkMemberRoleIn("ignore", newMember.roles, threadChannel);
 					}
-				
+
 					logInDev(`Role is allowed: ${roleIsAllowed}`);
 					if (!getConfig(CommandName.followOnlyChannel, guildID)) {
 					/**

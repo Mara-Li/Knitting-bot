@@ -4,6 +4,7 @@ import { getConfig } from "../../maps";
 import { discordLogs, logInDev } from "../../utils";
 import { addRoleAndUserToThread } from "../../utils/add";
 import { checkThread, validateChannelType } from "../../utils/data_check";
+import i18next from "i18next";
 
 /**
  * @param {Client} client - Discord.js Client
@@ -35,7 +36,7 @@ export default (client: Client): void => {
 			children.forEach(child => {
 				if (child.type === ChannelType.GuildText) {
 					const threads = (child as TextChannel).threads.cache;
-					if (threads.size > 0) discordLogs(guild, client, `Updating ${threads.size} thread of ${child.name}`);
+					if (threads.size > 0) discordLogs(guild, client, i18next.t("logs.updated.channel", { number: threads.size, child: child.name}));
 					threads.forEach(thread => {
 						if (!getConfig(CommandName.followOnlyChannel, guild)) {
 							if (!checkThread(thread, "ignore")) addRoleAndUserToThread(thread);
@@ -50,7 +51,7 @@ export default (client: Client): void => {
 			const threads = newTextChannel.threads.cache;
 			logInDev(`Updating ${threads.size} channels of ${newChannel.name}`);
 			if (threads.size === 0) return;
-			await discordLogs(guild, client, `Updating ${threads.size} threads of ${newChannel.name}`);
+			await discordLogs(guild, client, i18next.t("logs.updated.channel", { number: threads.size, child: newTextChannel.name}));
 			threads.forEach(thread => {
 				if (!getConfig(CommandName.followOnlyChannel, guild)) {
 					if (!checkThread(thread, "ignore")) addRoleAndUserToThread(thread);

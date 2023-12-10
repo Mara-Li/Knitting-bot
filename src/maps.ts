@@ -17,7 +17,6 @@ export const optionMaps = new Enmap({
 	cloneLevel: "deep",
 });
 
-export const translationLanguage = optionMaps.get("language") || "en";
 const ignoreMaps = new Enmap({ name: "Ignore",
 	fetchAll: false,
 	autoFetch: true,
@@ -65,7 +64,7 @@ const followOnlyMaps = new Enmap({
 export function setConfig(
 	name: CommandName | string,
 	guildID: string,
-	value: string 
+	value: string
 	| boolean
 ) {
 	if (name === CommandName.manualMode) return;
@@ -172,8 +171,6 @@ export function getConfig(name: CommandName, guildID: string, channel?: boolean)
 		return optionMaps.get(guildID, name) as string | boolean;
 	} catch (e) {
 		switch (name) {
-		case CommandName.language:
-			return optionMaps.ensure(guildID, "en", name) as string;
 		case CommandName.manualMode:
 			return optionMaps.ensure(guildID, false, name) as boolean;
 		case CommandName.followOnlyChannel:

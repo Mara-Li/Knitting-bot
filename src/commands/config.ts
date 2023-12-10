@@ -1,7 +1,6 @@
 /**
  * Configuration menu rework using button
  * Clicking on a button will edit the configuration data:
- * - Language {en, fr}
  * - Enable manual mode {true, false}
  * - follow only-role {true, false}
  * - follow only-channel {true, false}
@@ -22,14 +21,13 @@ import {
 	CommandInteraction,
 	CommandInteractionOptionResolver,
 	EmbedBuilder,
+	Locale,
+	LocaleString,
 	PermissionFlagsBits,
 	SlashCommandBuilder,
-	StringSelectMenuBuilder,
 	StringSelectMenuInteraction,
-	StringSelectMenuOptionBuilder,
 } from "discord.js";
-import { dedent } from "ts-dedent";
-import { default as i18next, languageValue } from "../i18n/i18next";
+import { default as i18next } from "../i18n/i18next";
 import { CommandName } from "../interface";
 import { getConfig, setConfig } from "../maps";
 import { logInDev } from "../utils";
@@ -92,7 +90,6 @@ export default {
 						)
 				)
 		)
-			
 		.addSubcommand(subcommand =>
 			subcommand
 				.setName(en("commands.help.name").toLowerCase())
@@ -117,6 +114,37 @@ export default {
 		)
 		.addSubcommand(subcommand =>
 			subcommand
+				.setName("locale")
+				.setNameLocalizations({
+					"fr": "langue"
+				})
+				.setDescription(en("configuration.language.desc"))
+				.setDescriptionLocalizations({
+					"fr": fr("configuration.language.desc")
+				})
+				.addStringOption(option =>
+					option
+						.setName("locale")
+						.setNameLocalizations({
+							"fr": "langue"
+						})
+						.setDescription("locale")
+						.setDescriptionLocalizations({
+							"fr": fr("configuration.language.options")
+						})
+						.setRequired(true)
+						.addChoices({
+							name: "Français",
+							value: "fr"
+						},
+						{
+							name: "English",
+							value: "en"
+						})
+				)
+		)
+		.addSubcommand(subcommand =>
+			subcommand
 				.setName(en("configuration.menu.autoUpdate.cmd").toLowerCase())
 				.setNameLocalizations({
 					"fr": fr("configuration.menu.autoUpdate.cmd").toLowerCase()
@@ -129,6 +157,7 @@ export default {
 	async execute(interaction: CommandInteraction) {
 		if (!interaction.guild) return;
 		const options = interaction.options as CommandInteractionOptionResolver;
+
 		const commands = options.getSubcommand();
 		const group = options.getSubcommandGroup();
 		logInDev("configuration", commands, group);
@@ -160,14 +189,15 @@ export default {
 					embeds: [embeds],
 					components: rows
 				});
-		} else if ( group === "general" && en("configuration.menu.general.display.title").toLowerCase() === commands) {
-			const rows = reloadButtonLanguage(interaction.guild.id);
-			const embeds = displayLanguageMenu(interaction.guild.id);
-			interaction.reply(
-				{
-					embeds: [embeds],
-					components: rows
-				});
+		} else if (commands === "locale") {
+			const guild = interaction.guild;
+			const locale = options.getString("locale", true);
+			if (locale === "en") guild.setPreferredLocale("en-US" as Locale);
+			else guild.setPreferredLocale(locale as Locale);
+			interaction.reply({
+				content: `${i18next.t("configuration.language.validate", {lang: (locale as LocaleString).toUpperCase()})}`,
+				ephemeral: true
+			});
 		} else {
 			const embeds = help();
 			const row = new ActionRowBuilder<ButtonBuilder>()
@@ -268,28 +298,6 @@ function autoUpdateMenu(guildID: string): EmbedBuilder {
 		);
 }
 
-function displayLanguageMenu(guildID: string) {
-	const activatedLog = getConfig(CommandName.log, guildID) as boolean;
-	let msg = i18next.t("configuration.log.display", { channel: i18next.t("common.disabled")});
-	let logChannel :null | boolean | string = i18next.t("common.none");
-	if (activatedLog) {
-		logChannel = getConfig(CommandName.log, guildID, true);
-		logInDev(logChannel);
-		if (logChannel !== undefined) {
-			logChannel = channelMention(logChannel as string);
-		} else {
-			logChannel = i18next.t("common.none");
-		}
-		msg = i18next.t("configuration.log.display", { channel: logChannel });
-	}
-	const desc = dedent(`
-	- ${languageValue[getConfig(CommandName.language, guildID) as string]}
-	- ${msg}`);
-	return new EmbedBuilder()
-		.setColor("#0099ff")
-		.setTitle(i18next.t("configuration.general"))
-		.setDescription(desc);
-}
 
 /**
  * Display the configuration as an embed
@@ -301,13 +309,8 @@ function help() {
 		.setDescription(i18next.t("configuration.show.menu.description"))
 		.addFields(
 			{
-				name: `${i18next.t("configuration.language.name")}`,
-				value: `\`/config ${i18next.t("configuration.menu.general.title")} ${i18next.t("configuration.menu.general.display")}\``,
-			})
-		.addFields(
-			{
 				name: `${i18next.t("configuration.log.name")}`,
-				value: `\`/config ${i18next.t("configuration.menu.general.title")} ${i18next.t("configuration.menu.log.channel.title")}\``, 
+				value: `\`/config ${i18next.t("configuration.menu.general.title")} ${i18next.t("configuration.menu.log.channel.title")}\``,
 			}
 		)
 		.addFields({ name: "\u200A", value: "\u200A" })
@@ -341,24 +344,13 @@ async function updateConfig(command: CommandName, interaction: ButtonInteraction
 	if (!interaction.guild) return;
 	let newConfig: string | boolean;
 	const commandType= {
-		"Language" : CommandName.language,
 		"Mode" : [CommandName.followOnlyRole, CommandName.followOnlyChannel, CommandName.followOnlyRoleIn],
 		"AutoUpdate" : [CommandName.channel, CommandName.member, CommandName.newMember, CommandName.thread, CommandName.manualMode]
 	};
 	const followOnlyRole = getConfig(CommandName.followOnlyRole, interaction.guild.id);
 	const followOnlyChannel = getConfig(CommandName.followOnlyChannel, interaction.guild.id);
 	const followOnlyRoleIn = getConfig(CommandName.followOnlyRoleIn, interaction.guild.id);
-	if (command === CommandName.language) {
-		const interactSelect = interaction as StringSelectMenuInteraction;
-		newConfig = interactSelect.values[0] as string;
-		// reload i18next
-		await i18next.changeLanguage(newConfig as string);
-		setConfig(command, interaction.guild.id, newConfig);
-		const embed = displayLanguageMenu(interaction.guild.id);
-		//reload buttons
-		const rows = reloadButtonLanguage(interaction.guild.id);
-		interaction.editReply({ embeds: [embed], components: rows });
-	} else if (
+	if (
 		command === CommandName.followOnlyRoleIn
 			&& (followOnlyChannel || followOnlyRole)
 		|| (followOnlyRoleIn
@@ -370,7 +362,7 @@ async function updateConfig(command: CommandName, interaction: ButtonInteraction
 		interaction.editReply({ embeds: [embed], components: rows });
 	} else if (command === CommandName.manualMode) {
 		const truc = [CommandName.channel, CommandName.member, CommandName.thread, CommandName.newMember];
-		
+
 		const allTruc = truc.map((command) => {
 			if (!interaction.guild) return false;
 			return getConfig(command, interaction.guild.id);
@@ -393,32 +385,13 @@ async function updateConfig(command: CommandName, interaction: ButtonInteraction
 		if (commandType["Mode"].includes(command)) {
 			rows = reloadButtonMode(interaction.guild.id);
 			embed = displayModeMenu(interaction.guild.id);
-		} else if (commandType["AutoUpdate"].includes(command)) {
+		} else {
 			rows = reloadButtonAuto(interaction.guild.id);
 			embed = autoUpdateMenu(interaction.guild.id);
-		} else {
-			rows = reloadButtonLanguage(interaction.guild.id);
-			embed = displayLanguageMenu(interaction.guild.id);
 		}
 		interaction.editReply({ embeds: [embed], components: rows });
 	}
-	
-}
 
-function createLanguageButton() {
-	const selectMenu = [];
-	for (const [id, lang] of Object.entries(languageValue)) {
-		selectMenu.push(
-			new StringSelectMenuOptionBuilder()
-				.setLabel(lang as string)
-				.setValue(id)
-		);
-	}
-	
-	return new StringSelectMenuBuilder()
-		.setCustomId(CommandName.language)
-		.setPlaceholder(i18next.t("configuration.language.name"))
-		.addOptions(selectMenu);
 }
 
 /**
@@ -441,16 +414,6 @@ function createButton(command: CommandName, label: string, guildID: string) {
 		.setLabel(label);
 }
 
-function reloadButtonLanguage(guildID: string) {
-	return [{
-		type: 1,
-		components: [createLanguageButton()]
-	},
-	{
-		type: 1,
-		components: [createButton(CommandName.log, i18next.t("configuration.log.name"), guildID)]
-	}];
-}
 
 function reloadButtonMode(guildID: string) {
 	//eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -459,7 +422,7 @@ function reloadButtonMode(guildID: string) {
 		[CommandName.followOnlyRole]: i18next.t("configuration.follow.role.name"),
 		[CommandName.followOnlyChannel]: i18next.t("configuration.follow.thread.name"),
 	};
-	
+
 	const buttons: ButtonBuilder[] = [];
 	for (const command of [CommandName.followOnlyRoleIn, CommandName.followOnlyRole, CommandName.followOnlyChannel].values()) {
 		buttons.push(createButton(command, labelButton(command, translation, guildID), guildID));

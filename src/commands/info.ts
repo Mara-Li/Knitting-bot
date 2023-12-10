@@ -27,11 +27,11 @@ export default {
 			.setFooter({
 				text: i18next.t("info.footer"),
 			});
-		
+
 		/**
 		 * Create button with external link
 		 */
-		
+
 		const row = new ActionRowBuilder<ButtonBuilder>()
 			.addComponents(
 				new ButtonBuilder()
@@ -61,7 +61,7 @@ export default {
 					.setEmoji("🕒")
 					.setStyle(ButtonStyle.Link),
 			);
-		
+
 		await interaction.reply({ embeds: [embed], components: [row] });
 	}
 };

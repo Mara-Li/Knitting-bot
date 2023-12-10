@@ -2,10 +2,8 @@ import { Client, REST, Routes } from "discord.js";
 import dotenv from "dotenv";
 import process from "process";
 import { commands } from "../commands";
-import i18next from "../i18n/i18next";
 import { DESTROY_DATABASE, VERSION } from "../index";
-import { CommandName } from "../interface";
-import { destroyDB, getConfig } from "../maps";
+import { destroyDB } from "../maps";
 import { logInDev } from "../utils";
 
 let config = dotenv.config({ path: ".env" }).parsed;
@@ -19,7 +17,7 @@ export default (client: Client): void => {
 		if (!client.user || !client.application || !process.env.CLIENT_ID) {
 			return;
 		}
-		
+
 		console.info(`${client.user.username} is online; v.${VERSION}`);
 		const serializeCmds = commands.map( (command) => {
 			return command.data.toJSON();
@@ -39,8 +37,6 @@ export default (client: Client): void => {
 				{ body: serializeCmds }
 			);
 			logInDev(`Load in ${guild.name} done`);
-			const language = getConfig(CommandName.language, guild.id) as string ?? "en";
-			i18next.changeLanguage(language);
 		}
 		//destroy all maps
 		if (DESTROY_DATABASE) destroyDB();
