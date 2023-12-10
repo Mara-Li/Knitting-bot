@@ -24,7 +24,7 @@ export async function addUserToThread(thread: ThreadChannel, user: GuildMember) 
 
 		const fetchedMessage = await thread.messages.fetch();
 		let message = fetchedMessage.filter(m => m.author.id === thread.client.user.id).first();
-		
+
 		if (getConfig(CommandName.followOnlyRoleIn, guild)) {
 			if (message) {
 				await message.edit(userMention(user.id));
@@ -84,7 +84,7 @@ export async function getUsersToPing(thread: ThreadChannel, members: GuildMember
 	const usersToBeAdded: GuildMember[] = [];
 	for (const member of members) {
 		if (thread.permissionsFor(member).has("ViewChannel", true) && await checkIfUserNotInTheThread(thread, member)) {
-			
+
 			if (getConfig(CommandName.followOnlyRoleIn, guild) && checkMemberRoleIn("follow", member.roles, thread)) {
 				usersToBeAdded.push(member);
 				logInDev(`Add @${member.user.username} to #${thread.name} - Rules:\n- Follow Only Role In\n- Role followed in the thread`);
@@ -146,11 +146,15 @@ export async function addRoleAndUserToThread(thread: ThreadChannel) {
 	logInDev(rolesWithAccess.map(role => role.name));
 	logInDev(`Roles with access to #${thread.name} : ${rolesWithAccess.length}`);
 	if (rolesWithAccess.length > 0) {
-		getRoleToPing(thread, rolesWithAccess).then(roles => {
-			roles.forEach(role => {
-				toPing.push(...role.members.toJSON());
+		try {
+			getRoleToPing(thread, rolesWithAccess).then(roles => {
+				roles.forEach(role => {
+					toPing.push(...role.members.toJSON());
+				});
 			});
-		});
+		} catch (error) {
+			console.error(error);
+		}
 	} else {
 		const guildMembers: GuildMember[] = members.toJSON();
 		await getUsersToPing(thread, guildMembers).then(users => {
