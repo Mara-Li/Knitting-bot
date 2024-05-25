@@ -211,7 +211,7 @@
     "cmds": "Get some information about the bot",
     "desc": "A little discord bot write in TypeScript that automatically add / remove member in thread, without pinging them!",
     "footer": "Made with 💖 by Mara__Li",
-    "readMe": "https://github.com/Lisandra-dev/Knitting-bot",
+    "readMe": "https://github.com/Mara-Li/Knitting-bot",
     "title": "Information"
   },
   "logs": {
