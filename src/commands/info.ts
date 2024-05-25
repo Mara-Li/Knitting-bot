@@ -57,7 +57,7 @@ export default {
 					.setStyle(ButtonStyle.Link),
 				new ButtonBuilder()
 					.setLabel("Changelog")
-					.setURL("https://github.com/Lisandra-dev/Knitting-bot/blob/master/CHANGELOG.md")
+					.setURL("https://github.com/mara-li/Knitting-bot/blob/master/CHANGELOG.md")
 					.setEmoji("🕒")
 					.setStyle(ButtonStyle.Link),
 			);
