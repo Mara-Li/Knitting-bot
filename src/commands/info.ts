@@ -43,7 +43,7 @@ export default {
 					.setStyle(ButtonStyle.Link),
 				new ButtonBuilder()
 					.setLabel("Kofi")
-					.setURL("https://ko-fi.com/lisandra_dev")
+					.setURL("https://ko-fi.com/mara__li")
 					.setEmoji({
 						id: INFO_EMOJI.kofi,
 					})
