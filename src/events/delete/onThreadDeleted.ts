@@ -27,7 +27,6 @@ export default (client: Client): void => {
 			const threadIndex = followedThread.findIndex((followedThread) => followedThread.id === thread.id);
 			followedThread.splice(threadIndex, 1);
 			setRoleIn("follow", guildID, followed);
-			logInDev(`Thread ${thread.name} removed from follow list in a channel`);
 		}
 		if (IgnoredThreadInRoleIn) {
 			const ignored = getRoleIn("ignore",guildID);
@@ -39,21 +38,18 @@ export default (client: Client): void => {
 			const threadIndex = ignoredThread.findIndex((ignoredThread) => ignoredThread.id === thread.id);
 			ignoredThread.splice(threadIndex, 1);
 			setRoleIn("ignore", guildID,ignored);
-			logInDev(`Thread ${thread.name} removed from ignore list in a channel`);
 		}
 		if (threadIsFollowed) {
 			const followed = getMaps("follow",TypeName.thread,guildID) as ThreadChannel[];
 			const index = followed.findIndex((followed) => followed.id === thread.id);
 			followed.splice(index, 1);
 			setFollow(TypeName.thread, guildID,followed);
-			logInDev(`Thread ${thread.name} removed from follow list`);
 		}
 		if (threadIsIgnored) {
 			const ignored = getMaps("ignore",TypeName.thread,guildID) as ThreadChannel[];
 			const index = ignored.findIndex((ignored) => ignored.id === thread.id);
 			ignored.splice(index, 1);
 			setIgnore(TypeName.thread, guildID, ignored);
-			logInDev(`Thread ${thread.name} removed from ignore list`);
 		}
 	});
 };

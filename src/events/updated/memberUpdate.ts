@@ -18,7 +18,6 @@ export default (client: Client): void => {
 			const updatedRoles = newRoles.filter(role => !oldRoles.has(role.id));
 			const guildID = newMember.guild.id;
 			if (getConfig(CommandName.member, guildID) === false) return;
-			logInDev(`${oldMember.user.username} has been updated!`);
 			if (updatedRoles.size === 0) {
 				await discordLogs(guildID, client, i18next.t("logs.member.updated.noRole", {user : oldMember.user.username}));
 				return;
@@ -32,17 +31,10 @@ export default (client: Client): void => {
 					logInDev(checkRoleIn("follow", role, threadChannel));
 					return checkRoleIn("follow", role, threadChannel);});
 				const ignoredUpdatedRole = updatedRoles.filter(role => {return checkRoleIn("ignore", role, threadChannel);});
-				logInDev("Updated Role FOLLOWED IN ROLE IN:", updatedRoleAllowed.map(role => role.name), "in", threadChannel.name, "UPDATED role IGNORED in ROLE IN:", ignoredUpdatedRole.map(role => role.name));
 				if (updatedRoleAllowed.size === 0) {
-					logInDev("No role updated in", threadChannel.name);
 				} else if (ignoredUpdatedRole.size > 0) {
-					logInDev("Role ignored for", threadChannel.name);
 				} else {
-					logInDev(
-						"Role member is followed :", checkMemberRole(newMember.roles, "follow"),
-						"Role member is ignored :", checkMemberRole(newMember.roles, "ignore"),
-						"Role member is in thread followed :", checkMemberRoleIn("follow",newMember.roles, threadChannel)
-					);
+					
 
 					/**
 				 * If checkMemberRoleInFollowed is true, ignore the two others condition and add the member to the thread
@@ -54,19 +46,15 @@ export default (client: Client): void => {
 						roleIsAllowed = checkMemberRole(newMember.roles, "follow") && !checkMemberRole(newMember.roles, "ignore") && checkMemberRoleIn("ignore", newMember.roles, threadChannel);
 					}
 
-					logInDev(`Role is allowed: ${roleIsAllowed}`);
 					if (!getConfig(CommandName.followOnlyChannel, guildID)) {
 					/**
 					 * followOnlyChannel is disabled && followOnlyRole can be enabled or disabled
 					 */
-						logInDev("followOnlyChannel is disabled");
-						logInDev(`${threadChannel.name} is ignored ? ${checkThread(threadChannel, "ignore")}`);
 						if (!checkThread(threadChannel, "ignore") && roleIsAllowed) await addUserToThread(threadChannel, newMember);
 					} else {
 					/**
 					 * followOnlyChannel is enabled && followOnlyRole can be enabled or disabled
 					 */
-						logInDev("followOnlyChannel is enabled");
 						const followedThread = checkThread(threadChannel, "follow");
 						if (roleIsAllowed && followedThread) await addUserToThread(threadChannel, newMember);
 					}

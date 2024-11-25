@@ -14,12 +14,10 @@ export default (client: Client):void => {
 		try {
 			for (const command of commands) {
 				await guild.commands.create(command.data);
-				logInDev(`Command ${command.data.name} created in ${guild.name}`);
 			}
 		} catch (error) {
 			console.error(error);
 		}
-		logInDev(`${client.user?.username} has been added to ${guild.name}`);
 		console.log(guild.preferredLocale);
 		loadDBFirstTime(guild.id);
 	});

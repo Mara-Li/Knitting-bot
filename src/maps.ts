@@ -31,31 +31,6 @@ const followOnlyMaps = new Enmap({
 
 
 /**
- * Maps :
- * - Configuration {
- *     guildID: {
- *         commandName: value
- *         ...
- *     }
- * }
- * où GuildID = id du serveur
- * - Ignore {
- *    guildID: {
- *    typeName: [channelID, ...]
- *    }
- *    ...
- *    }
- * - FollowOnly {
- *   guildID: {
- *      ....
- *      }
- *      }
- */
-
-
-
-
-/**
  * Set a value in Emaps "configuration"
  * @param {CommandName} name
  * @param guildID
@@ -69,7 +44,6 @@ export function setConfig(
 ) {
 	if (name === CommandName.manualMode) return;
 	optionMaps.set(guildID, value, name);
-	logInDev(`Set ${name} to ${value}`);
 }
 
 /**
@@ -85,15 +59,6 @@ export function setIgnore<T extends keyof IgnoreFollow>(
 	if (name === TypeName.OnlyRoleIn) return;
 	guildConfig[name] = value;
 	ignoreMaps.set(guildID, guildConfig);
-	logInDev(`Set ${name}`,
-		value.map((v) => {
-			if (name === TypeName.OnlyRoleIn) {
-				const roleIn = v as RoleIn;
-				return `${roleIn.role.name} in ${roleIn.channels.map((c) => c.name).join(", ")}`;
-			} else {
-				return (v as ThreadChannel | CategoryChannel | TextChannel | ForumChannel).name;
-			}
-		}).join(", "));
 }
 
 /**
@@ -109,15 +74,6 @@ export function setFollow<T extends keyof IgnoreFollow>(
 	if (name === TypeName.OnlyRoleIn) return;
 	guildConfig[name] = value;
 	followOnlyMaps.set(guildID, guildConfig);
-	logInDev(`Set ${name}`,
-		value.map((v) => {
-			if (name === TypeName.OnlyRoleIn) {
-				const roleIn = v as RoleIn;
-				return `${roleIn.role.name} in ${roleIn.channels.map((c) => c.name).join(", ")}`;
-			} else {
-				return (v as ThreadChannel | CategoryChannel | TextChannel | ForumChannel).name;
-			}
-		}).join(", "));
 }
 
 export function setRole(
@@ -133,8 +89,6 @@ export function setRole(
 		guildConfig[TypeName.role] = value;
 		ignoreMaps.set(guildID, guildConfig);
 	}
-	logInDev(`Set ${on}Role`,
-		value.map((v) => v.name).join(", "));
 }
 
 export function setRoleIn(
@@ -150,8 +104,6 @@ export function setRoleIn(
 		guildConfig[TypeName.OnlyRoleIn] = value;
 		ignoreMaps.set(guildID, guildConfig);
 	}
-	logInDev(`Set ${on}OnlyRoleIn`,
-		value.map((v) => v.role.name + " " + v.channels.map((v) => v.name).join(", ")).join(", "));
 }
 
 
@@ -313,12 +265,10 @@ export function deleteGuild(id: string) {
 	followOnlyMaps.delete(id);
 	ignoreMaps.delete(id);
 	optionMaps.delete(id);
-	logInDev("Deleted Guild", id);
 }
 
 export function loadDBFirstTime(guild: string) {
 	followOnlyMaps.set(guild, DEFAULT_IGNORE_FOLLOW);
 	ignoreMaps.set(guild, DEFAULT_IGNORE_FOLLOW);
 	optionMaps.set(guild, DEFAULT_CONFIGURATION);
-	logInDev("Loaded DB for the first time", guild);
 }

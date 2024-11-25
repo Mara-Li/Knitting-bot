@@ -24,7 +24,7 @@ import { logInDev } from "./index";
  * @param channel {GuildBasedChannel} The channel to check
  * @returns {boolean} true if the channel is valid
  */
-export function validateChannelType(channel: GuildBasedChannel) {
+export function validateChannelType(channel: GuildBasedChannel): boolean {
 	const validChannelTypes : ChannelType[] = [ChannelType.GuildCategory, ChannelType.GuildText, ChannelType.PublicThread, ChannelType.PrivateThread, ChannelType.GuildForum];
 	return validChannelTypes.includes(channel.type);
 }
@@ -115,7 +115,6 @@ export function checkRoleIn(on: "follow"|"ignore", role: Role, thread: ThreadCha
 	const categoryOfParent = parentChannel?.parent;
 	const roleIns = getRoleIn(on, guild);
 	const find = roleIns.find(followedRole => followedRole.role.id === role.id);
-	logInDev("checkRoleIn:",`Check if ${role.name} is ${on} in #${thread.name}`);
 	if (!find) return false;
 	return find.channels.some(channel => {
 		if (channel.id === thread.id) return true;
@@ -135,7 +134,6 @@ export function checkRoleIn(on: "follow"|"ignore", role: Role, thread: ThreadCha
  */
 
 export function checkThread(channel: ThreadChannel, on: "ignore" | "follow") {
-	logInDev("checkThread:",`Check if #${channel.name} is ${on}`);
 	const guild = channel.guild.id;
 	const parentChannels = channel.parent;
 	const categoryOfParent = parentChannels?.parent;
@@ -151,11 +149,11 @@ export function checkThread(channel: ThreadChannel, on: "ignore" | "follow") {
 
 /**
  * Get all members that have the permission to view the thread
- * @param {@link Collection<string, GuildMember>} members All members of the server
- * @param {@link ThreadChannel | TextChannel} thread The thread to check
+ * @param members
+ * @param thread
  * @param {boolean} allow If true, getConfig all members that have the permission to view the thread, else getConfig all members that don't have the permission to view the thread
  */
-export function getMemberPermission(members: Collection<string, GuildMember>, thread: ThreadChannel | TextChannel, allow = true) {
+export function getMemberPermission(members: Collection<string, GuildMember>, thread: ThreadChannel | TextChannel, allow: boolean = true) {
 	if (allow) {
 		return members.filter(member => {
 			if (!thread.parent) return false;

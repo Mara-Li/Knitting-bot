@@ -159,14 +159,12 @@ export default {
 		const options = interaction.options as CommandInteractionOptionResolver;
 
 		const commands = options.getSubcommand();
-		const group = options.getSubcommandGroup();
-		logInDev("configuration", commands, group);
 		if (en("configuration.menu.log.channel.title").toLowerCase() === commands) {
 			const channel = options.getChannel(en("common.channel").toLowerCase(), true);
 			if (!channel) return;
 			setConfig(`${CommandName.log}.channel`, interaction.guild.id, channel.id);
-			interaction.reply({
-				content: (i18next.t("configuration.menu.log.channel.success", { channel: channelMention(channel.id) }) as string),
+			await interaction.reply({
+				content: (i18next.t("configuration.menu.log.channel.success", {channel: channelMention(channel.id)}) as string),
 				ephemeral: true
 			});
 		} else if (en("configuration.menu.mode.title").toLowerCase() === commands) {
@@ -174,7 +172,7 @@ export default {
 			const row = reloadButtonMode(interaction.guild.id);
 			// eslint-disable-next-line no-case-declarations
 			const embed = displayModeMenu(interaction.guild.id);
-			interaction.reply(
+			await interaction.reply(
 				{
 					embeds: [embed],
 					components: row
@@ -184,7 +182,7 @@ export default {
 			const rows = reloadButtonAuto(interaction.guild.id);
 			// eslint-disable-next-line no-case-declarations
 			const embeds = autoUpdateMenu(interaction.guild.id);
-			interaction.reply(
+			await interaction.reply(
 				{
 					embeds: [embeds],
 					components: rows
@@ -192,9 +190,9 @@ export default {
 		} else if (commands === "locale") {
 			const guild = interaction.guild;
 			const locale = options.getString("locale", true);
-			if (locale === "en") guild.setPreferredLocale("en-US" as Locale);
-			else guild.setPreferredLocale(locale as Locale);
-			interaction.reply({
+			if (locale === "en") await guild.setPreferredLocale("en-US" as Locale);
+			else await guild.setPreferredLocale(locale as Locale);
+			await interaction.reply({
 				content: `${i18next.t("configuration.language.validate", {lang: (locale as LocaleString).toUpperCase()})}`,
 				ephemeral: true
 			});
@@ -228,11 +226,11 @@ export default {
 					await updateConfig(i.customId as CommandName, i as ButtonInteraction<CacheType>);
 				})
 				?.on("end", async () => {
-					interaction.editReply({ components: [] });
+					await interaction.editReply({ components: [] });
 				});
 		} catch (error) {
 			logInDev(error);
-			interaction.editReply({ components: [] });
+			await interaction.editReply({ components: [] });
 		}
 	}
 };
@@ -359,7 +357,7 @@ async function updateConfig(command: CommandName, interaction: ButtonInteraction
 	) {
 		const embed = displayModeMenu(interaction.guild.id);
 		const rows = reloadButtonMode(interaction.guild.id);
-		interaction.editReply({ embeds: [embed], components: rows });
+		await interaction.editReply({ embeds: [embed], components: rows });
 	} else if (command === CommandName.manualMode) {
 		const truc = [CommandName.channel, CommandName.member, CommandName.thread, CommandName.newMember];
 

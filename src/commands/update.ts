@@ -105,7 +105,7 @@ async function updateAllThreads(interaction: CommandInteraction) {
 	if (!interaction.guild) return;
 	const guild = interaction.guild.id;
 	const threads = interaction.guild.channels.cache.filter((channel) =>
-		channel.isThread()
+		channel.isThread() && !channel.archived
 	);
 	await interaction.reply({
 		content: i18next.t("commands.updateAllThreads.reply") as string,
@@ -146,12 +146,10 @@ async function updateThread(interaction: CommandInteraction) {
 		});
 		return;
 	}
-	logInDev(channel as ThreadChannel);
+	
 	const mention = channelMention(channel?.id as string);
 	const isFollowed = getConfig(CommandName.followOnlyChannel, guild) && checkThread(threadOption?.channel as ThreadChannel, "follow");
-	logInDev(`${channel.name} — Configuration ROLE IN :`, !getConfig(CommandName.followOnlyRoleIn, guild));
-	logInDev(`${channel.name} isFollowed:`, !isFollowed);
-	logInDev(`${channel.name} isIgnored:`, checkThread(threadOption?.channel as ThreadChannel, "ignore"));
+	
 	if (!getConfig(CommandName.followOnlyRoleIn, guild) && (checkThread(threadOption?.channel as ThreadChannel, "ignore") && !isFollowed)) {
 		await interaction.reply({
 			content: i18next.t("ignore.message", {thread: mention}) as string,

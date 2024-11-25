@@ -133,7 +133,6 @@ export default {
 		const guild = interaction.guild.id;
 		const options = interaction.options as CommandInteractionOptionResolver;
 		const commands = options.getSubcommand();
-		logInDev("follow", commands);
 		switch (commands) {
 		case (en("common.channel").toLowerCase()):
 			if (!getConfig(CommandName.followOnlyChannel, guild)) {

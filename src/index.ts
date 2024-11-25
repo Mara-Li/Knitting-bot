@@ -28,7 +28,7 @@ const client = new Client({
 	partials: [Partials.Channel],
 });
 
-export const EMOJI = process.env.MESSAGE && process.env.MESSAGE.trim().length > 0 ? process.env.MESSAGE : "🔄";
+export const EMOJI = process.env.MESSAGE && process.env.MESSAGE.trim().length > 0 ? process.env.MESSAGE : "_ _";
 export const VERSION = pkg.version ?? "0.0.0";
 export const DESTROY_DATABASE = process.env.DESTROY === "true";
 

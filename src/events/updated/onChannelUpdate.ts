@@ -21,11 +21,9 @@ export default (client: Client): void => {
 		const guild = oldChannel.guild.id;
 		changeGuildLanguage(oldChannel.guild);
 		if (getConfig(CommandName.channel, guild) === false) return;
-		logInDev(`Channel #${getChannelName(oldChannel.id, client)} updated\n. Channel type:`, oldChannel.type, newChannel.type);
 		if (!validateChannelType(oldChannel)
 			|| !validateChannelType(newChannel)
 			|| oldChannel.permissionOverwrites.cache === newChannel.permissionOverwrites.cache) {
-			logInDev("Channel is not a text channel or permission are not changed");
 			return;
 		}
 		//getConfig all threads of this channel
@@ -50,7 +48,6 @@ export default (client: Client): void => {
 		} else {
 			const newTextChannel = newChannel as TextChannel;
 			const threads = newTextChannel.threads.cache;
-			logInDev(`Updating ${threads.size} channels of ${newChannel.name}`);
 			if (threads.size === 0) return;
 			await discordLogs(guild, client, i18next.t("logs.updated.channel", { number: threads.size, child: newTextChannel.name}));
 			threads.forEach(thread => {

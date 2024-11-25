@@ -66,13 +66,11 @@ export default (client: Client): void => {
 				const index = allIgnore.findIndex((ignored) => ignored.id === channel.id);
 				allIgnore.splice(index, 1);
 				setIgnore(TypeName.channel, guildID, allIgnore as TextChannel[]);
-				logInDev(`Channel ${channel.name} removed from ignore list`);
 			}
 			if (isFollowed) {
 				const index = allFollow.findIndex((followed) => followed.id === channel.id);
 				allFollow.splice(index, 1);
 				setIgnore(TypeName.channel, guildID, allFollow);
-				logInDev(`Channel ${channel.name} removed from follow list`);
 			}
 		} else if (channelType === ChannelType.GuildCategory) {
 			/**
@@ -86,13 +84,11 @@ export default (client: Client): void => {
 				const index = allCategoryIgnore.findIndex((ignored) => ignored.id === channel.id);
 				allCategoryIgnore.splice(index, 1);
 				setIgnore(TypeName.category, guildID, allCategoryIgnore);
-				logInDev(`Category ${channel.name} removed from ignore list`);
 			}
 			if (isCategoryFollowed) {
 				const index = allCategoryFollow.findIndex((followed) => followed.id === channel.id);
 				allCategoryFollow.splice(index, 1);
 				setIgnore(TypeName.category,guildID, allCategoryFollow);
-				logInDev(`Category ${channel.name} removed from follow list`);
 			}
 		} else if (channelType === ChannelType.GuildForum) {
 			/**
@@ -106,13 +102,11 @@ export default (client: Client): void => {
 				const index = allThreadIgnore.findIndex((ignored) => ignored.id === channel.id);
 				allThreadIgnore.splice(index, 1);
 				setIgnore(TypeName.forum, guildID, allThreadIgnore);
-				logInDev(`Forum ${channel.name} removed from ignore list`);
 			}
 			if (isForumFollowed) {
 				const index = allThreadFollow.findIndex((followed) => followed.id === channel.id);
 				allThreadFollow.splice(index, 1);
 				setIgnore(TypeName.forum, guildID, allThreadFollow);
-				logInDev(`Forum ${channel.name} removed from follow list`);
 			}
 		}
 	});

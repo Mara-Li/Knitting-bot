@@ -23,10 +23,8 @@ export default (client: Client): void => {
 			return command.data.toJSON();
 		});
 		for (const guild of client.guilds.cache.values()) {
-			logInDev(`Load in ${guild.name}`);
 			//delete all commands
 			guild.client.application?.commands.cache.forEach( (command) => {
-				logInDev(`Delete ${command.name}`);
 				command.delete();
 			});
 			//add all commands
@@ -36,7 +34,6 @@ export default (client: Client): void => {
 				Routes.applicationGuildCommands(config?.CLIENT_ID, guild.id),
 				{ body: serializeCmds }
 			);
-			logInDev(`Load in ${guild.name} done`);
 		}
 		//destroy all maps
 		if (DESTROY_DATABASE) destroyDB();
