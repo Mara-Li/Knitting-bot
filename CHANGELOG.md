@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [2.3.0](https://github.com/Mara-Li/Knitting-bot/compare/2.2.0...2.3.0) (2024-11-25)
+
+
+### Features
+
+* set language based to the user interaction ([9155ca2](https://github.com/Mara-Li/Knitting-bot/commit/9155ca221a660a35326009e4bdd7b5a3c2016690))
+* set language for logs ([c5813fe](https://github.com/Mara-Li/Knitting-bot/commit/c5813fe5e0138b68c8ef238d5f3e77aec2db8d82))
+* use cmdLn instead of manually each lang ([e92ca4f](https://github.com/Mara-Li/Knitting-bot/commit/e92ca4f93c240cf2b7724a54f59b4b6839ed9254))
+* use cmdLn instead of manually each lang ([a3e39ef](https://github.com/Mara-Li/Knitting-bot/commit/a3e39ef8ad9ad7bd75c92490a1385f8e835380cd))
+
+
+### Bug Fixes
+
+* command value not found ([e83bc9c](https://github.com/Mara-Li/Knitting-bot/commit/e83bc9c24aaec4c171db893a6343775175a1ae31))
+* do not revive old threads (archived), only add user to existing thread ([24d3d8d](https://github.com/Mara-Li/Knitting-bot/commit/24d3d8d38dfd2665d3d68111be51c7982da087ef))
+* remove useless cmd ([07ee896](https://github.com/Mara-Li/Knitting-bot/commit/07ee8961ff40ac692e9a8280c08e859231df4240))
+
 ## [2.2.0](https://github.com/Lisandra-dev/DiscordThreadMember/compare/2.1.0...2.2.0) (2023-07-14)
 
 
