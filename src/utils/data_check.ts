@@ -25,7 +25,13 @@ import { logInDev } from "./index";
  * @returns {boolean} true if the channel is valid
  */
 export function validateChannelType(channel: GuildBasedChannel): boolean {
-	const validChannelTypes : ChannelType[] = [ChannelType.GuildCategory, ChannelType.GuildText, ChannelType.PublicThread, ChannelType.PrivateThread, ChannelType.GuildForum];
+	const validChannelTypes: ChannelType[] = [
+		ChannelType.GuildCategory,
+		ChannelType.GuildText,
+		ChannelType.PublicThread,
+		ChannelType.PrivateThread,
+		ChannelType.GuildForum,
+	];
 	return validChannelTypes.includes(channel.type);
 }
 
@@ -35,14 +41,17 @@ export function validateChannelType(channel: GuildBasedChannel): boolean {
  * @param {ThreadChannel} thread - The thread to check
  * @param {GuildMember} memberToCheck - The member to check
  */
-export async function checkIfUserNotInTheThread(thread: ThreadChannel, memberToCheck: GuildMember) {
+export async function checkIfUserNotInTheThread(
+	thread: ThreadChannel,
+	memberToCheck: GuildMember,
+) {
 	const members = await thread.members.fetch();
 	const threadMemberArray: ThreadMember<boolean>[] = [];
 	// biome-ignore lint/complexity/noForEach: <explanation>
-	members.forEach(member => {
+	members.forEach((member) => {
 		threadMemberArray.push(member);
 	});
-	return !threadMemberArray.some(member => member.id === memberToCheck.id);
+	return !threadMemberArray.some((member) => member.id === memberToCheck.id);
 }
 
 /**
@@ -52,12 +61,18 @@ export async function checkIfUserNotInTheThread(thread: ThreadChannel, memberToC
  * @param role {@link GuildMemberRoleManager} The role to check
  * @param on {"ignore" | "follow"} The settings map to check
  */
-export function checkMemberRole(role: GuildMemberRoleManager, on: "ignore" | "follow") {
+export function checkMemberRole(
+	role: GuildMemberRoleManager,
+	on: "ignore" | "follow",
+) {
 	const guild = role.guild.id;
-	if (on === "follow" && !getConfig(CommandName.followOnlyRole, guild)) return true;
+	if (on === "follow" && !getConfig(CommandName.followOnlyRole, guild))
+		return true;
 	const roles = getRole(on, guild);
 	const allMemberRoles = role.cache;
-	return allMemberRoles.some(memberRole => roles.some(r => r.id === memberRole.id));
+	return allMemberRoles.some((memberRole) =>
+		roles.some((r) => r.id === memberRole.id),
+	);
 }
 
 /**
@@ -69,9 +84,10 @@ export function checkMemberRole(role: GuildMemberRoleManager, on: "ignore" | "fo
  */
 export function checkRole(role: Role, on: "ignore" | "follow") {
 	const guild = role.guild.id;
-	if (on === "follow" && !getConfig(CommandName.followOnlyRole, guild)) return true;
+	if (on === "follow" && !getConfig(CommandName.followOnlyRole, guild))
+		return true;
 	const allFollowedRoles = getRole(on, guild);
-	return allFollowedRoles.some(followedRole => followedRole.id === role.id);
+	return allFollowedRoles.some((followedRole) => followedRole.id === role.id);
 }
 
 /**
@@ -82,17 +98,22 @@ export function checkRole(role: Role, on: "ignore" | "follow") {
  * @param roleManager {@link GuildMemberRoleManager} The role to check
  * @param thread {@link ThreadChannel} The thread to check
  */
-export function checkMemberRoleIn(on: "follow" | "ignore", roleManager: GuildMemberRoleManager, thread: ThreadChannel) {
+export function checkMemberRoleIn(
+	on: "follow" | "ignore",
+	roleManager: GuildMemberRoleManager,
+	thread: ThreadChannel,
+) {
 	const guild = thread.guild.id;
-	if (on === "follow" && !getConfig(CommandName.followOnlyRoleIn, guild)) return true;
+	if (on === "follow" && !getConfig(CommandName.followOnlyRoleIn, guild))
+		return true;
 	const roles = roleManager.cache;
 	const parentChannel = thread.parent;
 	const categoryOfParent = parentChannel?.parent;
 	const roleIn = getRoleIn(on, guild);
-	return roles.some(role => {
-		const find = roleIn.find(r => r.role.id === role.id);
+	return roles.some((role) => {
+		const find = roleIn.find((r) => r.role.id === role.id);
 		if (!find) return false;
-		return find.channels.some(channel => {
+		return find.channels.some((channel) => {
 			if (channel.id === thread.id) return true;
 			if (channel.id === parentChannel?.id) return true;
 			return channel.id === categoryOfParent?.id;
@@ -108,21 +129,24 @@ export function checkMemberRoleIn(on: "follow" | "ignore", roleManager: GuildMem
  * @param role {@link Role} The role to check
  * @param thread {@link ThreadChannel} The thread to check
  */
-export function checkRoleIn(on: "follow"|"ignore", role: Role, thread: ThreadChannel) {
+export function checkRoleIn(
+	on: "follow" | "ignore",
+	role: Role,
+	thread: ThreadChannel,
+) {
 	const guild = thread.guild.id;
-	if (on === "follow" && !getConfig(CommandName.followOnlyRoleIn, guild)) return true;
+	if (on === "follow" && !getConfig(CommandName.followOnlyRoleIn, guild))
+		return true;
 	const parentChannel = thread.parent;
 	const categoryOfParent = parentChannel?.parent;
 	const roleIns = getRoleIn(on, guild);
-	const find = roleIns.find(followedRole => followedRole.role.id === role.id);
+	const find = roleIns.find((followedRole) => followedRole.role.id === role.id);
 	if (!find) return false;
-	return find.channels.some(channel => {
+	return find.channels.some((channel) => {
 		if (channel.id === thread.id) return true;
-	 if (channel.id === parentChannel?.id) return true;
-	 return channel.id === categoryOfParent?.id;
-	
+		if (channel.id === parentChannel?.id) return true;
+		return channel.id === categoryOfParent?.id;
 	});
-	
 }
 
 /**
@@ -137,14 +161,24 @@ export function checkThread(channel: ThreadChannel, on: "ignore" | "follow") {
 	const guild = channel.guild.id;
 	const parentChannels = channel.parent;
 	const categoryOfParent = parentChannels?.parent;
-	const followedThread = getMaps(on,TypeName.thread, guild) as ThreadChannel[] || [];
-	const followedChannels = getMaps(on,TypeName.channel, guild) as TextChannel[] || [];
-	const followedCategories = getMaps(on,TypeName.category, guild) as CategoryChannel[] || [];
-	const followedForum = getMaps(on,TypeName.forum, guild) as ForumChannel[] || [];
-	return followedChannels.some(followedChannel => followedChannel.id === channel.id) ||
-		followedForum.some(followedForum => followedForum.id === channel.id) ||
-		followedCategories.some(followedCategory => followedCategory.id === categoryOfParent?.id) ||
-		followedThread.some(followedThread => followedThread.id === channel.id);
+	const followedThread =
+		(getMaps(on, TypeName.thread, guild) as ThreadChannel[]) || [];
+	const followedChannels =
+		(getMaps(on, TypeName.channel, guild) as TextChannel[]) || [];
+	const followedCategories =
+		(getMaps(on, TypeName.category, guild) as CategoryChannel[]) || [];
+	const followedForum =
+		(getMaps(on, TypeName.forum, guild) as ForumChannel[]) || [];
+	return (
+		followedChannels.some(
+			(followedChannel) => followedChannel.id === channel.id,
+		) ||
+		followedForum.some((followedForum) => followedForum.id === channel.id) ||
+		followedCategories.some(
+			(followedCategory) => followedCategory.id === categoryOfParent?.id,
+		) ||
+		followedThread.some((followedThread) => followedThread.id === channel.id)
+	);
 }
 
 /**
@@ -153,9 +187,13 @@ export function checkThread(channel: ThreadChannel, on: "ignore" | "follow") {
  * @param thread
  * @param {boolean} allow If true, getConfig all members that have the permission to view the thread, else getConfig all members that don't have the permission to view the thread
  */
-export function getMemberPermission(members: Collection<string, GuildMember>, thread: ThreadChannel | TextChannel, allow = true) {
+export function getMemberPermission(
+	members: Collection<string, GuildMember>,
+	thread: ThreadChannel | TextChannel,
+	allow = true,
+) {
 	if (allow) {
-		return members.filter(member => {
+		return members.filter((member) => {
 			if (!thread.parent) return false;
 			const memberPermissions = thread.parent.permissionsFor(member);
 			return (
@@ -165,7 +203,7 @@ export function getMemberPermission(members: Collection<string, GuildMember>, th
 		});
 	}
 	if (!allow) {
-		return members.filter(member => {
+		return members.filter((member) => {
 			const memberPermissions = thread.permissionsFor(member);
 			return (
 				!memberPermissions.has("ViewChannel", true) ||

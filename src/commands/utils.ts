@@ -1,5 +1,5 @@
 import {
-	channelMention, 
+	channelMention,
 	roleMention,
 	CategoryChannel,
 	CommandInteraction,
@@ -21,11 +21,18 @@ const en = i18next.getFixedT("en");
  * - The channel is not. If not given, the role will be deleted from the list
  * @param on {"follow" | "ignore"} The mode to use
  */
-export async function interactionRoleInChannel(interaction: CommandInteraction, on: "follow" | "ignore") {
+export async function interactionRoleInChannel(
+	interaction: CommandInteraction,
+	on: "follow" | "ignore",
+) {
 	const opposite = on === "follow" ? "ignore" : "follow";
 	if (!interaction.guild) return;
 	const guild = interaction.guild.id;
-	if (on === "follow" && (getConfig(CommandName.followOnlyChannel, guild) || getConfig(CommandName.followOnlyRole, guild))) {
+	if (
+		on === "follow" &&
+		(getConfig(CommandName.followOnlyChannel, guild) ||
+			getConfig(CommandName.followOnlyRole, guild))
+	) {
 		await interaction.reply({
 			content: i18next.t("roleIn.error.otherMode") as string,
 			ephemeral: true,
@@ -44,7 +51,7 @@ export async function interactionRoleInChannel(interaction: CommandInteraction, 
 
 	if (!role || !(role.role instanceof Role)) {
 		await interaction.reply({
-			content: i18next.t("ignore.role.error", {role: role?.name}) as string,
+			content: i18next.t("ignore.role.error", { role: role?.name }) as string,
 			ephemeral: true,
 		});
 		return;
@@ -55,11 +62,15 @@ export async function interactionRoleInChannel(interaction: CommandInteraction, 
 		//delete the role from the list
 		const allRoleIn = getRoleIn(on, guild);
 		const newRolesIn: RoleIn[] = allRoleIn.filter(
-			(r: RoleIn) => r.role.id !== role.role?.id);
+			(r: RoleIn) => r.role.id !== role.role?.id,
+		);
 		setRoleIn(on, guild, newRolesIn);
 		const translationOn = i18next.t(`roleIn.on.${on}`);
 		await interaction.reply({
-			content: i18next.t("roleIn.noLonger.any", {mention: mention, on: translationOn}) as string,
+			content: i18next.t("roleIn.noLonger.any", {
+				mention: mention,
+				on: translationOn,
+			}) as string,
 		});
 		return;
 	}
@@ -69,18 +80,21 @@ export async function interactionRoleInChannel(interaction: CommandInteraction, 
 	const allRoleIn = getRoleIn(on, guild);
 	//search for the role in the array
 	const roleIn = allRoleIn.find(
-		(roleIn: RoleIn) =>
-			roleIn.role.id === role.role?.id
+		(roleIn: RoleIn) => roleIn.role.id === role.role?.id,
 	);
 	const oppositeRolesIn = getRoleIn(opposite, guild);
 	const oppositeRoleFind = oppositeRolesIn.find(
-		(roleIn: RoleIn) => roleIn.role.id === role.role?.id
+		(roleIn: RoleIn) => roleIn.role.id === role.role?.id,
 	);
-	
+
 	/** Verify that the role is not ignored for the same channel */
-	if (oppositeRoleFind && oppositeRoleFind.channels.some(
-		(chan: ForumChannel | CategoryChannel | ThreadChannel | TextChannel) => chan.id === channel.channel?.id
-	)) {
+	if (
+		oppositeRoleFind &&
+		oppositeRoleFind.channels.some(
+			(chan: ForumChannel | CategoryChannel | ThreadChannel | TextChannel) =>
+				chan.id === channel.channel?.id,
+		)
+	) {
 		const translationOpposite = i18next.t(`roleIn.on.${opposite}`);
 		await interaction.reply({
 			content: i18next.t("roleIn.already", {
@@ -95,11 +109,18 @@ export async function interactionRoleInChannel(interaction: CommandInteraction, 
 	if (roleIn) {
 		/** Verify if the channel is already in the list */
 		const some = roleIn.channels.some(
-			(chan: ForumChannel | CategoryChannel | ThreadChannel | TextChannel) => chan.id === channel.channel?.id
+			(chan: ForumChannel | CategoryChannel | ThreadChannel | TextChannel) =>
+				chan.id === channel.channel?.id,
 		);
 		if (some) {
 			roleIn.channels = roleIn.channels.filter(
-				(followedChannel: ForumChannel | CategoryChannel | ThreadChannel | TextChannel) => followedChannel.id !== channel.channel?.id
+				(
+					followedChannel:
+						| ForumChannel
+						| CategoryChannel
+						| ThreadChannel
+						| TextChannel,
+				) => followedChannel.id !== channel.channel?.id,
 			);
 			//save
 			setRoleIn(on, guild, allRoleIn);
@@ -114,39 +135,50 @@ export async function interactionRoleInChannel(interaction: CommandInteraction, 
 			/** If the role is not followed in any channel, remove it from the list */
 			if (roleIn.channels.length === 0) {
 				const newRolesIn: RoleIn[] = allRoleIn.filter(
-					(r: RoleIn) => r.role.id !== role.role?.id
+					(r: RoleIn) => r.role.id !== role.role?.id,
 				);
-				setRoleIn(on,guild, newRolesIn);
+				setRoleIn(on, guild, newRolesIn);
 			}
 		} else {
 			/** Add the channel to the list */
-			roleIn.channels.push(channel.channel as CategoryChannel | ForumChannel | ThreadChannel | TextChannel);
+			roleIn.channels.push(
+				channel.channel as
+					| CategoryChannel
+					| ForumChannel
+					| ThreadChannel
+					| TextChannel,
+			);
 			//save
-			setRoleIn(on, guild,allRoleIn);
+			setRoleIn(on, guild, allRoleIn);
 			await interaction.reply({
 				content: i18next.t("roleIn.enabled.chan", {
 					mention: mention,
 					on: i18next.t(`roleIn.on.${on}`),
-					chan: channelMention(channel.channel?.id ?? "")
+					chan: channelMention(channel.channel?.id ?? ""),
 				}) as string,
 				ephemeral: true,
 			});
 		}
-		
 	}
 	//if not, create it
 	else {
 		const newRoleIn: RoleIn = {
 			role: role.role,
-			channels: [channel.channel as CategoryChannel | ForumChannel | ThreadChannel | TextChannel],
+			channels: [
+				channel.channel as
+					| CategoryChannel
+					| ForumChannel
+					| ThreadChannel
+					| TextChannel,
+			],
 		};
 		allRoleIn.push(newRoleIn);
-		setRoleIn(on,guild, allRoleIn);
+		setRoleIn(on, guild, allRoleIn);
 		await interaction.reply({
 			content: i18next.t("roleIn.enabled.chan", {
 				mention: mention,
 				on: i18next.t(`roleIn.on.${on}`),
-				chan: channelMention(channel.channel?.id ?? "")
+				chan: channelMention(channel.channel?.id ?? ""),
 			}) as string,
 			ephemeral: true,
 		});

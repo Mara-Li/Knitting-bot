@@ -28,14 +28,17 @@ const client = new Client({
 	partials: [Partials.Channel],
 });
 
-export const EMOJI = process.env.MESSAGE && process.env.MESSAGE.trim().length > 0 ? process.env.MESSAGE : "_ _";
+export const EMOJI =
+	process.env.MESSAGE && process.env.MESSAGE.trim().length > 0
+		? process.env.MESSAGE
+		: "_ _";
 export const VERSION = pkg.version ?? "0.0.0";
 export const DESTROY_DATABASE = process.env.DESTROY === "true";
 
 export const INFO_EMOJI = {
-	"github" : process.env.GITHUB_EMOJI ?? "??",
-	"kofi" : process.env.KOFI ?? "??",
-	"discord" : process.env.DISCORD ?? "??",
+	github: process.env.GITHUB_EMOJI ?? "??",
+	kofi: process.env.KOFI ?? "??",
+	discord: process.env.DISCORD ?? "??",
 };
 
 try {
@@ -54,4 +57,3 @@ try {
 	console.error(error);
 }
 client.login(config.parsed?.DISCORD_TOKEN);
-

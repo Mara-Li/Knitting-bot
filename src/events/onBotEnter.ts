@@ -9,7 +9,7 @@ import { logInDev } from "../utils";
  * @returns {void}
  */
 
-export default (client: Client):void => {
+export default (client: Client): void => {
 	client.on("guildCreate", async (guild) => {
 		try {
 			for (const command of commands) {

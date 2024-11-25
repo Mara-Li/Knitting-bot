@@ -20,7 +20,11 @@ export default (client: Client): void => {
 		if (getConfig(CommandName.thread, guild) === false) return;
 		logInDev(`Thread ${thread.name} created!`);
 		changeGuildLanguage(thread.guild);
-		await discordLogs(guild, client, i18next.t("logs.thread.created", {thread : thread.name}));
+		await discordLogs(
+			guild,
+			client,
+			i18next.t("logs.thread.created", { thread: thread.name }),
+		);
 		/** automatically add the bot to the thread */
 		await thread.join();
 		if (!getConfig(CommandName.followOnlyChannel, guild)) {

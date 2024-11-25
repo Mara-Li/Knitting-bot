@@ -8,7 +8,7 @@ export default (client: Client): void => {
 		if (!interaction.isCommand()) return;
 		changeLanguage(interaction);
 		const command = commands.find(
-			(cmd) => cmd.data.name === interaction.commandName
+			(cmd) => cmd.data.name === interaction.commandName,
 		);
 		if (!command) return;
 
@@ -17,7 +17,7 @@ export default (client: Client): void => {
 		} catch (error) {
 			console.log(error);
 			if (!interaction.channel || interaction.channel.isDMBased()) return;
-			await (interaction.channel).send({
+			await interaction.channel.send({
 				content: i18next.t("common.error", { error: error }) as string,
 			});
 		}

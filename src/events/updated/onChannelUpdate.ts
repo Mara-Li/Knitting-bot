@@ -14,16 +14,22 @@ import i18next from "i18next";
  */
 
 export default (client: Client): void => {
-	client.on("channelUpdate", async (
-		oldChannel,
-		newChannel) => {
-		if (oldChannel.type === ChannelType.DM || newChannel.type === ChannelType.DM || !oldChannel.guild) return;
+	client.on("channelUpdate", async (oldChannel, newChannel) => {
+		if (
+			oldChannel.type === ChannelType.DM ||
+			newChannel.type === ChannelType.DM ||
+			!oldChannel.guild
+		)
+			return;
 		const guild = oldChannel.guild.id;
 		changeGuildLanguage(oldChannel.guild);
 		if (getConfig(CommandName.channel, guild) === false) return;
-		if (!validateChannelType(oldChannel)
-			|| !validateChannelType(newChannel)
-			|| oldChannel.permissionOverwrites.cache === newChannel.permissionOverwrites.cache) {
+		if (
+			!validateChannelType(oldChannel) ||
+			!validateChannelType(newChannel) ||
+			oldChannel.permissionOverwrites.cache ===
+				newChannel.permissionOverwrites.cache
+		) {
 			return;
 		}
 		//getConfig all threads of this channel
@@ -32,13 +38,22 @@ export default (client: Client): void => {
 			//get all threads of the channels in the category
 			const children = newChannel.children.cache;
 			if (children.size === 0) return;
-			children.forEach(child => {
+			children.forEach((child) => {
 				if (child.type === ChannelType.GuildText) {
 					const threads = (child as TextChannel).threads.cache;
-					if (threads.size > 0) discordLogs(guild, client, i18next.t("logs.updated.channel", { number: threads.size, child: child.name}));
-					threads.forEach(thread => {
+					if (threads.size > 0)
+						discordLogs(
+							guild,
+							client,
+							i18next.t("logs.updated.channel", {
+								number: threads.size,
+								child: child.name,
+							}),
+						);
+					threads.forEach((thread) => {
 						if (!getConfig(CommandName.followOnlyChannel, guild)) {
-							if (!checkThread(thread, "ignore")) addRoleAndUserToThread(thread);
+							if (!checkThread(thread, "ignore"))
+								addRoleAndUserToThread(thread);
 						} else {
 							if (checkThread(thread, "follow")) addRoleAndUserToThread(thread);
 						}
@@ -49,8 +64,15 @@ export default (client: Client): void => {
 			const newTextChannel = newChannel as TextChannel;
 			const threads = newTextChannel.threads.cache;
 			if (threads.size === 0) return;
-			await discordLogs(guild, client, i18next.t("logs.updated.channel", { number: threads.size, child: newTextChannel.name}));
-			threads.forEach(thread => {
+			await discordLogs(
+				guild,
+				client,
+				i18next.t("logs.updated.channel", {
+					number: threads.size,
+					child: newTextChannel.name,
+				}),
+			);
+			threads.forEach((thread) => {
 				if (!getConfig(CommandName.followOnlyChannel, guild)) {
 					if (!checkThread(thread, "ignore")) addRoleAndUserToThread(thread);
 				} else {
@@ -60,7 +82,6 @@ export default (client: Client): void => {
 		}
 	});
 };
-
 
 /**
  * @description Get the name of a channel

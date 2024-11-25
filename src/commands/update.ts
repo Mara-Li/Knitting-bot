@@ -46,14 +46,17 @@ export default {
 							fr: fr("common.thread").toLowerCase(),
 						})
 						.setDescription(
-							en("commands.updateSpecificThread.option.description")
+							en("commands.updateSpecificThread.option.description"),
 						)
 						.setDescriptionLocalizations({
 							fr: fr("commands.updateSpecificThread.option.description"),
 						})
 						.setRequired(false)
-						.addChannelTypes(ChannelType.PrivateThread, ChannelType.PublicThread)
-				)
+						.addChannelTypes(
+							ChannelType.PrivateThread,
+							ChannelType.PublicThread,
+						),
+				),
 		)
 		.addSubcommand((subcommand) =>
 			subcommand
@@ -64,7 +67,7 @@ export default {
 				.setDescription(en("commands.updateAllThreads.description"))
 				.setDescriptionLocalizations({
 					fr: fr("commands.updateAllThreads.description"),
-				})
+				}),
 		)
 		.addSubcommand((subcommand) =>
 			subcommand
@@ -75,24 +78,24 @@ export default {
 				.setDescription(en("commands.help.description"))
 				.setDescriptionLocalizations({
 					fr: fr("commands.help.description"),
-				})
+				}),
 		),
 	async execute(interaction: CommandInteraction) {
 		if (!interaction.guild) return;
 		const options = interaction.options as CommandInteractionOptionResolver;
 		const commands = options.getSubcommand();
 		switch (commands) {
-		case en("commands.updateAllThreads.name"):
-			await updateAllThreads(interaction);
-			break;
-		case en("common.thread").toLowerCase():
-			await updateThread(interaction);
-			break;
-		case en("commands.help.name"):
-			await displayHelp(interaction);
-			break;
-		default:
-			await displayHelp(interaction);
+			case en("commands.updateAllThreads.name"):
+				await updateAllThreads(interaction);
+				break;
+			case en("common.thread").toLowerCase():
+				await updateThread(interaction);
+				break;
+			case en("commands.help.name"):
+				await displayHelp(interaction);
+				break;
+			default:
+				await displayHelp(interaction);
 		}
 	},
 };
@@ -104,8 +107,8 @@ export default {
 async function updateAllThreads(interaction: CommandInteraction) {
 	if (!interaction.guild) return;
 	const guild = interaction.guild.id;
-	const threads = interaction.guild.channels.cache.filter((channel) =>
-		channel.isThread() && !channel.archived
+	const threads = interaction.guild.channels.cache.filter(
+		(channel) => channel.isThread() && !channel.archived,
 	);
 	await interaction.reply({
 		content: i18next.t("commands.updateAllThreads.reply") as string,
@@ -114,10 +117,12 @@ async function updateAllThreads(interaction: CommandInteraction) {
 	const count = threads.size;
 	for (const thread of threads.values()) {
 		const threadChannel = thread as ThreadChannel;
-		if (!getConfig(CommandName.followOnlyChannel, guild) && !checkThread(threadChannel, "ignore")) {
+		if (
+			!getConfig(CommandName.followOnlyChannel, guild) &&
+			!checkThread(threadChannel, "ignore")
+		) {
 			await addRoleAndUserToThread(threadChannel);
-		}
-		else if (checkThread(threadChannel, "follow")) {
+		} else if (checkThread(threadChannel, "follow")) {
 			await addRoleAndUserToThread(threadChannel);
 		}
 	}
@@ -137,7 +142,9 @@ async function updateAllThreads(interaction: CommandInteraction) {
 async function updateThread(interaction: CommandInteraction) {
 	if (!interaction.guild) return;
 	const guild = interaction.guild.id;
-	const threadOption = interaction.options.get(i18next.t("common.thread").toLowerCase()) ?? interaction;
+	const threadOption =
+		interaction.options.get(i18next.t("common.thread").toLowerCase()) ??
+		interaction;
 	const channel = threadOption?.channel;
 	if (!channel || !(channel instanceof ThreadChannel)) {
 		await interaction.reply({
@@ -146,13 +153,19 @@ async function updateThread(interaction: CommandInteraction) {
 		});
 		return;
 	}
-	
+
 	const mention = channelMention(channel?.id as string);
-	const isFollowed = getConfig(CommandName.followOnlyChannel, guild) && checkThread(threadOption?.channel as ThreadChannel, "follow");
-	
-	if (!getConfig(CommandName.followOnlyRoleIn, guild) && (checkThread(threadOption?.channel as ThreadChannel, "ignore") && !isFollowed)) {
+	const isFollowed =
+		getConfig(CommandName.followOnlyChannel, guild) &&
+		checkThread(threadOption?.channel as ThreadChannel, "follow");
+
+	if (
+		!getConfig(CommandName.followOnlyRoleIn, guild) &&
+		checkThread(threadOption?.channel as ThreadChannel, "ignore") &&
+		!isFollowed
+	) {
 		await interaction.reply({
-			content: i18next.t("ignore.message", {thread: mention}) as string,
+			content: i18next.t("ignore.message", { thread: mention }) as string,
 			ephemeral: true,
 		});
 		return;
@@ -165,7 +178,6 @@ async function updateThread(interaction: CommandInteraction) {
 	await interaction.editReply({
 		content: i18next.t("commands.success", { channel: mention }) as string,
 	});
-
 }
 
 /**
@@ -173,14 +185,12 @@ async function updateThread(interaction: CommandInteraction) {
  * @param interaction {@link CommandInteraction} The trigger, to reply to it
  */
 async function displayHelp(interaction: CommandInteraction) {
-	const constructDesc: string = ((((
-		i18next.t("commands.help.desc") as string)
-		+ i18next.t("commands.help.all")) as string)
-		+ i18next.t("commands.help.thread")) as string;
+	const constructDesc: string = ((((i18next.t("commands.help.desc") as string) +
+		i18next.t("commands.help.all")) as string) +
+		i18next.t("commands.help.thread")) as string;
 	const embed = new EmbedBuilder()
 		.setTitle(i18next.t("commands.help.title") as string)
 		.setDescription(constructDesc)
 		.setColor("#53dcaa");
 	await interaction.reply({ embeds: [embed], ephemeral: true });
 }
-

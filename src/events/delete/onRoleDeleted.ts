@@ -5,10 +5,18 @@ import { logInDev } from "../../utils";
 export default (client: Client): void => {
 	client.on("roleDelete", (role) => {
 		const guildID = role.guild.id;
-		const isFollowed = getRole("follow", guildID).some((followed) => followed.id === role.id);
-		const isIgnored = getRole("ignore", guildID).some((ignored) => ignored.id === role.id);
-		const followedRoleIn = getRoleIn("follow", guildID).some((followed) => followed.role.id === role.id);
-		const ignoredRoleIn = getRoleIn("ignore", guildID).some((ignored) => ignored.role.id === role.id);
+		const isFollowed = getRole("follow", guildID).some(
+			(followed) => followed.id === role.id,
+		);
+		const isIgnored = getRole("ignore", guildID).some(
+			(ignored) => ignored.id === role.id,
+		);
+		const followedRoleIn = getRoleIn("follow", guildID).some(
+			(followed) => followed.role.id === role.id,
+		);
+		const ignoredRoleIn = getRoleIn("ignore", guildID).some(
+			(ignored) => ignored.role.id === role.id,
+		);
 		if (isFollowed) {
 			const followed = getRole("follow", guildID);
 			const index = followed.findIndex((followed) => followed.id === role.id);
@@ -16,22 +24,24 @@ export default (client: Client): void => {
 			setRole("follow", guildID, followed);
 		}
 		if (isIgnored) {
-			const ignored = getRole("ignore",guildID);
+			const ignored = getRole("ignore", guildID);
 			const index = ignored.findIndex((ignored) => ignored.id === role.id);
 			ignored.splice(index, 1);
-			setRole("ignore", guildID,ignored);
+			setRole("ignore", guildID, ignored);
 		}
 		if (followedRoleIn) {
-			const followed = getRoleIn("follow",guildID);
-			const index = followed.findIndex((followed) => followed.role.id === role.id);
+			const followed = getRoleIn("follow", guildID);
+			const index = followed.findIndex(
+				(followed) => followed.role.id === role.id,
+			);
 			followed.splice(index, 1);
-			setRoleIn("follow",guildID, followed);
+			setRoleIn("follow", guildID, followed);
 		}
 		if (ignoredRoleIn) {
-			const ignored = getRoleIn("ignore",guildID);
+			const ignored = getRoleIn("ignore", guildID);
 			const index = ignored.findIndex((ignored) => ignored.role.id === role.id);
 			ignored.splice(index, 1);
-			setRoleIn("ignore",guildID, ignored);
+			setRoleIn("ignore", guildID, ignored);
 		}
 	});
 };

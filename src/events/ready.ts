@@ -19,12 +19,12 @@ export default (client: Client): void => {
 		}
 
 		console.info(`${client.user.username} is online; v.${VERSION}`);
-		const serializeCmds = commands.map( (command) => {
+		const serializeCmds = commands.map((command) => {
 			return command.data.toJSON();
 		});
 		for (const guild of client.guilds.cache.values()) {
 			//delete all commands
-			guild.client.application?.commands.cache.forEach( (command) => {
+			guild.client.application?.commands.cache.forEach((command) => {
 				command.delete();
 			});
 			//add all commands
@@ -32,7 +32,7 @@ export default (client: Client): void => {
 				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 				//@ts-ignore
 				Routes.applicationGuildCommands(config?.CLIENT_ID, guild.id),
-				{ body: serializeCmds }
+				{ body: serializeCmds },
 			);
 		}
 		//destroy all maps
