@@ -16,7 +16,6 @@ import {
 	type ButtonInteraction,
 	ButtonStyle,
 	type CacheType,
-	channelMention,
 	ChannelType,
 	type CommandInteraction,
 	type CommandInteractionOptionResolver,
@@ -26,8 +25,10 @@ import {
 	PermissionFlagsBits,
 	SlashCommandBuilder,
 	type StringSelectMenuInteraction,
+	channelMention,
 } from "discord.js";
-import { default as i18next } from "../i18n/i18next";
+import { cmdLn } from "../i18n";
+import { default as i18next } from "../i18n/init";
 import { CommandName } from "../interface";
 import { getConfig, setConfig } from "../maps";
 import { logInDev } from "../utils";
@@ -38,54 +39,44 @@ const en = i18next.getFixedT("en");
 export default {
 	data: new SlashCommandBuilder()
 		.setName(en("configuration.main.name"))
-		.setNameLocalizations({
-			fr: fr("configuration.main.name"),
-		})
+		.setNameLocalizations(cmdLn("configuration.main.name"))
 		.setDescription(en("configuration.main.description"))
-		.setDescriptionLocalizations({
-			fr: fr("configuration.main.description"),
-		})
+		.setDescriptionLocalizations(cmdLn("configuration.main.description"))
 		.setDefaultMemberPermissions(PermissionFlagsBits.ManageThreads)
 		.addSubcommandGroup((subcommandGroup) =>
 			subcommandGroup
 				.setName(en("configuration.menu.general.title").toLowerCase())
-				.setNameLocalizations({
-					fr: fr("configuration.menu.general.title").toLowerCase(),
-				})
+				.setNameLocalizations(cmdLn("configuration.menu.general.title"))
 				.setDescription(en("configuration.menu.general.desc"))
 				.addSubcommand((subcommand) =>
 					subcommand
 						.setName(
 							en("configuration.menu.general.display.title").toLowerCase(),
 						)
-						.setNameLocalizations({
-							fr: fr("configuration.menu.general.display.title").toLowerCase(),
-						})
+						.setNameLocalizations(
+							cmdLn("configuration.menu.general.display.title", true),
+						)
 						.setDescription(en("configuration.menu.general.display.desc"))
-						.setDescriptionLocalizations({
-							fr: fr("configuration.menu.general.display.desc"),
-						}),
+						.setDescriptionLocalizations(
+							cmdLn("configuration.menu.general.display.desc"),
+						),
 				)
 				.addSubcommand((subcommand) =>
 					subcommand
 						.setName(en("configuration.menu.log.channel.title").toLowerCase())
-						.setNameLocalizations({
-							fr: fr("configuration.menu.log.channel.title").toLowerCase(),
-						})
+						.setNameLocalizations(
+							cmdLn("configuration.menu.log.channel.title", true),
+						)
 						.setDescription(en("configuration.menu.log.desc"))
-						.setDescriptionLocalizations({
-							fr: fr("configuration.menu.log.desc"),
-						})
+						.setDescriptionLocalizations(cmdLn("configuration.menu.log.desc"))
 						.addChannelOption((option) =>
 							option
 								.setName(en("common.channel").toLowerCase())
-								.setNameLocalizations({
-									fr: fr("common.channel").toLowerCase(),
-								})
+								.setNameLocalizations(cmdLn("common.channel", true))
 								.setDescription(en("configuration.menu.log.channel.desc"))
-								.setDescriptionLocalizations({
-									fr: fr("configuration.menu.log.channel.desc"),
-								})
+								.setDescriptionLocalizations(
+									cmdLn("configuration.menu.log.channel.desc"),
+								)
 								.setRequired(true)
 								.addChannelTypes(
 									ChannelType.GuildText,
@@ -100,24 +91,16 @@ export default {
 		.addSubcommand((subcommand) =>
 			subcommand
 				.setName(en("commands.help.name").toLowerCase())
-				.setNameLocalizations({
-					fr: fr("commands.help.name").toLowerCase(),
-				})
+				.setNameLocalizations(cmdLn("commands.help.name", true))
 				.setDescription(en("configuration.menu.help.desc"))
-				.setDescriptionLocalizations({
-					fr: fr("configuration.menu.help.desc"),
-				}),
+				.setDescriptionLocalizations(cmdLn("configuration.menu.help.desc")),
 		)
 		.addSubcommand((subcommand) =>
 			subcommand
 				.setName(en("configuration.menu.mode.title").toLowerCase())
-				.setNameLocalizations({
-					fr: fr("configuration.menu.mode.title").toLowerCase(),
-				})
+				.setNameLocalizations(cmdLn("configuration.menu.mode.title", true))
 				.setDescription(en("configuration.menu.mode.desc"))
-				.setDescriptionLocalizations({
-					fr: fr("configuration.menu.mode.desc"),
-				}),
+				.setDescriptionLocalizations(cmdLn("configuration.menu.mode.desc")),
 		)
 		.addSubcommand((subcommand) =>
 			subcommand
@@ -126,9 +109,7 @@ export default {
 					fr: "langue",
 				})
 				.setDescription(en("configuration.language.desc"))
-				.setDescriptionLocalizations({
-					fr: fr("configuration.language.desc"),
-				})
+				.setDescriptionLocalizations(cmdLn("configuration.language.desc"))
 				.addStringOption((option) =>
 					option
 						.setName("locale")
@@ -136,9 +117,9 @@ export default {
 							fr: "langue",
 						})
 						.setDescription("locale")
-						.setDescriptionLocalizations({
-							fr: fr("configuration.language.options"),
-						})
+						.setDescriptionLocalizations(
+							cmdLn("configuration.language.options"),
+						)
 						.setRequired(true)
 						.addChoices(
 							{
@@ -155,13 +136,34 @@ export default {
 		.addSubcommand((subcommand) =>
 			subcommand
 				.setName(en("configuration.menu.autoUpdate.cmd").toLowerCase())
-				.setNameLocalizations({
-					fr: fr("configuration.menu.autoUpdate.cmd").toLowerCase(),
-				})
+				.setNameLocalizations(cmdLn("configuration.menu.autoUpdate.cmd", true))
 				.setDescription(en("configuration.menu.autoUpdate.desc"))
+				.setDescriptionLocalizations(
+					cmdLn("configuration.menu.autoUpdate.desc"),
+				),
+		)
+		.addSubcommand((subcommand) =>
+			subcommand
+				.setName("update_archived")
+				.setNameLocalizations({
+					fr: "ajouter_archivé",
+				})
+				.setDescription("Update the thread even if it's archived")
 				.setDescriptionLocalizations({
-					fr: fr("configuration.menu.autoUpdate.desc"),
-				}),
+					fr: "Met à jour aussi les threads archivés",
+				})
+				.addBooleanOption((option) =>
+					option
+						.setName("update")
+						.setNameLocalizations({
+							fr: "mettre-à-jour",
+						})
+						.setDescription("update the thread even if it's archived")
+						.setDescriptionLocalizations({
+							fr: "mettre-à-jour même si le thread est archivé",
+						})
+						.setRequired(true),
+				),
 		),
 	async execute(interaction: CommandInteraction) {
 		if (!interaction.guild) return;
@@ -193,9 +195,7 @@ export default {
 		} else if (
 			en("configuration.menu.autoUpdate.cmd").toLowerCase() === commands
 		) {
-			// eslint-disable-next-line no-case-declarations
 			const rows = reloadButtonAuto(interaction.guild.id);
-			// eslint-disable-next-line no-case-declarations
 			const embeds = autoUpdateMenu(interaction.guild.id);
 			await interaction.reply({
 				embeds: [embeds],
@@ -208,6 +208,16 @@ export default {
 			else await guild.setPreferredLocale(locale as Locale);
 			await interaction.reply({
 				content: `${i18next.t("configuration.language.validate", { lang: (locale as LocaleString).toUpperCase() })}`,
+				ephemeral: true,
+			});
+		} else if (commands === "update_archived") {
+			const archived = options.getBoolean("update", true);
+			setConfig(CommandName.updateArchived, interaction.guild.id, archived);
+			const msg = archived
+				? i18next.t("configuration.archived.enable")
+				: i18next.t("configuration.archived.disable");
+			await interaction.reply({
+				content: msg,
 				ephemeral: true,
 			});
 		} else {

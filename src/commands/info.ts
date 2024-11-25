@@ -2,11 +2,11 @@ import {
 	ActionRowBuilder,
 	ButtonBuilder,
 	ButtonStyle,
-	CommandInteraction,
+	type CommandInteraction,
 	EmbedBuilder,
 	SlashCommandBuilder,
 } from "discord.js";
-import i18next from "../i18n/i18next";
+import i18next from "../i18n/init";
 import { INFO_EMOJI, VERSION } from "../index";
 
 const en = i18next.getFixedT("en");

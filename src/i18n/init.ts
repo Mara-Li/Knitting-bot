@@ -5,7 +5,7 @@ import * as fr from "./locales/fr.json";
 export const resources = {
 	en: { translation: en },
 	fr: { translation: fr },
-} as const;
+};
 
 i18next.init({
 	lng: "en",

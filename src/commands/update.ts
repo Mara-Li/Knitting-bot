@@ -1,14 +1,14 @@
 import {
-	channelMention,
 	ChannelType,
-	CommandInteraction,
-	CommandInteractionOptionResolver,
+	type CommandInteraction,
+	type CommandInteractionOptionResolver,
 	EmbedBuilder,
 	PermissionFlagsBits,
 	SlashCommandBuilder,
 	ThreadChannel,
+	channelMention,
 } from "discord.js";
-import { default as i18next } from "../i18n/i18next";
+import { default as i18next } from "../i18n/init";
 import { CommandName } from "../interface";
 import { getConfig } from "../maps";
 import { logInDev } from "../utils";

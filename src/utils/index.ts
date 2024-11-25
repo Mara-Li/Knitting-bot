@@ -1,3 +1,4 @@
+import process from "node:process";
 import type {
 	Client,
 	CommandInteraction,
@@ -5,11 +6,10 @@ import type {
 	TextChannel,
 	ThreadChannel,
 } from "discord.js";
-import process from "node:process";
+import i18next from "i18next";
+import { resources } from "../i18n/init";
 import { CommandName } from "../interface";
 import { getConfig } from "../maps";
-import i18next from "i18next";
-import { resources } from "../i18n/i18next";
 
 export function logInDev(...text: unknown[]) {
 	const time = new Date();

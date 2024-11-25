@@ -1,9 +1,8 @@
 import {
-	channelMention,
-	roleMention,
 	CategoryChannel,
-	CommandInteraction,
-	CommandInteractionOptionResolver,
+	ChannelType,
+	type CommandInteraction,
+	type CommandInteractionOptionResolver,
 	EmbedBuilder,
 	ForumChannel,
 	PermissionFlagsBits,
@@ -11,9 +10,11 @@ import {
 	SlashCommandBuilder,
 	TextChannel,
 	ThreadChannel,
-	ChannelType,
+	channelMention,
+	roleMention,
 } from "discord.js";
-import { default as i18next } from "../i18n/i18next";
+import { default as i18next } from "../i18n/init";
+import { CommandName, TypeName } from "../interface";
 import {
 	getConfig,
 	getMaps,
@@ -22,7 +23,6 @@ import {
 	setIgnore,
 	setRole,
 } from "../maps";
-import { TypeName, CommandName } from "../interface";
 import { interactionRoleInChannel } from "./utils";
 
 const fr = i18next.getFixedT("fr");

@@ -27,8 +27,8 @@ importers:
         specifier: ^5.9.8
         version: 5.9.8
       i18next:
-        specifier: ^22.5.1
-        version: 22.5.1
+        specifier: ^23.12.2
+        version: 23.12.2
       node-gyp:
         specifier: ^9.4.0
         version: 9.4.0
@@ -50,16 +50,16 @@ importers:
         version: 2.0.22
       ts-node:
         specifier: ^10.9.1
-        version: 10.9.1(@types/node@22.9.4)(typescript@5.1.6)
+        version: 10.9.1(@types/node@22.9.4)(typescript@5.7.2)
       ts-node-dev:
         specifier: ^2.0.0
-        version: 2.0.0(@types/node@22.9.4)(typescript@5.1.6)
+        version: 2.0.0(@types/node@22.9.4)(typescript@5.7.2)
       tslib:
         specifier: ^2.6.0
         version: 2.6.0
       typescript:
-        specifier: ^5.1.6
-        version: 5.1.6
+        specifier: ^5.7.2
+        version: 5.7.2
 
 packages:
 
@@ -75,8 +75,8 @@ packages:
     resolution: {integrity: sha512-BSKlD1hgnedS5XRnGOljZawtag7H1yPfQp0tdNJCHoH6AZ+Pcm9VvkrK59/Yy593Ypg0zMxH2BxD1VPYUQ7UIw==}
     engines: {node: '>=6.9.0'}
 
-  '@babel/runtime@7.22.6':
-    resolution: {integrity: sha512-wDb5pWm4WDdF6LFUde3Jl8WzPA+3ZbxYqkC6xAXuD3irdEHN1k0NfTRrJD8ZD378SJ61miMLCqIOXYhd8x+AJQ==}
+  '@babel/runtime@7.26.0':
+    resolution: {integrity: sha512-FDSOghenHTiToteC/QRlv2q3DhPZ/oOXTBoirfWNx1Cx3TMVcGWQtMMmQcSvb/JjpNeGzx8Pq/b4fKEJuWm1sw==}
     engines: {node: '>=6.9.0'}
 
   '@biomejs/biome@1.9.4':
@@ -651,15 +651,6 @@ packages:
       supports-color:
         optional: true
 
-  debug@4.3.7:
-    resolution: {integrity: sha512-Er2nc/H7RrMXZBFCEim6TCmMk02Z8vLC2Rbi1KEBggpo0fS6l0S1nnapwmIi3yW/+GOJap1Krg4w0Hg80oCqgQ==}
-    engines: {node: '>=6.0'}
-    peerDependencies:
-      supports-color: '*'
-    peerDependenciesMeta:
-      supports-color:
-        optional: true
-
   decamelize-keys@1.1.1:
     resolution: {integrity: sha512-WiPxgEirIV0/eIOMcnFBA3/IJZAZqKnwAwWyvvdi4lsr1WCN22nhdf/3db3DoZcUjTV2SqfzIwNyp6y2xs3nmg==}
     engines: {node: '>=0.10.0'}
@@ -1027,8 +1018,8 @@ packages:
   humanize-ms@1.2.1:
     resolution: {integrity: sha512-Fl70vYtsAFb/C06PTS9dZBo7ihau+Tu/DNCk/OyHhea07S+aeMWpFFkUaXRa8fI+ScZbEI8dfSxwY7gxZ9SAVQ==}
 
-  i18next@22.5.1:
-    resolution: {integrity: sha512-8TGPgM3pAD+VRsMtUMNknRz3kzqwp/gPALrWMsDnmC1mKqJwpWyooQRLMcbTwq8z8YwSmuj+ZYvc+xCuEpkssA==}
+  i18next@23.12.2:
+    resolution: {integrity: sha512-XIeh5V+bi8SJSWGL3jqbTEBW5oD6rbP5L+E7dVQh1MNTxxYef0x15rhJVcRb7oiuq4jLtgy2SD8eFlf6P2cmqg==}
 
   iconv-lite@0.4.24:
     resolution: {integrity: sha512-v3MXnZAcvnywkTUEZomIActle7RXXeedOR31wwl7VlyoXO4Qi9arvSenNQWne1TcRwhCL1HwLI21bEqdpj8/rA==}
@@ -1600,8 +1591,8 @@ packages:
     resolution: {integrity: sha512-6tDA8g98We0zd0GvVeMT9arEOnTw9qM03L9cJXaCjrip1OO764RDBLBfrB4cwzNGDj5OA5ioymC9GkizgWJDUg==}
     engines: {node: '>=8'}
 
-  regenerator-runtime@0.13.11:
-    resolution: {integrity: sha512-kY1AZVr2Ra+t+piVaJ4gxaFaReZVH40AKNo7UCX6W+dEwBo/2oZJzqfuN1qLq1oL45o56cPaTXELwrTh8Fpggg==}
+  regenerator-runtime@0.14.1:
+    resolution: {integrity: sha512-dYnhHh0nJoMfnkZs6GmmhFknAGRrLznOu5nc9ML+EJxGvrx6H7teuevqVqCuPcPK//3eDrrjQhehXVx9cnkGdw==}
 
   require-directory@2.1.1:
     resolution: {integrity: sha512-fGxEI7+wsG9xrvdjsrlmL22OMTTiHRwAMroiEeMgq8gzoLC/PQr7RsRDSTLUg/bZAZtF+TVIkHc6/4RIKrui+Q==}
@@ -1932,8 +1923,8 @@ packages:
   typedarray@0.0.6:
     resolution: {integrity: sha512-/aCDEGatGvZ2BIk+HmLf4ifCJFwvKFNb9/JeZPMulfgFracn9QFcAf5GO8B/mweUjSoblS5In0cWhqpfs/5PQA==}
 
-  typescript@5.1.6:
-    resolution: {integrity: sha512-zaWCozRZ6DLEWAWFrVDz1H6FVXzUSfTy5FUMWsQlU8Ym5JP9eO4xkTIROFCQvhQf61z6O/G6ugw3SgAnvvm+HA==}
+  typescript@5.7.2:
+    resolution: {integrity: sha512-i5t66RHxDvVN40HfDd1PsEThGNnlMCMT3jMUuoh9/0TaqWevNontacunWyN02LA9/fIbEWlcHZcgTKb9QoaLfg==}
     engines: {node: '>=14.17'}
     hasBin: true
 
@@ -2113,9 +2104,9 @@ snapshots:
       chalk: 2.4.2
       js-tokens: 4.0.0
 
-  '@babel/runtime@7.22.6':
+  '@babel/runtime@7.26.0':
     dependencies:
-      regenerator-runtime: 0.13.11
+      regenerator-runtime: 0.14.1
 
   '@biomejs/biome@1.9.4':
     optionalDependencies:
@@ -2300,7 +2291,7 @@ snapshots:
 
   '@pm2/pm2-version-check@1.0.4':
     dependencies:
-      debug: 4.3.7
+      debug: 4.3.4
     transitivePeerDependencies:
       - supports-color
 
@@ -2777,10 +2768,6 @@ snapshots:
     dependencies:
       ms: 2.1.2
 
-  debug@4.3.7:
-    dependencies:
-      ms: 2.1.3
-
   decamelize-keys@1.1.1:
     dependencies:
       decamelize: 1.2.0
@@ -3157,9 +3144,9 @@ snapshots:
     dependencies:
       ms: 2.1.3
 
-  i18next@22.5.1:
+  i18next@23.12.2:
     dependencies:
-      '@babel/runtime': 7.22.6
+      '@babel/runtime': 7.26.0
 
   iconv-lite@0.4.24:
     dependencies:
@@ -3832,7 +3819,7 @@ snapshots:
       indent-string: 4.0.0
       strip-indent: 3.0.0
 
-  regenerator-runtime@0.13.11: {}
+  regenerator-runtime@0.14.1: {}
 
   require-directory@2.1.1: {}
 
@@ -4084,7 +4071,7 @@ snapshots:
 
   ts-mixer@6.0.4: {}
 
-  ts-node-dev@2.0.0(@types/node@22.9.4)(typescript@5.1.6):
+  ts-node-dev@2.0.0(@types/node@22.9.4)(typescript@5.7.2):
     dependencies:
       chokidar: 3.5.3
       dynamic-dedupe: 0.3.0
@@ -4094,15 +4081,15 @@ snapshots:
       rimraf: 2.7.1
       source-map-support: 0.5.21
       tree-kill: 1.2.2
-      ts-node: 10.9.1(@types/node@22.9.4)(typescript@5.1.6)
+      ts-node: 10.9.1(@types/node@22.9.4)(typescript@5.7.2)
       tsconfig: 7.0.0
-      typescript: 5.1.6
+      typescript: 5.7.2
     transitivePeerDependencies:
       - '@swc/core'
       - '@swc/wasm'
       - '@types/node'
 
-  ts-node@10.9.1(@types/node@22.9.4)(typescript@5.1.6):
+  ts-node@10.9.1(@types/node@22.9.4)(typescript@5.7.2):
     dependencies:
       '@cspotcode/source-map-support': 0.8.1
       '@tsconfig/node10': 1.0.9
@@ -4116,7 +4103,7 @@ snapshots:
       create-require: 1.1.1
       diff: 4.0.2
       make-error: 1.3.6
-      typescript: 5.1.6
+      typescript: 5.7.2
       v8-compile-cache-lib: 3.0.1
       yn: 3.1.1
 
@@ -4156,7 +4143,7 @@ snapshots:
 
   typedarray@0.0.6: {}
 
-  typescript@5.1.6: {}
+  typescript@5.7.2: {}
 
   uglify-js@3.17.4:
     optional: true

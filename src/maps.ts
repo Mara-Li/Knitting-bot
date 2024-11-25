@@ -1,4 +1,4 @@
-import {
+import type {
 	CategoryChannel,
 	ForumChannel,
 	Role,
@@ -10,8 +10,8 @@ import {
 	CommandName,
 	DEFAULT_CONFIGURATION,
 	DEFAULT_IGNORE_FOLLOW,
-	IgnoreFollow,
-	RoleIn,
+	type IgnoreFollow,
+	type RoleIn,
 	TypeName,
 } from "./interface";
 import { logInDev } from "./utils";
@@ -125,8 +125,8 @@ export function setRoleIn(
  * return true if value is not setConfig (for the other options)
  * @param {CommandName} name
  * @param guildID
+ * @param channel
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function getConfig(
 	name: CommandName,
 	guildID: string,
@@ -151,6 +151,8 @@ export function getConfig(
 				if (channel) {
 					return optionMaps.ensure(guildID, "", `${name}.channel`) as string;
 				}
+				return optionMaps.ensure(guildID, false, name) as boolean;
+			case CommandName.updateArchived:
 				return optionMaps.ensure(guildID, false, name) as boolean;
 			default:
 				return optionMaps.ensure(guildID, true, name) as boolean;

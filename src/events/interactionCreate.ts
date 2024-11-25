@@ -1,6 +1,6 @@
 import type { BaseInteraction, Client } from "discord.js";
 import { commands } from "../commands";
-import { default as i18next } from "../i18n/i18next";
+import { default as i18next } from "../i18n/init";
 import { changeLanguage } from "../utils";
 
 export default (client: Client): void => {

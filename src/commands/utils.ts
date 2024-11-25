@@ -1,16 +1,16 @@
 import {
+	type CategoryChannel,
+	type CommandInteraction,
+	type ForumChannel,
+	Role,
+	type TextChannel,
+	type ThreadChannel,
 	channelMention,
 	roleMention,
-	CategoryChannel,
-	CommandInteraction,
-	ForumChannel,
-	Role,
-	TextChannel,
-	ThreadChannel,
 } from "discord.js";
-import { CommandName, RoleIn } from "../interface";
+import { default as i18next } from "../i18n/init";
+import { CommandName, type RoleIn } from "../interface";
 import { getConfig, getRoleIn, setRoleIn } from "../maps";
-import { default as i18next } from "../i18n/i18next";
 
 const en = i18next.getFixedT("en");
 

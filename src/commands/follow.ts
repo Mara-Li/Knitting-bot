@@ -1,7 +1,6 @@
 import {
-	channelMention,
-	roleMention,
 	CategoryChannel,
+	ChannelType,
 	type CommandInteraction,
 	type CommandInteractionOptionResolver,
 	EmbedBuilder,
@@ -11,9 +10,10 @@ import {
 	SlashCommandBuilder,
 	TextChannel,
 	ThreadChannel,
-	ChannelType,
+	channelMention,
+	roleMention,
 } from "discord.js";
-import { default as i18next } from "../i18n/i18next";
+import { default as i18next } from "../i18n/init";
 import { CommandName, type RoleIn, TypeName } from "../interface";
 import {
 	getConfig,
@@ -221,18 +221,13 @@ async function displayFollowed(interaction: CommandInteraction) {
 		})
 		.join("");
 
-	const followedCategoriesNames =
-		`\n- ${followedCategories
-			.map((category) => channelMention(category.id))
-			.join("\n- ")}`;
-	const followedThreadsNames =
-		`\n- ${followedThreads.map((thread) => channelMention(thread.id)).join("\n-")}`;
-	const followedChannelsNames =
-		`\n- ${followedChannels.map((channel) => channelMention(channel.id)).join("\n-")}`;
-	const followedRolesNames =
-		`\n- ${followedRoles.map((role) => roleMention(role.id)).join("\n-")}`;
-	const followedForumNames =
-		`\n- ${followedForum.map((forum) => channelMention(forum.id)).join("\n-")}`;
+	const followedCategoriesNames = `\n- ${followedCategories
+		.map((category) => channelMention(category.id))
+		.join("\n- ")}`;
+	const followedThreadsNames = `\n- ${followedThreads.map((thread) => channelMention(thread.id)).join("\n-")}`;
+	const followedChannelsNames = `\n- ${followedChannels.map((channel) => channelMention(channel.id)).join("\n-")}`;
+	const followedRolesNames = `\n- ${followedRoles.map((role) => roleMention(role.id)).join("\n-")}`;
+	const followedForumNames = `\n- ${followedForum.map((forum) => channelMention(forum.id)).join("\n-")}`;
 	let embed: EmbedBuilder;
 	if (getConfig(CommandName.followOnlyChannel, guildID)) {
 		embed = new EmbedBuilder()
