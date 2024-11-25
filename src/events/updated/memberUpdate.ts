@@ -2,7 +2,7 @@ import type { Client, ThreadChannel } from "discord.js";
 import i18next from "i18next";
 import { CommandName } from "../../interface";
 import { getConfig } from "../../maps";
-import { changeGuildLanguage, discordLogs, logInDev } from "../../utils";
+import { changeGuildLanguage, discordLogs } from "../../utils";
 import { addUserToThread } from "../../utils/add";
 import {
 	checkMemberRole,

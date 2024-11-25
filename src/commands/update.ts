@@ -12,11 +12,9 @@ import { cmdLn } from "../i18n";
 import { default as i18next } from "../i18n/init";
 import { CommandName } from "../interface";
 import { getConfig } from "../maps";
-import { logInDev } from "../utils";
 import { addRoleAndUserToThread } from "../utils/add";
 import { checkThread } from "../utils/data_check";
 
-const fr = i18next.getFixedT("fr");
 const en = i18next.getFixedT("en");
 
 export default {

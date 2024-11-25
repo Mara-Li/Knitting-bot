@@ -11,7 +11,6 @@
  * - Channel updated
  */
 import {
-	ActionRowBuilder,
 	ButtonBuilder,
 	type ButtonInteraction,
 	ButtonStyle,
@@ -33,7 +32,6 @@ import { CommandName } from "../interface";
 import { getConfig, setConfig } from "../maps";
 import { logInDev } from "../utils";
 
-const fr = i18next.getFixedT("fr");
 const en = i18next.getFixedT("en");
 
 export default {
