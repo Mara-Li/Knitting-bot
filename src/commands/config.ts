@@ -186,7 +186,10 @@ export default {
 				ephemeral: true,
 			});
 		} else if (commands === "update_archived") {
-			const archived = options.getBoolean("update", true);
+			const archived = options.getBoolean(
+				en("common.enable").toLowerCase(),
+				true,
+			);
 			setConfig(CommandName.updateArchived, interaction.guild.id, archived);
 			const msg = archived
 				? i18next.t("configuration.archived.enable")

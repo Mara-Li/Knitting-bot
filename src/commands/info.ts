@@ -21,7 +21,9 @@ export default {
 	async execute(interaction: CommandInteraction) {
 		const embed = new EmbedBuilder()
 			.setTitle(i18next.t("info.title"))
-			.setDescription(`${i18next.t("info.desc")}`)
+			.setDescription(
+				`${i18next.t("info.desc")}\n\n${i18next.t("configuration.show.menu.description")}`,
+			)
 			.setThumbnail(interaction.client.user.displayAvatarURL())
 			.setColor("#4c8cb9")
 			.addFields({

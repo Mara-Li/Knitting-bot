@@ -26,7 +26,5 @@ export function cmdLn(key: string, lowerCase = false) {
 			else localized[Locale as Djs.Locale] = t;
 		}
 	}
-
-	console.log(localized);
 	return localized;
 }
