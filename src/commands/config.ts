@@ -70,13 +70,6 @@ export default {
 		)
 		.addSubcommand((subcommand) =>
 			subcommand
-				.setName(en("commands.help.name").toLowerCase())
-				.setNameLocalizations(cmdLn("commands.help.name", true))
-				.setDescription(en("configuration.menu.help.desc"))
-				.setDescriptionLocalizations(cmdLn("configuration.menu.help.desc")),
-		)
-		.addSubcommand((subcommand) =>
-			subcommand
 				.setName(en("configuration.menu.mode.title").toLowerCase())
 				.setNameLocalizations(cmdLn("configuration.menu.mode.title", true))
 				.setDescription(en("configuration.menu.mode.desc"))
