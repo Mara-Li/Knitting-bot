@@ -1,10 +1,10 @@
 import i18next from "i18next";
-import * as en from "./locales/en.json";
-import * as fr from "./locales/fr.json";
+import * as EnglishUS from "./locales/en.json";
+import * as French from "./locales/fr.json";
 
 export const resources = {
-	en: { translation: en },
-	fr: { translation: fr },
+	en: { translation: EnglishUS },
+	fr: { translation: French },
 };
 
 i18next.init({

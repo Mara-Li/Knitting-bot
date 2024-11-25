@@ -1,10 +1,10 @@
-import { ChannelType, Client, ThreadChannel } from "discord.js";
+import { ChannelType, type Client, type ThreadChannel } from "discord.js";
+import i18next from "i18next";
 import { CommandName } from "../../interface";
 import { getConfig } from "../../maps";
 import { changeGuildLanguage, discordLogs, logInDev } from "../../utils";
 import { addRoleAndUserToThread } from "../../utils/add";
 import { checkThread } from "../../utils/data_check";
-import i18next from "i18next";
 
 /**
  * @param {Client} client - Discord.js Client

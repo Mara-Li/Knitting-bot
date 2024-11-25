@@ -89,8 +89,7 @@ export async function interactionRoleInChannel(
 
 	/** Verify that the role is not ignored for the same channel */
 	if (
-		oppositeRoleFind &&
-		oppositeRoleFind.channels.some(
+		oppositeRoleFind?.channels.some(
 			(chan: ForumChannel | CategoryChannel | ThreadChannel | TextChannel) =>
 				chan.id === channel.channel?.id,
 		)

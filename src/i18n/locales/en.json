@@ -117,6 +117,7 @@
       "log": {
         "channel": {
           "desc": "Channel where to send the logs",
+          "disable": "Logs has been disabled.",
           "success": "The logs channel is now {{- channel}}.",
           "title": "log"
         },
@@ -125,6 +126,10 @@
       "mode": {
         "desc": "Configuration's follow's mode",
         "title": "MODE"
+      },
+      "updateArchived": {
+        "desc": "\"Update the thread even if it's archived\"",
+        "name": "update_archived"
       }
     },
     "newMember": {

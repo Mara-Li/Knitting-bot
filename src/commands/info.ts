@@ -6,6 +6,7 @@ import {
 	EmbedBuilder,
 	SlashCommandBuilder,
 } from "discord.js";
+import { cmdLn } from "../i18n";
 import i18next from "../i18n/init";
 import { INFO_EMOJI, VERSION } from "../index";
 
@@ -16,9 +17,7 @@ export default {
 	data: new SlashCommandBuilder()
 		.setName("info")
 		.setDescription(en("info.cmds"))
-		.setDescriptionLocalizations({
-			fr: fr("info.cmds"),
-		}),
+		.setDescriptionLocalizations(cmdLn("info.cmds")),
 	async execute(interaction: CommandInteraction) {
 		const embed = new EmbedBuilder()
 			.setTitle(i18next.t("info.title"))
@@ -28,6 +27,20 @@ export default {
 			.addFields({
 				name: "Version",
 				value: VERSION as string,
+			})
+			.addFields({
+				name: `${i18next.t("configuration.log.name")}`,
+				value: `\`/config ${i18next.t("configuration.menu.log.channel.title")}\``,
+			})
+			.addFields({ name: "\u200A", value: "\u200A" })
+			.addFields({
+				name: i18next.t("configuration.menu.mode.title"),
+				value: `\`/config ${i18next.t("configuration.menu.mode.title").toLowerCase()}\``,
+			})
+			.addFields({ name: "\u200A", value: "\u200A" })
+			.addFields({
+				name: i18next.t("configuration.menu.autoUpdate.title"),
+				value: `\`/config ${i18next.t("configuration.menu.autoUpdate.cmd").toLowerCase()}\``,
 			})
 			.setFooter({
 				text: i18next.t("info.footer"),

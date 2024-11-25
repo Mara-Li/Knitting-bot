@@ -43,48 +43,28 @@ export default {
 		.setDescription(en("configuration.main.description"))
 		.setDescriptionLocalizations(cmdLn("configuration.main.description"))
 		.setDefaultMemberPermissions(PermissionFlagsBits.ManageThreads)
-		.addSubcommandGroup((subcommandGroup) =>
-			subcommandGroup
-				.setName(en("configuration.menu.general.title").toLowerCase())
-				.setNameLocalizations(cmdLn("configuration.menu.general.title"))
-				.setDescription(en("configuration.menu.general.desc"))
-				.addSubcommand((subcommand) =>
-					subcommand
-						.setName(
-							en("configuration.menu.general.display.title").toLowerCase(),
-						)
-						.setNameLocalizations(
-							cmdLn("configuration.menu.general.display.title", true),
-						)
-						.setDescription(en("configuration.menu.general.display.desc"))
-						.setDescriptionLocalizations(
-							cmdLn("configuration.menu.general.display.desc"),
-						),
+		.addSubcommand((subcommand) =>
+			subcommand
+				.setName(en("configuration.menu.log.channel.title").toLowerCase())
+				.setNameLocalizations(
+					cmdLn("configuration.menu.log.channel.title", true),
 				)
-				.addSubcommand((subcommand) =>
-					subcommand
-						.setName(en("configuration.menu.log.channel.title").toLowerCase())
-						.setNameLocalizations(
-							cmdLn("configuration.menu.log.channel.title", true),
+				.setDescription(en("configuration.menu.log.desc"))
+				.setDescriptionLocalizations(cmdLn("configuration.menu.log.desc"))
+				.addChannelOption((option) =>
+					option
+						.setName(en("common.channel").toLowerCase())
+						.setNameLocalizations(cmdLn("common.channel", true))
+						.setDescription(en("configuration.menu.log.channel.desc"))
+						.setDescriptionLocalizations(
+							cmdLn("configuration.menu.log.channel.desc"),
 						)
-						.setDescription(en("configuration.menu.log.desc"))
-						.setDescriptionLocalizations(cmdLn("configuration.menu.log.desc"))
-						.addChannelOption((option) =>
-							option
-								.setName(en("common.channel").toLowerCase())
-								.setNameLocalizations(cmdLn("common.channel", true))
-								.setDescription(en("configuration.menu.log.channel.desc"))
-								.setDescriptionLocalizations(
-									cmdLn("configuration.menu.log.channel.desc"),
-								)
-								.setRequired(true)
-								.addChannelTypes(
-									ChannelType.GuildText,
-									ChannelType.AnnouncementThread,
-									ChannelType.PublicThread,
-									ChannelType.PrivateThread,
-									ChannelType.GuildAnnouncement,
-								),
+						.addChannelTypes(
+							ChannelType.GuildText,
+							ChannelType.AnnouncementThread,
+							ChannelType.PublicThread,
+							ChannelType.PrivateThread,
+							ChannelType.GuildAnnouncement,
 						),
 				),
 		)
@@ -144,24 +124,18 @@ export default {
 		)
 		.addSubcommand((subcommand) =>
 			subcommand
-				.setName("update_archived")
-				.setNameLocalizations({
-					fr: "ajouter_archivé",
-				})
-				.setDescription("Update the thread even if it's archived")
-				.setDescriptionLocalizations({
-					fr: "Met à jour aussi les threads archivés",
-				})
+				.setName(en("configuration.menu.updateArchived.name").toLowerCase())
+				.setNameLocalizations(cmdLn("configuration.menu.updateArchived.name"))
+				.setDescription(en("configuration.menu.updateArchived.desc"))
+				.setDescriptionLocalizations(
+					cmdLn("configuration.menu.updateArchived.desc"),
+				)
 				.addBooleanOption((option) =>
 					option
-						.setName("update")
-						.setNameLocalizations({
-							fr: "mettre-à-jour",
-						})
-						.setDescription("update the thread even if it's archived")
-						.setDescriptionLocalizations({
-							fr: "mettre-à-jour même si le thread est archivé",
-						})
+						.setName(en("common.enable").toLowerCase())
+						.setNameLocalizations(cmdLn("common.enable", true))
+						.setDescription(en("common.enable"))
+						.setDescriptionLocalizations(cmdLn("common.enable"))
 						.setRequired(true),
 				),
 		),
@@ -171,18 +145,26 @@ export default {
 
 		const commands = options.getSubcommand();
 		if (en("configuration.menu.log.channel.title").toLowerCase() === commands) {
-			const channel = options.getChannel(
-				en("common.channel").toLowerCase(),
-				true,
-			);
-			if (!channel) return;
-			setConfig(`${CommandName.log}.channel`, interaction.guild.id, channel.id);
-			await interaction.reply({
-				content: i18next.t("configuration.menu.log.channel.success", {
-					channel: channelMention(channel.id),
-				}) as string,
-				ephemeral: true,
-			});
+			const channel = options.getChannel(en("common.channel").toLowerCase());
+			if (channel) {
+				setConfig(
+					`${CommandName.log}.channel`,
+					interaction.guild.id,
+					channel.id,
+				);
+				await interaction.reply({
+					content: i18next.t("configuration.menu.log.channel.success", {
+						channel: channelMention(channel.id),
+					}) as string,
+					ephemeral: true,
+				});
+			} else {
+				setConfig(`${CommandName.log}.channel`, interaction.guild.id, false);
+				await interaction.reply({
+					content: i18next.t("configuration.menu.log.channel.disable"),
+					ephemeral: true,
+				});
+			}
 		} else if (en("configuration.menu.mode.title").toLowerCase() === commands) {
 			// eslint-disable-next-line no-case-declarations
 			const row = reloadButtonMode(interaction.guild.id);
@@ -219,20 +201,6 @@ export default {
 			await interaction.reply({
 				content: msg,
 				ephemeral: true,
-			});
-		} else {
-			const embeds = help();
-			const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
-				new ButtonBuilder()
-					.setEmoji("📖")
-					.setURL(`${i18next.t("info.readMe")}`)
-					.setLabel(i18next.t("configuration.menu.help.readme"))
-					.setStyle(ButtonStyle.Link),
-			);
-			await interaction.reply({
-				embeds: [embeds],
-				components: [row],
-				fetchReply: true,
 			});
 		}
 		// biome-ignore lint/suspicious/noExplicitAny: <explanation>
@@ -335,30 +303,6 @@ function autoUpdateMenu(guildID: string): EmbedBuilder {
 				inline: true,
 			},
 		);
-}
-
-/**
- * Display the configuration as an embed
- */
-function help() {
-	return new EmbedBuilder()
-		.setColor("#0099ff")
-		.setTitle(i18next.t("configuration.show.menu.title"))
-		.setDescription(i18next.t("configuration.show.menu.description"))
-		.addFields({
-			name: `${i18next.t("configuration.log.name")}`,
-			value: `\`/config ${i18next.t("configuration.menu.general.title")} ${i18next.t("configuration.menu.log.channel.title")}\``,
-		})
-		.addFields({ name: "\u200A", value: "\u200A" })
-		.addFields({
-			name: i18next.t("configuration.menu.mode.title"),
-			value: `\`/config ${i18next.t("configuration.menu.mode.title").toLowerCase()}\``,
-		})
-		.addFields({ name: "\u200A", value: "\u200A" })
-		.addFields({
-			name: i18next.t("configuration.menu.autoUpdate.title"),
-			value: `\`/config ${i18next.t("configuration.menu.autoUpdate.cmd").toLowerCase()}\``,
-		});
 }
 
 /**

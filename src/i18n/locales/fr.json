@@ -117,6 +117,7 @@
       "log": {
         "channel": {
           "desc": "Channel où envoyer les logs",
+          "disable": "Les logs sont maintenant désactivés.",
           "success": "Le channel des logs est maintenant {{- channel}}.",
           "title": "log"
         },
@@ -125,6 +126,10 @@
       "mode": {
         "desc": "Configuration des modes de suivis",
         "title": "MODE"
+      },
+      "updateArchived": {
+        "desc": "Met à jour les threads même s'ils sont archivés",
+        "name": "ajouter_archivé"
       }
     },
     "newMember": {

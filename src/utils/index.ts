@@ -39,8 +39,8 @@ export async function discordLogs(
 	...text: unknown[]
 ) {
 	if (getConfig(CommandName.log, guildID)) {
-		const chan = getConfig(CommandName.log, guildID, true) as string;
-		if (chan) {
+		const chan = getConfig(CommandName.log, guildID, true);
+		if (chan && typeof chan === "string") {
 			//search channel in guild
 			const channel = await bot.channels.fetch(chan);
 			if (channel) {

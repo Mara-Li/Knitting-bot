@@ -13,6 +13,7 @@ import {
 	channelMention,
 	roleMention,
 } from "discord.js";
+import { cmdLn } from "../i18n";
 import { default as i18next } from "../i18n/init";
 import { CommandName, type RoleIn, TypeName } from "../interface";
 import {
@@ -33,30 +34,22 @@ export default {
 	data: new SlashCommandBuilder()
 		.setName("follow")
 		.setDescription(en("follow.description"))
-		.setDescriptionLocalizations({
-			fr: fr("follow.description"),
-		})
+		.setDescriptionLocalizations(cmdLn("follow.description"))
 		.setDefaultMemberPermissions(PermissionFlagsBits.ManageThreads)
 		.addSubcommand((subcommand) =>
 			subcommand
 				.setName(en("common.channel").toLowerCase())
-				.setNameLocalizations({
-					fr: fr("common.channel").toLowerCase(),
-				})
+				.setNameLocalizations(cmdLn("common.channel", true))
 				.setDescription(en("follow.thread.description"))
-				.setDescriptionLocalizations({
-					fr: fr("follow.thread.description"),
-				})
+				.setDescriptionLocalizations(cmdLn("follow.thread.description"))
 				.addChannelOption((option) =>
 					option
 						.setName(en("common.channel").toLowerCase())
-						.setNameLocalizations({
-							fr: fr("common.channel").toLowerCase(),
-						})
+						.setNameLocalizations(cmdLn("common.channel", true))
 						.setDescription(en("follow.thread.option.description"))
-						.setDescriptionLocalizations({
-							fr: fr("follow.thread.option.description"),
-						})
+						.setDescriptionLocalizations(
+							cmdLn("follow.thread.option.description"),
+						)
 						.addChannelTypes(
 							ChannelType.GuildCategory,
 							ChannelType.GuildText,
@@ -69,69 +62,45 @@ export default {
 		.addSubcommand((subcommand) =>
 			subcommand
 				.setName(en("common.role").toLowerCase())
-				.setNameLocalizations({
-					fr: fr("common.role").toLowerCase(),
-				})
+				.setNameLocalizations(cmdLn("common.role", true))
 				.setDescription(en("follow.role.description"))
-				.setDescriptionLocalizations({
-					fr: fr("follow.role.description"),
-				})
+				.setDescriptionLocalizations(cmdLn("follow.role.description"))
 				.addRoleOption((option) =>
 					option
 						.setName(en("common.role").toLowerCase())
-						.setNameLocalizations({
-							fr: fr("common.role").toLowerCase(),
-						})
+						.setNameLocalizations(cmdLn("common.role", true))
 						.setDescription(en("follow.role.option"))
-						.setDescriptionLocalizations({
-							fr: fr("follow.role.option"),
-						})
+						.setDescriptionLocalizations(cmdLn("follow.role.option"))
 						.setRequired(true),
 				),
 		)
 		.addSubcommand((subcommand) =>
 			subcommand
 				.setName(en("common.list"))
-				.setNameLocalizations({
-					fr: fr("common.list"),
-				})
+				.setNameLocalizations(cmdLn("common.list"))
 				.setDescription(en("follow.list.description"))
-				.setDescriptionLocalizations({
-					fr: fr("follow.list.description"),
-				}),
+				.setDescriptionLocalizations(cmdLn("follow.list.description")),
 		)
 		.addSubcommand((subcommand) =>
 			subcommand
 				.setName(en("common.roleIn"))
-				.setNameLocalizations({
-					fr: fr("common.roleIn"),
-				})
+				.setNameLocalizations(cmdLn("common.roleIn"))
 				.setDescription(en("follow.roleIn.description"))
-				.setDescriptionLocalizations({
-					fr: fr("follow.roleIn.description"),
-				})
+				.setDescriptionLocalizations(cmdLn("follow.roleIn.description"))
 				.addRoleOption((option) =>
 					option
 						.setName(en("common.role").toLowerCase())
-						.setNameLocalizations({
-							fr: fr("common.role").toLowerCase(),
-						})
+						.setNameLocalizations(cmdLn("common.role", true))
 						.setDescription(en("follow.roleIn.option.role"))
-						.setDescriptionLocalizations({
-							fr: fr("follow.roleIn.option.role"),
-						})
+						.setDescriptionLocalizations(cmdLn("follow.roleIn.option.role"))
 						.setRequired(true),
 				)
 				.addChannelOption((option) =>
 					option
 						.setName(en("common.channel").toLowerCase())
-						.setNameLocalizations({
-							fr: fr("common.channel").toLowerCase(),
-						})
+						.setNameLocalizations(cmdLn("common.channel", true))
 						.setDescription(en("follow.roleIn.option.channel"))
-						.setDescriptionLocalizations({
-							fr: fr("follow.roleIn.option.channel"),
-						})
+						.setDescriptionLocalizations(cmdLn("follow.roleIn.option.channel"))
 						.addChannelTypes(
 							ChannelType.GuildCategory,
 							ChannelType.GuildText,

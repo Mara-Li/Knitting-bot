@@ -13,6 +13,7 @@ import {
 	channelMention,
 	roleMention,
 } from "discord.js";
+import { cmdLn } from "../i18n";
 import { default as i18next } from "../i18n/init";
 import { CommandName, TypeName } from "../interface";
 import {
@@ -32,30 +33,22 @@ export default {
 	data: new SlashCommandBuilder()
 		.setName("ignore")
 		.setDescription(en("ignore.description"))
-		.setDescriptionLocalizations({
-			fr: fr("ignore.description"),
-		})
+		.setDescriptionLocalizations(cmdLn("ignore.description"))
 		.setDefaultMemberPermissions(PermissionFlagsBits.ManageThreads)
 		.addSubcommand((subcommand) =>
 			subcommand
 				.setName(en("common.channel").toLowerCase())
-				.setNameLocalizations({
-					fr: fr("common.channel").toLowerCase(),
-				})
+				.setNameLocalizations(cmdLn("common.channel", true))
 				.setDescription(en("ignore.thread.description"))
-				.setDescriptionLocalizations({
-					fr: fr("ignore.thread.description"),
-				})
+				.setDescriptionLocalizations(cmdLn("ignore.thread.description"))
 				.addChannelOption((option) =>
 					option
 						.setName(en("common.channel").toLowerCase())
-						.setNameLocalizations({
-							fr: fr("common.channel").toLowerCase(),
-						})
+						.setNameLocalizations(cmdLn("common.channel", true))
 						.setDescription(en("ignore.thread.option.description"))
-						.setDescriptionLocalizations({
-							fr: fr("ignore.thread.option.description"),
-						})
+						.setDescriptionLocalizations(
+							cmdLn("ignore.thread.option.description"),
+						)
 						.addChannelTypes(
 							ChannelType.GuildCategory,
 							ChannelType.GuildText,
@@ -68,53 +61,37 @@ export default {
 		.addSubcommand((subcommand) =>
 			subcommand
 				.setName(en("common.role").toLowerCase())
-				.setNameLocalizations({
-					fr: fr("common.role").toLowerCase(),
-				})
+				.setNameLocalizations(cmdLn("common.role", true))
 				.setDescription(en("ignore.role.description"))
-				.setDescriptionLocalizations({
-					fr: fr("ignore.role.description"),
-				})
+				.setDescriptionLocalizations(cmdLn("ignore.role.description"))
 
 				.addRoleOption((option) =>
 					option
 						.setName(en("common.role").toLowerCase())
-						.setNameLocalizations({
-							fr: fr("common.role").toLowerCase(),
-						})
+						.setNameLocalizations(cmdLn("common.role", true))
 						.setDescription(en("ignore.role.option"))
-						.setDescriptionLocalizations({
-							fr: fr("ignore.role.option"),
-						})
+						.setDescriptionLocalizations(cmdLn("ignore.role.option"))
 						.setRequired(true),
 				),
 		)
 		.addSubcommand((subcommand) =>
 			subcommand
 				.setName(en("common.roleIn"))
-				.setNameLocalizations({
-					fr: fr("common.roleIn"),
-				})
+				.setNameLocalizations(cmdLn("common.roleIn"))
 				.setDescription(en("ignore.roleIn.description"))
-				.setDescriptionLocalizations({
-					fr: fr("ignore.roleIn.description"),
-				})
+				.setDescriptionLocalizations(cmdLn("ignore.roleIn.description"))
 				.addRoleOption((option) =>
 					option
 						.setName(en("common.role").toLowerCase())
 						.setDescription(en("ignore.roleIn.option.role"))
-						.setDescriptionLocalizations({
-							fr: fr("ignore.roleIn.option.role"),
-						})
+						.setDescriptionLocalizations(cmdLn("ignore.roleIn.option.role"))
 						.setRequired(true),
 				)
 				.addChannelOption((option) =>
 					option
 						.setName(en("common.channel").toLowerCase())
 						.setDescription(en("ignore.roleIn.option.chan"))
-						.setDescriptionLocalizations({
-							fr: fr("ignore.roleIn.option.chan"),
-						})
+						.setDescriptionLocalizations(cmdLn("ignore.roleIn.option.chan"))
 						.setRequired(false)
 						.addChannelTypes(
 							ChannelType.GuildCategory,
@@ -128,13 +105,9 @@ export default {
 		.addSubcommand((subcommand) =>
 			subcommand
 				.setName(en("common.list"))
-				.setNameLocalizations({
-					fr: fr("common.list"),
-				})
+				.setNameLocalizations(cmdLn("common.list"))
 				.setDescription(en("ignore.list.description"))
-				.setDescriptionLocalizations({
-					fr: fr("ignore.list.description"),
-				}),
+				.setDescriptionLocalizations(cmdLn("ignore.list.description")),
 		),
 	async execute(interaction: CommandInteraction) {
 		if (!interaction.guild) return;
@@ -206,20 +179,13 @@ async function listIgnored(interaction: CommandInteraction) {
 		})
 		.join("");
 
-	const ignoredCategoriesNames =
-		"\n- " +
-		ignoredCategories
-			.map((category) => channelMention(category.id))
-			.join("\n- ");
-	const ignoredThreadsNames =
-		"\n- " +
-		ignoredThreads.map((thread) => channelMention(thread.id)).join("\n-");
-	const ignoredChannelsNames =
-		"\n- " + ignoredChannels.map((channel) => channel.name).join("\n-");
-	const ignoredRolesNames =
-		"\n- " + ignoredRoles.map((role) => roleMention(role.id)).join("\n-");
-	const ignoredForumNames =
-		"\n- " + ignoredForum.map((forum) => channelMention(forum.id)).join("\n-");
+	const ignoredCategoriesNames = `\n- ${ignoredCategories
+		.map((category) => channelMention(category.id))
+		.join("\n- ")}`;
+	const ignoredThreadsNames = `\n- ${ignoredThreads.map((thread) => channelMention(thread.id)).join("\n-")}`;
+	const ignoredChannelsNames = `\n- ${ignoredChannels.map((channel) => channel.name).join("\n-")}`;
+	const ignoredRolesNames = `\n- ${ignoredRoles.map((role) => roleMention(role.id)).join("\n-")}`;
+	const ignoredForumNames = `\n- ${ignoredForum.map((forum) => channelMention(forum.id)).join("\n-")}`;
 
 	const embed = new EmbedBuilder()
 		.setColor("#2f8e7d")

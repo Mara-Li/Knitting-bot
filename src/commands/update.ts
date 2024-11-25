@@ -8,6 +8,7 @@ import {
 	ThreadChannel,
 	channelMention,
 } from "discord.js";
+import { cmdLn } from "../i18n";
 import { default as i18next } from "../i18n/init";
 import { CommandName } from "../interface";
 import { getConfig } from "../maps";
@@ -21,36 +22,28 @@ const en = i18next.getFixedT("en");
 export default {
 	data: new SlashCommandBuilder()
 		.setName(en("commands.name"))
-		.setNameLocalizations({
-			fr: fr("commands.name"),
-		})
+		.setNameLocalizations(cmdLn("commands.name"))
 		.setDescription(en("commands.description"))
-		.setDescriptionLocalizations({
-			fr: fr("commands.description"),
-		})
+		.setDescriptionLocalizations(cmdLn("commands.description"))
 		.setDefaultMemberPermissions(PermissionFlagsBits.ManageThreads)
 		.addSubcommand((subcommand) =>
 			subcommand
 				.setName(en("common.thread").toLowerCase())
-				.setNameLocalizations({
-					fr: fr("common.thread").toLowerCase(),
-				})
+				.setNameLocalizations(cmdLn("common.thread", true))
 				.setDescription(en("commands.updateSpecificThread.description"))
-				.setDescriptionLocalizations({
-					fr: fr("commands.updateSpecificThread.description"),
-				})
+				.setDescriptionLocalizations(
+					cmdLn("commands.updateSpecificThread.description"),
+				)
 				.addChannelOption((option) =>
 					option
 						.setName(en("common.thread").toLowerCase())
-						.setNameLocalizations({
-							fr: fr("common.thread").toLowerCase(),
-						})
+						.setNameLocalizations(cmdLn("common.thread", true))
 						.setDescription(
 							en("commands.updateSpecificThread.option.description"),
 						)
-						.setDescriptionLocalizations({
-							fr: fr("commands.updateSpecificThread.option.description"),
-						})
+						.setDescriptionLocalizations(
+							cmdLn("commands.updateSpecificThread.option.description"),
+						)
 						.setRequired(false)
 						.addChannelTypes(
 							ChannelType.PrivateThread,
@@ -61,24 +54,18 @@ export default {
 		.addSubcommand((subcommand) =>
 			subcommand
 				.setName(en("commands.updateAllThreads.name"))
-				.setNameLocalizations({
-					fr: fr("commands.updateAllThreads.name"),
-				})
+				.setNameLocalizations(cmdLn("commands.updateAllThreads.name"))
 				.setDescription(en("commands.updateAllThreads.description"))
-				.setDescriptionLocalizations({
-					fr: fr("commands.updateAllThreads.description"),
-				}),
+				.setDescriptionLocalizations(
+					cmdLn("commands.updateAllThreads.description"),
+				),
 		)
 		.addSubcommand((subcommand) =>
 			subcommand
 				.setName(en("commands.help.name"))
-				.setNameLocalizations({
-					fr: fr("commands.help.name"),
-				})
+				.setNameLocalizations(cmdLn("commands.help.name"))
 				.setDescription(en("commands.help.description"))
-				.setDescriptionLocalizations({
-					fr: fr("commands.help.description"),
-				}),
+				.setDescriptionLocalizations(cmdLn("commands.help.description")),
 		),
 	async execute(interaction: CommandInteraction) {
 		if (!interaction.guild) return;
