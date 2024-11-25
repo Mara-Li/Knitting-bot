@@ -114,23 +114,6 @@ export default {
 				.setDescriptionLocalizations(
 					cmdLn("configuration.menu.autoUpdate.desc"),
 				),
-		)
-		.addSubcommand((subcommand) =>
-			subcommand
-				.setName(en("configuration.menu.updateArchived.name").toLowerCase())
-				.setNameLocalizations(cmdLn("configuration.menu.updateArchived.name"))
-				.setDescription(en("configuration.menu.updateArchived.desc"))
-				.setDescriptionLocalizations(
-					cmdLn("configuration.menu.updateArchived.desc"),
-				)
-				.addBooleanOption((option) =>
-					option
-						.setName(en("common.enable").toLowerCase())
-						.setNameLocalizations(cmdLn("common.enable", true))
-						.setDescription(en("common.enable"))
-						.setDescriptionLocalizations(cmdLn("common.enable"))
-						.setRequired(true),
-				),
 		),
 	async execute(interaction: CommandInteraction) {
 		if (!interaction.guild) return;
@@ -183,19 +166,6 @@ export default {
 			else await guild.setPreferredLocale(locale as Locale);
 			await interaction.reply({
 				content: `${i18next.t("configuration.language.validate", { lang: (locale as LocaleString).toUpperCase() })}`,
-				ephemeral: true,
-			});
-		} else if (commands === "update_archived") {
-			const archived = options.getBoolean(
-				en("common.enable").toLowerCase(),
-				true,
-			);
-			setConfig(CommandName.updateArchived, interaction.guild.id, archived);
-			const msg = archived
-				? i18next.t("configuration.archived.enable")
-				: i18next.t("configuration.archived.disable");
-			await interaction.reply({
-				content: msg,
 				ephemeral: true,
 			});
 		}

@@ -28,7 +28,6 @@ export enum CommandName {
 	followOnlyChannel = "followOnlyChannel",
 	followOnlyRoleIn = "followOnlyRoleIn",
 	log = "log",
-	updateArchived = "updateArchived",
 }
 
 export enum TypeName {

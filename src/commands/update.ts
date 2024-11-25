@@ -94,8 +94,8 @@ export default {
 async function updateAllThreads(interaction: CommandInteraction) {
 	if (!interaction.guild) return;
 	const guild = interaction.guild.id;
-	const threads = interaction.guild.channels.cache.filter(
-		(channel) => channel.isThread() && !channel.archived,
+	const threads = interaction.guild.channels.cache.filter((channel) =>
+		channel.isThread(),
 	);
 	await interaction.reply({
 		content: i18next.t("commands.updateAllThreads.reply") as string,

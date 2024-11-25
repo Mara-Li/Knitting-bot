@@ -1,4 +1,5 @@
 import type { Client, ThreadChannel } from "discord.js";
+import i18next from "i18next";
 import { CommandName } from "../../interface";
 import { getConfig } from "../../maps";
 import { changeGuildLanguage, discordLogs, logInDev } from "../../utils";
@@ -9,7 +10,6 @@ import {
 	checkRoleIn,
 	checkThread,
 } from "../../utils/data_check";
-import i18next from "i18next";
 
 export default (client: Client): void => {
 	client.on("guildMemberUpdate", async (oldMember, newMember) => {
@@ -48,7 +48,6 @@ export default (client: Client): void => {
 			for (const channel of channels.values()) {
 				const threadChannel = channel as ThreadChannel;
 				const updatedRoleAllowed = updatedRoles.filter((role) => {
-					logInDev(checkRoleIn("follow", role, threadChannel));
 					return checkRoleIn("follow", role, threadChannel);
 				});
 				const ignoredUpdatedRole = updatedRoles.filter((role) => {

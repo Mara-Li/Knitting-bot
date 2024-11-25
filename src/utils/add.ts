@@ -28,11 +28,6 @@ export async function addUserToThread(
 	thread: ThreadChannel,
 	user: GuildMember,
 ) {
-	const includeArchived = getConfig(
-		CommandName.updateArchived,
-		thread.guild.id,
-	);
-	if ((!includeArchived && thread.archived) || thread.locked) return;
 	const guild = thread.guild.id;
 
 	if (
@@ -190,11 +185,6 @@ export async function getRoleToPing(thread: ThreadChannel, roles: Role[]) {
  * @param thread {@link ThreadChannel} The thread to add the user
  */
 export async function addRoleAndUserToThread(thread: ThreadChannel) {
-	const includeArchived = getConfig(
-		CommandName.updateArchived,
-		thread.guild.id,
-	);
-	if ((!includeArchived && thread.archived) || thread.locked) return;
 	const members = await thread.guild.members.fetch();
 	const toPing: GuildMember[] = [];
 	const rolesWithAccess: Role[] = thread.guild.roles.cache.toJSON();

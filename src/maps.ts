@@ -152,8 +152,6 @@ export function getConfig(
 					return optionMaps.ensure(guildID, "", `${name}.channel`) as string;
 				}
 				return optionMaps.ensure(guildID, false, name) as boolean;
-			case CommandName.updateArchived:
-				return optionMaps.ensure(guildID, false, name) as boolean;
 			default:
 				return optionMaps.ensure(guildID, true, name) as boolean;
 		}

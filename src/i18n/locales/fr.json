@@ -1,260 +1,256 @@
 {
-  "commands": {
-    "description": "Permet de mettre à jour manuellement les threads en ajoutant les utilisateurs manquants.",
-    "error": "Cette commande ne peut être utilisée que dans ou pour un thread.",
-    "help": {
-      "all": "- `/update tout` : Pour ajouter sur tous les threads du serveur.\n",
-      "desc": "Met à jour manuellement les threads en ajoutant les utilisateurs manquants, avec l'aide des commandes ci-dessous :\n",
-      "description": "Affiche l'aide des commandes manuelles",
-      "name": "aide",
-      "thread": "- `/update thread <thread>` : Pour ajouter dans un thread spécifique (à sélectionner depuis la liste). Si aucun channel n'est sélectionné, utilise celui utilisé pour la commande.\n",
-      "title": "Aide des commandes manuelles"
-    },
-    "name": "update",
-    "success": "Mise à jour effectuée : {{- channel}}",
-    "updateAllThreads": {
-      "description": "Met à jour tous les threads du serveur, en ajoutant ou supprimant des utilisateurs",
-      "name": "tout",
-      "reply": "Mise à jour de tous les threads…",
-      "success": "Mise à jour effectuée de {{- count}} threads"
-    },
-    "updateSpecificThread": {
-      "description": "Met à jour un thread spécifique",
-      "option": {
-        "description": "Sélectionner le thread à mettre à jour"
-      }
-    },
-    "updateThread": {
-      "description": "Met à jour ce thread en ajoutant les utilisateurs manquants"
-    }
-  },
-  "common": {
-    "cancel": "Annuler",
-    "category": "Catégorie",
-    "channel": "Channel",
-    "confirm": "Confirmer",
-    "disable": "Désactiver",
-    "disabled": "Désactivé",
-    "enable": "Activer",
-    "enabled": "Activé",
-    "error": "Une erreur est apparue :\n```\n{{error}}\n```",
-    "forum": "Forum",
-    "here": "ici",
-    "list": "liste",
-    "no": "Non",
-    "none": "/",
-    "role": "role",
-    "roleIn": "spécifique",
-    "thread": "Thread",
-    "yes": "Oui"
-  },
-  "configuration": {
-    "archived": {
-      "disable": "Les threads archivés ne seront pas mis à jour.",
-      "enable": "Les threads archivés seront maintenant mis à jour."
-    },
-    "channel": {
-      "description": "Active/désactive l'ajout des membres aux threads lors de l'édition des permissions d'un channel.",
-      "name": "Modification de salon",
-      "title": "Modification de salon, catégorie, forum"
-    },
-    "disable": {
-      "description": "Active ou désactive tous les évènements pour passer le bot en mode manuel ou automatique",
-      "name": "Mode manuel"
-    },
-    "follow": {
-      "role": {
-        "name": "[Mode] Suivre certains rôles",
-        "title": "Rôle uniquement"
-      },
-      "roleIn": "[@role] dans [#channel]",
-      "thread": {
-        "name": "[Mode] Suivre certains channels",
-        "title": "Channel uniquement"
-      }
-    },
-    "general": "Configuration générale",
-    "language": {
-      "desc": "Changer la langue du serveur (pour les logs)",
-      "name": "Langue",
-      "options": "langue à changer",
-      "validate": "Langue du serveur changée à `{{- lang}}`"
-    },
-    "log": {
-      "description": "Voir les logs du bot sur un channel (utiliser /log pour choisir le channel)",
-      "display": "Channel des logs : {{- channel}}",
-      "name": "Log du bot"
-    },
-    "main": {
-      "description": "Modifier la configuration du serveur, autorisant à modifier certains évènements.",
-      "name": "config"
-    },
-    "member": {
-      "name": "Modification de membre",
-      "title": "Modification des membres"
-    },
-    "menu": {
-      "autoUpdate": {
-        "cmd": "auto",
-        "desc": "Configuration des mises à jour automatiques",
-        "title": "MISE À JOUR AUTOMATIQUE"
-      },
-      "general": {
-        "desc": "Configuration générale du bot (langue et logs).",
-        "display": {
-          "desc": "Affichage de la configuration générale et changement des paramètres",
-          "title": "affichage"
-        },
-        "lang": {
-          "desc": "Langue actuellement utilisée"
-        },
-        "title": "general"
-      },
-      "help": {
-        "desc": "Affiche les informations générales de configuration",
-        "readme": "Documentation"
-      },
-      "log": {
-        "channel": {
-          "desc": "Channel où envoyer les logs",
-          "disable": "Les logs sont maintenant désactivés.",
-          "success": "Le channel des logs est maintenant {{- channel}}.",
-          "title": "log"
-        },
-        "desc": "Choisir le channel pour envoyer les logs"
-      },
-      "mode": {
-        "desc": "Configuration des modes de suivis",
-        "title": "MODE"
-      },
-      "updateArchived": {
-        "desc": "Met à jour les threads même s'ils sont archivés",
-        "name": "ajouter_archivé"
-      }
-    },
-    "newMember": {
-      "display": "Arrivée d'un nouveau membre",
-      "name": "Arrivée d'un membre"
-    },
-    "roleIn": {
-      "error": "Vous ne pouvez combiner follow role-in avec only-role et only-channel.",
-      "name": "[Mode] Suivre [@role] dans [#channel]"
-    },
-    "show": {
-      "menu": {
-        "description": "Le bot peut être activé sur :\n- Changement de permission d'un membre, d'un channel, catégorie\n- Lors de la création d'un thread\n- Lors de l'arrivée d'un nouveau membre.\n\nVous pouvez aussi désactiver le bot entièrement, et ne mettre à jour uniquement pour certains salons et rôles.\n\n Les commandes de configurations sont :",
-        "title": "Configuration"
-      }
-    },
-    "thread": {
-      "display": "Création de thread",
-      "name": "À la création d'un thread"
-    }
-  },
-  "follow": {
-    "description": "Mise à jour uniquement sur les rôles/canaux suivis",
-    "disabled": "Vous ne pouvez pas utiliser ces commandes : le mode \"follow-only\" est désactivé.",
-    "list": {
-      "description": "Affiche les rôles et les channels suivis",
-      "roleIn": "Role suivi dans des salons spécifiques",
-      "title": "Suivi"
-    },
-    "role": {
-      "added": "{{- role}} suivi",
-      "description": "Role à suivre ou ne plus suivre",
-      "option": "Sélection le role",
-      "removed": "{{- role}} non-suivi"
-    },
-    "roleIn": {
-      "description": "Suivre un role pour un salon spécifique",
-      "option": {
-        "channel": "Le salon à suivre. Si non spécifié, le rôle ne sera plus suivi.",
-        "role": "Le rôle à suivre"
-      }
-    },
-    "thread": {
-      "description": "Sélectionne un salon, thread, catégorie, ou forum, à suivre",
-      "option": {
-        "description": "Salon à suivre"
-      },
-      "remove": "{{- thread}} a été supprimé du suivi",
-      "success": "{{- thread}} est maintenant suivi."
-    }
-  },
-  "ignore": {
-    "description": "Exclure des channels ou rôle des mises-à-jours",
-    "error": "Le channel, thread, forum ou catégorie n'a pas été reconnu.",
-    "followError": "Les commandes \"ignore\" ne peuvent pas être utilisées en mode \"follow-only\".",
-    "list": {
-      "description": "Liste de tous les canaux, fils de discussion, catégories et rôles ignorés",
-      "none": "Vide",
-      "title": "Liste des channels, catégories, threads et rôles ignorés"
-    },
-    "message": "{{- thread}} est ignoré depuis les paramètres !",
-    "name": "Ignore",
-    "role": {
-      "added": "Role {{- role}} ignoré.",
-      "description": "Exclure un rôle des mises-à-jours",
-      "error": "{{- role}} est introuvable",
-      "option": "Selectionner le rôle à inclure/exclure",
-      "removed": "Role {{- role}} dés-ignoré !"
-    },
-    "roleIn": {
-      "description": "Ignore un rôle pour un channel spécifique",
-      "option": {
-        "chan": "Le channel dans lequel le rôle sera ignoré. Si indéfini, supprime le rôle de la liste.",
-        "role": "Le rôle à ignorer"
-      }
-    },
-    "thread": {
-      "description": "Ignore un thread, channel, forum ou catégorie spécifique",
-      "error": "Cette commande ne peut être utilisée que pour une catégorie, forum, channel ou un thread.",
-      "option": {
-        "description": "Sélectionner le thread/channel/catégorie/forum à ignorer ou à dés-ignorer"
-      },
-      "remove": "{{- thread}} n'est plus ignoré",
-      "success": "{{- thread}} a été ignoré"
-    }
-  },
-  "info": {
-    "cmds": "Obtenir des informations sur le bot",
-    "desc": "Un petit bot discord écrit en TypeScript qui ajoute / supprime automatiquement des membres dans un fil de discussion, sans leur envoyer de ping !",
-    "footer": "Fait avec 💖 par Mara__Li",
-    "readMe": "https://github.com/Mara-Li/Knitting-bot/blob/master/README_FR.md",
-    "title": "Information"
-  },
-  "logs": {
-    "joined": "{{- user}} a rejoint le serveur",
-    "member": {
-      "updated": {
-        "noRole": "{{- user}} a été mis à jour, mais aucun rôle n'a été ajouté.",
-        "roleList": "{{- user}} a été mis à jour avec les rôles : {{- role}}"
-      }
-    },
-    "thread": {
-      "created": "Le thread {{- thread}} a été créé !"
-    },
-    "updated": {
-      "channel": "Mise à jour de {{- number}} threads de {{- child}}"
-    }
-  },
-  "roleIn": {
-    "already": "Le rôle {{- mention }} est déjà {{- opposite }} dans {{- channel }}.",
-    "enabled": {
-      "chan": "{{- chan}} est maintenant {{- on}} pour {{- mention }}"
-    },
-    "error": {
-      "need": "Vous devez d'abord activer le mode \"follow-only-in\".",
-      "otherMode": "Vous ne pouvez pas utiliser cette commande avec les autres modes de suivi.",
-      "support": "Ce type de salon n'est pas supporté"
-    },
-    "noLonger": {
-      "any": "Le role {{- mention }} n'est plus {{- on}} dans aucun channel.",
-      "chan": "{{- chan}} n'est plus {{- on }} pour {{- mention }}"
-    },
-    "on": {
-      "follow": "suivi",
-      "ignore": "ignoré"
-    }
-  }
+	"commands": {
+		"description": "Permet de mettre à jour manuellement les threads en ajoutant les utilisateurs manquants.",
+		"error": "Cette commande ne peut être utilisée que dans ou pour un thread.",
+		"help": {
+			"all": "- `/update tout` : Pour ajouter sur tous les threads du serveur.\n",
+			"desc": "Met à jour manuellement les threads en ajoutant les utilisateurs manquants, avec l'aide des commandes ci-dessous :\n",
+			"description": "Affiche l'aide des commandes manuelles",
+			"name": "aide",
+			"thread": "- `/update thread <thread>` : Pour ajouter dans un thread spécifique (à sélectionner depuis la liste). Si aucun channel n'est sélectionné, utilise celui utilisé pour la commande.\n",
+			"title": "Aide des commandes manuelles"
+		},
+		"name": "update",
+		"success": "Mise à jour effectuée : {{- channel}}",
+		"updateAllThreads": {
+			"description": "Met à jour tous les threads du serveur, en ajoutant ou supprimant des utilisateurs",
+			"name": "tout",
+			"reply": "Mise à jour de tous les threads…",
+			"success": "Mise à jour effectuée de {{- count}} threads"
+		},
+		"updateSpecificThread": {
+			"description": "Met à jour un thread spécifique",
+			"option": {
+				"description": "Sélectionner le thread à mettre à jour"
+			}
+		},
+		"updateThread": {
+			"description": "Met à jour ce thread en ajoutant les utilisateurs manquants"
+		}
+	},
+	"common": {
+		"cancel": "Annuler",
+		"category": "Catégorie",
+		"channel": "Channel",
+		"confirm": "Confirmer",
+		"disable": "Désactiver",
+		"disabled": "Désactivé",
+		"enable": "Activer",
+		"enabled": "Activé",
+		"error": "Une erreur est apparue :\n```\n{{error}}\n```",
+		"forum": "Forum",
+		"here": "ici",
+		"list": "liste",
+		"no": "Non",
+		"none": "/",
+		"role": "role",
+		"roleIn": "spécifique",
+		"thread": "Thread",
+		"yes": "Oui"
+	},
+	"configuration": {
+		"archived": {
+			"disable": "Les threads archivés ne seront pas mis à jour.",
+			"enable": "Les threads archivés seront maintenant mis à jour."
+		},
+		"channel": {
+			"description": "Active/désactive l'ajout des membres aux threads lors de l'édition des permissions d'un channel.",
+			"name": "Modification de salon",
+			"title": "Modification de salon, catégorie, forum"
+		},
+		"disable": {
+			"description": "Active ou désactive tous les évènements pour passer le bot en mode manuel ou automatique",
+			"name": "Mode manuel"
+		},
+		"follow": {
+			"role": {
+				"name": "[Mode] Suivre certains rôles",
+				"title": "Rôle uniquement"
+			},
+			"roleIn": "[@role] dans [#channel]",
+			"thread": {
+				"name": "[Mode] Suivre certains channels",
+				"title": "Channel uniquement"
+			}
+		},
+		"general": "Configuration générale",
+		"language": {
+			"desc": "Changer la langue du serveur (pour les logs)",
+			"name": "Langue",
+			"options": "langue à changer",
+			"validate": "Langue du serveur changée à `{{- lang}}`"
+		},
+		"log": {
+			"description": "Voir les logs du bot sur un channel (utiliser /log pour choisir le channel)",
+			"display": "Channel des logs : {{- channel}}",
+			"name": "Log du bot"
+		},
+		"main": {
+			"description": "Modifier la configuration du serveur, autorisant à modifier certains évènements.",
+			"name": "config"
+		},
+		"member": {
+			"name": "Modification de membre",
+			"title": "Modification des membres"
+		},
+		"menu": {
+			"autoUpdate": {
+				"cmd": "auto",
+				"desc": "Configuration des mises à jour automatiques",
+				"title": "MISE À JOUR AUTOMATIQUE"
+			},
+			"general": {
+				"desc": "Configuration générale du bot (langue et logs).",
+				"display": {
+					"desc": "Affichage de la configuration générale et changement des paramètres",
+					"title": "affichage"
+				},
+				"lang": {
+					"desc": "Langue actuellement utilisée"
+				},
+				"title": "general"
+			},
+			"help": {
+				"desc": "Affiche les informations générales de configuration",
+				"readme": "Documentation"
+			},
+			"log": {
+				"channel": {
+					"desc": "Channel où envoyer les logs",
+					"disable": "Les logs sont maintenant désactivés.",
+					"success": "Le channel des logs est maintenant {{- channel}}.",
+					"title": "log"
+				},
+				"desc": "Choisir le channel pour envoyer les logs"
+			},
+			"mode": {
+				"desc": "Configuration des modes de suivis",
+				"title": "MODE"
+			}
+		},
+		"newMember": {
+			"display": "Arrivée d'un nouveau membre",
+			"name": "Arrivée d'un membre"
+		},
+		"roleIn": {
+			"error": "Vous ne pouvez combiner follow role-in avec only-role et only-channel.",
+			"name": "[Mode] Suivre [@role] dans [#channel]"
+		},
+		"show": {
+			"menu": {
+				"description": "Le bot peut être activé sur :\n- Changement de permission d'un membre, d'un channel, catégorie\n- Lors de la création d'un thread\n- Lors de l'arrivée d'un nouveau membre.\n\nVous pouvez aussi désactiver le bot entièrement, et ne mettre à jour uniquement pour certains salons et rôles.\n\n Les commandes de configurations sont :",
+				"title": "Configuration"
+			}
+		},
+		"thread": {
+			"display": "Création de thread",
+			"name": "À la création d'un thread"
+		}
+	},
+	"follow": {
+		"description": "Mise à jour uniquement sur les rôles/canaux suivis",
+		"disabled": "Vous ne pouvez pas utiliser ces commandes : le mode \"follow-only\" est désactivé.",
+		"list": {
+			"description": "Affiche les rôles et les channels suivis",
+			"roleIn": "Role suivi dans des salons spécifiques",
+			"title": "Suivi"
+		},
+		"role": {
+			"added": "{{- role}} suivi",
+			"description": "Role à suivre ou ne plus suivre",
+			"option": "Sélection le role",
+			"removed": "{{- role}} non-suivi"
+		},
+		"roleIn": {
+			"description": "Suivre un role pour un salon spécifique",
+			"option": {
+				"channel": "Le salon à suivre. Si non spécifié, le rôle ne sera plus suivi.",
+				"role": "Le rôle à suivre"
+			}
+		},
+		"thread": {
+			"description": "Sélectionne un salon, thread, catégorie, ou forum, à suivre",
+			"option": {
+				"description": "Salon à suivre"
+			},
+			"remove": "{{- thread}} a été supprimé du suivi",
+			"success": "{{- thread}} est maintenant suivi."
+		}
+	},
+	"ignore": {
+		"description": "Exclure des channels ou rôle des mises-à-jours",
+		"error": "Le channel, thread, forum ou catégorie n'a pas été reconnu.",
+		"followError": "Les commandes \"ignore\" ne peuvent pas être utilisées en mode \"follow-only\".",
+		"list": {
+			"description": "Liste de tous les canaux, fils de discussion, catégories et rôles ignorés",
+			"none": "Vide",
+			"title": "Liste des channels, catégories, threads et rôles ignorés"
+		},
+		"message": "{{- thread}} est ignoré depuis les paramètres !",
+		"name": "Ignore",
+		"role": {
+			"added": "Role {{- role}} ignoré.",
+			"description": "Exclure un rôle des mises-à-jours",
+			"error": "{{- role}} est introuvable",
+			"option": "Selectionner le rôle à inclure/exclure",
+			"removed": "Role {{- role}} dés-ignoré !"
+		},
+		"roleIn": {
+			"description": "Ignore un rôle pour un channel spécifique",
+			"option": {
+				"chan": "Le channel dans lequel le rôle sera ignoré. Si indéfini, supprime le rôle de la liste.",
+				"role": "Le rôle à ignorer"
+			}
+		},
+		"thread": {
+			"description": "Ignore un thread, channel, forum ou catégorie spécifique",
+			"error": "Cette commande ne peut être utilisée que pour une catégorie, forum, channel ou un thread.",
+			"option": {
+				"description": "Sélectionner le thread/channel/catégorie/forum à ignorer ou à dés-ignorer"
+			},
+			"remove": "{{- thread}} n'est plus ignoré",
+			"success": "{{- thread}} a été ignoré"
+		}
+	},
+	"info": {
+		"cmds": "Obtenir des informations sur le bot",
+		"desc": "Un petit bot discord écrit en TypeScript qui ajoute / supprime automatiquement des membres dans un fil de discussion, sans leur envoyer de ping !",
+		"footer": "Fait avec 💖 par Mara__Li",
+		"readMe": "https://github.com/Mara-Li/Knitting-bot/blob/master/README_FR.md",
+		"title": "Information"
+	},
+	"logs": {
+		"joined": "{{- user}} a rejoint le serveur",
+		"member": {
+			"updated": {
+				"noRole": "{{- user}} a été mis à jour, mais aucun rôle n'a été ajouté.",
+				"roleList": "{{- user}} a été mis à jour avec les rôles : {{- role}}"
+			}
+		},
+		"thread": {
+			"created": "Le thread {{- thread}} a été créé !"
+		},
+		"updated": {
+			"channel": "Mise à jour de {{- number}} threads de {{- child}}"
+		}
+	},
+	"roleIn": {
+		"already": "Le rôle {{- mention }} est déjà {{- opposite }} dans {{- channel }}.",
+		"enabled": {
+			"chan": "{{- chan}} est maintenant {{- on}} pour {{- mention }}"
+		},
+		"error": {
+			"need": "Vous devez d'abord activer le mode \"follow-only-in\".",
+			"otherMode": "Vous ne pouvez pas utiliser cette commande avec les autres modes de suivi.",
+			"support": "Ce type de salon n'est pas supporté"
+		},
+		"noLonger": {
+			"any": "Le role {{- mention }} n'est plus {{- on}} dans aucun channel.",
+			"chan": "{{- chan}} n'est plus {{- on }} pour {{- mention }}"
+		},
+		"on": {
+			"follow": "suivi",
+			"ignore": "ignoré"
+		}
+	}
 }
