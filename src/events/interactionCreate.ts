@@ -1,4 +1,4 @@
-import { BaseInteraction, Client } from "discord.js";
+import type { BaseInteraction, Client } from "discord.js";
 import { commands } from "../commands";
 import { default as i18next } from "../i18n/i18next";
 import { changeLanguage } from "../utils";
@@ -16,7 +16,8 @@ export default (client: Client): void => {
 			await command.execute(interaction);
 		} catch (error) {
 			console.log(error);
-			await interaction.channel?.send({
+			if (!interaction.channel || interaction.channel.isDMBased()) return;
+			await (interaction.channel).send({
 				content: i18next.t("common.error", { error: error }) as string,
 			});
 		}

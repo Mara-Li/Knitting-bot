@@ -1,6 +1,6 @@
 import { Client, GatewayIntentBits, Partials } from "discord.js";
 import dotenv from "dotenv";
-import * as process from "process";
+import * as process from "node:process";
 import * as pkg from "../package.json";
 import onNewMember from "./events/created/onNewMember";
 import onThreadCreated from "./events/created/onThreadCreated";

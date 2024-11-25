@@ -1,4 +1,4 @@
-import { CategoryChannel, ForumChannel, Role, TextChannel, ThreadChannel } from "discord.js";
+import type { CategoryChannel, ForumChannel, Role, TextChannel, ThreadChannel } from "discord.js";
 
 export enum DefaultMenuBuilder {
 	member = "on-member-update",

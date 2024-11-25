@@ -1,5 +1,5 @@
-import { Client, CommandInteraction, Guild, TextChannel, ThreadChannel } from "discord.js";
-import process from "process";
+import type { Client, CommandInteraction, Guild, TextChannel, ThreadChannel } from "discord.js";
+import process from "node:process";
 import { CommandName } from "../interface";
 import { getConfig } from "../maps";
 import i18next from "i18next";
@@ -33,7 +33,7 @@ export async function discordLogs(guildID: string, bot: Client, ...text: unknown
 			const channel = await bot.channels.fetch(chan);
 			if (channel) {
 				const channelText = channel as TextChannel;
-				channelText.send(`\`\`\`\n${text.join(" ")}\n\`\`\``);
+				await channelText.send(`\`\`\`\n${text.join(" ")}\n\`\`\``);
 			}
 		}
 	}

@@ -1,15 +1,15 @@
 import {
-	CategoryChannel,
+	type CategoryChannel,
 	ChannelType,
-	Collection,
-	ForumChannel,
-	GuildBasedChannel,
-	GuildMember,
-	GuildMemberRoleManager,
-	Role,
-	TextChannel,
-	ThreadChannel,
-	ThreadMember,
+	type Collection,
+	type ForumChannel,
+	type GuildBasedChannel,
+	type GuildMember,
+	type GuildMemberRoleManager,
+	type Role,
+	type TextChannel,
+	type ThreadChannel,
+	type ThreadMember,
 } from "discord.js";
 import { CommandName, TypeName } from "../interface";
 import { getConfig, getMaps, getRole, getRoleIn } from "../maps";
@@ -38,6 +38,7 @@ export function validateChannelType(channel: GuildBasedChannel): boolean {
 export async function checkIfUserNotInTheThread(thread: ThreadChannel, memberToCheck: GuildMember) {
 	const members = await thread.members.fetch();
 	const threadMemberArray: ThreadMember<boolean>[] = [];
+	// biome-ignore lint/complexity/noForEach: <explanation>
 	members.forEach(member => {
 		threadMemberArray.push(member);
 	});
@@ -93,9 +94,8 @@ export function checkMemberRoleIn(on: "follow" | "ignore", roleManager: GuildMem
 		if (!find) return false;
 		return find.channels.some(channel => {
 			if (channel.id === thread.id) return true;
-			else if (channel.id === parentChannel?.id) return true;
-			else if (channel.id === categoryOfParent?.id) return true;
-			return false;
+			if (channel.id === parentChannel?.id) return true;
+			return channel.id === categoryOfParent?.id;
 		});
 	});
 }
@@ -118,9 +118,9 @@ export function checkRoleIn(on: "follow"|"ignore", role: Role, thread: ThreadCha
 	if (!find) return false;
 	return find.channels.some(channel => {
 		if (channel.id === thread.id) return true;
-		else if (channel.id === parentChannel?.id) return true;
-		else if (channel.id === categoryOfParent?.id) return true;
-		return false;
+	 if (channel.id === parentChannel?.id) return true;
+	 return channel.id === categoryOfParent?.id;
+	
 	});
 	
 }
@@ -153,7 +153,7 @@ export function checkThread(channel: ThreadChannel, on: "ignore" | "follow") {
  * @param thread
  * @param {boolean} allow If true, getConfig all members that have the permission to view the thread, else getConfig all members that don't have the permission to view the thread
  */
-export function getMemberPermission(members: Collection<string, GuildMember>, thread: ThreadChannel | TextChannel, allow: boolean = true) {
+export function getMemberPermission(members: Collection<string, GuildMember>, thread: ThreadChannel | TextChannel, allow = true) {
 	if (allow) {
 		return members.filter(member => {
 			if (!thread.parent) return false;
@@ -163,7 +163,8 @@ export function getMemberPermission(members: Collection<string, GuildMember>, th
 				memberPermissions.has("ReadMessageHistory")
 			);
 		});
-	} else if (!allow) {
+	}
+	if (!allow) {
 		return members.filter(member => {
 			const memberPermissions = thread.permissionsFor(member);
 			return (

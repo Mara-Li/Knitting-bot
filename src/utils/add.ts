@@ -1,4 +1,4 @@
-import { GuildMember, MessageFlags, MessagePayloadOption, Role, ThreadChannel, userMention } from "discord.js";
+import { type GuildMember, MessageFlags, type Role, type ThreadChannel, userMention } from "discord.js";
 import { EMOJI } from "../index";
 import { CommandName } from "../interface";
 import { getConfig } from "../maps";
@@ -19,7 +19,7 @@ import { discordLogs, logInDev } from "./index";
  * @param user {@link GuildMember} The user to add
  */
 export async function addUserToThread(thread: ThreadChannel, user: GuildMember) {
-	if (thread.archived) return;
+	if (thread.archived || thread.locked) return;
 	const guild = thread.guild.id;
 	
 	if (thread.permissionsFor(user).has("ViewChannel", true) && await checkIfUserNotInTheThread(thread, user)) {
@@ -130,13 +130,14 @@ export async function getRoleToPing(thread: ThreadChannel, roles: Role[]) {
  * @param thread {@link ThreadChannel} The thread to add the user
  */
 export async function addRoleAndUserToThread(thread: ThreadChannel) {
-	if (thread.archived) return;
+	if (thread.archived || !thread.locked) return;
 	const members = await thread.guild.members.fetch();
 	const toPing: GuildMember[] = [];
 	const rolesWithAccess: Role[] = thread.guild.roles.cache.toJSON();
 	if (rolesWithAccess.length > 0) {
 		try {
 			getRoleToPing(thread, rolesWithAccess).then(roles => {
+				// biome-ignore lint/complexity/noForEach: <explanation>
 				roles.forEach(role => {
 					toPing.push(...role.members.toJSON());
 				});
@@ -160,12 +161,11 @@ export async function addRoleAndUserToThread(thread: ThreadChannel) {
 		});
 	}
 	if (toPing.length > 0) {
-		const messagePayload: MessagePayloadOption = {
+		const fetchedMessage = await thread.messages.fetch();
+		const message = fetchedMessage.filter(m => m.author.id === thread.client.user.id).first() ?? await thread.send({
 			content: EMOJI,
 			flags: MessageFlags.SuppressNotifications
-		};
-		const fetchedMessage = await thread.messages.fetch();
-		const message = fetchedMessage.filter(m => m.author.id === thread.client.user.id).first() ?? await thread.send(messagePayload);
+		});
 		await message.edit(toPing.map(member => `<@${member.id}>`).join(" "));
 		await message.edit(EMOJI);
 		await discordLogs(thread.guild.id, thread.client, `Add ${toPing.length} members to #${thread.name}:\n- ${toPing.map(member => member.user.username).join("\n- ")}`);

@@ -1,4 +1,4 @@
-import { Client, ThreadChannel } from "discord.js";
+import type { Client, ThreadChannel } from "discord.js";
 import { CommandName } from "../../interface";
 import { getConfig } from "../../maps";
 import { changeGuildLanguage, discordLogs, logInDev } from "../../utils";
