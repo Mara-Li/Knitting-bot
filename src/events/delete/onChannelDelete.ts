@@ -1,15 +1,14 @@
 import {
-	CategoryChannel,
+	type CategoryChannel,
 	ChannelType,
-	Client,
+	type Client,
 	DMChannel,
-	ForumChannel,
-	NonThreadGuildBasedChannel,
-	TextChannel,
+	type ForumChannel,
+	type NonThreadGuildBasedChannel,
+	type TextChannel,
 } from "discord.js";
 import { TypeName } from "../../interface";
 import { getMaps, getRoleIn, setIgnore, setRoleIn } from "../../maps";
-import { logInDev } from "../../utils";
 
 /**
  * @param {Client} client - Discord.js Client
@@ -35,11 +34,10 @@ export default (client: Client): void => {
 		if (ignoredRoleIn) {
 			//remove the channel from the role.channels array
 			const ignored = getRoleIn("ignore", guildID);
+			// biome-ignore lint/complexity/noForEach: <explanation>
 			ignored.forEach((ignored) => {
 				const channels = ignored.channels;
-				const index = channels.findIndex(
-					(channel) => channel.id === channel.id,
-				);
+				const index = channels.findIndex((c) => c.id === channel.id);
 				channels.splice(index, 1);
 				ignored.channels = channels;
 			});
@@ -48,11 +46,10 @@ export default (client: Client): void => {
 		if (followedRoleIn) {
 			//remove the channel from the role.channels array
 			const followed = getRoleIn("follow", guildID);
+			// biome-ignore lint/complexity/noForEach: <explanation>
 			followed.forEach((followed) => {
 				const channels = followed.channels;
-				const index = channels.findIndex(
-					(channel) => channel.id === channel.id,
-				);
+				const index = channels.findIndex((c) => c.id === channel.id);
 				channels.splice(index, 1);
 				followed.channels = channels;
 			});

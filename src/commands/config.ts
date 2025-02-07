@@ -20,7 +20,7 @@ import {
 	type CommandInteractionOptionResolver,
 	EmbedBuilder,
 	type Locale,
-	type LocaleString,
+	MessageFlags,
 	PermissionFlagsBits,
 	SlashCommandBuilder,
 	type StringSelectMenuInteraction,
@@ -130,13 +130,13 @@ export default {
 					content: i18next.t("configuration.menu.log.channel.success", {
 						channel: channelMention(channel.id),
 					}) as string,
-					ephemeral: true,
+					flags: MessageFlags.Ephemeral,
 				});
 			} else {
 				setConfig(`${CommandName.log}.channel`, interaction.guild.id, false);
 				await interaction.reply({
 					content: i18next.t("configuration.menu.log.channel.disable"),
-					ephemeral: true,
+					flags: MessageFlags.Ephemeral,
 				});
 			}
 		} else if (en("configuration.menu.mode.title").toLowerCase() === commands) {
@@ -163,8 +163,8 @@ export default {
 			if (locale === "en") await guild.setPreferredLocale("en-US" as Locale);
 			else await guild.setPreferredLocale(locale as Locale);
 			await interaction.reply({
-				content: `${i18next.t("configuration.language.validate", { lang: (locale as LocaleString).toUpperCase() })}`,
-				ephemeral: true,
+				content: `${i18next.t("configuration.language.validate", { lang: (locale as Locale).toUpperCase() })}`,
+				flags: MessageFlags.Ephemeral,
 			});
 		}
 		// biome-ignore lint/suspicious/noExplicitAny: <explanation>
