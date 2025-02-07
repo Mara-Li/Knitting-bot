@@ -5,6 +5,7 @@ import {
 	type CommandInteractionOptionResolver,
 	EmbedBuilder,
 	ForumChannel,
+	MessageFlags,
 	PermissionFlagsBits,
 	Role,
 	SlashCommandBuilder,
@@ -121,7 +122,7 @@ export default {
 				if (!getConfig(CommandName.followOnlyChannel, guild)) {
 					await interaction.reply({
 						content: i18next.t("follow.disabled") as string,
-						ephemeral: true,
+						flags: MessageFlags.Ephemeral,
 					});
 					return;
 				}
@@ -131,7 +132,7 @@ export default {
 				if (!getConfig(CommandName.followOnlyRole, guild)) {
 					await interaction.reply({
 						content: i18next.t("follow.disabled") as string,
-						ephemeral: true,
+						flags: MessageFlags.Ephemeral,
 					});
 					return;
 				}
@@ -246,7 +247,7 @@ async function displayFollowed(interaction: CommandInteraction) {
 
 	await interaction.reply({
 		embeds: [embed],
-		ephemeral: true,
+		flags: MessageFlags.Ephemeral,
 	});
 }
 
@@ -261,7 +262,7 @@ async function followThisRole(interaction: CommandInteraction) {
 	if (!role || !(role.role instanceof Role)) {
 		await interaction.reply({
 			content: i18next.t("ignore.role.error", { role: role }) as string,
-			ephemeral: true,
+			flags: MessageFlags.Ephemeral,
 		});
 		return;
 	}
@@ -279,7 +280,7 @@ async function followThisRole(interaction: CommandInteraction) {
 		setRole("follow", interaction.guild.id, newFollowRoles);
 		await interaction.reply({
 			content: i18next.t("follow.role.removed", { role: mention }) as string,
-			ephemeral: true,
+			flags: MessageFlags.Ephemeral,
 		});
 	} else {
 		//add to follow list
@@ -287,7 +288,7 @@ async function followThisRole(interaction: CommandInteraction) {
 		setRole("follow", interaction.guild.id, followedRoles);
 		await interaction.reply({
 			content: i18next.t("follow.role.added", { role: mention }) as string,
-			ephemeral: true,
+			flags: MessageFlags.Ephemeral,
 		});
 	}
 }
@@ -310,7 +311,7 @@ async function followText(interaction: CommandInteraction) {
 	} else {
 		await interaction.reply({
 			content: i18next.t("ignore.error") as string,
-			ephemeral: true,
+			flags: MessageFlags.Ephemeral,
 		});
 		return;
 	}
@@ -330,7 +331,7 @@ async function followThis(
 	if (!followChan) {
 		await interaction.reply({
 			content: i18next.t("commands.error") as string,
-			ephemeral: true,
+			flags: MessageFlags.Ephemeral,
 		});
 		return;
 	}
@@ -389,7 +390,7 @@ async function followThis(
 			content: i18next.t("follow.thread.remove", {
 				thread: followChan.name,
 			}) as string,
-			ephemeral: true,
+			flags: MessageFlags.Ephemeral,
 		});
 	} else {
 		//add to ignore list
@@ -407,7 +408,7 @@ async function followThis(
 			content: i18next.t("follow.thread.success", {
 				thread: followChan.name,
 			}) as string,
-			ephemeral: true,
+			flags: MessageFlags.Ephemeral,
 		});
 	}
 }

@@ -3,6 +3,7 @@ import {
 	type CommandInteraction,
 	type CommandInteractionOptionResolver,
 	EmbedBuilder,
+	MessageFlags,
 	PermissionFlagsBits,
 	SlashCommandBuilder,
 	ThreadChannel,
@@ -97,7 +98,7 @@ async function updateAllThreads(interaction: CommandInteraction) {
 	);
 	await interaction.reply({
 		content: i18next.t("commands.updateAllThreads.reply") as string,
-		ephemeral: true,
+		flags: MessageFlags.Ephemeral,
 	});
 	const count = threads.size;
 	for (const thread of threads.values()) {
@@ -115,7 +116,7 @@ async function updateAllThreads(interaction: CommandInteraction) {
 		content: i18next.t("commands.updateAllThreads.success", {
 			count: count,
 		}) as string,
-		ephemeral: true,
+		flags: MessageFlags.Ephemeral,
 	});
 }
 
@@ -134,7 +135,7 @@ async function updateThread(interaction: CommandInteraction) {
 	if (!channel || !(channel instanceof ThreadChannel)) {
 		await interaction.reply({
 			content: i18next.t("commands.error") as string,
-			ephemeral: true,
+			flags: MessageFlags.Ephemeral,
 		});
 		return;
 	}
@@ -151,13 +152,13 @@ async function updateThread(interaction: CommandInteraction) {
 	) {
 		await interaction.reply({
 			content: i18next.t("ignore.message", { thread: mention }) as string,
-			ephemeral: true,
+			flags: MessageFlags.Ephemeral,
 		});
 		return;
 	}
 	if (!interaction.guild) return;
 	await interaction.deferReply({
-		ephemeral: true,
+		flags: MessageFlags.Ephemeral,
 	});
 	await addRoleAndUserToThread(channel);
 	await interaction.editReply({
@@ -177,5 +178,5 @@ async function displayHelp(interaction: CommandInteraction) {
 		.setTitle(i18next.t("commands.help.title") as string)
 		.setDescription(constructDesc)
 		.setColor("#53dcaa");
-	await interaction.reply({ embeds: [embed], ephemeral: true });
+	await interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
 }
