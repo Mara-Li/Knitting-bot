@@ -4,6 +4,10 @@
 
 [Invitation links](https://discord.com/api/oauth2/authorize?client_id=1101559076086886500&permissions=292057785360&scope=bot)
 
+> [!WARNING]
+> When invited the bot is in `manual mode`, to prevents errors when the bot is added to a server. 
+> You need to activate the automatic events with the `/config auto` command.
+
 If you want to try out the bot, you can join [this discord server](https://discord.gg/TWjfz2yTSA)!
 
 A bot that helps you to add user to a thread, to keep the thread always visible for everyone, and without pinging them!
@@ -12,7 +16,6 @@ A bot that helps you to add user to a thread, to keep the thread always visible 
 > The user added to the thread needs to have the permission to see it.
 
 The bot will automatically add a user to a thread when:
-
 - A user joins the server and has the permission to see the thread
 - A user is updated and gets a new role
 - When a channel or category that have their permission edited
