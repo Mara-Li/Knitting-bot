@@ -1,10 +1,9 @@
-import { Client, REST, Routes } from "discord.js";
+import process from "node:process";
+import { type Client, REST, Routes } from "discord.js";
 import dotenv from "dotenv";
-import process from "process";
 import { commands } from "../commands";
 import { DESTROY_DATABASE, VERSION } from "../index";
 import { destroyDB } from "../maps";
-import { logInDev } from "../utils";
 
 let config = dotenv.config({ path: ".env" }).parsed;
 if (process.env.ENV === "production") {
@@ -24,6 +23,7 @@ export default (client: Client): void => {
 		});
 		for (const guild of client.guilds.cache.values()) {
 			//delete all commands
+			// biome-ignore lint/complexity/noForEach: <explanation>
 			guild.client.application?.commands.cache.forEach((command) => {
 				command.delete();
 			});

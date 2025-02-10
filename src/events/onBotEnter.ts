@@ -1,4 +1,4 @@
-import { Client } from "discord.js";
+import type { Client } from "discord.js";
 import { commands } from "../commands";
 import { loadDBFirstTime } from "../maps";
 import { logInDev } from "../utils";
@@ -18,7 +18,7 @@ export default (client: Client): void => {
 		} catch (error) {
 			console.error(error);
 		}
-		console.log(guild.preferredLocale);
 		loadDBFirstTime(guild.id);
+		logInDev(`Guild ${guild.name} has been added to the database.`);
 	});
 };

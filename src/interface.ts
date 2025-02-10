@@ -65,10 +65,10 @@ export interface IgnoreFollow {
 }
 
 export const DEFAULT_CONFIGURATION: Configuration = {
-	[CommandName.channel]: true,
-	[CommandName.member]: true,
-	[CommandName.newMember]: true,
-	[CommandName.thread]: true,
+	[CommandName.channel]: false,
+	[CommandName.member]: false,
+	[CommandName.newMember]: false,
+	[CommandName.thread]: false,
 	[CommandName.followOnlyChannel]: false,
 	[CommandName.followOnlyRole]: false,
 	[CommandName.followOnlyRoleIn]: false,

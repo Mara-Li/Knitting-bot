@@ -1,10 +1,15 @@
-import { ChannelType, Client, Snowflake, TextChannel } from "discord.js";
+import {
+	ChannelType,
+	type Client,
+	type Snowflake,
+	type TextChannel,
+} from "discord.js";
+import i18next from "i18next";
 import { CommandName } from "../../interface";
 import { getConfig } from "../../maps";
 import { changeGuildLanguage, discordLogs, logInDev } from "../../utils";
 import { addRoleAndUserToThread } from "../../utils/add";
 import { checkThread, validateChannelType } from "../../utils/data_check";
-import i18next from "i18next";
 
 /**
  * @param {Client} client - Discord.js Client
@@ -15,6 +20,9 @@ import i18next from "i18next";
 
 export default (client: Client): void => {
 	client.on("channelUpdate", async (oldChannel, newChannel) => {
+		logInDev(
+			`Channel ${getChannelName(oldChannel.id, client)} has been updated.`,
+		);
 		if (
 			oldChannel.type === ChannelType.DM ||
 			newChannel.type === ChannelType.DM ||
@@ -38,6 +46,7 @@ export default (client: Client): void => {
 			//get all threads of the channels in the category
 			const children = newChannel.children.cache;
 			if (children.size === 0) return;
+			// biome-ignore lint/complexity/noForEach: <explanation>
 			children.forEach((child) => {
 				if (child.type === ChannelType.GuildText) {
 					const threads = (child as TextChannel).threads.cache;
@@ -50,6 +59,7 @@ export default (client: Client): void => {
 								child: child.name,
 							}),
 						);
+					// biome-ignore lint/complexity/noForEach: <explanation>
 					threads.forEach((thread) => {
 						if (!getConfig(CommandName.followOnlyChannel, guild)) {
 							if (!checkThread(thread, "ignore"))
@@ -72,6 +82,7 @@ export default (client: Client): void => {
 					child: newTextChannel.name,
 				}),
 			);
+			// biome-ignore lint/complexity/noForEach: <explanation>
 			threads.forEach((thread) => {
 				if (!getConfig(CommandName.followOnlyChannel, guild)) {
 					if (!checkThread(thread, "ignore")) addRoleAndUserToThread(thread);

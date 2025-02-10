@@ -2,7 +2,7 @@ import type { Client, ThreadChannel } from "discord.js";
 import i18next from "i18next";
 import { CommandName } from "../../interface";
 import { getConfig } from "../../maps";
-import { changeGuildLanguage, discordLogs } from "../../utils";
+import { changeGuildLanguage, discordLogs, logInDev } from "../../utils";
 import { addUserToThread } from "../../utils/add";
 import {
 	checkMemberRole,
@@ -87,6 +87,8 @@ export default (client: Client): void => {
 			}
 		} catch (error) {
 			console.error(error);
+			logInDev(`Error on memberUpdate: ${error}`);
 		}
+		logInDev(`Member ${newMember.user.username} has been updated.`);
 	});
 };
