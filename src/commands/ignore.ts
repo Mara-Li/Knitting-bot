@@ -25,9 +25,10 @@ import {
 	setIgnore,
 	setRole,
 } from "../maps";
+import { toTitle } from "../utils";
+import { mapToStr } from "./index";
 import { interactionRoleInChannel } from "./utils";
 
-const fr = i18next.getFixedT("fr");
 const en = i18next.getFixedT("en");
 
 export default {
@@ -158,65 +159,45 @@ export default {
  */
 async function listIgnored(interaction: CommandInteraction) {
 	if (!interaction.guild) return;
-	const guild = interaction.guild.id;
-	const ignoredCategories =
-		(getMaps("ignore", TypeName.category, guild) as CategoryChannel[]) ?? [];
-	const ignoredThreads =
-		(getMaps("ignore", TypeName.thread, guild) as ThreadChannel[]) ?? [];
-	const ignoredChannels =
-		(getMaps("ignore", TypeName.channel, guild) as TextChannel[]) ?? [];
-	const ignoredForum =
-		(getMaps("ignore", TypeName.forum, guild) as ForumChannel[]) ?? [];
-	const ignoredRoles = getRole("ignore", guild);
-
-	const ignoredRolesIn = getRoleIn("ignore", guild);
-	const ignoredRolesInMaps = ignoredRolesIn
-		.map((roleIn) => {
-			const role = roleIn.role.id;
-			const channels = roleIn.channels
-				.map((channel) => channelMention(channel.id))
-				.join("\n - ");
-			return `${roleMention(role)}:\n - ${channels}`;
-		})
-		.join("");
-
-	const ignoredCategoriesNames = `\n- ${ignoredCategories
-		.map((category) => channelMention(category.id))
-		.join("\n- ")}`;
-	const ignoredThreadsNames = `\n- ${ignoredThreads.map((thread) => channelMention(thread.id)).join("\n-")}`;
-	const ignoredChannelsNames = `\n- ${ignoredChannels.map((channel) => channel.name).join("\n-")}`;
-	const ignoredRolesNames = `\n- ${ignoredRoles.map((role) => roleMention(role.id)).join("\n-")}`;
-	const ignoredForumNames = `\n- ${ignoredForum.map((forum) => channelMention(forum.id)).join("\n-")}`;
-
+	const ignored = mapToStr("ignore", interaction.guild.id);
+	const roleIn = getRoleIn("ignore", interaction.guild.id);
+	const {
+		rolesNames: ignoredRolesNames,
+		categoriesNames: ignoredCategoriesNames,
+		threadsNames: ignoredThreadsNames,
+		channelsNames: ignoredChannelsNames,
+		rolesInNames: ignoredRolesIn,
+		forumNames: ignoredForumNames,
+	} = ignored;
 	const embed = new EmbedBuilder()
 		.setColor("#2f8e7d")
-		.setTitle(i18next.t("ignore.list.title") as string)
+		.setTitle(i18next.t("ignore.list.title"))
 		.addFields({
-			name: i18next.t("common.category") as string,
-			value:
-				ignoredCategoriesNames || (i18next.t("ignore.list.none") as string),
+			name: i18next.t("common.category"),
+			value: ignoredCategoriesNames || i18next.t("ignore.list.none"),
 		})
 		.addFields({
-			name: i18next.t("common.channel") as string,
-			value: ignoredThreadsNames || (i18next.t("ignore.list.none") as string),
+			name: i18next.t("common.channel"),
+			value: ignoredThreadsNames || i18next.t("ignore.list.none"),
 		})
 		.addFields({
-			name: i18next.t("common.channel") as string,
-			value: ignoredChannelsNames || (i18next.t("ignore.list.none") as string),
+			name: i18next.t("common.channel"),
+			value: ignoredChannelsNames || i18next.t("ignore.list.none"),
 		})
 		.addFields({
-			name: i18next.t("common.forum") as string,
-			value: ignoredForumNames || (i18next.t("ignore.list.none") as string),
+			name: i18next.t("common.forum"),
+			value: ignoredForumNames || i18next.t("ignore.list.none"),
 		})
 		.addFields({
-			name: i18next.t("common.role") as string,
-			value: ignoredRolesNames || (i18next.t("ignore.list.none") as string),
+			name: toTitle(i18next.t("common.role")),
+			value: ignoredRolesNames || i18next.t("ignore.list.none"),
 		});
 
-	if (ignoredRolesIn.length > 0) {
+	if (roleIn.length > 0) {
 		const embed2 = new EmbedBuilder()
+			.setTitle(i18next.t("ignore.roleIn.title"))
 			.setColor("#2f8e7d")
-			.setDescription(ignoredRolesInMaps);
+			.setDescription(ignoredRolesIn);
 		await interaction.reply({
 			embeds: [embed, embed2],
 			flags: MessageFlags.Ephemeral,

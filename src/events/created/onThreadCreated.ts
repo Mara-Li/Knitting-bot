@@ -28,8 +28,10 @@ export default (client: Client): void => {
 		/** automatically add the bot to the thread */
 		await thread.join();
 		if (!getConfig(CommandName.followOnlyChannel, guild)) {
+			logInDev("Thread is not follow only", !checkThread(thread, "ignore"));
 			if (!checkThread(thread, "ignore")) await addRoleAndUserToThread(thread);
 		} else {
+			logInDev("Thread is follow only", checkThread(thread, "follow"));
 			if (checkThread(thread, "follow")) await addRoleAndUserToThread(thread);
 		}
 	});

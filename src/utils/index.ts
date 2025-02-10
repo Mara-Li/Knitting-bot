@@ -68,3 +68,7 @@ export function changeGuildLanguage(guild: Guild) {
 	i18next.changeLanguage(userLang);
 	return;
 }
+
+export function toTitle(name: string) {
+	return name.charAt(0).toUpperCase() + name.slice(1);
+}

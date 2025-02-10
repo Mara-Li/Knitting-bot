@@ -11,24 +11,16 @@ import {
 	SlashCommandBuilder,
 	TextChannel,
 	ThreadChannel,
-	channelMention,
 	roleMention,
 } from "discord.js";
 import { cmdLn } from "../i18n";
 import { default as i18next } from "../i18n/init";
-import { CommandName, type RoleIn, TypeName } from "../interface";
-import {
-	getConfig,
-	getMaps,
-	getRole,
-	getRoleIn,
-	setFollow,
-	setRole,
-} from "../maps";
-import { logInDev } from "../utils";
+import { CommandName, TypeName } from "../interface";
+import { getConfig, getMaps, getRole, setFollow, setRole } from "../maps";
+import { toTitle } from "../utils";
+import { mapToStr } from "./index";
 import { interactionRoleInChannel } from "./utils";
 
-const fr = i18next.getFixedT("fr");
 const en = i18next.getFixedT("en");
 
 export default {
@@ -121,7 +113,7 @@ export default {
 			case en("common.channel").toLowerCase():
 				if (!getConfig(CommandName.followOnlyChannel, guild)) {
 					await interaction.reply({
-						content: i18next.t("follow.disabled") as string,
+						content: i18next.t("follow.disabled"),
 						flags: MessageFlags.Ephemeral,
 					});
 					return;
@@ -131,7 +123,7 @@ export default {
 			case en("common.role").toLowerCase():
 				if (!getConfig(CommandName.followOnlyRole, guild)) {
 					await interaction.reply({
-						content: i18next.t("follow.disabled") as string,
+						content: i18next.t("follow.disabled"),
 						flags: MessageFlags.Ephemeral,
 					});
 					return;
@@ -162,83 +154,52 @@ export default {
 async function displayFollowed(interaction: CommandInteraction) {
 	if (!interaction.guild) return;
 	const guildID = interaction.guild.id;
-	const followedCategories =
-		(getMaps("follow", TypeName.category, guildID) as CategoryChannel[]) ?? [];
-	const followedThreads =
-		(getMaps("follow", TypeName.thread, guildID) as ThreadChannel[]) ?? [];
-	const followedChannels =
-		(getMaps("follow", TypeName.channel, guildID) as TextChannel[]) ?? [];
-	const followedForum =
-		(getMaps("follow", TypeName.forum, guildID) as ForumChannel[]) ?? [];
-	const followedRoles = (getRole("follow", guildID) as Role[]) ?? [];
-	const followedRolesIn = (getRoleIn("follow", guildID) as RoleIn[]) ?? [];
-	/**
-	 * Display followedRoleIn :
-	 * - Role:
-	 * 		- Channel
-	 * 		- Channel
-	 * 	- Role:
-	 * 		- Channel
-	 * 		- Channel
-	 */
-	const followedRolesInNames = followedRolesIn
-		.map((roleIn) => {
-			const role = roleIn.role.id;
-			const channels = roleIn.channels
-				.map((channel) => channelMention(channel.id))
-				.join("\n - ");
-			return `\n- ${roleMention(role)}:\n - ${channels}`;
-		})
-		.join("");
-
-	const followedCategoriesNames = `\n- ${followedCategories
-		.map((category) => channelMention(category.id))
-		.join("\n- ")}`;
-	const followedThreadsNames = `\n- ${followedThreads.map((thread) => channelMention(thread.id)).join("\n-")}`;
-	const followedChannelsNames = `\n- ${followedChannels.map((channel) => channelMention(channel.id)).join("\n-")}`;
-	const followedRolesNames = `\n- ${followedRoles.map((role) => roleMention(role.id)).join("\n-")}`;
-	const followedForumNames = `\n- ${followedForum.map((forum) => channelMention(forum.id)).join("\n-")}`;
+	const followed = mapToStr("follow", guildID);
+	const {
+		rolesNames: followedRolesNames,
+		categoriesNames: followedCategoriesNames,
+		threadsNames: followedThreadsNames,
+		channelsNames: followedChannelsNames,
+		rolesInNames: followedRolesInNames,
+		forumNames: followedForumNames,
+	} = followed;
 	let embed: EmbedBuilder;
 	if (getConfig(CommandName.followOnlyChannel, guildID)) {
 		embed = new EmbedBuilder()
 			.setColor("#2f8e7d")
-			.setTitle(i18next.t("follow.list.title") as string)
+			.setTitle(i18next.t("follow.list.title"))
 			.addFields({
-				name: i18next.t("common.category") as string,
-				value: followedCategoriesNames || (i18next.t("common.none") as string),
+				name: i18next.t("common.category"),
+				value: followedCategoriesNames || i18next.t("common.none"),
 			})
 			.addFields({
-				name: i18next.t("common.channel") as string,
-				value: followedThreadsNames || (i18next.t("common.none") as string),
+				name: i18next.t("common.channel"),
+				value: followedThreadsNames || i18next.t("common.none"),
 			})
 			.addFields({
-				name: i18next.t("common.channel") as string,
-				value: followedChannelsNames || (i18next.t("common.none") as string),
+				name: i18next.t("common.channel"),
+				value: followedChannelsNames || i18next.t("common.none"),
 			})
 			.addFields({
-				name: i18next.t("common.forum") as string,
-				value: followedForumNames || (i18next.t("common.none") as string),
+				name: i18next.t("common.forum"),
+				value: followedForumNames || i18next.t("common.none"),
 			});
 		if (getConfig(CommandName.followOnlyRole, guildID)) {
 			embed.addFields({
-				name: i18next.t("common.role") as string,
-				value: followedRolesNames || (i18next.t("common.none") as string),
+				name: toTitle(i18next.t("common.role")),
+				value: followedRolesNames || i18next.t("common.none"),
 			});
 		}
 	} else if (getConfig(CommandName.followOnlyRole, guildID)) {
 		embed = new EmbedBuilder()
 			.setColor("#2f8e7d")
-			.setTitle(i18next.t("follow.list.title") as string)
-			.setDescription(
-				followedRolesNames || (i18next.t("common.none") as string),
-			);
+			.setTitle(i18next.t("follow.list.title"))
+			.setDescription(followedRolesNames || i18next.t("common.none"));
 	} else if (getConfig(CommandName.followOnlyRoleIn, guildID)) {
 		embed = new EmbedBuilder()
 			.setColor("#2f8e7d")
-			.setTitle(i18next.t("follow.list.roleIn") as string)
-			.setDescription(
-				followedRolesInNames || (i18next.t("common.none") as string),
-			);
+			.setTitle(i18next.t("follow.list.roleIn"))
+			.setDescription(followedRolesInNames || i18next.t("common.none"));
 	} else {
 		embed = new EmbedBuilder()
 			.setColor("#2f8e7d")
@@ -261,7 +222,7 @@ async function followThisRole(interaction: CommandInteraction) {
 	const role = interaction.options.get(en("common.role").toLowerCase());
 	if (!role || !(role.role instanceof Role)) {
 		await interaction.reply({
-			content: i18next.t("ignore.role.error", { role: role }) as string,
+			content: i18next.t("ignore.role.error", { role: role }),
 			flags: MessageFlags.Ephemeral,
 		});
 		return;
@@ -279,7 +240,7 @@ async function followThisRole(interaction: CommandInteraction) {
 		);
 		setRole("follow", interaction.guild.id, newFollowRoles);
 		await interaction.reply({
-			content: i18next.t("follow.role.removed", { role: mention }) as string,
+			content: i18next.t("follow.role.removed", { role: mention }),
 			flags: MessageFlags.Ephemeral,
 		});
 	} else {
@@ -287,7 +248,7 @@ async function followThisRole(interaction: CommandInteraction) {
 		followedRoles.push(role.role);
 		setRole("follow", interaction.guild.id, followedRoles);
 		await interaction.reply({
-			content: i18next.t("follow.role.added", { role: mention }) as string,
+			content: i18next.t("follow.role.added", { role: mention }),
 			flags: MessageFlags.Ephemeral,
 		});
 	}
@@ -310,7 +271,7 @@ async function followText(interaction: CommandInteraction) {
 		await followThis(interaction, TypeName.forum, toIgnore.channel);
 	} else {
 		await interaction.reply({
-			content: i18next.t("ignore.error") as string,
+			content: i18next.t("ignore.error"),
 			flags: MessageFlags.Ephemeral,
 		});
 		return;
@@ -330,7 +291,7 @@ async function followThis(
 ) {
 	if (!followChan) {
 		await interaction.reply({
-			content: i18next.t("commands.error") as string,
+			content: i18next.t("commands.error"),
 			flags: MessageFlags.Ephemeral,
 		});
 		return;
@@ -389,7 +350,7 @@ async function followThis(
 		await interaction.reply({
 			content: i18next.t("follow.thread.remove", {
 				thread: followChan.name,
-			}) as string,
+			}),
 			flags: MessageFlags.Ephemeral,
 		});
 	} else {
@@ -407,7 +368,7 @@ async function followThis(
 		await interaction.reply({
 			content: i18next.t("follow.thread.success", {
 				thread: followChan.name,
-			}) as string,
+			}),
 			flags: MessageFlags.Ephemeral,
 		});
 	}
