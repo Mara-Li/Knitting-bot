@@ -1,5 +1,6 @@
 import {
 	type GuildMember,
+	type Message,
 	MessageFlags,
 	type Role,
 	type ThreadChannel,
@@ -215,16 +216,8 @@ export async function addRoleAndUserToThread(thread: ThreadChannel) {
 		});
 	}
 	if (toPing.length > 0) {
-		const fetchedMessage = await thread.messages.fetch();
-		const message =
-			fetchedMessage
-				.filter((m) => m.author.id === thread.client.user.id)
-				.first() ??
-			(await thread.send({
-				content: EMOJI,
-				flags: MessageFlags.SuppressNotifications,
-			}));
-		await message.edit(toPing.map((member) => `<@${member.id}>`).join(" "));
+		const message = await fetchMessage(thread);
+		await splitAndSend(toPing, message);
 		await message.edit(EMOJI);
 		await discordLogs(
 			thread.guild.id,
@@ -232,4 +225,45 @@ export async function addRoleAndUserToThread(thread: ThreadChannel) {
 			`Add ${toPing.length} members to #${thread.name}:\n- ${toPing.map((member) => member.user.username).join("\n- ")}`,
 		);
 	}
+}
+
+async function splitAndSend(toPing: GuildMember[], message: Message) {
+	//okay on réfléchit.
+	//On envoie par id sous forme de <@id> ce qui fait que l'on a :
+	//longueur d'un user mention = 2(<@) + 18(id) + 1(>) + 1 (& si c'est un rôle) = 21-22
+	//soit 2000 / 22 = 90,9
+	//Vu que la longueur max d'un message est de 2000 caractères, on peut envoyer 90 mentions par message
+	const maxMentions = 90;
+	let currentMessage = "";
+	for (let i = 0; i < toPing.length; i++) {
+		const mention = `<@${toPing[i].id}>`;
+		if (currentMessage.length + mention.length > 2000) {
+			await message.edit(currentMessage);
+			currentMessage = "";
+		}
+		currentMessage += mention + " ";
+		if ((i + 1) % maxMentions === 0 || i === toPing.length - 1) {
+			await message.edit(currentMessage);
+			currentMessage = "";
+		}
+	}
+	// If there is still a message to send, send it
+	if (currentMessage.length > 0) {
+		await message.edit(currentMessage);
+	}
+	// Send the emoji at the end
+	await message.edit(EMOJI);
+}
+
+async function fetchMessage(thread: ThreadChannel): Promise<Message> {
+	const fetchedMessage = await thread.messages.fetch();
+	return (
+		fetchedMessage
+			.filter((m) => m.author.id === thread.client.user.id)
+			.first() ??
+		(await thread.send({
+			content: EMOJI,
+			flags: MessageFlags.SuppressNotifications,
+		}))
+	);
 }
