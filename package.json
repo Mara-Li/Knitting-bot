@@ -3,6 +3,9 @@
 	"version": "2.3.2",
 	"description": "A bot used to add new user automatically in thread, without pinging them!",
 	"main": "dist/index.js",
+	"engines": {
+		"node": "20.x"
+	},
 	"scripts": {
 		"build": "tsc",
 		"prestart": "pnpm run build",
@@ -27,17 +30,22 @@
 		"dotenv": "^16.3.1",
 		"enmap": "^5.9.8",
 		"i18next": "^23.12.2",
-		"node-gyp": "^9.4.0",
 		"pm2": "^5.3.0",
 		"readline-sync": "^1.4.10",
 		"ts-dedent": "^2.2.0"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "1.9.4",
+		"@biomejs/biome": "2.0.0-beta.5",
 		"nodemon": "^2.0.22",
 		"ts-node": "^10.9.1",
 		"ts-node-dev": "^2.0.0",
 		"tslib": "^2.6.0",
 		"typescript": "^5.7.2"
+	},
+	"pnpm": {
+		"onlyBuiltDependencies": [
+			"@biomejs/biome",
+			"better-sqlite3"
+		]
 	}
 }
