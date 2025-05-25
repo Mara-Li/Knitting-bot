@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [2.3.3](https://github.com/Mara-Li/Knitting-bot/compare/2.3.2...2.3.3) (2025-05-25)
+
+
+### Bug Fixes
+
+* allow more than 90 mentions (2000 char) when adding to threads ([3befb79](https://github.com/Mara-Li/Knitting-bot/commit/3befb79772f376a2d65ece2a7b511691f0ada966))
+
 ## [2.3.2](https://github.com/Mara-Li/Knitting-bot/compare/2.3.0...2.3.2) (2025-02-07)
 
 ## [2.3.1](https://github.com/Mara-Li/Knitting-bot/compare/2.3.0...2.3.1) (2025-02-07)
