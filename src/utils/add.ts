@@ -35,11 +35,7 @@ export async function addUserToThread(
 		thread.permissionsFor(user).has("ViewChannel", true) &&
 		(await checkIfUserNotInTheThread(thread, user))
 	) {
-		const fetchedMessage = await thread.messages.fetch();
-		let message = fetchedMessage
-			.filter((m) => m.author.id === thread.client.user.id)
-			.first();
-
+		let message = await fetchMessage(thread);
 		if (getConfig(CommandName.followOnlyRoleIn, guild)) {
 			if (message) {
 				await message.edit(userMention(user.id));
@@ -148,7 +144,7 @@ export async function getRoleToPing(thread: ThreadChannel, roles: Role[]) {
 	const roleToBeAdded: Role[] = [];
 	for (const role of roles) {
 		//check if all members of the role are in the thread
-		const membersInTheThread = await thread.members.fetch();
+		const membersInTheThread = thread.members.cache;
 		const membersOfTheRoleNotInTheThread = role.members.filter(
 			(member) => !membersInTheThread.has(member.id),
 		);
@@ -186,13 +182,12 @@ export async function getRoleToPing(thread: ThreadChannel, roles: Role[]) {
  * @param thread {@link ThreadChannel} The thread to add the user
  */
 export async function addRoleAndUserToThread(thread: ThreadChannel) {
-	const members = await thread.guild.members.fetch();
+	const members = thread.guild.members.cache;
 	const toPing: GuildMember[] = [];
 	const rolesWithAccess: Role[] = thread.guild.roles.cache.toJSON();
 	if (rolesWithAccess.length > 0) {
 		try {
 			getRoleToPing(thread, rolesWithAccess).then((roles) => {
-				// biome-ignore lint/complexity/noForEach: <explanation>
 				roles.forEach((role) => {
 					toPing.push(...role.members.toJSON());
 				});
@@ -207,7 +202,8 @@ export async function addRoleAndUserToThread(thread: ThreadChannel) {
 		});
 	}
 	//getConfig all member that have access to the thread (overwriting permission)
-	const reloadMembers = await thread.guild.members.fetch();
+	//use cache
+	const reloadMembers = thread.guild.members.cache;
 	const memberWithAccess = getMemberPermission(reloadMembers, thread);
 	if (memberWithAccess) {
 		const memberWithAccessArray: GuildMember[] = memberWithAccess.toJSON();
@@ -256,7 +252,7 @@ async function splitAndSend(toPing: GuildMember[], message: Message) {
 }
 
 async function fetchMessage(thread: ThreadChannel): Promise<Message> {
-	const fetchedMessage = await thread.messages.fetch();
+	const fetchedMessage = thread.messages.cache;
 	return (
 		fetchedMessage
 			.filter((m) => m.author.id === thread.client.user.id)

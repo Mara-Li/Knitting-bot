@@ -45,9 +45,8 @@ export async function checkIfUserNotInTheThread(
 	thread: ThreadChannel,
 	memberToCheck: GuildMember,
 ) {
-	const members = await thread.members.fetch();
+	const members = thread.members.cache;
 	const threadMemberArray: ThreadMember<boolean>[] = [];
-	// biome-ignore lint/complexity/noForEach: <explanation>
 	members.forEach((member) => {
 		threadMemberArray.push(member);
 	});

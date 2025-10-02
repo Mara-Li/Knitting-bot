@@ -1,8 +1,10 @@
 import process from "node:process";
 import type {
 	Client,
+	Collection,
 	CommandInteraction,
 	Guild,
+	Message,
 	TextChannel,
 	ThreadChannel,
 } from "discord.js";
@@ -71,4 +73,21 @@ export function changeGuildLanguage(guild: Guild) {
 
 export function toTitle(name: string) {
 	return name.charAt(0).toUpperCase() + name.slice(1);
+}
+
+export function findFirst(
+	thread: ThreadChannel,
+	fetchedMessage: Collection<string, Message<true>>,
+) {
+	return fetchedMessage
+		.filter((m) => m.author.id === thread.client.user.id)
+		.first();
+}
+
+export async function fetchMessage(thread: ThreadChannel) {
+	const fetchedMessage = thread.messages.cache;
+	const msg = findFirst(thread, fetchedMessage);
+	if (msg) return msg;
+	const fetched = await thread.messages.fetch();
+	return findFirst(thread, fetched);
 }

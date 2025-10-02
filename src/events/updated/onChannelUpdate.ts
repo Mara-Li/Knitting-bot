@@ -46,7 +46,6 @@ export default (client: Client): void => {
 			//get all threads of the channels in the category
 			const children = newChannel.children.cache;
 			if (children.size === 0) return;
-			// biome-ignore lint/complexity/noForEach: <explanation>
 			children.forEach((child) => {
 				if (child.type === ChannelType.GuildText) {
 					const threads = (child as TextChannel).threads.cache;
@@ -59,7 +58,6 @@ export default (client: Client): void => {
 								child: child.name,
 							}),
 						);
-					// biome-ignore lint/complexity/noForEach: <explanation>
 					threads.forEach((thread) => {
 						if (!getConfig(CommandName.followOnlyChannel, guild)) {
 							if (!checkThread(thread, "ignore"))
