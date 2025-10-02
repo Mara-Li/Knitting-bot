@@ -14,6 +14,7 @@ import { cmdLn } from "../i18n";
 import { default as i18next } from "../i18n/init";
 import { CommandName } from "../interface";
 import { getConfig } from "../maps";
+import { updateCache } from "../utils";
 import { addRoleAndUserToThread } from "../utils/add";
 import { checkThread } from "../utils/data_check";
 
@@ -102,6 +103,7 @@ async function updateAllThreads(interaction: CommandInteraction) {
 		flags: MessageFlags.Ephemeral,
 	});
 	const count = threads.size;
+	await updateCache(interaction.guild);
 	for (const thread of threads.values()) {
 		const threadChannel = thread as ThreadChannel;
 		if (
@@ -128,6 +130,7 @@ async function updateAllThreads(interaction: CommandInteraction) {
  */
 async function updateThread(interaction: ChatInputCommandInteraction) {
 	if (!interaction.guild) return;
+	await updateCache(interaction.guild);
 	const guild = interaction.guild.id;
 	const threadOption =
 		interaction.options.get(i18next.t("common.thread").toLowerCase()) ??

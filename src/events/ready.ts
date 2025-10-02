@@ -2,8 +2,7 @@ import process from "node:process";
 import { type Client, REST, Routes } from "discord.js";
 import dotenv from "dotenv";
 import { commands } from "../commands";
-import { DESTROY_DATABASE, VERSION } from "../index";
-import { destroyDB } from "../maps";
+import { VERSION } from "../index";
 
 let config = dotenv.config({ path: ".env" }).parsed;
 if (process.env.ENV === "production") {
@@ -12,30 +11,55 @@ if (process.env.ENV === "production") {
 const rest = new REST().setToken(config?.DISCORD_TOKEN ?? "0");
 
 export default (client: Client): void => {
-	client.on("ready", async () => {
-		if (!client.user || !client.application || !process.env.CLIENT_ID) {
+	client.on("clientReady", async () => {
+		if (!client.user || !client.application || !process.env.CLIENT_ID) return;
+
+		console.info(`${client.user.username} is online; v.${VERSION}`);
+		const serializedCommands = commands.map((command) => command.data.toJSON());
+
+		// ID application (priorité à process.env, fallback sur fichier .env/*.prod)
+		const applicationId = process.env.CLIENT_ID || config?.CLIENT_ID;
+		if (!applicationId) {
+			console.error(
+				"CLIENT_ID manquant: impossible d'enregistrer les commandes.",
+			);
 			return;
 		}
 
-		console.info(`${client.user.username} is online; v.${VERSION}`);
-		const serializeCmds = commands.map((command) => {
-			return command.data.toJSON();
-		});
-		for (const guild of client.guilds.cache.values()) {
-			//delete all commands
-			// biome-ignore lint/complexity/noForEach: <explanation>
-			guild.client.application?.commands.cache.forEach((command) => {
-				command.delete();
-			});
-			//add all commands
-			await rest.put(
-				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-				//@ts-ignore
-				Routes.applicationGuildCommands(config?.CLIENT_ID, guild.id),
-				{ body: serializeCmds },
-			);
+		// Préparation des promesses pour chaque guilde
+		const guilds = Array.from(client.guilds.cache.values());
+		if (guilds.length === 0) {
+			console.info("Aucune guilde détectée, rien à enregistrer.");
+			return;
 		}
-		//destroy all maps
-		if (DESTROY_DATABASE) destroyDB();
+
+		console.info(
+			`Enregistrement des commandes sur ${guilds.length} guildes...`,
+		);
+
+		const guildPromises = guilds.map(async (guild) => {
+			try {
+				console.info(`[${guild.name}] Synchronisation des commandes...`);
+				// L'appel REST écrase l'ensemble des commandes guild pour cette application.
+				await rest.put(
+					// biome-ignore lint/suspicious/noTsIgnore: compat Discord.js route types
+					// @ts-ignore
+					Routes.applicationGuildCommands(applicationId, guild.id),
+					{ body: serializedCommands },
+				);
+				console.info(
+					`[${guild.name}] OK (${serializedCommands.length} commandes).`,
+				);
+			} catch (error) {
+				console.error(
+					`[${guild.name}] Échec lors de l'enregistrement des commandes:`,
+					error,
+				);
+			}
+		});
+
+		// Exécuter toutes les promesses en parallèle
+		await Promise.all(guildPromises);
+		console.info("Toutes les guildes ont été traitées.");
 	});
 };

@@ -91,3 +91,13 @@ export async function fetchMessage(thread: ThreadChannel) {
 	const fetched = await thread.messages.fetch();
 	return findFirst(thread, fetched);
 }
+
+export async function updateCache(guild: Guild) {
+	try {
+		await guild.members.fetch();
+		await guild.roles.fetch();
+	} catch (e) {
+		console.log(e);
+		//ignore error
+	}
+}

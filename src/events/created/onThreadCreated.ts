@@ -2,7 +2,12 @@ import { ChannelType, type Client, type ThreadChannel } from "discord.js";
 import i18next from "i18next";
 import { CommandName } from "../../interface";
 import { getConfig } from "../../maps";
-import { changeGuildLanguage, discordLogs, logInDev } from "../../utils";
+import {
+	changeGuildLanguage,
+	discordLogs,
+	logInDev,
+	updateCache,
+} from "../../utils";
 import { addRoleAndUserToThread } from "../../utils/add";
 import { checkThread } from "../../utils/data_check";
 
@@ -27,6 +32,7 @@ export default (client: Client): void => {
 		);
 		/** automatically add the bot to the thread */
 		await thread.join();
+		await updateCache(thread.guild);
 		if (!getConfig(CommandName.followOnlyChannel, guild)) {
 			logInDev("Thread is not follow only", !checkThread(thread, "ignore"));
 			if (!checkThread(thread, "ignore")) await addRoleAndUserToThread(thread);

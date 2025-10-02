@@ -7,7 +7,12 @@ import {
 import i18next from "i18next";
 import { CommandName } from "../../interface";
 import { getConfig } from "../../maps";
-import { changeGuildLanguage, discordLogs, logInDev } from "../../utils";
+import {
+	changeGuildLanguage,
+	discordLogs,
+	logInDev,
+	updateCache,
+} from "../../utils";
 import { addRoleAndUserToThread } from "../../utils/add";
 import { checkThread, validateChannelType } from "../../utils/data_check";
 
@@ -30,6 +35,7 @@ export default (client: Client): void => {
 		)
 			return;
 		const guild = oldChannel.guild.id;
+		await updateCache(oldChannel.guild);
 		changeGuildLanguage(oldChannel.guild);
 		if (getConfig(CommandName.channel, guild) === false) return;
 		if (
@@ -80,7 +86,6 @@ export default (client: Client): void => {
 					child: newTextChannel.name,
 				}),
 			);
-			// biome-ignore lint/complexity/noForEach: <explanation>
 			threads.forEach((thread) => {
 				if (!getConfig(CommandName.followOnlyChannel, guild)) {
 					if (!checkThread(thread, "ignore")) addRoleAndUserToThread(thread);

@@ -2,7 +2,12 @@ import type { Client, ThreadChannel } from "discord.js";
 import i18next from "i18next";
 import { CommandName } from "../../interface";
 import { getConfig } from "../../maps";
-import { changeGuildLanguage, discordLogs, logInDev } from "../../utils";
+import {
+	changeGuildLanguage,
+	discordLogs,
+	logInDev,
+	updateCache,
+} from "../../utils";
 import { addUserToThread } from "../../utils/add";
 import {
 	checkMemberRole,
@@ -22,6 +27,7 @@ export default (client: Client): void => {
 			const newRoles = newMember.roles.cache;
 			const updatedRoles = newRoles.filter((role) => !oldRoles.has(role.id));
 			const guildID = newMember.guild.id;
+			await updateCache(newMember.guild);
 			if (getConfig(CommandName.member, guildID) === false) return;
 			if (updatedRoles.size === 0) {
 				await discordLogs(
