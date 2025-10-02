@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [2.3.4](https://github.com/Mara-Li/Knitting-bot/compare/2.3.3...2.3.4) (2025-10-02)
+
+
+### Bug Fixes
+
+* **guildMember:** add updateCache function to refresh guild members and roles ([78081d2](https://github.com/Mara-Li/Knitting-bot/commit/78081d289a29b65ec2cc38d51b8d20c7b00fa16b))
+* use correct type since discord.js update ([745273b](https://github.com/Mara-Li/Knitting-bot/commit/745273b58e332cfddf7a0051f61c1560e747248a))
+
 ## [2.3.3](https://github.com/Mara-Li/Knitting-bot/compare/2.3.2...2.3.3) (2025-05-25)
 
 
