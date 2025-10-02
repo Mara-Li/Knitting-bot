@@ -1,13 +1,14 @@
 import {
 	type CategoryChannel,
+	type ChatInputCommandInteraction,
 	type CommandInteraction,
+	channelMention,
 	type ForumChannel,
 	MessageFlags,
 	Role,
+	roleMention,
 	type TextChannel,
 	type ThreadChannel,
-	channelMention,
-	roleMention,
 } from "discord.js";
 import { default as i18next } from "../i18n/init";
 import { CommandName, type RoleIn } from "../interface";
@@ -23,7 +24,7 @@ const en = i18next.getFixedT("en");
  * @param on {"follow" | "ignore"} The mode to use
  */
 export async function interactionRoleInChannel(
-	interaction: CommandInteraction,
+	interaction: ChatInputCommandInteraction,
 	on: "follow" | "ignore",
 ) {
 	const opposite = on === "follow" ? "ignore" : "follow";

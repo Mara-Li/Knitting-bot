@@ -1,6 +1,7 @@
 import {
 	CategoryChannel,
 	ChannelType,
+	type ChatInputCommandInteraction,
 	type CommandInteraction,
 	type CommandInteractionOptionResolver,
 	EmbedBuilder,
@@ -8,10 +9,10 @@ import {
 	MessageFlags,
 	PermissionFlagsBits,
 	Role,
+	roleMention,
 	SlashCommandBuilder,
 	TextChannel,
 	ThreadChannel,
-	roleMention,
 } from "discord.js";
 import { cmdLn } from "../i18n";
 import { default as i18next } from "../i18n/init";
@@ -104,7 +105,7 @@ export default {
 						.setRequired(false),
 				),
 		),
-	async execute(interaction: CommandInteraction) {
+	async execute(interaction: ChatInputCommandInteraction) {
 		if (!interaction.guild) return;
 		const guild = interaction.guild.id;
 		const options = interaction.options as CommandInteractionOptionResolver;
@@ -151,7 +152,7 @@ export default {
  * - Followed roles in chan
  * @param interaction {@link CommandInteraction} The interaction to reply to.
  */
-async function displayFollowed(interaction: CommandInteraction) {
+async function displayFollowed(interaction: ChatInputCommandInteraction) {
 	if (!interaction.guild) return;
 	const guildID = interaction.guild.id;
 	const followed = mapToStr("follow", guildID);
@@ -217,7 +218,7 @@ async function displayFollowed(interaction: CommandInteraction) {
  * @param interaction {@link CommandInteraction} The interaction to reply to.
  * The role is required, linked to the option name.
  */
-async function followThisRole(interaction: CommandInteraction) {
+async function followThisRole(interaction: ChatInputCommandInteraction) {
 	if (!interaction.guild) return;
 	const role = interaction.options.get(en("common.role").toLowerCase());
 	if (!role || !(role.role instanceof Role)) {
@@ -258,7 +259,7 @@ async function followThisRole(interaction: CommandInteraction) {
  * Check the type of the channel and run {@link followThis} with the right type
  * @param interaction {@link CommandInteraction} The interaction to reply to.
  */
-async function followText(interaction: CommandInteraction) {
+async function followText(interaction: ChatInputCommandInteraction) {
 	const toIgnore =
 		interaction.options.get(en("common.channel").toLowerCase()) ?? interaction;
 	if (toIgnore.channel instanceof CategoryChannel) {

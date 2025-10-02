@@ -1,13 +1,14 @@
 import {
 	ChannelType,
+	type ChatInputCommandInteraction,
 	type CommandInteraction,
 	type CommandInteractionOptionResolver,
+	channelMention,
 	EmbedBuilder,
 	MessageFlags,
 	PermissionFlagsBits,
 	SlashCommandBuilder,
 	ThreadChannel,
-	channelMention,
 } from "discord.js";
 import { cmdLn } from "../i18n";
 import { default as i18next } from "../i18n/init";
@@ -66,7 +67,7 @@ export default {
 				.setDescription(en("commands.help.description"))
 				.setDescriptionLocalizations(cmdLn("commands.help.description")),
 		),
-	async execute(interaction: CommandInteraction) {
+	async execute(interaction: ChatInputCommandInteraction) {
 		if (!interaction.guild) return;
 		const options = interaction.options as CommandInteractionOptionResolver;
 		const commands = options.getSubcommand();
@@ -125,7 +126,7 @@ async function updateAllThreads(interaction: CommandInteraction) {
  * @param interaction {@link CommandInteraction} The interaction, contains the thread to update
  * - If not thread is provided, the thread is the current channel
  */
-async function updateThread(interaction: CommandInteraction) {
+async function updateThread(interaction: ChatInputCommandInteraction) {
 	if (!interaction.guild) return;
 	const guild = interaction.guild.id;
 	const threadOption =

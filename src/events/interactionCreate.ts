@@ -1,4 +1,8 @@
-import type { BaseInteraction, Client } from "discord.js";
+import type {
+	BaseInteraction,
+	ChatInputCommandInteraction,
+	Client,
+} from "discord.js";
 import { commands } from "../commands";
 import { default as i18next } from "../i18n/init";
 import { changeLanguage } from "../utils";
@@ -13,7 +17,7 @@ export default (client: Client): void => {
 		if (!command) return;
 
 		try {
-			await command.execute(interaction);
+			await command.execute(interaction as ChatInputCommandInteraction);
 		} catch (error) {
 			console.log(error);
 			if (!interaction.channel || interaction.channel.isDMBased()) return;

@@ -1,18 +1,19 @@
 import {
 	CategoryChannel,
 	ChannelType,
+	type ChatInputCommandInteraction,
 	type CommandInteraction,
 	type CommandInteractionOptionResolver,
+	channelMention,
 	EmbedBuilder,
 	ForumChannel,
 	MessageFlags,
 	PermissionFlagsBits,
 	Role,
+	roleMention,
 	SlashCommandBuilder,
 	TextChannel,
 	ThreadChannel,
-	channelMention,
-	roleMention,
 } from "discord.js";
 import { cmdLn } from "../i18n";
 import { default as i18next } from "../i18n/init";
@@ -111,7 +112,7 @@ export default {
 				.setDescription(en("ignore.list.description"))
 				.setDescriptionLocalizations(cmdLn("ignore.list.description")),
 		),
-	async execute(interaction: CommandInteraction) {
+	async execute(interaction: ChatInputCommandInteraction) {
 		if (!interaction.guild) return;
 		const guild = interaction.guild;
 		const options = interaction.options as CommandInteractionOptionResolver;
@@ -157,7 +158,7 @@ export default {
  * Display all ignored channels, roles and categories, but also the channels ignored by roles
  * @param interaction {@link CommandInteraction} the interaction to reply to
  */
-async function listIgnored(interaction: CommandInteraction) {
+async function listIgnored(interaction: ChatInputCommandInteraction) {
 	if (!interaction.guild) return;
 	const ignored = mapToStr("ignore", interaction.guild.id);
 	const roleIn = getRoleIn("ignore", interaction.guild.id);
@@ -215,7 +216,7 @@ async function listIgnored(interaction: CommandInteraction) {
  * @param interaction {@link CommandInteraction} the interaction to reply to
  * Also contains the role to ignore
  */
-async function ignoreThisRole(interaction: CommandInteraction) {
+async function ignoreThisRole(interaction: ChatInputCommandInteraction) {
 	if (!interaction.guild) return;
 	const guild = interaction.guild.id;
 	const role = interaction.options.get(en("common.role").toLowerCase());
@@ -259,7 +260,7 @@ async function ignoreThisRole(interaction: CommandInteraction) {
  * @param interaction {@link CommandInteraction} the interaction to reply to
  * Also contains the channel to ignore
  */
-async function ignoreText(interaction: CommandInteraction) {
+async function ignoreText(interaction: ChatInputCommandInteraction) {
 	const toIgnore =
 		interaction.options.get(en("common.channel").toLowerCase()) ?? interaction;
 	if (toIgnore.channel instanceof CategoryChannel) {

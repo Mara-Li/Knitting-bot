@@ -16,15 +16,15 @@ import {
 	ButtonStyle,
 	type CacheType,
 	ChannelType,
-	type CommandInteraction,
+	type ChatInputCommandInteraction,
 	type CommandInteractionOptionResolver,
+	channelMention,
 	EmbedBuilder,
 	type Locale,
 	MessageFlags,
 	PermissionFlagsBits,
 	SlashCommandBuilder,
 	type StringSelectMenuInteraction,
-	channelMention,
 } from "discord.js";
 import { cmdLn } from "../i18n";
 import { default as i18next } from "../i18n/init";
@@ -113,7 +113,7 @@ export default {
 					cmdLn("configuration.menu.autoUpdate.desc"),
 				),
 		),
-	async execute(interaction: CommandInteraction) {
+	async execute(interaction: ChatInputCommandInteraction) {
 		if (!interaction.guild) return;
 		const options = interaction.options as CommandInteractionOptionResolver;
 
@@ -167,7 +167,7 @@ export default {
 				flags: MessageFlags.Ephemeral,
 			});
 		}
-		// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+		// biome-ignore lint/suspicious/noExplicitAny: we don't know the type
 		const filter = (i: any) => {
 			/** filter on message id */
 			return i.user.id === interaction.user.id;
@@ -350,10 +350,8 @@ async function updateConfig(
 		setConfig(command, interaction.guild.id, newConfig);
 		let embed: EmbedBuilder;
 		//reload buttons
-		// biome-ignore lint/suspicious/noImplicitAnyLet: <explanation>
-		let rows;
-		// biome-ignore lint/complexity/useLiteralKeys: <explanation>
-		if (commandType["Mode"].includes(command)) {
+		let rows: { type: number; components: ButtonBuilder[] }[];
+		if (commandType.Mode.includes(command)) {
 			rows = reloadButtonMode(interaction.guild.id);
 			embed = displayModeMenu(interaction.guild.id);
 		} else {
@@ -394,8 +392,7 @@ function createButton(command: CommandName, label: string, guildID: string) {
 }
 
 function reloadButtonMode(guildID: string) {
-	// biome-ignore lint/suspicious/noExplicitAny: <explanation>
-	const translation: any = {
+	const translation = {
 		[CommandName.followOnlyRoleIn]: i18next.t("configuration.roleIn.name"),
 		[CommandName.followOnlyRole]: i18next.t("configuration.follow.role.name"),
 		[CommandName.followOnlyChannel]: i18next.t(
@@ -446,7 +443,7 @@ function reloadButtonMode(guildID: string) {
 	];
 }
 
-// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+// biome-ignore lint/suspicious/noExplicitAny: prevent issues
 function labelButton(id: CommandName, translation: any, guildID: string) {
 	const idIndex = Object.values(CommandName).indexOf(id);
 	const value = Object.values(CommandName)[idIndex];
@@ -469,8 +466,7 @@ function labelButton(id: CommandName, translation: any, guildID: string) {
 }
 
 function reloadButtonAuto(guildID: string) {
-	// biome-ignore lint/suspicious/noExplicitAny: <explanation>
-	const translation: any = {
+	const translation = {
 		[CommandName.manualMode]: i18next.t("configuration.disable.name"),
 		[CommandName.channel]: i18next.t("configuration.channel.name"),
 		[CommandName.member]: i18next.t("configuration.member.name"),
