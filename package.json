@@ -24,23 +24,23 @@
 	},
 	"dependencies": {
 		"ansi-colors": "^4.1.3",
-		"commit-and-tag-version": "^11.2.2",
-		"cross-env": "^7.0.3",
-		"discord.js": "^14.17.3",
-		"dotenv": "^16.3.1",
+		"commit-and-tag-version": "^12.6.0",
+		"cross-env": "^10.1.0",
+		"discord.js": "^14.22.1",
+		"dotenv": "^17.2.3",
 		"enmap": "^5.9.8",
-		"i18next": "^23.12.2",
-		"pm2": "^5.3.0",
+		"i18next": "^25.5.3",
+		"pm2": "^6.0.13",
 		"readline-sync": "^1.4.10",
 		"ts-dedent": "^2.2.0"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "2.0.0-beta.5",
-		"nodemon": "^2.0.22",
-		"ts-node": "^10.9.1",
+		"@biomejs/biome": "2.2.5",
+		"nodemon": "^3.1.10",
+		"ts-node": "^10.9.2",
 		"ts-node-dev": "^2.0.0",
-		"tslib": "^2.6.0",
-		"typescript": "^5.7.2"
+		"tslib": "^2.8.1",
+		"typescript": "^5.9.3"
 	},
 	"pnpm": {
 		"onlyBuiltDependencies": [
