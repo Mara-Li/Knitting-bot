@@ -1,5 +1,5 @@
 import process from "node:process";
-import { type Client, REST, Routes } from "discord.js";
+import type { Client } from "discord.js";
 import dotenv from "dotenv";
 import { commands } from "../commands";
 import { VERSION } from "../index";
@@ -8,7 +8,6 @@ let config = dotenv.config({ path: ".env" }).parsed;
 if (process.env.ENV === "production") {
 	config = dotenv.config({ path: ".env.prod" }).parsed;
 }
-const rest = new REST().setToken(config?.DISCORD_TOKEN ?? "0");
 
 export default (client: Client): void => {
 	client.on("clientReady", async () => {
@@ -41,12 +40,7 @@ export default (client: Client): void => {
 			try {
 				console.info(`[${guild.name}] Synchronisation des commandes...`);
 				// L'appel REST écrase l'ensemble des commandes guild pour cette application.
-				await rest.put(
-					// biome-ignore lint/suspicious/noTsIgnore: compat Discord.js route types
-					// @ts-ignore
-					Routes.applicationGuildCommands(applicationId, guild.id),
-					{ body: serializedCommands },
-				);
+				await guild.commands.set(serializedCommands);
 				console.info(
 					`[${guild.name}] OK (${serializedCommands.length} commandes).`,
 				);
