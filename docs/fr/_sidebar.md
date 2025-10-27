@@ -1,0 +1,11 @@
+- [Fonctionnement](fr/how-it-works.md)
+- Commands
+  - [Configuration](fr/commands/config.md)
+  - [Suivre](fr/commands/follow.md)
+  - [Ignorer](fr/commands/ignore.md)
+  - [Informations](fr/commands/info.md)
+  - [Mise à jour](fr/commands/update.md)
+- [Permissions](fr/permissions.md)
+- [Développement](fr/dev/README.md)
+  - [Ajouter une traduction](fr/dev/translation.md)
+  - [Autres bots](fr/dev/other.md)

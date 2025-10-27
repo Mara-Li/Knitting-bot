@@ -1,0 +1,69 @@
+body {
+	--coverBackground: radial-gradient(circle at 20% 30%, #c7d2fe, #a5b4fc 30%, #6366f1 70%);
+}
+
+section.cover img {
+	width: 140px;
+	height: 140px;
+	object-fit: contain;
+	padding: 10px;
+}
+
+
+
+/* --- Titre --- */
+section.cover h1 span {
+	font-size: 3rem !important;
+	font-weight: 700;
+	margin-bottom: 0.3em;
+	color: #f8fafc;
+	text-shadow: 0 2px 12px rgba(0, 0, 0, 0.35);
+	background: none !important;
+	/* ✅ enlève le fond semi-transparent */
+}
+
+/* --- Description --- */
+section.cover blockquote {
+	color: #474e62;
+	font-size: 1rem;
+	margin-top: 0;
+	font-weight: 400;
+	text-shadow: 0 1px 5px rgba(0, 0, 0, 0.2);
+}
+
+/* --- Boutons --- */
+section.cover a {
+	display: inline-block;
+	border-radius: 0.7rem;
+	padding: 0.7rem 1.2rem;
+	margin: 0.4rem;
+	font-weight: 600;
+	text-decoration: none;
+	transition: all 0.2s ease;
+}
+
+/* bouton doc */
+section.cover a[href*="README"] {
+	background: rgba(255, 255, 255, 0.25);
+	color: #1e293b !important;
+	border: 1px solid rgba(255, 255, 255, 0.3) !important;
+	backdrop-filter: blur(8px);
+}
+
+section.cover a[href*="Home"]:hover {
+	background: rgba(255, 255, 255, 0.4);
+	transform: translateY(-2px);
+}
+
+/* bouton invite */
+section.cover a[href*="discord.com"] {
+	background: linear-gradient(135deg, #5865f2, #4752c4);
+	color: white;
+	box-shadow: 0 6px 20px rgba(88, 101, 242, 0.6);
+	border: 1px solid rgba(69, 75, 144, 0.6) !important;
+}
+
+section.cover a[href*="discord.com"]:hover {
+	transform: translateY(-2px) scale(1.03);
+	box-shadow: 0 10px 30px rgba(88, 101, 242, 0.8);
+}
