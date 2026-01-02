@@ -34,7 +34,6 @@
 		"enmap": "^5.9.8",
 		"i18next": "^25.5.3",
 		"load-tsconfig": "^0.2.5",
-		"pm2": "^6.0.13",
 		"readline-sync": "^1.4.10",
 		"ts-dedent": "^2.2.0",
 		"glob": "^13.0.0",
