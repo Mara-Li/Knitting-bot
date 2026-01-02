@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [2.3.5](https://github.com/Mara-Li/Knitting-bot/compare/2.3.4...2.3.5) (2026-01-02)
+
+
+### Bug Fixes
+
+* the channel was never found as they was a typo error ([2a75c34](https://github.com/Mara-Li/Knitting-bot/commit/2a75c3449725444037ca616a03295dc9f605e033))
+* the config notification should not be ephemerale ([57e43aa](https://github.com/Mara-Li/Knitting-bot/commit/57e43aaf94fea5b7dd799b2e4f5e19cd274cd911))
+
 ## [2.3.4](https://github.com/Mara-Li/Knitting-bot/compare/2.3.3...2.3.4) (2025-10-02)
 
 
