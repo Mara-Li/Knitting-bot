@@ -115,7 +115,6 @@ export default {
 				if (!getConfig(CommandName.followOnlyChannel, guild)) {
 					await interaction.reply({
 						content: i18next.t("follow.disabled"),
-						flags: MessageFlags.Ephemeral,
 					});
 					return;
 				}
@@ -125,7 +124,6 @@ export default {
 				if (!getConfig(CommandName.followOnlyRole, guild)) {
 					await interaction.reply({
 						content: i18next.t("follow.disabled"),
-						flags: MessageFlags.Ephemeral,
 					});
 					return;
 				}
@@ -209,7 +207,6 @@ async function displayFollowed(interaction: ChatInputCommandInteraction) {
 
 	await interaction.reply({
 		embeds: [embed],
-		flags: MessageFlags.Ephemeral,
 	});
 }
 
@@ -224,7 +221,6 @@ async function followThisRole(interaction: ChatInputCommandInteraction) {
 	if (!role || !(role.role instanceof Role)) {
 		await interaction.reply({
 			content: i18next.t("ignore.role.error", { role: role }),
-			flags: MessageFlags.Ephemeral,
 		});
 		return;
 	}
@@ -242,7 +238,6 @@ async function followThisRole(interaction: ChatInputCommandInteraction) {
 		setRole("follow", interaction.guild.id, newFollowRoles);
 		await interaction.reply({
 			content: i18next.t("follow.role.removed", { role: mention }),
-			flags: MessageFlags.Ephemeral,
 		});
 	} else {
 		//add to follow list
@@ -250,7 +245,6 @@ async function followThisRole(interaction: ChatInputCommandInteraction) {
 		setRole("follow", interaction.guild.id, followedRoles);
 		await interaction.reply({
 			content: i18next.t("follow.role.added", { role: mention }),
-			flags: MessageFlags.Ephemeral,
 		});
 	}
 }
@@ -273,7 +267,6 @@ async function followText(interaction: ChatInputCommandInteraction) {
 	} else {
 		await interaction.reply({
 			content: i18next.t("ignore.error"),
-			flags: MessageFlags.Ephemeral,
 		});
 		return;
 	}
@@ -293,7 +286,6 @@ async function followThis(
 	if (!followChan) {
 		await interaction.reply({
 			content: i18next.t("commands.error"),
-			flags: MessageFlags.Ephemeral,
 		});
 		return;
 	}
@@ -352,7 +344,6 @@ async function followThis(
 			content: i18next.t("follow.thread.remove", {
 				thread: followChan.name,
 			}),
-			flags: MessageFlags.Ephemeral,
 		});
 	} else {
 		//add to ignore list
@@ -370,7 +361,6 @@ async function followThis(
 			content: i18next.t("follow.thread.success", {
 				thread: followChan.name,
 			}),
-			flags: MessageFlags.Ephemeral,
 		});
 	}
 }

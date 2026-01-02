@@ -32,41 +32,32 @@ export default {
 				.setName(en("common.thread").toLowerCase())
 				.setNameLocalizations(cmdLn("common.thread", true))
 				.setDescription(en("commands.updateSpecificThread.description"))
-				.setDescriptionLocalizations(
-					cmdLn("commands.updateSpecificThread.description"),
-				)
+				.setDescriptionLocalizations(cmdLn("commands.updateSpecificThread.description"))
 				.addChannelOption((option) =>
 					option
 						.setName(en("common.thread").toLowerCase())
 						.setNameLocalizations(cmdLn("common.thread", true))
-						.setDescription(
-							en("commands.updateSpecificThread.option.description"),
-						)
+						.setDescription(en("commands.updateSpecificThread.option.description"))
 						.setDescriptionLocalizations(
-							cmdLn("commands.updateSpecificThread.option.description"),
+							cmdLn("commands.updateSpecificThread.option.description")
 						)
 						.setRequired(false)
-						.addChannelTypes(
-							ChannelType.PrivateThread,
-							ChannelType.PublicThread,
-						),
-				),
+						.addChannelTypes(ChannelType.PrivateThread, ChannelType.PublicThread)
+				)
 		)
 		.addSubcommand((subcommand) =>
 			subcommand
 				.setName(en("commands.updateAllThreads.name"))
 				.setNameLocalizations(cmdLn("commands.updateAllThreads.name"))
 				.setDescription(en("commands.updateAllThreads.description"))
-				.setDescriptionLocalizations(
-					cmdLn("commands.updateAllThreads.description"),
-				),
+				.setDescriptionLocalizations(cmdLn("commands.updateAllThreads.description"))
 		)
 		.addSubcommand((subcommand) =>
 			subcommand
 				.setName(en("commands.help.name"))
 				.setNameLocalizations(cmdLn("commands.help.name"))
 				.setDescription(en("commands.help.description"))
-				.setDescriptionLocalizations(cmdLn("commands.help.description")),
+				.setDescriptionLocalizations(cmdLn("commands.help.description"))
 		),
 	async execute(interaction: ChatInputCommandInteraction) {
 		if (!interaction.guild) return;
@@ -96,11 +87,10 @@ async function updateAllThreads(interaction: CommandInteraction) {
 	if (!interaction.guild) return;
 	const guild = interaction.guild.id;
 	const threads = interaction.guild.channels.cache.filter((channel) =>
-		channel.isThread(),
+		channel.isThread()
 	);
 	await interaction.reply({
 		content: i18next.t("commands.updateAllThreads.reply") as string,
-		flags: MessageFlags.Ephemeral,
 	});
 	const count = threads.size;
 	await updateCache(interaction.guild);
@@ -119,7 +109,6 @@ async function updateAllThreads(interaction: CommandInteraction) {
 		content: i18next.t("commands.updateAllThreads.success", {
 			count: count,
 		}) as string,
-		flags: MessageFlags.Ephemeral,
 	});
 }
 
@@ -133,13 +122,11 @@ async function updateThread(interaction: ChatInputCommandInteraction) {
 	await updateCache(interaction.guild);
 	const guild = interaction.guild.id;
 	const threadOption =
-		interaction.options.get(i18next.t("common.thread").toLowerCase()) ??
-		interaction;
+		interaction.options.get(i18next.t("common.thread").toLowerCase()) ?? interaction;
 	const channel = threadOption?.channel;
 	if (!channel || !(channel instanceof ThreadChannel)) {
 		await interaction.reply({
 			content: i18next.t("commands.error") as string,
-			flags: MessageFlags.Ephemeral,
 		});
 		return;
 	}
@@ -156,14 +143,11 @@ async function updateThread(interaction: ChatInputCommandInteraction) {
 	) {
 		await interaction.reply({
 			content: i18next.t("ignore.message", { thread: mention }) as string,
-			flags: MessageFlags.Ephemeral,
 		});
 		return;
 	}
 	if (!interaction.guild) return;
-	await interaction.deferReply({
-		flags: MessageFlags.Ephemeral,
-	});
+	await interaction.deferReply({});
 	await addRoleAndUserToThread(channel);
 	await interaction.editReply({
 		content: i18next.t("commands.success", { channel: mention }) as string,
@@ -182,5 +166,5 @@ async function displayHelp(interaction: CommandInteraction) {
 		.setTitle(i18next.t("commands.help.title") as string)
 		.setDescription(constructDesc)
 		.setColor("#53dcaa");
-	await interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
+	await interaction.reply({ embeds: [embed] });
 }

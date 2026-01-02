@@ -125,7 +125,6 @@ export default {
 				if (getConfig(CommandName.followOnlyChannel, guild.id)) {
 					await interaction.reply({
 						content: i18next.t("ignore.followError") as string,
-						flags: MessageFlags.Ephemeral,
 					});
 					return;
 				}
@@ -135,7 +134,6 @@ export default {
 				if (getConfig(CommandName.followOnlyRole, guild.id)) {
 					await interaction.reply({
 						content: i18next.t("ignore.followError") as string,
-						flags: MessageFlags.Ephemeral,
 					});
 					return;
 				}
@@ -201,12 +199,11 @@ async function listIgnored(interaction: ChatInputCommandInteraction) {
 			.setDescription(ignoredRolesIn);
 		await interaction.reply({
 			embeds: [embed, embed2],
-			flags: MessageFlags.Ephemeral,
 		});
 	} else {
 		await interaction.reply({
 			embeds: [embed],
-			flags: MessageFlags.Ephemeral,
+			
 		});
 	}
 }
@@ -223,7 +220,7 @@ async function ignoreThisRole(interaction: ChatInputCommandInteraction) {
 	if (!role || !(role.role instanceof Role)) {
 		await interaction.reply({
 			content: i18next.t("ignore.role.error", { role: role?.name }) as string,
-			flags: MessageFlags.Ephemeral,
+			
 		});
 		return;
 	}
@@ -241,7 +238,7 @@ async function ignoreThisRole(interaction: ChatInputCommandInteraction) {
 		setRole("ignore", guild, newIgnoreRoles);
 		await interaction.reply({
 			content: i18next.t("ignore.role.removed", { role: mention }) as string,
-			flags: MessageFlags.Ephemeral,
+			
 		});
 	} else {
 		//add to ignore list
@@ -249,7 +246,7 @@ async function ignoreThisRole(interaction: ChatInputCommandInteraction) {
 		setRole("ignore", guild, allIgnoreRoles);
 		await interaction.reply({
 			content: i18next.t("ignore.role.added", { role: mention }) as string,
-			flags: MessageFlags.Ephemeral,
+			
 		});
 	}
 }
@@ -274,7 +271,7 @@ async function ignoreText(interaction: ChatInputCommandInteraction) {
 	} else {
 		await interaction.reply({
 			content: i18next.t("ignore.error") as string,
-			flags: MessageFlags.Ephemeral,
+			
 		});
 		return;
 	}
@@ -297,7 +294,7 @@ async function ignoreThis(
 	if (!ignoreCategory) {
 		await interaction.reply({
 			content: i18next.t("commands.error") as string,
-			flags: MessageFlags.Ephemeral,
+			
 		});
 		return;
 	}
@@ -358,7 +355,7 @@ async function ignoreThis(
 		);
 		await interaction.reply({
 			content: i18next.t("ignore.thread.remove", { thread: mention }) as string,
-			flags: MessageFlags.Ephemeral,
+			
 		});
 	} else {
 		//add to ignore list
@@ -376,7 +373,7 @@ async function ignoreThis(
 			content: i18next.t("ignore.thread.success", {
 				thread: mention,
 			}) as string,
-			flags: MessageFlags.Ephemeral,
+			
 		});
 	}
 }

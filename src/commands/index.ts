@@ -27,7 +27,7 @@ function mapChannel(
 		| djs.CategoryChannel[]
 		| djs.ThreadChannel[]
 		| djs.TextChannel[]
-		| djs.ForumChannel[],
+		| djs.ForumChannel[]
 ) {
 	if (!toMaps.length) return "/";
 	return `\n- ${toMaps
@@ -37,20 +37,15 @@ function mapChannel(
 
 function mapRole(roles: djs.Role[]) {
 	if (!roles.length) return "/";
-	return `\n- ${roles
-		.map((role) => `**${djs.roleMention(role.id)}**`)
-		.join("\n- ")}\`;`;
+	return `\n- ${roles.map((role) => `**${djs.roleMention(role.id)}**`).join("\n- ")}\`;`;
 }
 
 export function mapToStr(type: "follow" | "ignore", guildID: string) {
 	const categories =
 		(getMaps(type, TypeName.category, guildID) as djs.CategoryChannel[]) ?? [];
-	const threads =
-		(getMaps(type, TypeName.thread, guildID) as djs.ThreadChannel[]) ?? [];
-	const channels =
-		(getMaps(type, TypeName.channel, guildID) as djs.TextChannel[]) ?? [];
-	const forum =
-		(getMaps(type, TypeName.forum, guildID) as djs.ForumChannel[]) ?? [];
+	const threads = (getMaps(type, TypeName.thread, guildID) as djs.ThreadChannel[]) ?? [];
+	const channels = (getMaps(type, TypeName.channel, guildID) as djs.TextChannel[]) ?? [];
+	const forum = (getMaps(type, TypeName.forum, guildID) as djs.ForumChannel[]) ?? [];
 	const roles = (getRole(type, guildID) as djs.Role[]) ?? [];
 	const roleIns = (getRoleIn(type, guildID) as RoleIn[]) ?? [];
 	const rolesInNames = mapRoleIn(roleIns);
@@ -60,11 +55,11 @@ export function mapToStr(type: "follow" | "ignore", guildID: string) {
 	const rolesNames = mapRole(roles);
 	const forumNames = mapChannel(forum);
 	return {
-		rolesNames,
 		categoriesNames,
-		threadsNames,
 		channelsNames,
-		rolesInNames,
 		forumNames,
+		rolesInNames,
+		rolesNames,
+		threadsNames,
 	};
 }

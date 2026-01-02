@@ -37,14 +37,14 @@ export async function interactionRoleInChannel(
 	) {
 		await interaction.reply({
 			content: i18next.t("roleIn.error.otherMode") as string,
-			flags: MessageFlags.Ephemeral,
+			
 		});
 		return;
 	}
 	if (!getConfig(CommandName.followOnlyRoleIn, guild) && on === "follow") {
 		await interaction.reply({
 			content: i18next.t("roleIn.error.need") as string,
-			flags: MessageFlags.Ephemeral,
+			
 		});
 		return;
 	}
@@ -54,7 +54,7 @@ export async function interactionRoleInChannel(
 	if (!role || !(role.role instanceof Role)) {
 		await interaction.reply({
 			content: i18next.t("ignore.role.error", { role: role?.name }) as string,
-			flags: MessageFlags.Ephemeral,
+			
 		});
 		return;
 	}
@@ -103,7 +103,7 @@ export async function interactionRoleInChannel(
 				opposite: translationOpposite,
 				channel: channelMention(channel.channel?.id ?? ""),
 			}) as string,
-			flags: MessageFlags.Ephemeral,
+			
 		});
 		return;
 	}
@@ -131,7 +131,7 @@ export async function interactionRoleInChannel(
 					on: i18next.t(`roleIn.on.${on}`),
 					chan: channelMention(channel.channel?.id ?? ""),
 				}) as string,
-				flags: MessageFlags.Ephemeral,
+				
 			});
 			/** If the role is not followed in any channel, remove it from the list */
 			if (roleIn.channels.length === 0) {
@@ -157,7 +157,7 @@ export async function interactionRoleInChannel(
 					on: i18next.t(`roleIn.on.${on}`),
 					chan: channelMention(channel.channel?.id ?? ""),
 				}) as string,
-				flags: MessageFlags.Ephemeral,
+				
 			});
 		}
 	}
@@ -181,7 +181,7 @@ export async function interactionRoleInChannel(
 				on: i18next.t(`roleIn.on.${on}`),
 				chan: channelMention(channel.channel?.id ?? ""),
 			}) as string,
-			flags: MessageFlags.Ephemeral,
+			
 		});
 	}
 }

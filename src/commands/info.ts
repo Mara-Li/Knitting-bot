@@ -11,7 +11,7 @@ import i18next from "../i18n/init";
 import { INFO_EMOJI, VERSION } from "../index";
 
 const en = i18next.getFixedT("en");
-const fr = i18next.getFixedT("fr");
+//const fr = i18next.getFixedT("fr");
 
 export default {
 	data: new SlashCommandBuilder()
@@ -22,7 +22,7 @@ export default {
 		const embed = new EmbedBuilder()
 			.setTitle(i18next.t("info.title"))
 			.setDescription(
-				`${i18next.t("info.desc")}\n\n${i18next.t("configuration.show.menu.description")}`,
+				`${i18next.t("info.desc")}\n\n${i18next.t("configuration.show.menu.description")}`
 			)
 			.setThumbnail(interaction.client.user.displayAvatarURL())
 			.setColor("#4c8cb9")
@@ -76,13 +76,11 @@ export default {
 				.setStyle(ButtonStyle.Link),
 			new ButtonBuilder()
 				.setLabel("Changelog")
-				.setURL(
-					"https://github.com/mara-li/Knitting-bot/blob/master/CHANGELOG.md",
-				)
+				.setURL("https://github.com/mara-li/Knitting-bot/blob/master/CHANGELOG.md")
 				.setEmoji("🕒")
-				.setStyle(ButtonStyle.Link),
+				.setStyle(ButtonStyle.Link)
 		);
 
-		await interaction.reply({ embeds: [embed], components: [row] });
+		await interaction.reply({ components: [row], embeds: [embed] });
 	},
 };
