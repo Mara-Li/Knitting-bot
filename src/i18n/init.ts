@@ -8,8 +8,8 @@ export const resources = {
 };
 
 i18next.init({
-	lng: "en",
 	fallbackLng: "en",
+	lng: "en",
 	resources,
 	returnNull: false,
 });

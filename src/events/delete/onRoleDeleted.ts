@@ -1,21 +1,20 @@
-import { Client } from "discord.js";
+import type { Client } from "discord.js";
 import { getRole, getRoleIn, setRole, setRoleIn } from "../../maps";
-import { logInDev } from "../../utils";
 
 export default (client: Client): void => {
 	client.on("roleDelete", (role) => {
 		const guildID = role.guild.id;
 		const isFollowed = getRole("follow", guildID).some(
-			(followed) => followed.id === role.id,
+			(followed) => followed.id === role.id
 		);
 		const isIgnored = getRole("ignore", guildID).some(
-			(ignored) => ignored.id === role.id,
+			(ignored) => ignored.id === role.id
 		);
 		const followedRoleIn = getRoleIn("follow", guildID).some(
-			(followed) => followed.role.id === role.id,
+			(followed) => followed.role.id === role.id
 		);
 		const ignoredRoleIn = getRoleIn("ignore", guildID).some(
-			(ignored) => ignored.role.id === role.id,
+			(ignored) => ignored.role.id === role.id
 		);
 		if (isFollowed) {
 			const followed = getRole("follow", guildID);
@@ -31,9 +30,7 @@ export default (client: Client): void => {
 		}
 		if (followedRoleIn) {
 			const followed = getRoleIn("follow", guildID);
-			const index = followed.findIndex(
-				(followed) => followed.role.id === role.id,
-			);
+			const index = followed.findIndex((followed) => followed.role.id === role.id);
 			followed.splice(index, 1);
 			setRoleIn("follow", guildID, followed);
 		}

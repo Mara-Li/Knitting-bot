@@ -5,7 +5,6 @@ import {
 	type CommandInteractionOptionResolver,
 	channelMention,
 	EmbedBuilder,
-	MessageFlags,
 	PermissionFlagsBits,
 	SlashCommandBuilder,
 	ThreadChannel,

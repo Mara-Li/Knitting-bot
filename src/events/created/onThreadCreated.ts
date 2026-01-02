@@ -2,12 +2,7 @@ import { ChannelType, type Client, type ThreadChannel } from "discord.js";
 import i18next from "i18next";
 import { CommandName } from "../../interface";
 import { getConfig } from "../../maps";
-import {
-	changeGuildLanguage,
-	discordLogs,
-	logInDev,
-	updateCache,
-} from "../../utils";
+import { changeGuildLanguage, discordLogs, logInDev, updateCache } from "../../utils";
 import { addRoleAndUserToThread } from "../../utils/add";
 import { checkThread } from "../../utils/data_check";
 
@@ -28,7 +23,7 @@ export default (client: Client): void => {
 		await discordLogs(
 			guild,
 			client,
-			i18next.t("logs.thread.created", { thread: thread.name }),
+			i18next.t("logs.thread.created", { thread: thread.name })
 		);
 		/** automatically add the bot to the thread */
 		await thread.join();

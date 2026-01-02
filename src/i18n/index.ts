@@ -15,12 +15,12 @@ export function cmdLn(key: string, lowerCase = false) {
 	const localized: Djs.LocalizationMap = {};
 	const allValidLocale = Object.entries(Djs.Locale);
 	const allTranslatedLanguages = Object.keys(resources).filter(
-		(lang) => !lang.includes("en"),
+		(lang) => !lang.includes("en")
 	);
 	for (const [name, Locale] of allValidLocale) {
 		if (allTranslatedLanguages.includes(Locale)) {
 			const ul = ln(name as Djs.Locale);
-			//@ts-ignore
+			//@ts-expect-error
 			const t = ul(key) as string;
 			if (lowerCase) localized[Locale as Djs.Locale] = t.toLowerCase();
 			else localized[Locale as Djs.Locale] = t;

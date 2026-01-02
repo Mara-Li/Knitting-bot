@@ -1,18 +1,8 @@
-import {
-	ChannelType,
-	type Client,
-	type Snowflake,
-	type TextChannel,
-} from "discord.js";
+import { ChannelType, type Client, type Snowflake, type TextChannel } from "discord.js";
 import i18next from "i18next";
 import { CommandName } from "../../interface";
 import { getConfig } from "../../maps";
-import {
-	changeGuildLanguage,
-	discordLogs,
-	logInDev,
-	updateCache,
-} from "../../utils";
+import { changeGuildLanguage, discordLogs, logInDev, updateCache } from "../../utils";
 import { addRoleAndUserToThread } from "../../utils/add";
 import { checkThread, validateChannelType } from "../../utils/data_check";
 
@@ -25,9 +15,7 @@ import { checkThread, validateChannelType } from "../../utils/data_check";
 
 export default (client: Client): void => {
 	client.on("channelUpdate", async (oldChannel, newChannel) => {
-		logInDev(
-			`Channel ${getChannelName(oldChannel.id, client)} has been updated.`,
-		);
+		logInDev(`Channel ${getChannelName(oldChannel.id, client)} has been updated.`);
 		if (
 			oldChannel.type === ChannelType.DM ||
 			newChannel.type === ChannelType.DM ||
@@ -41,8 +29,7 @@ export default (client: Client): void => {
 		if (
 			!validateChannelType(oldChannel) ||
 			!validateChannelType(newChannel) ||
-			oldChannel.permissionOverwrites.cache ===
-				newChannel.permissionOverwrites.cache
+			oldChannel.permissionOverwrites.cache === newChannel.permissionOverwrites.cache
 		) {
 			return;
 		}
@@ -60,14 +47,13 @@ export default (client: Client): void => {
 							guild,
 							client,
 							i18next.t("logs.updated.channel", {
-								number: threads.size,
 								child: child.name,
-							}),
+								number: threads.size,
+							})
 						);
 					threads.forEach((thread) => {
 						if (!getConfig(CommandName.followOnlyChannel, guild)) {
-							if (!checkThread(thread, "ignore"))
-								addRoleAndUserToThread(thread);
+							if (!checkThread(thread, "ignore")) addRoleAndUserToThread(thread);
 						} else {
 							if (checkThread(thread, "follow")) addRoleAndUserToThread(thread);
 						}
@@ -82,9 +68,9 @@ export default (client: Client): void => {
 				guild,
 				client,
 				i18next.t("logs.updated.channel", {
-					number: threads.size,
 					child: newTextChannel.name,
-				}),
+					number: threads.size,
+				})
 			);
 			threads.forEach((thread) => {
 				if (!getConfig(CommandName.followOnlyChannel, guild)) {

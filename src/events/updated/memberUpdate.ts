@@ -2,12 +2,7 @@ import type { Client, ThreadChannel } from "discord.js";
 import i18next from "i18next";
 import { CommandName } from "../../interface";
 import { getConfig } from "../../maps";
-import {
-	changeGuildLanguage,
-	discordLogs,
-	logInDev,
-	updateCache,
-} from "../../utils";
+import { changeGuildLanguage, discordLogs, logInDev, updateCache } from "../../utils";
 import { addUserToThread } from "../../utils/add";
 import {
 	checkMemberRole,
@@ -35,7 +30,7 @@ export default (client: Client): void => {
 					client,
 					i18next.t("logs.member.updated.noRole", {
 						user: oldMember.user.username,
-					}),
+					})
 				);
 				return;
 			}
@@ -43,14 +38,12 @@ export default (client: Client): void => {
 				guildID,
 				client,
 				i18next.t("logs.member.updated.roleList", {
-					user: oldMember.user.username,
 					role: updatedRoles.map((role) => role.name).join(", "),
-				}),
+					user: oldMember.user.username,
+				})
 			);
 			const guild = newMember.guild;
-			const channels = guild.channels.cache.filter((channel) =>
-				channel.isThread(),
-			);
+			const channels = guild.channels.cache.filter((channel) => channel.isThread());
 			for (const channel of channels.values()) {
 				const threadChannel = channel as ThreadChannel;
 				const updatedRoleAllowed = updatedRoles.filter((role) => {
@@ -59,36 +52,36 @@ export default (client: Client): void => {
 				const ignoredUpdatedRole = updatedRoles.filter((role) => {
 					return checkRoleIn("ignore", role, threadChannel);
 				});
-				if (updatedRoleAllowed.size === 0) {
-				} else if (ignoredUpdatedRole.size > 0) {
+				/*
+				 * If no updated role is in follow roles or the role is ignored, continue to the next thread
+				 */
+				if (updatedRoleAllowed.size === 0 || ignoredUpdatedRole.size > 0) continue;
+				/**
+				 * If checkMemberRoleInFollowed is true, ignore the two others condition and add the member to the thread
+				 * Else, check the two others condition and add the member to the thread if they are true
+				 */
+
+				let roleIsAllowed = true;
+				if (!checkMemberRoleIn("follow", newMember.roles, threadChannel)) {
+					roleIsAllowed =
+						checkMemberRole(newMember.roles, "follow") &&
+						!checkMemberRole(newMember.roles, "ignore") &&
+						checkMemberRoleIn("ignore", newMember.roles, threadChannel);
+				}
+
+				if (!getConfig(CommandName.followOnlyChannel, guildID)) {
+					/**
+					 * followOnlyChannel is disabled && followOnlyRole can be enabled or disabled
+					 */
+					if (!checkThread(threadChannel, "ignore") && roleIsAllowed)
+						await addUserToThread(threadChannel, newMember);
 				} else {
 					/**
-					 * If checkMemberRoleInFollowed is true, ignore the two others condition and add the member to the thread
-					 * Else, check the two others condition and add the member to the thread if they are true
+					 * followOnlyChannel is enabled && followOnlyRole can be enabled or disabled
 					 */
-
-					let roleIsAllowed = true;
-					if (!checkMemberRoleIn("follow", newMember.roles, threadChannel)) {
-						roleIsAllowed =
-							checkMemberRole(newMember.roles, "follow") &&
-							!checkMemberRole(newMember.roles, "ignore") &&
-							checkMemberRoleIn("ignore", newMember.roles, threadChannel);
-					}
-
-					if (!getConfig(CommandName.followOnlyChannel, guildID)) {
-						/**
-						 * followOnlyChannel is disabled && followOnlyRole can be enabled or disabled
-						 */
-						if (!checkThread(threadChannel, "ignore") && roleIsAllowed)
-							await addUserToThread(threadChannel, newMember);
-					} else {
-						/**
-						 * followOnlyChannel is enabled && followOnlyRole can be enabled or disabled
-						 */
-						const followedThread = checkThread(threadChannel, "follow");
-						if (roleIsAllowed && followedThread)
-							await addUserToThread(threadChannel, newMember);
-					}
+					const followedThread = checkThread(threadChannel, "follow");
+					if (roleIsAllowed && followedThread)
+						await addUserToThread(threadChannel, newMember);
 				}
 			}
 		} catch (error) {

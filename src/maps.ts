@@ -17,23 +17,23 @@ import {
 import { logInDev } from "./utils";
 
 export const optionMaps = new Enmap({
-	name: "Configuration",
-	fetchAll: false,
 	autoFetch: true,
 	cloneLevel: "deep",
+	fetchAll: false,
+	name: "Configuration",
 });
 
 const ignoreMaps = new Enmap({
-	name: "Ignore",
-	fetchAll: false,
 	autoFetch: true,
 	cloneLevel: "deep",
+	fetchAll: false,
+	name: "Ignore",
 });
 const followOnlyMaps = new Enmap({
-	name: "FollowOnly",
-	fetchAll: false,
 	autoFetch: true,
 	cloneLevel: "deep",
+	fetchAll: false,
+	name: "FollowOnly",
 });
 
 /**
@@ -45,7 +45,7 @@ const followOnlyMaps = new Enmap({
 export function setConfig(
 	name: CommandName | string,
 	guildID: string,
-	value: string | boolean,
+	value: string | boolean
 ) {
 	if (name === CommandName.manualMode) return;
 	optionMaps.set(guildID, value, name);
@@ -58,10 +58,9 @@ export function setConfig(
 export function setIgnore<T extends keyof IgnoreFollow>(
 	name: T,
 	guildID: string,
-	value: IgnoreFollow[T],
+	value: IgnoreFollow[T]
 ) {
-	const guildConfig =
-		(ignoreMaps.get(guildID) as IgnoreFollow) ?? DEFAULT_IGNORE_FOLLOW;
+	const guildConfig = (ignoreMaps.get(guildID) as IgnoreFollow) ?? DEFAULT_IGNORE_FOLLOW;
 	if (name === TypeName.OnlyRoleIn) return;
 	guildConfig[name] = value;
 	ignoreMaps.set(guildID, guildConfig);
@@ -74,7 +73,7 @@ export function setIgnore<T extends keyof IgnoreFollow>(
 export function setFollow<T extends keyof IgnoreFollow>(
 	name: T,
 	guildID: string,
-	value: IgnoreFollow[T],
+	value: IgnoreFollow[T]
 ) {
 	const guildConfig =
 		(followOnlyMaps.get(guildID) as IgnoreFollow) ?? DEFAULT_IGNORE_FOLLOW;
@@ -83,11 +82,7 @@ export function setFollow<T extends keyof IgnoreFollow>(
 	followOnlyMaps.set(guildID, guildConfig);
 }
 
-export function setRole(
-	on: "follow" | "ignore",
-	guildID: string,
-	value: Role[],
-) {
+export function setRole(on: "follow" | "ignore", guildID: string, value: Role[]) {
 	if (on === "follow") {
 		const guildConfig =
 			(followOnlyMaps.get(guildID) as IgnoreFollow) ?? DEFAULT_IGNORE_FOLLOW;
@@ -101,11 +96,7 @@ export function setRole(
 	}
 }
 
-export function setRoleIn(
-	on: "follow" | "ignore",
-	guildID: string,
-	value: RoleIn[],
-) {
+export function setRoleIn(on: "follow" | "ignore", guildID: string, value: RoleIn[]) {
 	if (on === "follow") {
 		const guildConfig =
 			(followOnlyMaps.get(guildID) as IgnoreFollow) ?? DEFAULT_IGNORE_FOLLOW;
@@ -130,7 +121,7 @@ export function setRoleIn(
 export function getConfig(
 	name: CommandName,
 	guildID: string,
-	channel?: boolean,
+	channel?: boolean
 ): string | boolean | null {
 	try {
 		if (channel) {
@@ -158,23 +149,14 @@ export function getConfig(
 	}
 }
 
-export function getRoleIn(
-	ignore: "follow" | "ignore",
-	guildID: string,
-): RoleIn[] {
-	const ignoreConfig = ignoreMaps.ensure(
-		guildID,
-		DEFAULT_IGNORE_FOLLOW,
-	) as IgnoreFollow;
+export function getRoleIn(ignore: "follow" | "ignore", guildID: string): RoleIn[] {
+	const ignoreConfig = ignoreMaps.ensure(guildID, DEFAULT_IGNORE_FOLLOW) as IgnoreFollow;
 	const followConfig = followOnlyMaps.ensure(
 		guildID,
-		DEFAULT_IGNORE_FOLLOW,
+		DEFAULT_IGNORE_FOLLOW
 	) as IgnoreFollow;
 
-	if (
-		!ignoreConfig[TypeName.OnlyRoleIn] ||
-		!followConfig[TypeName.OnlyRoleIn]
-	) {
+	if (!ignoreConfig[TypeName.OnlyRoleIn] || !followConfig[TypeName.OnlyRoleIn]) {
 		setRoleIn(ignore, guildID, []);
 	}
 	switch (ignore) {
@@ -186,13 +168,10 @@ export function getRoleIn(
 }
 
 export function getRole(ignore: "follow" | "ignore", guildID: string): Role[] {
-	const ignoreConfig = ignoreMaps.ensure(
-		guildID,
-		DEFAULT_IGNORE_FOLLOW,
-	) as IgnoreFollow;
+	const ignoreConfig = ignoreMaps.ensure(guildID, DEFAULT_IGNORE_FOLLOW) as IgnoreFollow;
 	const followConfig = followOnlyMaps.ensure(
 		guildID,
-		DEFAULT_IGNORE_FOLLOW,
+		DEFAULT_IGNORE_FOLLOW
 	) as IgnoreFollow;
 
 	if (!ignoreConfig[TypeName.role] || !followConfig[TypeName.role]) {
@@ -209,7 +188,7 @@ export function getRole(ignore: "follow" | "ignore", guildID: string): Role[] {
 export function getMaps(
 	maps: "follow" | "ignore",
 	typeName: TypeName,
-	guildID: string,
+	guildID: string
 ): ThreadChannel[] | CategoryChannel[] | TextChannel[] | ForumChannel[] {
 	switch (maps) {
 		case "follow":
@@ -227,11 +206,11 @@ export function getMaps(
  */
 function getFollow(
 	follow: TypeName,
-	guildID: string,
+	guildID: string
 ): ThreadChannel[] | CategoryChannel[] | TextChannel[] | ForumChannel[] {
 	const followConfig = followOnlyMaps.ensure(
 		guildID,
-		DEFAULT_IGNORE_FOLLOW,
+		DEFAULT_IGNORE_FOLLOW
 	) as IgnoreFollow;
 	if (!followConfig[follow]) {
 		setFollow(follow, guildID, []);
@@ -258,12 +237,9 @@ function getFollow(
  */
 function getIgnored(
 	ignore: TypeName,
-	guildID: string,
+	guildID: string
 ): ThreadChannel[] | CategoryChannel[] | TextChannel[] | ForumChannel[] {
-	const ignoreConfig = ignoreMaps.ensure(
-		guildID,
-		DEFAULT_IGNORE_FOLLOW,
-	) as IgnoreFollow;
+	const ignoreConfig = ignoreMaps.ensure(guildID, DEFAULT_IGNORE_FOLLOW) as IgnoreFollow;
 	if (!ignoreConfig[ignore]) {
 		setIgnore(ignore, guildID, []);
 	}

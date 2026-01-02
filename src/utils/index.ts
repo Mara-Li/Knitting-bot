@@ -30,16 +30,10 @@ export function logInDev(...text: unknown[]) {
 }
 
 export function messageOfBot(thread: ThreadChannel, bot: Client) {
-	return thread.messages.cache.find(
-		(message) => message.author.id === bot.user?.id,
-	);
+	return thread.messages.cache.find((message) => message.author.id === bot.user?.id);
 }
 
-export async function discordLogs(
-	guildID: string,
-	bot: Client,
-	...text: unknown[]
-) {
+export async function discordLogs(guildID: string, bot: Client, ...text: unknown[]) {
 	if (getConfig(CommandName.log, guildID)) {
 		const chan = getConfig(CommandName.log, guildID, true);
 		if (chan && typeof chan === "string") {
@@ -77,11 +71,9 @@ export function toTitle(name: string) {
 
 export function findFirst(
 	thread: ThreadChannel,
-	fetchedMessage: Collection<string, Message<true>>,
+	fetchedMessage: Collection<string, Message<true>>
 ) {
-	return fetchedMessage
-		.filter((m) => m.author.id === thread.client.user.id)
-		.first();
+	return fetchedMessage.filter((m) => m.author.id === thread.client.user.id).first();
 }
 
 export async function fetchMessage(thread: ThreadChannel) {

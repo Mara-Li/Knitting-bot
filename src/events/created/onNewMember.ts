@@ -22,12 +22,10 @@ export default (client: Client): void => {
 		await discordLogs(
 			guildID,
 			client,
-			i18next.t("logs.joined", { user: member.user.username }),
+			i18next.t("logs.joined", { user: member.user.username })
 		);
 		const guild = member.guild;
-		const channels = guild.channels.cache.filter((channel) =>
-			channel.isThread(),
-		);
+		const channels = guild.channels.cache.filter((channel) => channel.isThread());
 		for (const channel of channels.values()) {
 			const threadChannel = channel as ThreadChannel;
 			const roleIsAllowed =

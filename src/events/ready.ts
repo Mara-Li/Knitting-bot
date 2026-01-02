@@ -19,9 +19,7 @@ export default (client: Client): void => {
 		// ID application (priorité à process.env, fallback sur fichier .env/*.prod)
 		const applicationId = process.env.CLIENT_ID || config?.CLIENT_ID;
 		if (!applicationId) {
-			console.error(
-				"CLIENT_ID manquant: impossible d'enregistrer les commandes.",
-			);
+			console.error("CLIENT_ID manquant: impossible d'enregistrer les commandes.");
 			return;
 		}
 
@@ -32,22 +30,18 @@ export default (client: Client): void => {
 			return;
 		}
 
-		console.info(
-			`Enregistrement des commandes sur ${guilds.length} guildes...`,
-		);
+		console.info(`Enregistrement des commandes sur ${guilds.length} guildes...`);
 
 		const guildPromises = guilds.map(async (guild) => {
 			try {
 				console.info(`[${guild.name}] Synchronisation des commandes...`);
 				// L'appel REST écrase l'ensemble des commandes guild pour cette application.
 				await guild.commands.set(serializedCommands);
-				console.info(
-					`[${guild.name}] OK (${serializedCommands.length} commandes).`,
-				);
+				console.info(`[${guild.name}] OK (${serializedCommands.length} commandes).`);
 			} catch (error) {
 				console.error(
 					`[${guild.name}] Échec lors de l'enregistrement des commandes:`,
-					error,
+					error
 				);
 			}
 		});

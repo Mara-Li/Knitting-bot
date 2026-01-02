@@ -25,10 +25,7 @@ import { discordLogs } from "./index";
  * @param thread {@link ThreadChannel} The thread to add the user
  * @param user {@link GuildMember} The user to add
  */
-export async function addUserToThread(
-	thread: ThreadChannel,
-	user: GuildMember,
-) {
+export async function addUserToThread(thread: ThreadChannel, user: GuildMember) {
 	const guild = thread.guild.id;
 
 	if (
@@ -51,7 +48,7 @@ export async function addUserToThread(
 			await discordLogs(
 				guild,
 				thread.client,
-				`Add @${user.user.username} to #${thread.name}`,
+				`Add @${user.user.username} to #${thread.name}`
 			);
 		} else if (!checkMemberRole(user.roles, "ignore")) {
 			if (message) {
@@ -68,7 +65,7 @@ export async function addUserToThread(
 			await discordLogs(
 				guild,
 				thread.client,
-				`Add @${user.user.username} to #${thread.name}`,
+				`Add @${user.user.username} to #${thread.name}`
 			);
 		} else if (
 			getConfig(CommandName.followOnlyRole, guild) &&
@@ -88,7 +85,7 @@ export async function addUserToThread(
 			await discordLogs(
 				guild,
 				thread.client,
-				`Add @${user.user.username} to #${thread.name}`,
+				`Add @${user.user.username} to #${thread.name}`
 			);
 		}
 	}
@@ -99,10 +96,7 @@ export async function addUserToThread(
  * @param thread
  * @param members
  */
-export async function getUsersToPing(
-	thread: ThreadChannel,
-	members: GuildMember[],
-) {
+export async function getUsersToPing(thread: ThreadChannel, members: GuildMember[]) {
 	const guild = thread.guild.id;
 	const usersToBeAdded: GuildMember[] = [];
 	for (const member of members) {
@@ -146,7 +140,7 @@ export async function getRoleToPing(thread: ThreadChannel, roles: Role[]) {
 		//check if all members of the role are in the thread
 		const membersInTheThread = thread.members.cache;
 		const membersOfTheRoleNotInTheThread = role.members.filter(
-			(member) => !membersInTheThread.has(member.id),
+			(member) => !membersInTheThread.has(member.id)
 		);
 		if (
 			role.name !== "@everyone" &&
@@ -157,10 +151,7 @@ export async function getRoleToPing(thread: ThreadChannel, roles: Role[]) {
 			if (checkRoleIn("follow", role, thread)) {
 				roleToBeAdded.push(role);
 			} else if (!getConfig(CommandName.followOnlyRoleIn, guild)) {
-				if (
-					getConfig(CommandName.followOnlyRole, guild) &&
-					checkRole(role, "follow")
-				) {
+				if (getConfig(CommandName.followOnlyRole, guild) && checkRole(role, "follow")) {
 					roleToBeAdded.push(role);
 				} else if (
 					!getConfig(CommandName.followOnlyRoleIn, guild) &&
@@ -218,7 +209,7 @@ export async function addRoleAndUserToThread(thread: ThreadChannel) {
 		await discordLogs(
 			thread.guild.id,
 			thread.client,
-			`Add ${toPing.length} members to #${thread.name}:\n- ${toPing.map((member) => member.user.username).join("\n- ")}`,
+			`Add ${toPing.length} members to #${thread.name}:\n- ${toPing.map((member) => member.user.username).join("\n- ")}`
 		);
 	}
 }
@@ -237,7 +228,7 @@ async function splitAndSend(toPing: GuildMember[], message: Message) {
 			await message.edit(currentMessage);
 			currentMessage = "";
 		}
-		currentMessage += mention + " ";
+		currentMessage += `${mention} `;
 		if ((i + 1) % maxMentions === 0 || i === toPing.length - 1) {
 			await message.edit(currentMessage);
 			currentMessage = "";
@@ -254,9 +245,7 @@ async function splitAndSend(toPing: GuildMember[], message: Message) {
 async function fetchMessage(thread: ThreadChannel): Promise<Message> {
 	const fetchedMessage = thread.messages.cache;
 	return (
-		fetchedMessage
-			.filter((m) => m.author.id === thread.client.user.id)
-			.first() ??
+		fetchedMessage.filter((m) => m.author.id === thread.client.user.id).first() ??
 		(await thread.send({
 			content: EMOJI,
 			flags: MessageFlags.SuppressNotifications,

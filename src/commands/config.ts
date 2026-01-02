@@ -21,7 +21,6 @@ import {
 	channelMention,
 	EmbedBuilder,
 	type Locale,
-	MessageFlags,
 	PermissionFlagsBits,
 	SlashCommandBuilder,
 	type StringSelectMenuInteraction,

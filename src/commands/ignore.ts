@@ -7,7 +7,6 @@ import {
 	channelMention,
 	EmbedBuilder,
 	ForumChannel,
-	MessageFlags,
 	PermissionFlagsBits,
 	Role,
 	roleMention,
@@ -18,14 +17,7 @@ import {
 import { cmdLn } from "../i18n";
 import { default as i18next } from "../i18n/init";
 import { CommandName, TypeName } from "../interface";
-import {
-	getConfig,
-	getMaps,
-	getRole,
-	getRoleIn,
-	setIgnore,
-	setRole,
-} from "../maps";
+import { getConfig, getMaps, getRole, getRoleIn, setIgnore, setRole } from "../maps";
 import { toTitle } from "../utils";
 import { mapToStr } from "./index";
 import { interactionRoleInChannel } from "./utils";
@@ -49,17 +41,15 @@ export default {
 						.setName(en("common.channel").toLowerCase())
 						.setNameLocalizations(cmdLn("common.channel", true))
 						.setDescription(en("ignore.thread.option.description"))
-						.setDescriptionLocalizations(
-							cmdLn("ignore.thread.option.description"),
-						)
+						.setDescriptionLocalizations(cmdLn("ignore.thread.option.description"))
 						.addChannelTypes(
 							ChannelType.GuildCategory,
 							ChannelType.GuildText,
 							ChannelType.PublicThread,
 							ChannelType.PrivateThread,
-							ChannelType.GuildForum,
-						),
-				),
+							ChannelType.GuildForum
+						)
+				)
 		)
 		.addSubcommand((subcommand) =>
 			subcommand
@@ -74,8 +64,8 @@ export default {
 						.setNameLocalizations(cmdLn("common.role", true))
 						.setDescription(en("ignore.role.option"))
 						.setDescriptionLocalizations(cmdLn("ignore.role.option"))
-						.setRequired(true),
-				),
+						.setRequired(true)
+				)
 		)
 		.addSubcommand((subcommand) =>
 			subcommand
@@ -88,7 +78,7 @@ export default {
 						.setName(en("common.role").toLowerCase())
 						.setDescription(en("ignore.roleIn.option.role"))
 						.setDescriptionLocalizations(cmdLn("ignore.roleIn.option.role"))
-						.setRequired(true),
+						.setRequired(true)
 				)
 				.addChannelOption((option) =>
 					option
@@ -101,16 +91,16 @@ export default {
 							ChannelType.GuildText,
 							ChannelType.PublicThread,
 							ChannelType.PrivateThread,
-							ChannelType.GuildForum,
-						),
-				),
+							ChannelType.GuildForum
+						)
+				)
 		)
 		.addSubcommand((subcommand) =>
 			subcommand
 				.setName(en("common.list"))
 				.setNameLocalizations(cmdLn("common.list"))
 				.setDescription(en("ignore.list.description"))
-				.setDescriptionLocalizations(cmdLn("ignore.list.description")),
+				.setDescriptionLocalizations(cmdLn("ignore.list.description"))
 		),
 	async execute(interaction: ChatInputCommandInteraction) {
 		if (!interaction.guild) return;
@@ -203,7 +193,6 @@ async function listIgnored(interaction: ChatInputCommandInteraction) {
 	} else {
 		await interaction.reply({
 			embeds: [embed],
-			
 		});
 	}
 }
@@ -220,25 +209,23 @@ async function ignoreThisRole(interaction: ChatInputCommandInteraction) {
 	if (!role || !(role.role instanceof Role)) {
 		await interaction.reply({
 			content: i18next.t("ignore.role.error", { role: role?.name }) as string,
-			
 		});
 		return;
 	}
 	const mention = role?.role.id ? roleMention(role.role.id) : role.role?.name;
 	const allIgnoreRoles: Role[] = getRole("ignore", guild);
 	const isAlreadyIgnored = allIgnoreRoles.some(
-		(ignoredRole: Role) => ignoredRole.id === role.role?.id,
+		(ignoredRole: Role) => ignoredRole.id === role.role?.id
 	);
 
 	if (isAlreadyIgnored) {
 		//remove from ignore list
 		const newIgnoreRoles: Role[] = allIgnoreRoles.filter(
-			(ignoredRole: Role) => ignoredRole.id !== role.role?.id,
+			(ignoredRole: Role) => ignoredRole.id !== role.role?.id
 		);
 		setRole("ignore", guild, newIgnoreRoles);
 		await interaction.reply({
 			content: i18next.t("ignore.role.removed", { role: mention }) as string,
-			
 		});
 	} else {
 		//add to ignore list
@@ -246,7 +233,6 @@ async function ignoreThisRole(interaction: ChatInputCommandInteraction) {
 		setRole("ignore", guild, allIgnoreRoles);
 		await interaction.reply({
 			content: i18next.t("ignore.role.added", { role: mention }) as string,
-			
 		});
 	}
 }
@@ -271,7 +257,6 @@ async function ignoreText(interaction: ChatInputCommandInteraction) {
 	} else {
 		await interaction.reply({
 			content: i18next.t("ignore.error") as string,
-			
 		});
 		return;
 	}
@@ -287,14 +272,13 @@ async function ignoreText(interaction: ChatInputCommandInteraction) {
 async function ignoreThis(
 	interaction: CommandInteraction,
 	typeName: TypeName,
-	ignoreCategory?: CategoryChannel | ThreadChannel | TextChannel | ForumChannel,
+	ignoreCategory?: CategoryChannel | ThreadChannel | TextChannel | ForumChannel
 ) {
 	if (!interaction.guild) return;
 	const guild = interaction.guild.id;
 	if (!ignoreCategory) {
 		await interaction.reply({
 			content: i18next.t("commands.error") as string,
-			
 		});
 		return;
 	}
@@ -307,27 +291,19 @@ async function ignoreThis(
 	switch (typeName) {
 		case TypeName.category:
 			allIgnored =
-				(getMaps("ignore", TypeName.category, guild) as CategoryChannel[]) ??
-				[];
+				(getMaps("ignore", TypeName.category, guild) as CategoryChannel[]) ?? [];
 			break;
 		case TypeName.thread:
-			allIgnored =
-				(getMaps("ignore", TypeName.thread, guild) as ThreadChannel[]) ?? [];
+			allIgnored = (getMaps("ignore", TypeName.thread, guild) as ThreadChannel[]) ?? [];
 			break;
 		case TypeName.channel:
-			allIgnored =
-				(getMaps("ignore", TypeName.channel, guild) as TextChannel[]) ?? [];
+			allIgnored = (getMaps("ignore", TypeName.channel, guild) as TextChannel[]) ?? [];
 			break;
 	}
 	const isAlreadyIgnored = allIgnored.some(
 		(
-			ignoredCategory:
-				| CategoryChannel
-				| ForumChannel
-				| ThreadChannel
-				| TextChannel
-				| Role,
-		) => ignoredCategory.id === ignoreCategory?.id,
+			ignoredCategory: CategoryChannel | ForumChannel | ThreadChannel | TextChannel | Role
+		) => ignoredCategory.id === ignoreCategory?.id
 	);
 	const mention = ignoreCategory?.id
 		? channelMention(ignoreCategory.id)
@@ -341,8 +317,8 @@ async function ignoreThis(
 					| ForumChannel
 					| ThreadChannel
 					| TextChannel
-					| Role,
-			) => ignoredCategory.id !== ignoreCategory?.id,
+					| Role
+			) => ignoredCategory.id !== ignoreCategory?.id
 		);
 		setIgnore(
 			typeName,
@@ -351,11 +327,10 @@ async function ignoreThis(
 				| ThreadChannel[]
 				| CategoryChannel[]
 				| TextChannel[]
-				| ForumChannel[],
+				| ForumChannel[]
 		);
 		await interaction.reply({
 			content: i18next.t("ignore.thread.remove", { thread: mention }) as string,
-			
 		});
 	} else {
 		//add to ignore list
@@ -363,17 +338,12 @@ async function ignoreThis(
 		setIgnore(
 			typeName,
 			guild,
-			allIgnored as
-				| ThreadChannel[]
-				| CategoryChannel[]
-				| TextChannel[]
-				| ForumChannel[],
+			allIgnored as ThreadChannel[] | CategoryChannel[] | TextChannel[] | ForumChannel[]
 		);
 		await interaction.reply({
 			content: i18next.t("ignore.thread.success", {
 				thread: mention,
 			}) as string,
-			
 		});
 	}
 }

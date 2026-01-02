@@ -1,6 +1,6 @@
+import * as process from "node:process";
 import { Client, GatewayIntentBits, Partials } from "discord.js";
 import dotenv from "dotenv";
-import * as process from "node:process";
 import * as pkg from "../package.json";
 import onNewMember from "./events/created/onNewMember";
 import onThreadCreated from "./events/created/onThreadCreated";
@@ -36,9 +36,9 @@ export const VERSION = pkg.version ?? "0.0.0";
 export const DESTROY_DATABASE = process.env.DESTROY === "true";
 
 export const INFO_EMOJI = {
+	discord: process.env.DISCORD ?? "??",
 	github: process.env.GITHUB_EMOJI ?? "??",
 	kofi: process.env.KOFI ?? "??",
-	discord: process.env.DISCORD ?? "??",
 };
 
 try {
