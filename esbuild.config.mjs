@@ -48,9 +48,9 @@ for (const file of localeFiles) {
 	const destFile = path.normalize(file.replace("src", "dist/src"));
 	//fix path for windows
 	copyFileSync(file, destFile);
-	console.log(`Copie: ${file} -> ${destFile}`);
+	console.log(`Copy: ${file} -> ${destFile}`);
 }
 
 console.log(
-	`✅ Build ${isProd ? "production" : "development"} terminé${isProd ? " (sans console)" : ""}`
+	`✅ Build ${isProd ? "production" : "development"} done ${isProd ? " (without logging)" : ""}`
 );
