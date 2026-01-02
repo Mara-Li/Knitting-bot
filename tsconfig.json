@@ -1,33 +1,33 @@
 {
-    "compilerOptions": {
-        "target": "ESNext",
-        "module": "esnext",
-        "rootDir": "./",
-        "outDir": "./dist/",
-        "strict": true,
-        "moduleResolution": "node",
-        "importHelpers": true,
-        "experimentalDecorators": true,
-        "esModuleInterop": true,
-        "skipLibCheck": true,
-        "allowSyntheticDefaultImports": true,
-        "resolveJsonModule": true,
-        "forceConsistentCasingInFileNames": true,
-        "removeComments": true,
-        "typeRoots": [
-            "node_modules/@types"
-        ],
-        "sourceMap": false,
-        "baseUrl": "./"
-    },
-    "files": [
-        "src/index.ts"
-    ],
-    "include": [
-        "./**/*.ts"
-    ],
-    "exclude": [
-        "node_modules",
-        "dist"
-    ],
-} 
+	"ts-node": {
+		"require": ["tsconfig-paths/register"],
+		"esm": true,
+		"transpileOnly": true,
+		"experimentalSpecifierResolution": "node"
+	},
+	"tsc-alias": {
+		"resolveFullPaths": true
+	},
+	"compilerOptions": {
+		"target": "ESNext",
+		"module": "ESNext",
+		"rootDir": "./",
+		"outDir": "./dist/",
+		"strict": true,
+		"moduleResolution": "node",
+		"importHelpers": true,
+		"experimentalDecorators": true,
+		"esModuleInterop": true,
+		"skipLibCheck": true,
+		"allowSyntheticDefaultImports": true,
+		"resolveJsonModule": true,
+		"forceConsistentCasingInFileNames": true,
+		"removeComments": true,
+		"typeRoots": ["node_modules/@types", "src/@types"],
+		"sourceMap": false,
+		"baseUrl": "./"
+	},
+	"files": ["src/index.ts"],
+	"include": ["./**/*.ts", "./**/*.json", "./**/*.d.ts"],
+	"exclude": ["node_modules", "dist"]
+}

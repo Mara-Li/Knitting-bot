@@ -14,9 +14,9 @@ import ready from "./events/ready";
 import memberUpdate from "./events/updated/memberUpdate";
 import onChannelUpdate from "./events/updated/onChannelUpdate";
 
-let config = dotenv.config({ path: ".env" });
+let config = dotenv.config({ path: ".env", quiet: true });
 if (process.env.ENV === "production") {
-	config = dotenv.config({ path: ".env.prod" });
+	config = dotenv.config({ path: ".env.prod", quiet: true });
 }
 
 const client = new Client({

@@ -14,7 +14,6 @@ import {
 	ButtonBuilder,
 	type ButtonInteraction,
 	ButtonStyle,
-	type CacheType,
 	ChannelType,
 	type ChatInputCommandInteraction,
 	type CommandInteractionOptionResolver,

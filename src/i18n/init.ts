@@ -7,11 +7,13 @@ export const resources = {
 	fr: { translation: French },
 };
 
-await i18next.init({
-	fallbackLng: "en",
-	lng: "en",
-	resources,
-	returnNull: false,
-});
+i18next
+	.init({
+		fallbackLng: "en",
+		lng: "en",
+		resources,
+		returnNull: false,
+	})
+	.then((r) => console.log("i18next initialized", r.name));
 
 export default i18next;

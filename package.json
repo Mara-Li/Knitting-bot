@@ -7,15 +7,17 @@
 		"node": "20.x"
 	},
 	"scripts": {
-		"build": "tsc",
+		"typecheck": "tsc --noEmit",
+		"build": "pnpm run typecheck && node esbuild.config.mjs",
+		"build:watch": "node esbuild.config.mjs --watch",
 		"prestart": "pnpm run build",
 		"start": "pm2 start dist/src/index.js --name knitting-bot --log-date-format=\"YYYY-MM-DD HH:mm Z\"",
 		"stop": "pm2 stop knitting-bot",
 		"prerestart": "pnpm run build",
 		"restart": "pm2 restart knitting-bot",
 		"delete": "pm2 delete knitting-bot",
-		"dev": "ts-node-dev --respawn -- src/index.ts",
-		"dev:prod": "cross-env ENV=production ts-node-dev --respawn -- src/index.ts",
+		"dev": "tsx watch --clear-screen=false src/index.ts",
+		"dev:prod": "cross-env ENV=production tsx watch --clear-screen=false src/index.ts",
 		"release": "commit-and-tag-version",
 		"lint": "biome check --write src/ --unsafe"
 	},
@@ -36,16 +38,22 @@
 	},
 	"devDependencies": {
 		"@biomejs/biome": "2.3.10",
+		"esbuild": "^0.24.0",
+		"glob": "^13.0.0",
 		"nodemon": "^3.1.10",
 		"ts-node": "^10.9.2",
 		"ts-node-dev": "^2.0.0",
+		"tsc-alias": "^1.8.16",
+		"tsconfig-paths": "^4.2.0",
 		"tslib": "^2.8.1",
+		"tsx": "^4.21.0",
 		"typescript": "^5.9.3"
 	},
 	"pnpm": {
 		"onlyBuiltDependencies": [
 			"@biomejs/biome",
-			"better-sqlite3"
+			"better-sqlite3",
+			"esbuild"
 		]
 	}
 }

@@ -149,17 +149,11 @@
 		{ "includes": ["**/*.js", "!**/node_modules/**"] },
 		{ "includes": ["**/*.json", "!**/node_modules/**"] },
 		{
-			"includes": ["**/packages/src/bot/commands/tools/graph.ts", "!**/node_modules/**"],
-			"linter": {
-				"rules": {
-					"style": {
-						"noParameterAssign": "off"
-					}
-				}
-			}
-		},
-		{
-			"includes": ["**/tests/constant.ts", "!**/node_modules/**", "**/src/regex.ts"],
+			"includes": [
+				"!**/node_modules/**",
+				"**/src/interface.ts",
+				"**/src/commands/config.ts"
+			],
 			"linter": {
 				"rules": {
 					"style": {

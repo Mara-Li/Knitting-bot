@@ -4,9 +4,9 @@ import dotenv from "dotenv";
 import { commands } from "../commands";
 import { VERSION } from "../index";
 
-let config = dotenv.config({ path: ".env" }).parsed;
+let config = dotenv.config({ path: ".env", quiet: true }).parsed;
 if (process.env.ENV === "production") {
-	config = dotenv.config({ path: ".env.prod" }).parsed;
+	config = dotenv.config({ path: ".env.prod", quiet: true }).parsed;
 }
 
 export default (client: Client): void => {
