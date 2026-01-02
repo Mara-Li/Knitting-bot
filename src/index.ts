@@ -56,4 +56,6 @@ try {
 } catch (error) {
 	console.error(error);
 }
-client.login(config.parsed?.DISCORD_TOKEN);
+client.login(config.parsed?.DISCORD_TOKEN).then(() => {
+	console.log("Bot logged in successfully.");
+});

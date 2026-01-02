@@ -45,7 +45,7 @@ export async function checkIfUserNotInTheThread(
 	memberToCheck: GuildMember
 ) {
 	const members = thread.members.cache;
-	const threadMemberArray: ThreadMember<boolean>[] = [];
+	const threadMemberArray: ThreadMember[] = [];
 	members.forEach((member) => {
 		threadMemberArray.push(member);
 	});

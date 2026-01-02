@@ -160,10 +160,7 @@ export default {
 				.createMessageComponentCollector({ filter, time: 60000 })
 				?.on("collect", async (i) => {
 					await i.deferUpdate();
-					await updateConfig(
-						i.customId as CommandName,
-						i as ButtonInteraction<CacheType>
-					);
+					await updateConfig(i.customId as CommandName, i as ButtonInteraction);
 				})
 				?.on("end", async () => {
 					await interaction.editReply({ components: [] });
@@ -258,7 +255,7 @@ function enabledOrDisabled(value: boolean) {
  */
 async function updateConfig(
 	command: CommandName,
-	interaction: ButtonInteraction<CacheType> | StringSelectMenuInteraction
+	interaction: ButtonInteraction | StringSelectMenuInteraction
 ) {
 	if (!interaction.guild) return;
 	let newConfig: string | boolean;
@@ -292,28 +289,28 @@ async function updateConfig(
 		const rows = reloadButtonMode(interaction.guild.id);
 		await interaction.editReply({ components: rows, embeds: [embed] });
 	} else if (command === CommandName.manualMode) {
-		const truc = [
+		const names = [
 			CommandName.channel,
 			CommandName.member,
 			CommandName.thread,
 			CommandName.newMember,
 		];
 
-		const allTruc = truc.map((command) => {
+		const allnames = names.map((command) => {
 			if (!interaction.guild) return false;
 			return getConfig(command, interaction.guild.id);
 		});
-		const manualMode = allTruc.every((value) => value);
-		for (const command of truc) {
+		const manualMode = allnames.every((value) => value);
+		for (const command of names) {
 			setConfig(command, interaction.guild.id, !manualMode);
 		}
 		const embed = autoUpdateMenu(interaction.guild.id);
 		//reload buttons
 		const rows = reloadButtonAuto(interaction.guild.id);
-		interaction.editReply({ components: rows, embeds: [embed] });
+		await interaction.editReply({ components: rows, embeds: [embed] });
 	} else {
 		newConfig = !getConfig(command, interaction.guild.id);
-		interaction.editReply({ content: "" });
+		await interaction.editReply({ content: "" });
 		setConfig(command, interaction.guild.id, newConfig);
 		let embed: EmbedBuilder;
 		//reload buttons
@@ -325,7 +322,7 @@ async function updateConfig(
 			rows = reloadButtonAuto(interaction.guild.id);
 			embed = autoUpdateMenu(interaction.guild.id);
 		}
-		interaction.editReply({ components: rows, embeds: [embed] });
+		await interaction.editReply({ components: rows, embeds: [embed] });
 	}
 }
 

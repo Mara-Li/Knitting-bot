@@ -47,21 +47,21 @@ export async function discordLogs(guildID: string, bot: Client, ...text: unknown
 	}
 }
 
-export function changeLanguage(interaction: CommandInteraction) {
+export async function changeLanguage(interaction: CommandInteraction) {
 	const lang = interaction.locale as keyof typeof resources;
 	const userLang = resources[lang] ? lang : "en";
-	i18next.changeLanguage(userLang);
+	await i18next.changeLanguage(userLang);
 }
 
-export function changeGuildLanguage(guild: Guild) {
+export async function changeGuildLanguage(guild: Guild) {
 	if (guild.preferredLocale === null) return "en";
 	if (guild.preferredLocale.includes("en")) {
-		i18next.changeLanguage("en");
+		await i18next.changeLanguage("en");
 		return;
 	}
 	const lang = guild.preferredLocale as keyof typeof resources;
 	const userLang = resources[lang] ? lang : "en";
-	i18next.changeLanguage(userLang);
+	await i18next.changeLanguage(userLang);
 	return;
 }
 
