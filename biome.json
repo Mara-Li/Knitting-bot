@@ -1,40 +1,191 @@
 {
-	"$schema": "https://biomejs.dev/schemas/2.0.0-beta.5/schema.json",
-	"vcs": {
-		"enabled": false,
-		"clientKind": "git",
-		"useIgnoreFile": false
-	},
-	"files": {
-		"ignoreUnknown": false,
-		"includes": ["**"]
-	},
-	"formatter": {
-		"enabled": true,
-		"indentStyle": "tab"
-	},
-	"assist": { "actions": { "source": { "organizeImports": "on" } } },
-	"linter": {
-		"enabled": true,
-		"rules": {
-			"recommended": true,
-			"style": {
-				"noParameterAssign": "error",
-				"useAsConstAssertion": "error",
-				"useDefaultParameterLast": "error",
-				"useEnumInitializers": "error",
-				"useSelfClosingElements": "error",
-				"useSingleVarDeclarator": "error",
-				"noUnusedTemplateLiteral": "error",
-				"useNumberNamespace": "error",
-				"noInferrableTypes": "error",
-				"noUselessElse": "error"
+	"$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
+	"assist": {
+		"actions": {
+			"source": {
+				"organizeImports": "on",
+				"useSortedKeys": "on"
 			}
 		}
 	},
+	"files": {
+		"includes": ["**", "!**/node_modules", "!**/dist"]
+	},
+	"formatter": {
+		"enabled": true,
+		"formatWithErrors": true,
+		"includes": ["**", "!**/node_modules/**"],
+		"indentStyle": "tab",
+		"indentWidth": 2,
+		"lineEnding": "lf",
+		"lineWidth": 90
+	},
 	"javascript": {
 		"formatter": {
-			"quoteStyle": "double"
+			"quoteStyle": "double",
+			"semicolons": "always",
+			"trailingCommas": "es5"
 		}
-	}
+	},
+	"json": {
+		"formatter": {
+			"trailingCommas": "none"
+		}
+	},
+	"linter": {
+		"domains": {
+			"project": "recommended"
+		},
+		"rules": {
+			"complexity": {
+				"noAdjacentSpacesInRegex": "error",
+				"noArguments": "error",
+				"noCommaOperator": "error",
+				"noExtraBooleanCast": "error",
+				"noUselessCatch": "error",
+				"useNumericLiterals": "error"
+			},
+			"correctness": {
+				"noConstAssign": "error",
+				"noConstantCondition": "error",
+				"noEmptyCharacterClassInRegex": "error",
+				"noEmptyPattern": "error",
+				"noGlobalObjectCalls": "error",
+				"noInnerDeclarations": "error",
+				"noInvalidBuiltinInstantiation": {
+					"level": "error"
+				},
+				"noInvalidConstructorSuper": "error",
+				"noNonoctalDecimalEscape": "error",
+				"noPrecisionLoss": "error",
+				"noSelfAssign": "error",
+				"noSetterReturn": "error",
+				"noSwitchDeclarations": "error",
+				"noUndeclaredVariables": "error",
+				"noUnreachable": "error",
+				"noUnreachableSuper": "error",
+				"noUnsafeFinally": "error",
+				"noUnsafeOptionalChaining": "error",
+				"noUnusedImports": "warn",
+				"noUnusedLabels": "error",
+				"noUnusedVariables": "off",
+				"useIsNan": "error",
+				"useValidForDirection": "error",
+				"useValidTypeof": "error",
+				"useYield": "error"
+			},
+			"recommended": true,
+			"style": {
+				"noInferrableTypes": "error",
+				"noNonNullAssertion": "off",
+				"noParameterAssign": "off",
+				"noUnusedTemplateLiteral": "error",
+				"noUselessElse": "error",
+				"useAsConstAssertion": "error",
+				"useConst": "error",
+				"useDefaultParameterLast": "error",
+
+				"useEnumInitializers": "error",
+				"useExponentiationOperator": "error",
+
+				"useExportType": "error",
+				"useFilenamingConvention": "error",
+				"useImportType": "error",
+				"useLiteralEnumMembers": "error",
+				"useNamingConvention": {
+					"level": "warn",
+					"options": {
+						"conventions": [
+							{
+								"formats": ["CONSTANT_CASE", "camelCase"],
+								"selector": {
+									"kind": "const",
+									"scope": "global"
+								}
+							}
+						],
+						"strictCase": false
+					}
+				},
+
+				"useNodejsImportProtocol": "error",
+				"useNumberNamespace": "error",
+				"useSelfClosingElements": "error",
+				"useShorthandFunctionType": "error",
+				"useSingleVarDeclarator": "error",
+				"useTemplate": "warn"
+			},
+			"suspicious": {
+				"noAssignInExpressions": "off",
+				"noAsyncPromiseExecutor": "error",
+				"noCatchAssign": "error",
+				"noClassAssign": "error",
+				"noCompareNegZero": "error",
+				"noControlCharactersInRegex": "error",
+				"noDebugger": "error",
+				"noDuplicateCase": "error",
+				"noDuplicateClassMembers": "error",
+				"noDuplicateObjectKeys": "error",
+				"noDuplicateParameters": "error",
+				"noEmptyBlockStatements": "error",
+				"noFallthroughSwitchClause": "error",
+				"noFunctionAssign": "error",
+				"noGlobalAssign": "error",
+				"noImportAssign": "error",
+				"noMisleadingCharacterClass": "error",
+				"noPrototypeBuiltins": "error",
+				"noRedeclare": "error",
+				"noShadowRestrictedNames": "error",
+				"noUnsafeNegation": "error",
+				"noVar": "error",
+				"noWith": "error",
+				"useGetterReturn": "error",
+				"noExtraNonNullAssertion": "off"
+			}
+		}
+	},
+	"overrides": [
+		{ "includes": ["**/*.ts", "**/*.tsx", "!**/*.js", "!**/node_modules/**"] },
+		{ "includes": ["**/*.js", "!**/node_modules/**"] },
+		{ "includes": ["**/*.json", "!**/node_modules/**"] },
+		{
+			"includes": ["**/packages/src/bot/commands/tools/graph.ts", "!**/node_modules/**"],
+			"linter": {
+				"rules": {
+					"style": {
+						"noParameterAssign": "off"
+					}
+				}
+			}
+		},
+		{
+			"includes": ["**/tests/constant.ts", "!**/node_modules/**", "**/src/regex.ts"],
+			"linter": {
+				"rules": {
+					"style": {
+						"useNamingConvention": "off"
+					}
+				}
+			}
+		},
+		{
+			"includes": [
+				"**/package.json",
+				"biome.json",
+				"**/tsconfig.json",
+				"!**/node_modules/**"
+			],
+			"assist": { "actions": { "source": { "useSortedKeys": "off" } } }
+		},
+		{
+			"includes": ["biome.json", "**/package.json", "!**/node_modules/**"],
+			"assist": {
+				"actions": {
+					"source": {
+						"useSortedKeys": "off"
+					}
+				}
+			}
+		}
+	]
 }
