@@ -24,11 +24,12 @@ import {
 	SlashCommandBuilder,
 	type StringSelectMenuInteraction,
 } from "discord.js";
-import { getTranslation, getUl, ln, t } from "../i18n";
+import { getUl, ln, t } from "../i18n";
 import { CommandName, type Translation } from "../interface";
 import { getConfig, optionMaps, setConfig } from "../maps";
 import { logInDev } from "../utils";
-import "../discord_ext";
+
+import "../discord_ext.js";
 
 export default {
 	data: new SlashCommandBuilder()

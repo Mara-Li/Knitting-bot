@@ -17,7 +17,6 @@ import {
 import { getUl } from "../i18n";
 import { CommandName, type RoleIn } from "../interface";
 import { getConfig, getRoleIn, setRoleIn } from "../maps";
-import "../discord_ext";
 
 /**
  * Follow or ignore roles in specific channels using a modal
