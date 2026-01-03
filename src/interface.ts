@@ -55,6 +55,8 @@ export interface Configuration {
 	[CommandName.followOnlyRole]: boolean;
 	[CommandName.followOnlyRoleIn]: boolean;
 	language: Locale;
+	pin: boolean;
+	messageToSend: string;
 	[key: string]: boolean | string;
 }
 
@@ -76,6 +78,8 @@ export const DEFAULT_CONFIGURATION: Configuration = {
 	[CommandName.followOnlyRole]: false,
 	[CommandName.followOnlyRoleIn]: false,
 	language: Locale.EnglishUS,
+	pin: false,
+	messageToSend: "_ _",
 };
 
 export const DEFAULT_IGNORE_FOLLOW: IgnoreFollow = {

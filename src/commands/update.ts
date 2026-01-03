@@ -7,13 +7,13 @@ import {
 	EmbedBuilder,
 	PermissionFlagsBits,
 	SlashCommandBuilder,
-	ThreadChannel,
+	ThreadChannel, MessageFlags,
 } from "discord.js";
 import { getUl, t } from "../i18n";
 import { CommandName, type Translation } from "../interface";
 import { getConfig } from "../maps";
 import { fetchArchived, updateCache } from "../utils";
-import { addRoleAndUserToThread } from "../utils/add";
+import { addRoleAndUserToThread, fetchUntilMessage } from "../utils/add";
 import { checkThread } from "../utils/data_check";
 import "../discord_ext.js";
 
@@ -94,9 +94,9 @@ async function updateAllThreads(
 	if (includeArchived) {
 		//fetch archived threads
 		const archived = await fetchArchived(interaction.guild);
-		for (const thread of archived) {
+		for (const thread of archived)
 			toUpdate.add(thread);
-		}
+		
 	}
 	//merge both collections
 	for (const thread of threads.threads.values()) {
@@ -134,12 +134,15 @@ async function updateThread(interaction: ChatInputCommandInteraction, ul: Transl
 	const threadOption =
 		interaction.options.get(ul("common.thread").toLowerCase()) ?? interaction;
 	const channel = threadOption?.channel;
+	await interaction.deferReply({flags: MessageFlags.Ephemeral});
+
 	if (!channel || !(channel instanceof ThreadChannel)) {
-		await interaction.reply({
-			content: ul("commands.error") as string,
+		await interaction.editReply({
+			content: ul("commands.error"),
 		});
 		return;
 	}
+	await fetchUntilMessage(threadOption!.channel as ThreadChannel);
 
 	const mention = channelMention(channel?.id as string);
 	const isFollowed =
@@ -151,13 +154,11 @@ async function updateThread(interaction: ChatInputCommandInteraction, ul: Transl
 		checkThread(threadOption?.channel as ThreadChannel, "ignore") &&
 		!isFollowed
 	) {
-		await interaction.reply({
+		await interaction.editReply({
 			content: ul("ignore.message", { thread: mention }) as string,
 		});
 		return;
 	}
-	if (!interaction.guild) return;
-	await interaction.deferReply({});
 	await addRoleAndUserToThread(channel);
 	await interaction.editReply({
 		content: ul("commands.success", { channel: mention }) as string,

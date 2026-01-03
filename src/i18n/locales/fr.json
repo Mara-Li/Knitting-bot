@@ -130,9 +130,34 @@
         "title": "MODE"
       }
     },
+    "message": {
+      "description": "Message envoyé par le bot en tant que placeholder pour éviter les pings fantômes.",
+      "name": "placeholder",
+      "option": {
+        "description": "Contenu du message envoyé. Ne supporte pas les émojis venant d'autres serveurs !",
+        "name": "message"
+      },
+      "response": {
+        "custom": "Le message `{{- message}}` sera envoyé en tant que placeholder.",
+        "default": "Le message `_ _` sera utilisé.",
+        "error": "Les messages vides ne sont pas supportés."
+      }
+    },
     "newMember": {
       "display": "Arrivée d'un nouveau membre",
       "name": "Arrivée d'un membre"
+    },
+    "pin": {
+      "description": "Épingler le message envoyé par le bot dans le fil de discussion",
+      "name": "pin",
+      "option": {
+        "description": "Basculer l'option",
+        "name": "basculer"
+      },
+      "response": {
+        "disabled": "Les messages ne seront pas épinglés. Le bot essaiera de retrouver le message envoyé précédemment pour l'utiliser ou en enverra un nouveau dans le cas contraire.\n\n:warning: **Bien que le message peut sembler facile à retrouver, Discord met en cache les messages et ne permet de retrouver qu'un certain nombre de message. Il est donc difficile de le retrouver dans certains cas.**",
+        "enabled": "Le message envoyé par le bot dans les fils sera épinglé, ce qui évitera au bot de toujours le retrouver et éviter ainsi tout pings.\n\n:warning: **Bien qu'épingler le message facilite sa recherche cela ne la garantie pas. Il est donc toujours (malheureusement) possible que le bot envoie un message pour ajouter les membres.**"
+      }
     },
     "roleIn": {
       "error": "Vous ne pouvez combiner follow role-in avec only-role et only-channel.",
