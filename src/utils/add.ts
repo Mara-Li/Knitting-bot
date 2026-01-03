@@ -10,7 +10,7 @@ import {
 import { getTranslation } from "../i18n";
 import { EMOJI } from "../index";
 import { CommandName } from "../interface";
-import { getConfig } from "../maps";
+import { getConfig, optionMaps } from "../maps";
 import {
 	checkIfUserNotInTheThread,
 	checkMemberRole,
@@ -30,6 +30,7 @@ import { discordLogs } from "./index";
 export async function addUserToThread(thread: ThreadChannel, user: GuildMember) {
 	const guild = thread.guild.id;
 	const ul = getTranslation(guild, { locale: thread.guild.preferredLocale });
+	const emoji = optionMaps.get(guild, "messageToSend") ?? EMOJI;
 	if (
 		thread.permissionsFor(user).has("ViewChannel", true) &&
 		(await checkIfUserNotInTheThread(thread, user))
@@ -39,14 +40,14 @@ export async function addUserToThread(thread: ThreadChannel, user: GuildMember) 
 			if (getConfig(CommandName.followOnlyRoleIn, guild)) {
 				if (message) {
 					await message.edit(userMention(user.id));
-					await message.edit(EMOJI);
+					await message.edit(emoji);
 				} else {
 					message = await thread.send({
-						content: EMOJI,
+						content: emoji,
 						flags: MessageFlags.SuppressNotifications,
 					});
 					await message.edit(userMention(user.id));
-					await message.edit(EMOJI);
+					await message.edit(emoji);
 				}
 				await discordLogs(
 					guild,
@@ -56,14 +57,14 @@ export async function addUserToThread(thread: ThreadChannel, user: GuildMember) 
 			} else if (!checkMemberRole(user.roles, "ignore")) {
 				if (message) {
 					await message.edit(userMention(user.id));
-					await message.edit(EMOJI);
+					await message.edit(emoji);
 				} else {
 					message = await thread.send({
-						content: EMOJI,
+						content: emoji,
 						flags: MessageFlags.SuppressNotifications,
 					});
 					await message.edit(userMention(user.id));
-					await message.edit(EMOJI);
+					await message.edit(emoji);
 				}
 				await discordLogs(
 					guild,
@@ -76,14 +77,14 @@ export async function addUserToThread(thread: ThreadChannel, user: GuildMember) 
 			) {
 				if (message) {
 					await message.edit(userMention(user.id));
-					await message.edit(EMOJI);
+					await message.edit(emoji);
 				} else {
 					message = await thread.send({
-						content: EMOJI,
+						content: emoji,
 						flags: MessageFlags.SuppressNotifications,
 					});
 					await message.edit(userMention(user.id));
-					await message.edit(EMOJI);
+					await message.edit(emoji);
 				}
 				await discordLogs(
 					guild,
@@ -214,11 +215,12 @@ export async function addRoleAndUserToThread(thread: ThreadChannel) {
 			toPing.push(...users);
 		});
 	}
+	const emoji = optionMaps.get(thread.guild.id, "messageToSend") ?? EMOJI;
 	if (toPing.length > 0) {
 		try {
 			const message = await fetchMessage(thread);
 			await splitAndSend(toPing, message);
-			await message.edit(EMOJI);
+			await message.edit(emoji);
 			await discordLogs(
 				thread.guild.id,
 				thread.client,
@@ -264,26 +266,120 @@ async function splitAndSend(toPing: GuildMember[], message: Message) {
 		await message.edit(currentMessage);
 	}
 	// Send the emoji at the end
-	await message.edit(EMOJI);
+	const emoji = optionMaps.get(message.guild!.id, "messageToSend") ?? EMOJI;
+	return await message.edit(emoji);
 }
 
-async function fetchFirstMessage(thread: ThreadChannel): Promise<Message | undefined | null> {
-	const fetchedMessage = thread.messages.cache;
-	const firstMessage = fetchedMessage.filter((m) => m.author.id === thread.client.user.id).first();
-	if (!firstMessage) {
-		//fetch all thread messages
-		const messages = await thread.messages.fetch();
-		return messages.filter((m) => m.author.id === thread.client.user.id).first() ?? null;
+export async function fetchUntilMessage(
+	thread: ThreadChannel
+): Promise<Message | undefined | null> {
+	const fetchMessage = await thread.messages.fetch({ limit: 100 });
+	let find = fetchMessage.filter((m) => m.author.id === thread.client.user.id).first();
+
+	// Return early if found
+	if (find) return find;
+
+	// Limit iterations to prevent infinite loops
+	const maxIterations = 10;
+	let iterations = 0;
+	let previousLastMessageId: string | undefined;
+
+	while (!find && fetchMessage.size === 100 && iterations < maxIterations) {
+		iterations++;
+		const lastMessageId = fetchMessage.last()?.id;
+		// Break if no valid message ID or if we're stuck on the same message
+		if (!lastMessageId || lastMessageId === previousLastMessageId) break;
+		previousLastMessageId = lastMessageId;
+		const moreMessages = await thread.messages.fetch({
+			before: lastMessageId,
+			limit: 100,
+		});
+		// Break if no new messages were fetched
+		if (moreMessages.size === 0) break;
+		find = moreMessages.filter((m) => m.author.id === thread.client.user.id).first();
+		// If found, return immediately
+		if (find) return find;
 	}
+	return find ?? null;
+}
+
+async function fetchAllPinnedMessages(
+	thread: ThreadChannel
+): Promise<Message | undefined> {
+	const pinnedMessage = await thread.messages.fetchPins({ limit: 50 });
+	let find = pinnedMessage.items.find(
+		(m) => m.message.author.id === thread.client.user.id
+	);
+
+	// Return early if found
+	if (find) return find.message;
+
+	// Limit iterations to prevent infinite loops
+	const maxIterations = 10;
+	let iterations = 0;
+	let previousLastMessageId: string | undefined;
+
+	while (!find && pinnedMessage.hasMore && iterations < maxIterations) {
+		iterations++;
+		const lastMessageId = pinnedMessage.items[pinnedMessage.items.length - 1]?.message.id;
+
+		// Break if no valid message ID or if we're stuck on the same message
+		if (!lastMessageId || lastMessageId === previousLastMessageId) break;
+
+		previousLastMessageId = lastMessageId;
+
+		const moreMessages = await thread.messages.fetchPins({
+			before: lastMessageId,
+			limit: 50,
+		});
+
+		// Break if no new messages were fetched
+		if (moreMessages.items.length === 0) break;
+
+		find = moreMessages.items.find((m) => m.message.author.id === thread.client.user.id);
+
+		// If found, return immediately
+		if (find) return find.message;
+
+		// Update hasMore status
+		if (!moreMessages.hasMore) break;
+	}
+
+	return undefined;
+}
+
+async function fetchFirstMessage(
+	thread: ThreadChannel
+): Promise<Message | undefined | null> {
+	const pin = optionMaps.get(thread.guild.id, "pin");
+	if (pin) {
+		//fetch pinned messages
+		const pinnedMessages = thread.messages.cache.filter((m) => m.pinned);
+		const firstPinnedMessage = pinnedMessages
+			.filter((m) => m.author.id === thread.client.user.id)
+			.first();
+		if (firstPinnedMessage) return firstPinnedMessage;
+		const fetchedPinnedMessages = await fetchAllPinnedMessages(thread);
+		if (fetchedPinnedMessages) return fetchedPinnedMessages;
+	}
+	const fetchedMessage = thread.messages.cache;
+	const firstMessage = fetchedMessage.find((m) => m.author.id === thread.client.user.id);
+	if (!firstMessage) return await fetchUntilMessage(thread);
+}
+
+async function sendAndPin(thread: ThreadChannel): Promise<Message> {
+	const toPin = optionMaps.get(thread.guild.id, "pin");
+	const messageToSend = optionMaps.get(thread.guild.id, "messageToSend") ?? EMOJI;
+	const message = await thread.send({
+		content: messageToSend,
+		flags: MessageFlags.SuppressNotifications,
+	});
+	if (toPin) await message.pin();
+
+	return message;
 }
 
 async function fetchMessage(thread: ThreadChannel): Promise<Message> {
-	const fetchedMessage = thread.messages.cache;
-	return (
-		fetchedMessage.filter((m) => m.author.id === thread.client.user.id).first() ??
-		(await thread.send({
-			content: EMOJI,
-			flags: MessageFlags.SuppressNotifications,
-		}))
-	);
+	const firstMessage = await fetchFirstMessage(thread);
+	return firstMessage ?? (await sendAndPin(thread));
 }

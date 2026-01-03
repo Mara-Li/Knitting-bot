@@ -130,9 +130,34 @@
         "title": "MODE"
       }
     },
+    "message": {
+      "description": "Message sent by the bot as a placeholder to avoid ghost pings.",
+      "name": "placeholder",
+      "option": {
+        "description": "Content of the message sent. Does not support emojis from other servers!",
+        "name": "message"
+      },
+      "response": {
+        "custom": "The message `{{- message}}` will be sent as a placeholder.",
+        "default": "The message `_ _` will be used.",
+        "error": "Empty string are not supported."
+      }
+    },
     "newMember": {
       "display": "New member",
       "name": "On new member"
+    },
+    "pin": {
+      "description": "Pin the message send by the bot in the thread",
+      "name": "pin",
+      "option": {
+        "description": "Toggle the option",
+        "name": "toggle"
+      },
+      "response": {
+        "disabled": "Messages will not be pinned. The bot will try to find the previously sent message to use it, or will send a new one if it cannot find it.\n\n:warning: **Although the message may seem easy to find, Discord caches messages and only allows a certain number of messages to be retrieved. This makes it difficult to find in some cases.**",
+        "enabled": "The message sent by the bot in the threads will be pinned, which will prevent the bot from always finding it and thus avoid any pings.\n\n:warning: **Although pinning the message makes it easier to find, it does not guarantee that it will be found. It is therefore still (unfortunately) possible that the bot will send a message to add members.**"
+      }
     },
     "roleIn": {
       "error": "You can't combine follow role-in with only-role or only-channel",

@@ -13,6 +13,7 @@ import onGuildQuit from "./events/onGuildQuit";
 import ready from "./events/ready";
 import memberUpdate from "./events/updated/memberUpdate";
 import onChannelUpdate from "./events/updated/onChannelUpdate";
+import onPinsUpdate from "./events/pinUpdate";
 
 let config = dotenv.config({ path: ".env", quiet: true });
 if (process.env.ENV === "production") {
@@ -53,6 +54,7 @@ try {
 	onThreadDeleted(client);
 	interactionCreate(client);
 	onGuildQuit(client);
+	onPinsUpdate(client);
 } catch (error) {
 	console.error(error);
 }

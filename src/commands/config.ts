@@ -89,80 +89,238 @@ export default {
 			subcommand
 				.setNames("configuration.menu.autoUpdate.cmd")
 				.setDescriptions("configuration.menu.autoUpdate.desc")
+		)
+		.addSubcommand((sub) =>
+			sub
+				.setNames("configuration.pin.name")
+				.setDescriptions("configuration.pin.description")
+				.addBooleanOption((toggle) =>
+					toggle
+						.setNames("configuration.pin.option.name")
+						.setDescriptions("configuration.pin.option.description")
+				)
+		)
+		.addSubcommand((sub) =>
+			sub
+				.setNames("configuration.message.name")
+				.setDescriptions("configuration.message.description")
+				.addStringOption((input) =>
+					input
+						.setNames("configuration.message.option.name")
+						.setDescriptions("configuration.message.option.description")
+				)
 		),
 	async execute(interaction: ChatInputCommandInteraction) {
 		if (!interaction.guild) return;
 		const options = interaction.options as CommandInteractionOptionResolver;
 		const ul = getUl(interaction);
 		const commands = options.getSubcommand();
+
 		if (t("configuration.menu.log.channel.title").toLowerCase() === commands) {
-			const channel = options.getChannel(t("common.channel").toLowerCase());
-			if (channel) {
-				setConfig(`${CommandName.log}.channel`, interaction.guild.id, channel.id);
-				await interaction.reply({
-					content: ul("configuration.menu.log.channel.success", {
-						channel: channelMention(channel.id),
-					}) as string,
-				});
-			} else {
-				setConfig(`${CommandName.log}.channel`, interaction.guild.id, false);
-				await interaction.reply({
-					content: ul("configuration.menu.log.channel.disable"),
-				});
-			}
-		} else if (t("configuration.menu.mode.title").toLowerCase() === commands) {
-			// eslint-disable-next-line no-case-declarations
-			const row = reloadButtonMode(interaction.guild.id, ul);
-			// eslint-disable-next-line no-case-declarations
-			const embed = displayModeMenu(interaction.guild.id, ul);
-			await interaction.reply({
-				components: row,
-				embeds: [embed],
-			});
-		} else if (t("configuration.menu.autoUpdate.cmd").toLowerCase() === commands) {
-			const rows = reloadButtonAuto(interaction.guild.id, ul);
-			const embeds = autoUpdateMenu(interaction.guild.id, ul);
-			await interaction.reply({
-				components: rows,
-				embeds: [embeds],
-			});
-		} else if (commands === "locale") {
-			const locale = options.getString("locale", true);
-			let lang = optionMaps.get(interaction.guild.id, "language");
-			if (locale === "en") {
-				optionMaps.set(interaction.guild.id, Locale.EnglishUS, "language");
-				lang = Locale.EnglishUS;
-			} else if (locale === "fr") {
-				optionMaps.set(interaction.guild.id, Locale.French, "language");
-				lang = Locale.French;
-			}
-			const ul = ln(lang ?? interaction.locale);
-			await interaction.reply({
-				content: `${ul("configuration.language.validate", { lang: (locale as Locale).toUpperCase() })}`,
-			});
+			await handleLogChannelConfig(interaction, options, ul);
+			return;
 		}
-		// biome-ignore lint/suspicious/noExplicitAny: we don't know the type
-		const filter = (i: any) => {
-			/** filter on message id */
-			return i.user.id === interaction.user.id;
-		};
-		try {
-			const message = await interaction.fetchReply();
-			message
-				.createMessageComponentCollector({ filter, time: 60000 })
-				?.on("collect", async (i) => {
-					await i.deferUpdate();
-					await updateConfig(i.customId as CommandName, i as ButtonInteraction, ul);
-				})
-				?.on("end", async () => {
-					await interaction.editReply({ components: [] });
-				});
-		} catch (error) {
-			logInDev(error);
-			await interaction.editReply({ components: [] });
+
+		if (commands === t("configuration.pin.name")) {
+			await handlePinConfig(interaction, options, ul);
+			return;
+		}
+
+		if (t("configuration.menu.mode.title").toLowerCase() === commands) {
+			await handleModeConfig(interaction, ul);
+			return;
+		}
+
+		if (t("configuration.menu.autoUpdate.cmd").toLowerCase() === commands) {
+			await handleAutoUpdateConfig(interaction, ul);
+			return;
+		}
+
+		if (commands === "locale") {
+			await handleLocaleConfig(interaction, options);
+			return;
+		}
+
+		if (commands === t("configuration.message.name")) {
+			await handleMessageConfig(interaction, options, ul);
+			return;
 		}
 	},
 };
+
+async function handleMessageConfig(
+	interaction: ChatInputCommandInteraction,
+	options: CommandInteractionOptionResolver,
+	ul: Translation
+) {
+	if (!interaction.guild) return;
+
+	const messageToSend = options.getString(
+		t("configuration.message.option.name").toLowerCase()
+	);
+
+	if (!messageToSend) {
+		optionMaps.set(interaction.guild.id, "_ _", "messageToSend");
+		await interaction.reply({
+			content: ul("configuration.message.response.default"),
+		});
+		return;
+	}
+	if (messageToSend?.trim().length === 0) {
+		await interaction.reply({
+			content: ul("configuration.message.response.error"),
+		});
+		return;
+	}
+	optionMaps.set(interaction.guild.id, messageToSend, "messageToSend");
+	await interaction.reply({
+		content: ul("configuration.message.response.custom", {
+			message: messageToSend,
+		}),
+	});
+}
+
+/**
+ * Handle log channel configuration
+ */
+async function handleLogChannelConfig(
+	interaction: ChatInputCommandInteraction,
+	options: CommandInteractionOptionResolver,
+	ul: Translation
+) {
+	if (!interaction.guild) return;
+
+	const channel = options.getChannel(t("common.channel").toLowerCase());
+	if (channel) {
+		setConfig(`${CommandName.log}.channel`, interaction.guild.id, channel.id);
+		await interaction.reply({
+			content: ul("configuration.menu.log.channel.success", {
+				channel: channelMention(channel.id),
+			}) as string,
+		});
+	} else {
+		setConfig(`${CommandName.log}.channel`, interaction.guild.id, false);
+		await interaction.reply({
+			content: ul("configuration.menu.log.channel.disable"),
+		});
+	}
+}
+
+/**
+ * Handle pin configuration
+ */
+async function handlePinConfig(
+	interaction: ChatInputCommandInteraction,
+	options: CommandInteractionOptionResolver,
+	ul: Translation
+) {
+	if (!interaction.guild) return;
+
+	const toggle = options.getBoolean(t("configuration.pin.option.name"));
+	optionMaps.set(interaction.guild.id, toggle ?? false, "pin");
+
+	await interaction.reply({
+		content: toggle
+			? ul("configuration.pin.response.enabled")
+			: ul("configuration.pin.response.disabled"),
+	});
+}
+
+/**
+ * Handle mode configuration
+ */
+async function handleModeConfig(
+	interaction: ChatInputCommandInteraction,
+	ul: Translation
+) {
+	if (!interaction.guild) return;
+
+	const row = reloadButtonMode(interaction.guild.id, ul);
+	const embed = displayModeMenu(interaction.guild.id, ul);
+
+	await interaction.reply({
+		components: row,
+		embeds: [embed],
+	});
+
+	await setupMessageCollector(interaction, ul);
+}
+
+/**
+ * Handle auto-update configuration
+ */
+async function handleAutoUpdateConfig(
+	interaction: ChatInputCommandInteraction,
+	ul: Translation
+) {
+	if (!interaction.guild) return;
+
+	const rows = reloadButtonAuto(interaction.guild.id, ul);
+	const embeds = autoUpdateMenu(interaction.guild.id, ul);
+
+	await interaction.reply({
+		components: rows,
+		embeds: [embeds],
+	});
+
+	await setupMessageCollector(interaction, ul);
+}
+
+/**
+ * Handle locale configuration
+ */
+async function handleLocaleConfig(
+	interaction: ChatInputCommandInteraction,
+	options: CommandInteractionOptionResolver
+) {
+	if (!interaction.guild) return;
+
+	const locale = options.getString("locale", true);
+	let lang = optionMaps.get(interaction.guild.id, "language");
+
+	if (locale === "en") {
+		optionMaps.set(interaction.guild.id, Locale.EnglishUS, "language");
+		lang = Locale.EnglishUS;
+	} else if (locale === "fr") {
+		optionMaps.set(interaction.guild.id, Locale.French, "language");
+		lang = Locale.French;
+	}
+
+	const ul = ln(lang ?? interaction.locale);
+	await interaction.reply({
+		content: `${ul("configuration.language.validate", { lang: (locale as Locale).toUpperCase() })}`,
+	});
+}
+
+/**
+ * Setup message component collector for button interactions
+ */
+async function setupMessageCollector(
+	interaction: ChatInputCommandInteraction,
+	ul: Translation
+) {
+	// biome-ignore lint/suspicious/noExplicitAny: we don't know the type
+	const filter = (i: any) => {
+		/** filter on message id */
+		return i.user.id === interaction.user.id;
+	};
+
+	try {
+		const message = await interaction.fetchReply();
+		message
+			.createMessageComponentCollector({ filter, time: 60000 })
+			?.on("collect", async (i) => {
+				await i.deferUpdate();
+				await updateConfig(i.customId as CommandName, i as ButtonInteraction, ul);
+			})
+			?.on("end", async () => {
+				await interaction.editReply({ components: [] });
+			});
+	} catch (error) {
+		logInDev(error);
+		await interaction.editReply({ components: [] });
+	}
+}
 
 /**
  * Display Mode menu as an embed

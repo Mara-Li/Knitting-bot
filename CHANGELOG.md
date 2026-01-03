@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [2.4.0](https://github.com/Mara-Li/Knitting-bot/compare/2.3.5...2.4.0) (2026-01-03)
+
+
+### Features
+
+* add include archived option ([83647f0](https://github.com/Mara-Li/Knitting-bot/commit/83647f037ff29adaed51c3b5062b2b973f9f5105))
+* add support for pin ([97ec732](https://github.com/Mara-Li/Knitting-bot/commit/97ec732c6b6d47e7fd05d496a4fce9425339c4de))
+
+
+### Bug Fixes
+
+* import discord_ext ([08df374](https://github.com/Mara-Li/Knitting-bot/commit/08df37435b5d4862e6ec73ee2ef326afece4cb33))
+
 ## [2.3.5](https://github.com/Mara-Li/Knitting-bot/compare/2.3.4...2.3.5) (2026-01-02)
 
 
