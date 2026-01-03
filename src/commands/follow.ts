@@ -19,6 +19,7 @@ import { getConfig, getMaps, getRole, setFollow, setRole } from "../maps";
 import { toTitle } from "../utils";
 import { mapToStr } from "./index";
 import { interactionRoleInChannel } from "./utils";
+import "../discord_ext";
 
 export default {
 	data: new SlashCommandBuilder()

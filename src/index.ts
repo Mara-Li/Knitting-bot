@@ -1,7 +1,7 @@
 import * as process from "node:process";
 import { Client, GatewayIntentBits, Partials } from "discord.js";
 import dotenv from "dotenv";
-import * as pkg from "../package.json";
+import * as pkg from "../package.json" with { type: "json" };
 import onNewMember from "./events/created/onNewMember";
 import onThreadCreated from "./events/created/onThreadCreated";
 import onChannelDelete from "./events/delete/onChannelDelete";

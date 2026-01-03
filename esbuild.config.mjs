@@ -22,7 +22,7 @@ await build({
 	},
 	drop: isProd ? ["console"] : [],
 	entryPoints,
-	format: "cjs",
+	format: "esm",
 	minify: isProd,
 	// Préserve la structure des dossiers
 	outbase: "src",
@@ -31,7 +31,7 @@ await build({
 	plugins: [fixImportsPlugin(), writeFilePlugin()],
 	sourcemap: !isProd,
 	sourceRoot: "src",
-	target: "node20",
+	target: "esnext",
 	tsconfig: "./tsconfig.json",
 	write: false,
 });

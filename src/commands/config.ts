@@ -19,19 +19,20 @@ import {
 	type CommandInteractionOptionResolver,
 	channelMention,
 	EmbedBuilder,
-	type Locale,
+	Locale,
 	PermissionFlagsBits,
 	SlashCommandBuilder,
 	type StringSelectMenuInteraction,
 } from "discord.js";
-import { getUl, t } from "../i18n";
+import { getTranslation, getUl, ln, t } from "../i18n";
 import { CommandName, type Translation } from "../interface";
-import { getConfig, setConfig } from "../maps";
+import { getConfig, optionMaps, setConfig } from "../maps";
 import { logInDev } from "../utils";
+import "../discord_ext";
 
 export default {
 	data: new SlashCommandBuilder()
-		.setName("configuration.main.name")
+		.setNames("configuration.main.name")
 		.setDescriptions("configuration.main.description")
 		.setDefaultMemberPermissions(PermissionFlagsBits.ManageThreads)
 		.addSubcommand((subcommand) =>
@@ -125,10 +126,16 @@ export default {
 				embeds: [embeds],
 			});
 		} else if (commands === "locale") {
-			const guild = interaction.guild;
 			const locale = options.getString("locale", true);
-			if (locale === "en") await guild.setPreferredLocale("en-US" as Locale);
-			else await guild.setPreferredLocale(locale as Locale);
+			let lang = optionMaps.get(interaction.guild.id, "language");
+			if (locale === "en") {
+				optionMaps.set(interaction.guild.id, Locale.EnglishUS, "language");
+				lang = Locale.EnglishUS;
+			} else if (locale === "fr") {
+				optionMaps.set(interaction.guild.id, Locale.French, "language");
+				lang = Locale.French;
+			}
+			const ul = ln(lang ?? interaction.locale);
 			await interaction.reply({
 				content: `${ul("configuration.language.validate", { lang: (locale as Locale).toUpperCase() })}`,
 			});

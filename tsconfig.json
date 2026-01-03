@@ -1,9 +1,9 @@
 {
 	"ts-node": {
-		"require": ["tsconfig-paths/register"],
 		"esm": true,
-		"transpileOnly": true,
-		"experimentalSpecifierResolution": "node"
+		"experimentalSpecifierResolution": "node",
+		"require": ["tsconfig-paths/register"],
+		"transpileOnly": true
 	},
 	"tsc-alias": {
 		"resolveFullPaths": true
@@ -25,9 +25,11 @@
 		"removeComments": true,
 		"typeRoots": ["node_modules/@types", "src/@types"],
 		"sourceMap": false,
-		"baseUrl": "./"
+		"baseUrl": "./",
+		"allowJs": true,
+		"composite": false,
+		"declaration": false
 	},
-	"files": ["src/index.ts"],
 	"include": ["./**/*.ts", "./**/*.json", "./**/*.d.ts"],
 	"exclude": ["node_modules", "dist"]
 }

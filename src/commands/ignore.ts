@@ -20,10 +20,11 @@ import { getConfig, getMaps, getRole, getRoleIn, setIgnore, setRole } from "../m
 import { toTitle } from "../utils";
 import { mapToStr } from "./index";
 import { interactionRoleInChannel } from "./utils";
+import "../discord_ext";
 
 export default {
 	data: new SlashCommandBuilder()
-		.setNames("ignore")
+		.setName("ignore")
 		.setDescriptions("ignore.description")
 		.setDefaultMemberPermissions(PermissionFlagsBits.ManageThreads)
 		.addSubcommand((subcommand) =>

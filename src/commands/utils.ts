@@ -12,6 +12,7 @@ import {
 import { getUl, t } from "../i18n";
 import { CommandName, type RoleIn } from "../interface";
 import { getConfig, getRoleIn, setRoleIn } from "../maps";
+import "../discord_ext";
 
 /**
  * Follow or ignore a role for a channel, get with the interaction
