@@ -8,7 +8,7 @@ Permet d'afficher la langue actuelle et de la changer.
 ## `/config mode`
 
 Affiche les modes actuels et permet de les changer. Vous pouvez :
-- Suivre uniquement un channel spécifique (_Note :_ Channel ici inclut les catégories, forum, thread et salon).
+- Suivre uniquement un channel[^1] spécifique.
 - Suivre uniquement un rôle spécifique.
 - Suivre [@role] pour [@channel], mode qui ne peut pas être utilisé avec les autres modes.
 
@@ -28,3 +28,5 @@ Affiche les informations générale sur la configuration du bot, ainsi qu'un lie
 
 > [!NOTE] 
 > Les boutons seront verts si leur activation autorise un mode ou un évènement, et rouge si elle le désactive.
+
+[^1]: Le channel inclut ici les threads, channels, forums et catégories.

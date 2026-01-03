@@ -20,3 +20,5 @@ The exact opposite of the follow command. It won't ping the channels or roles ig
 > - If the `only-channel` mode is activated, you can't ignore a channel.
 > - If the `only-role` mode is activated, you can't ignore a role.
 >   Factually, the `follow` commands will ignore all un-specified channels/roles.
+
+[^1]: Channel includes here thread, channel, forum and category.

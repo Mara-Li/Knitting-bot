@@ -20,3 +20,5 @@ Permet d'ignorer un channel ou un rôle spécifique : le bot ne mentionnera pas 
 > - Si vous avez activé le mode `follow role`, vous ne pouvez ignorer un rôle.
 > - Vous ne pouvez pas utiliser les autres configurations si vous avez activé `follow spécifique`.
 >   Dans les faits, la commande `follow` ignorera tous les rôles/channels sauf ceux spécifiés dans la commande `follow`.
+
+[^1]: Le channel inclut ici les threads, channels, forums et catégories.

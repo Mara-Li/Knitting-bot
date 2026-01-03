@@ -14,5 +14,5 @@ Après avoir envoyé/édité le message, le bot modifiera le message de nouveau 
 
 > [!WARNING]
 > Le message ne sera donc pas supprimé, car j'ai découvert que mentionner un utilisateur dans un ancien message ne faisait pas de notification "blanche".
-> Donc, le bot gardera les message pour les éditer quand le thread a besoin d'être mise à jour.
+> Donc, le bot gardera les messages pour les éditer quand le thread a besoin d'être mise à jour.
 > Avec cela, les anciens utilisateurs n'auront donc pas de notification du tout.

@@ -8,9 +8,9 @@ Displays the current language and allows you to change it.
 ## `/config mode`
 
 Displays the current modes and allows you to change them. You can:
-- Only follow a specific channel (_Note: Here, "channel" includes categories, forums, threads, and channels).
+- Only follow a specific channel[^1]
 - Only follow a specific role.
-- Use the "[@role] for [@channel]" mode, which cannot be used with other modes.
+- Use the `[@role] for [@channel]` mode, which cannot be used with other modes.
 
 ## `/config auto`
 
@@ -28,3 +28,5 @@ Displays general information about bot configuration, as well as a link to the R
 
 > [!NOTE]  
 > The button will be red if activate it will disable the event, and green if it will enable it.
+
+[^1]: Channel includes here thread, channel, forum and category.
