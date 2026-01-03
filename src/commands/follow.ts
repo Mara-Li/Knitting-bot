@@ -18,7 +18,7 @@ import {
 	type TextChannel,
 	type ThreadChannel,
 } from "discord.js";
-import { cmdLn, getUl, t } from "../i18n";
+import { getUl, t } from "../i18n";
 import { CommandName, type Translation, TypeName } from "../interface";
 import { getConfig, getMaps, getRole, setFollow, setRole } from "../maps";
 import { toTitle } from "../utils";
@@ -35,23 +35,21 @@ export default {
 			subcommand.setNames("common.channel").setDescriptions("follow.thread.description")
 		)
 		.addSubcommand((subcommand) =>
-			subcommand
-				.setNames(t("common.role"))
-				.setDescriptions("follow.role.description")
-				.addRoleOption((option) =>
-					option
-						.setName(t("common.role").toLowerCase())
-						.setNameLocalizations(cmdLn("common.role", true))
-						.setDescription(t("follow.role.option"))
-						.setDescriptionLocalizations(cmdLn("follow.role.option"))
-						.setRequired(true)
-				)
+			subcommand.setNames(t("common.role")).setDescriptions("follow.role.description")
 		)
 		.addSubcommand((subcommand) =>
 			subcommand.setNames("common.list").setDescriptions("follow.list.description")
 		)
 		.addSubcommand((subcommand) =>
-			subcommand.setNames("common.roleIn").setDescriptions("follow.roleIn.description")
+			subcommand
+				.setNames("common.roleIn")
+				.setDescriptions("follow.roleIn.description")
+				.addRoleOption((option) =>
+					option
+						.setNames("common.role")
+						.setDescription("follow.roleIn.option.role")
+						.setRequired(true)
+				)
 		),
 	async execute(interaction: ChatInputCommandInteraction) {
 		if (!interaction.guild) return;

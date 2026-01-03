@@ -9,12 +9,11 @@ import {
 	ModalBuilder,
 	type ModalSubmitInteraction,
 	type Role,
-	RoleSelectMenuBuilder,
 	roleMention,
 	type TextChannel,
 	type ThreadChannel,
 } from "discord.js";
-import { getUl } from "../i18n";
+import { getUl, t } from "../i18n";
 import { CommandName, type RoleIn } from "../interface";
 import { getConfig, getRoleIn, setRoleIn } from "../maps";
 
@@ -50,22 +49,21 @@ export async function interactionRoleInChannel(
 		return;
 	}
 
-	const allRoleIn = getRoleIn(on, guild);
+	const roleOpt = interaction.options.get(t("common.role").toLowerCase());
+	if (!roleOpt || !roleOpt.role) {
+		await interaction.reply({
+			content: ul("ignore.role.error", { role: roleOpt?.name }) as string,
+		});
+		return;
+	}
 
-	// Create modal with role selector and channel selector
+	const allRoleIn = getRoleIn(on, guild);
+	const existingRoleIn = allRoleIn.find((r: RoleIn) => r.role.id === roleOpt.role?.id);
+
+	// Create modal with channel selector only (role provided via option)
 	const modal = new ModalBuilder()
 		.setCustomId("roleIn_modal")
 		.setTitle(ul(`roleIn.on.${on}`));
-
-	// Role select menu
-	const roleSelect = new RoleSelectMenuBuilder()
-		.setCustomId("select_roleIn_roles")
-		.setMaxValues(1)
-		.setMinValues(1);
-
-	const roleLabel = new LabelBuilder()
-		.setLabel(ul("common.role"))
-		.setRoleSelectMenuComponent(roleSelect);
 
 	// Channel select menu
 	const channelSelect = new ChannelSelectMenuBuilder()
@@ -77,6 +75,7 @@ export async function interactionRoleInChannel(
 			ChannelType.PrivateThread,
 			ChannelType.GuildForum
 		)
+		.setDefaultChannels(existingRoleIn?.channels.map((c) => c.id) ?? [])
 		.setMaxValues(25)
 		.setMinValues(0);
 
@@ -84,7 +83,7 @@ export async function interactionRoleInChannel(
 		.setLabel(ul("common.channel"))
 		.setChannelSelectMenuComponent(channelSelect);
 
-	modal.addLabelComponents(roleLabel, channelLabel);
+	modal.addLabelComponents(channelLabel);
 
 	try {
 		const collectorFilter = (i: ModalSubmitInteraction) => {
@@ -99,7 +98,6 @@ export async function interactionRoleInChannel(
 			time: 60_000,
 		});
 
-		const selectedRoles = selection.fields.getSelectedRoles("select_roleIn_roles", true);
 		const selectedChannels = selection.fields.getSelectedChannels(
 			"select_roleIn_channels",
 			true,
@@ -112,16 +110,8 @@ export async function interactionRoleInChannel(
 			]
 		);
 
-		const role = Array.from(selectedRoles.values())[0];
+		const role = roleOpt.role;
 		const channels = Array.from(selectedChannels.values());
-
-		if (!role) {
-			await interaction.editReply({
-				content: ul("common.error") as string,
-			});
-			return;
-		}
-
 		const mention = roleMention(role.id);
 		const messages: string[] = [];
 
