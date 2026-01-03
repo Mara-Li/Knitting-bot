@@ -1,24 +1,27 @@
 import {
 	type CategoryChannel,
+	ChannelSelectMenuBuilder,
+	ChannelType,
 	type ChatInputCommandInteraction,
-	type CommandInteraction,
 	channelMention,
 	type ForumChannel,
-	Role,
+	LabelBuilder,
+	ModalBuilder,
+	type ModalSubmitInteraction,
+	type Role,
+	RoleSelectMenuBuilder,
 	roleMention,
 	type TextChannel,
 	type ThreadChannel,
 } from "discord.js";
-import { getUl, t } from "../i18n";
+import { getUl } from "../i18n";
 import { CommandName, type RoleIn } from "../interface";
 import { getConfig, getRoleIn, setRoleIn } from "../maps";
 import "../discord_ext";
 
 /**
- * Follow or ignore a role for a channel, get with the interaction
- * @param interaction {@link CommandInteraction} The interaction that triggered the command. It will have all option for the command.
- * - The role is required
- * - The channel is not. If not given, the role will be deleted from the list
+ * Follow or ignore roles in specific channels using a modal
+ * @param interaction {@link ChatInputCommandInteraction} The interaction that triggered the command.
  * @param on {"follow" | "ignore"} The mode to use
  */
 export async function interactionRoleInChannel(
@@ -29,6 +32,7 @@ export async function interactionRoleInChannel(
 	if (!interaction.guild) return;
 	const guild = interaction.guild.id;
 	const ul = getUl(interaction);
+
 	if (
 		on === "follow" &&
 		(getConfig(CommandName.followOnlyChannel, guild) ||
@@ -39,126 +43,176 @@ export async function interactionRoleInChannel(
 		});
 		return;
 	}
+
 	if (!getConfig(CommandName.followOnlyRoleIn, guild) && on === "follow") {
 		await interaction.reply({
 			content: ul("roleIn.error.need") as string,
 		});
 		return;
 	}
-	const role = interaction.options.get(t("common.role").toLowerCase());
-	const channel = interaction.options.get(t("common.channel").toLowerCase());
 
-	if (!role || !(role.role instanceof Role)) {
-		await interaction.reply({
-			content: ul("ignore.role.error", { role: role?.name }) as string,
-		});
-		return;
-	}
-	const mention = roleMention(role.role?.id ?? "");
-
-	if (!channel) {
-		//delete the role from the list
-		const allRoleIn = getRoleIn(on, guild);
-		const newRolesIn: RoleIn[] = allRoleIn.filter(
-			(r: RoleIn) => r.role.id !== role.role?.id
-		);
-		setRoleIn(on, guild, newRolesIn);
-		const translationOn = ul(`roleIn.on.${on}`);
-		await interaction.reply({
-			content: ul("roleIn.noLonger.any", {
-				mention: mention,
-				on: translationOn,
-			}) as string,
-		});
-		return;
-	}
-	/**
-	 * Get the RoleIn interface for the given role and channel
-	 */
 	const allRoleIn = getRoleIn(on, guild);
-	//search for the role in the array
-	const roleIn = allRoleIn.find((roleIn: RoleIn) => roleIn.role.id === role.role?.id);
-	const oppositeRolesIn = getRoleIn(opposite, guild);
-	const oppositeRoleFind = oppositeRolesIn.find(
-		(roleIn: RoleIn) => roleIn.role.id === role.role?.id
-	);
 
-	/** Verify that the role is not ignored for the same channel */
-	if (
-		oppositeRoleFind?.channels.some(
-			(chan: ForumChannel | CategoryChannel | ThreadChannel | TextChannel) =>
-				chan.id === channel.channel?.id
+	// Create modal with role selector and channel selector
+	const modal = new ModalBuilder()
+		.setCustomId("roleIn_modal")
+		.setTitle(ul(`roleIn.on.${on}`));
+
+	// Role select menu
+	const roleSelect = new RoleSelectMenuBuilder()
+		.setCustomId("select_roleIn_roles")
+		.setMaxValues(1)
+		.setMinValues(1);
+
+	const roleLabel = new LabelBuilder()
+		.setLabel(ul("common.role"))
+		.setRoleSelectMenuComponent(roleSelect);
+
+	// Channel select menu
+	const channelSelect = new ChannelSelectMenuBuilder()
+		.setCustomId("select_roleIn_channels")
+		.setChannelTypes(
+			ChannelType.GuildCategory,
+			ChannelType.GuildText,
+			ChannelType.PublicThread,
+			ChannelType.PrivateThread,
+			ChannelType.GuildForum
 		)
-	) {
-		const translationOpposite = ul(`roleIn.on.${opposite}`);
-		await interaction.reply({
-			content: ul("roleIn.already", {
-				channel: channelMention(channel.channel?.id ?? ""),
-				mention: mention,
-				opposite: translationOpposite,
-			}) as string,
+		.setMaxValues(25)
+		.setMinValues(0);
+
+	const channelLabel = new LabelBuilder()
+		.setLabel(ul("common.channel"))
+		.setChannelSelectMenuComponent(channelSelect);
+
+	modal.addLabelComponents(roleLabel, channelLabel);
+
+	try {
+		const collectorFilter = (i: ModalSubmitInteraction) => {
+			i.deferUpdate();
+			return i.user.id === interaction.user.id;
+		};
+
+		await interaction.showModal(modal);
+
+		const selection = await interaction.awaitModalSubmit({
+			filter: collectorFilter,
+			time: 60_000,
+		});
+
+		const selectedRoles = selection.fields.getSelectedRoles("select_roleIn_roles", true);
+		const selectedChannels = selection.fields.getSelectedChannels(
+			"select_roleIn_channels",
+			true,
+			[
+				ChannelType.GuildCategory,
+				ChannelType.GuildText,
+				ChannelType.PublicThread,
+				ChannelType.PrivateThread,
+				ChannelType.GuildForum,
+			]
+		);
+
+		const role = Array.from(selectedRoles.values())[0];
+		const channels = Array.from(selectedChannels.values());
+
+		if (!role) {
+			await interaction.editReply({
+				content: ul("common.error") as string,
+			});
+			return;
+		}
+
+		const mention = roleMention(role.id);
+		const messages: string[] = [];
+
+		if (channels.length === 0) {
+			// No channels selected - remove the role entirely
+			const newRolesIn: RoleIn[] = allRoleIn.filter((r: RoleIn) => r.role.id !== role.id);
+			setRoleIn(on, guild, newRolesIn);
+			const translationOn = ul(`roleIn.on.${on}`);
+			messages.push(
+				ul("roleIn.noLonger.any", {
+					mention: mention,
+					on: translationOn,
+				}) as string
+			);
+		} else {
+			// Check if role already exists
+			const roleIn = allRoleIn.find((r: RoleIn) => r.role.id === role.id);
+			const oldChannelIds = new Set(roleIn?.channels.map((c) => c.id) ?? []);
+			const newChannelIds = new Set(channels.map((c) => c.id));
+
+			// Find removed channels
+			if (roleIn) {
+				for (const oldChannel of roleIn.channels) {
+					if (!newChannelIds.has(oldChannel.id)) {
+						const translationOn = ul(`roleIn.on.${on}`);
+						messages.push(
+							ul("roleIn.noLonger.chan", {
+								chan: channelMention(oldChannel.id),
+								mention: mention,
+								on: translationOn,
+							}) as string
+						);
+					}
+				}
+			}
+
+			// Find added channels
+			for (const channel of channels) {
+				if (!oldChannelIds.has(channel.id)) {
+					const translationOn = ul(`roleIn.on.${on}`);
+					messages.push(
+						ul("roleIn.enabled.chan", {
+							chan: channelMention(channel.id),
+							mention: mention,
+							on: translationOn,
+						}) as string
+					);
+				}
+			}
+
+			// Update or create role entry
+			if (roleIn) {
+				// Update existing role entry
+				const updatedRoles = allRoleIn.map((r) =>
+					r.role.id === role.id
+						? {
+								...r,
+								channels: channels as (
+									| CategoryChannel
+									| ForumChannel
+									| ThreadChannel
+									| TextChannel
+								)[],
+							}
+						: r
+				);
+				setRoleIn(on, guild, updatedRoles);
+			} else {
+				const newRoleIn: RoleIn = {
+					channels: channels as (
+						| CategoryChannel
+						| ForumChannel
+						| ThreadChannel
+						| TextChannel
+					)[],
+					role: role as Role,
+				};
+				allRoleIn.push(newRoleIn);
+				setRoleIn(on, guild, allRoleIn);
+			}
+		}
+
+		const finalMessage = messages.join("\n") || ul("common.error");
+		await interaction.editReply({
+			content: finalMessage as string,
+		});
+	} catch (e) {
+		await interaction.editReply({
+			content: "error.failedReply",
 		});
 		return;
-	}
-	if (roleIn) {
-		/** Verify if the channel is already in the list */
-		const some = roleIn.channels.some(
-			(chan: ForumChannel | CategoryChannel | ThreadChannel | TextChannel) =>
-				chan.id === channel.channel?.id
-		);
-		if (some) {
-			roleIn.channels = roleIn.channels.filter(
-				(followedChannel: ForumChannel | CategoryChannel | ThreadChannel | TextChannel) =>
-					followedChannel.id !== channel.channel?.id
-			);
-			//save
-			setRoleIn(on, guild, allRoleIn);
-			await interaction.reply({
-				content: ul("roleIn.noLonger.chan", {
-					chan: channelMention(channel.channel?.id ?? ""),
-					mention: mention,
-					on: ul(`roleIn.on.${on}`),
-				}) as string,
-			});
-			/** If the role is not followed in any channel, remove it from the list */
-			if (roleIn.channels.length === 0) {
-				const newRolesIn: RoleIn[] = allRoleIn.filter(
-					(r: RoleIn) => r.role.id !== role.role?.id
-				);
-				setRoleIn(on, guild, newRolesIn);
-			}
-		} else {
-			/** Add the channel to the list */
-			roleIn.channels.push(
-				channel.channel as CategoryChannel | ForumChannel | ThreadChannel | TextChannel
-			);
-			//save
-			setRoleIn(on, guild, allRoleIn);
-			await interaction.reply({
-				content: ul("roleIn.enabled.chan", {
-					chan: channelMention(channel.channel?.id ?? ""),
-					mention: mention,
-					on: ul(`roleIn.on.${on}`),
-				}) as string,
-			});
-		}
-	}
-	//if not, create it
-	else {
-		const newRoleIn: RoleIn = {
-			channels: [
-				channel.channel as CategoryChannel | ForumChannel | ThreadChannel | TextChannel,
-			],
-			role: role.role,
-		};
-		allRoleIn.push(newRoleIn);
-		setRoleIn(on, guild, allRoleIn);
-		await interaction.reply({
-			content: ul("roleIn.enabled.chan", {
-				chan: channelMention(channel.channel?.id ?? ""),
-				mention: mention,
-				on: ul(`roleIn.on.${on}`),
-			}) as string,
-		});
 	}
 }
