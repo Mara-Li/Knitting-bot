@@ -12,7 +12,7 @@ import {
 import { getUl, t } from "../i18n";
 import { CommandName, type Translation } from "../interface";
 import { getConfig } from "../maps";
-import { updateCache } from "../utils";
+import { fetchArchived, updateCache } from "../utils";
 import { addRoleAndUserToThread } from "../utils/add";
 import { checkThread } from "../utils/data_check";
 import "../discord_ext";
@@ -38,6 +38,11 @@ export default {
 			subcommand
 				.setNames("commands.updateAllThreads.name")
 				.setDescriptions("commands.updateAllThreads.description")
+				.addBooleanOption((opt) =>
+					opt
+						.setNames("common.archived")
+						.setDescriptions("commands.updateAllThreads.option")
+				)
 		)
 		.addSubcommand((subcommand) =>
 			subcommand
@@ -52,7 +57,11 @@ export default {
 		const commands = options.getSubcommand();
 		switch (commands) {
 			case t("commands.updateAllThreads.name"):
-				await updateAllThreads(interaction, ul);
+				await updateAllThreads(
+					interaction,
+					ul,
+					options.getBoolean(t("common.archived")) ?? false
+				);
 				break;
 			case t("common.thread").toLowerCase():
 				await updateThread(interaction, ul);
@@ -70,30 +79,42 @@ export default {
  * Update all thread, unless they are ignored
  * @param interaction {@link CommandInteraction} The interaction, contains the guild to update + reply to it
  * @param ul
+ * @param includeArchived
  */
-async function updateAllThreads(interaction: CommandInteraction, ul: Translation) {
+async function updateAllThreads(
+	interaction: CommandInteraction,
+	ul: Translation,
+	includeArchived?: boolean
+) {
 	if (!interaction.guild) return;
 	const guild = interaction.guild.id;
-	const threads = interaction.guild.channels.cache.filter((channel) =>
-		channel.isThread()
-	);
-	await interaction.reply({
-		content: ul("commands.updateAllThreads.reply") as string,
-	});
-	const count = threads.size;
-	await updateCache(interaction.guild);
-	for (const thread of threads.values()) {
-		const threadChannel = thread as ThreadChannel;
-		if (
-			!getConfig(CommandName.followOnlyChannel, guild) &&
-			!checkThread(threadChannel, "ignore")
-		) {
-			await addRoleAndUserToThread(threadChannel);
-		} else if (checkThread(threadChannel, "follow")) {
-			await addRoleAndUserToThread(threadChannel);
+	await interaction.deferReply();
+	const threads = await interaction.guild.channels.fetchActiveThreads(true);
+	const toUpdate = new Set<ThreadChannel>();
+	if (includeArchived) {
+		//fetch archived threads
+		const archived = await fetchArchived(interaction.guild);
+		for (const thread of archived) {
+			toUpdate.add(thread);
 		}
 	}
-	await interaction.followUp({
+	//merge both collections
+	for (const thread of threads.threads.values()) {
+		toUpdate.add(thread);
+	}
+
+	const count = threads.threads.size;
+	await updateCache(interaction.guild);
+	for (const thread of toUpdate) {
+		if (thread.locked) continue;
+		if (
+			!getConfig(CommandName.followOnlyChannel, guild) &&
+			!checkThread(thread, "ignore")
+		)
+			await addRoleAndUserToThread(thread);
+		else if (checkThread(thread, "follow")) await addRoleAndUserToThread(thread);
+	}
+	await interaction.editReply({
 		content: ul("commands.updateAllThreads.success", {
 			count: count,
 		}) as string,

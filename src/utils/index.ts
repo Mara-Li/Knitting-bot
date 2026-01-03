@@ -1,5 +1,5 @@
 import process from "node:process";
-import type { Client, Guild, TextChannel } from "discord.js";
+import { ChannelType, type Client, type Guild, type TextChannel } from "discord.js";
 import { CommandName } from "../interface";
 import { getConfig } from "../maps";
 
@@ -39,10 +39,31 @@ export function toTitle(name: string) {
 
 export async function updateCache(guild: Guild) {
 	try {
-		await guild.members.fetch();
-		await guild.roles.fetch();
+		await Promise.all([
+			guild.members.fetch(),
+			guild.roles.fetch()
+		]);
 	} catch (e) {
 		console.log(e);
 		//ignore error
 	}
+}
+
+export async function fetchArchived(guild: Guild) {
+	const textChannels = guild.channels.cache.filter(
+		(c) => c.type === ChannelType.GuildText
+	);
+	const results = await Promise.allSettled(
+		textChannels.map((channel) => channel.threads.fetchArchived({ fetchAll: true }))
+	);
+
+	// Collecter tous les threads accessibles, en ignorant les erreurs individuelles
+	return results
+		.filter((result) => result.status === "fulfilled")
+		.flatMap((result) => {
+			if (result.status === "fulfilled") {
+				return Array.from(result.value.threads.values());
+			}
+			return [];
+		});
 }

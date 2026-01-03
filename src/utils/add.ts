@@ -1,4 +1,5 @@
 import {
+	DiscordAPIError,
 	type GuildMember,
 	type Message,
 	MessageFlags,
@@ -6,6 +7,7 @@ import {
 	type ThreadChannel,
 	userMention,
 } from "discord.js";
+import { getTranslation } from "../i18n";
 import { EMOJI } from "../index";
 import { CommandName } from "../interface";
 import { getConfig } from "../maps";
@@ -27,66 +29,76 @@ import { discordLogs } from "./index";
  */
 export async function addUserToThread(thread: ThreadChannel, user: GuildMember) {
 	const guild = thread.guild.id;
-
+	const ul = getTranslation(guild, { locale: thread.guild.preferredLocale });
 	if (
 		thread.permissionsFor(user).has("ViewChannel", true) &&
 		(await checkIfUserNotInTheThread(thread, user))
 	) {
-		let message = await fetchMessage(thread);
-		if (getConfig(CommandName.followOnlyRoleIn, guild)) {
-			if (message) {
-				await message.edit(userMention(user.id));
-				await message.edit(EMOJI);
-			} else {
-				message = await thread.send({
-					content: EMOJI,
-					flags: MessageFlags.SuppressNotifications,
-				});
-				await message.edit(userMention(user.id));
-				await message.edit(EMOJI);
+		try {
+			let message = await fetchMessage(thread);
+			if (getConfig(CommandName.followOnlyRoleIn, guild)) {
+				if (message) {
+					await message.edit(userMention(user.id));
+					await message.edit(EMOJI);
+				} else {
+					message = await thread.send({
+						content: EMOJI,
+						flags: MessageFlags.SuppressNotifications,
+					});
+					await message.edit(userMention(user.id));
+					await message.edit(EMOJI);
+				}
+				await discordLogs(
+					guild,
+					thread.client,
+					`Add @${user.user.username} to #${thread.name}`
+				);
+			} else if (!checkMemberRole(user.roles, "ignore")) {
+				if (message) {
+					await message.edit(userMention(user.id));
+					await message.edit(EMOJI);
+				} else {
+					message = await thread.send({
+						content: EMOJI,
+						flags: MessageFlags.SuppressNotifications,
+					});
+					await message.edit(userMention(user.id));
+					await message.edit(EMOJI);
+				}
+				await discordLogs(
+					guild,
+					thread.client,
+					`Add @${user.user.username} to #${thread.name}`
+				);
+			} else if (
+				getConfig(CommandName.followOnlyRole, guild) &&
+				checkMemberRole(user.roles, "follow")
+			) {
+				if (message) {
+					await message.edit(userMention(user.id));
+					await message.edit(EMOJI);
+				} else {
+					message = await thread.send({
+						content: EMOJI,
+						flags: MessageFlags.SuppressNotifications,
+					});
+					await message.edit(userMention(user.id));
+					await message.edit(EMOJI);
+				}
+				await discordLogs(
+					guild,
+					thread.client,
+					`Add @${user.user.username} to #${thread.name}`
+				);
 			}
-			await discordLogs(
-				guild,
-				thread.client,
-				`Add @${user.user.username} to #${thread.name}`
-			);
-		} else if (!checkMemberRole(user.roles, "ignore")) {
-			if (message) {
-				await message.edit(userMention(user.id));
-				await message.edit(EMOJI);
-			} else {
-				message = await thread.send({
-					content: EMOJI,
-					flags: MessageFlags.SuppressNotifications,
-				});
-				await message.edit(userMention(user.id));
-				await message.edit(EMOJI);
-			}
-			await discordLogs(
-				guild,
-				thread.client,
-				`Add @${user.user.username} to #${thread.name}`
-			);
-		} else if (
-			getConfig(CommandName.followOnlyRole, guild) &&
-			checkMemberRole(user.roles, "follow")
-		) {
-			if (message) {
-				await message.edit(userMention(user.id));
-				await message.edit(EMOJI);
-			} else {
-				message = await thread.send({
-					content: EMOJI,
-					flags: MessageFlags.SuppressNotifications,
-				});
-				await message.edit(userMention(user.id));
-				await message.edit(EMOJI);
-			}
-			await discordLogs(
-				guild,
-				thread.client,
-				`Add @${user.user.username} to #${thread.name}`
-			);
+		} catch (error) {
+			console.error(error);
+			if (error instanceof DiscordAPIError && error.code === 50001)
+				await discordLogs(
+					guild,
+					thread.client,
+					ul("error.missingPermission", { thread: thread.id })
+				);
 		}
 	}
 }
@@ -203,14 +215,27 @@ export async function addRoleAndUserToThread(thread: ThreadChannel) {
 		});
 	}
 	if (toPing.length > 0) {
-		const message = await fetchMessage(thread);
-		await splitAndSend(toPing, message);
-		await message.edit(EMOJI);
-		await discordLogs(
-			thread.guild.id,
-			thread.client,
-			`Add ${toPing.length} members to #${thread.name}:\n- ${toPing.map((member) => member.user.username).join("\n- ")}`
-		);
+		try {
+			const message = await fetchMessage(thread);
+			await splitAndSend(toPing, message);
+			await message.edit(EMOJI);
+			await discordLogs(
+				thread.guild.id,
+				thread.client,
+				`Add ${toPing.length} members to #${thread.name}:\n- ${toPing.map((member) => member.user.username).join("\n- ")}`
+			);
+		} catch (error) {
+			console.error(error);
+			if (error instanceof DiscordAPIError && error.code === 50001) {
+				await discordLogs(
+					thread.guild.id,
+					thread.client,
+					getTranslation(thread.guild.id, {
+						locale: thread.guild.preferredLocale,
+					})("error.missingPermission", { thread: thread.id })
+				);
+			}
+		}
 	}
 }
 
@@ -240,6 +265,16 @@ async function splitAndSend(toPing: GuildMember[], message: Message) {
 	}
 	// Send the emoji at the end
 	await message.edit(EMOJI);
+}
+
+async function fetchFirstMessage(thread: ThreadChannel): Promise<Message | undefined | null> {
+	const fetchedMessage = thread.messages.cache;
+	const firstMessage = fetchedMessage.filter((m) => m.author.id === thread.client.user.id).first();
+	if (!firstMessage) {
+		//fetch all thread messages
+		const messages = await thread.messages.fetch();
+		return messages.filter((m) => m.author.id === thread.client.user.id).first() ?? null;
+	}
 }
 
 async function fetchMessage(thread: ThreadChannel): Promise<Message> {
