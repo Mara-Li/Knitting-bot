@@ -69,6 +69,7 @@ export default {
 					return;
 				}
 				await channelSelectors(interaction, ul);
+				await channelSelectors(interaction, ul);
 				break;
 			case t("common.role").toLowerCase():
 				if (!getConfig(CommandName.followOnlyRole, guild)) {
