@@ -1,10 +1,12 @@
-import type {
-	CategoryChannel,
-	ForumChannel,
-	Role,
-	TextChannel,
-	ThreadChannel,
+import {
+	type CategoryChannel,
+	type ForumChannel,
+	Locale,
+	type Role,
+	type TextChannel,
+	type ThreadChannel,
 } from "discord.js";
+import type { TFunction } from "i18next";
 
 export enum DefaultMenuBuilder {
 	member = "on-member-update",
@@ -52,6 +54,7 @@ export interface Configuration {
 	[CommandName.followOnlyChannel]: boolean;
 	[CommandName.followOnlyRole]: boolean;
 	[CommandName.followOnlyRoleIn]: boolean;
+	language: Locale;
 	[key: string]: boolean | string;
 }
 
@@ -72,6 +75,7 @@ export const DEFAULT_CONFIGURATION: Configuration = {
 	[CommandName.followOnlyChannel]: false,
 	[CommandName.followOnlyRole]: false,
 	[CommandName.followOnlyRoleIn]: false,
+	language: Locale.EnglishUS,
 };
 
 export const DEFAULT_IGNORE_FOLLOW: IgnoreFollow = {
@@ -82,3 +86,29 @@ export const DEFAULT_IGNORE_FOLLOW: IgnoreFollow = {
 	[TypeName.forum]: [],
 	[TypeName.OnlyRoleIn]: [],
 };
+
+/**
+ * Interface pour l'EnMap "Configuration" (optionMaps)
+ * Stocke les configurations des guildes avec leurs valeurs
+ */
+export interface ConfigurationEnMap {
+	[guildId: string]: Configuration;
+}
+
+/**
+ * Interface pour l'EnMap "Ignore" (ignoreMaps)
+ * Stocke les éléments ignorés par guilde
+ */
+export interface IgnoreEnMap {
+	[guildId: string]: IgnoreFollow;
+}
+
+/**
+ * Interface pour l'EnMap "FollowOnly" (followOnlyMaps)
+ * Stocke les éléments suivis uniquement par guilde
+ */
+export interface FollowOnlyEnMap {
+	[guildId: string]: IgnoreFollow;
+}
+
+export type Translation = TFunction<"translation", undefined>;

@@ -1,8 +1,8 @@
 import type { Client, ThreadChannel } from "discord.js";
-import i18next from "i18next";
+import { getTranslation } from "../../i18n";
 import { CommandName } from "../../interface";
 import { getConfig } from "../../maps";
-import { changeGuildLanguage, discordLogs, logInDev, updateCache } from "../../utils";
+import { discordLogs, logInDev, updateCache } from "../../utils";
 import { addUserToThread } from "../../utils/add";
 import {
 	checkMemberRole,
@@ -15,7 +15,6 @@ export default (client: Client): void => {
 	client.on("guildMemberUpdate", async (oldMember, newMember) => {
 		//trigger only on role change
 		try {
-			changeGuildLanguage(newMember.guild);
 			if (oldMember.roles.cache.size === newMember.roles.cache.size) return;
 			/** Search updated roles */
 			const oldRoles = oldMember.roles.cache;
@@ -24,11 +23,12 @@ export default (client: Client): void => {
 			const guildID = newMember.guild.id;
 			await updateCache(newMember.guild);
 			if (getConfig(CommandName.member, guildID) === false) return;
+			const ul = getTranslation(guildID, { locale: newMember.guild.preferredLocale });
 			if (updatedRoles.size === 0) {
 				await discordLogs(
 					guildID,
 					client,
-					i18next.t("logs.member.updated.noRole", {
+					ul("logs.member.updated.noRole", {
 						user: oldMember.user.username,
 					})
 				);
@@ -37,7 +37,7 @@ export default (client: Client): void => {
 			await discordLogs(
 				guildID,
 				client,
-				i18next.t("logs.member.updated.roleList", {
+				ul("logs.member.updated.roleList", {
 					role: updatedRoles.map((role) => role.name).join(", "),
 					user: oldMember.user.username,
 				})

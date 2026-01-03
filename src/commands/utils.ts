@@ -9,11 +9,9 @@ import {
 	type TextChannel,
 	type ThreadChannel,
 } from "discord.js";
-import { default as i18next } from "../i18n/init";
+import { getUl, t } from "../i18n";
 import { CommandName, type RoleIn } from "../interface";
 import { getConfig, getRoleIn, setRoleIn } from "../maps";
-
-const en = i18next.getFixedT("en");
 
 /**
  * Follow or ignore a role for a channel, get with the interaction
@@ -29,28 +27,29 @@ export async function interactionRoleInChannel(
 	const opposite = on === "follow" ? "ignore" : "follow";
 	if (!interaction.guild) return;
 	const guild = interaction.guild.id;
+	const ul = getUl(interaction);
 	if (
 		on === "follow" &&
 		(getConfig(CommandName.followOnlyChannel, guild) ||
 			getConfig(CommandName.followOnlyRole, guild))
 	) {
 		await interaction.reply({
-			content: i18next.t("roleIn.error.otherMode") as string,
+			content: ul("roleIn.error.otherMode") as string,
 		});
 		return;
 	}
 	if (!getConfig(CommandName.followOnlyRoleIn, guild) && on === "follow") {
 		await interaction.reply({
-			content: i18next.t("roleIn.error.need") as string,
+			content: ul("roleIn.error.need") as string,
 		});
 		return;
 	}
-	const role = interaction.options.get(en("common.role").toLowerCase());
-	const channel = interaction.options.get(en("common.channel").toLowerCase());
+	const role = interaction.options.get(t("common.role").toLowerCase());
+	const channel = interaction.options.get(t("common.channel").toLowerCase());
 
 	if (!role || !(role.role instanceof Role)) {
 		await interaction.reply({
-			content: i18next.t("ignore.role.error", { role: role?.name }) as string,
+			content: ul("ignore.role.error", { role: role?.name }) as string,
 		});
 		return;
 	}
@@ -63,9 +62,9 @@ export async function interactionRoleInChannel(
 			(r: RoleIn) => r.role.id !== role.role?.id
 		);
 		setRoleIn(on, guild, newRolesIn);
-		const translationOn = i18next.t(`roleIn.on.${on}`);
+		const translationOn = ul(`roleIn.on.${on}`);
 		await interaction.reply({
-			content: i18next.t("roleIn.noLonger.any", {
+			content: ul("roleIn.noLonger.any", {
 				mention: mention,
 				on: translationOn,
 			}) as string,
@@ -90,9 +89,9 @@ export async function interactionRoleInChannel(
 				chan.id === channel.channel?.id
 		)
 	) {
-		const translationOpposite = i18next.t(`roleIn.on.${opposite}`);
+		const translationOpposite = ul(`roleIn.on.${opposite}`);
 		await interaction.reply({
-			content: i18next.t("roleIn.already", {
+			content: ul("roleIn.already", {
 				channel: channelMention(channel.channel?.id ?? ""),
 				mention: mention,
 				opposite: translationOpposite,
@@ -114,10 +113,10 @@ export async function interactionRoleInChannel(
 			//save
 			setRoleIn(on, guild, allRoleIn);
 			await interaction.reply({
-				content: i18next.t("roleIn.noLonger.chan", {
+				content: ul("roleIn.noLonger.chan", {
 					chan: channelMention(channel.channel?.id ?? ""),
 					mention: mention,
-					on: i18next.t(`roleIn.on.${on}`),
+					on: ul(`roleIn.on.${on}`),
 				}) as string,
 			});
 			/** If the role is not followed in any channel, remove it from the list */
@@ -135,10 +134,10 @@ export async function interactionRoleInChannel(
 			//save
 			setRoleIn(on, guild, allRoleIn);
 			await interaction.reply({
-				content: i18next.t("roleIn.enabled.chan", {
+				content: ul("roleIn.enabled.chan", {
 					chan: channelMention(channel.channel?.id ?? ""),
 					mention: mention,
-					on: i18next.t(`roleIn.on.${on}`),
+					on: ul(`roleIn.on.${on}`),
 				}) as string,
 			});
 		}
@@ -154,10 +153,10 @@ export async function interactionRoleInChannel(
 		allRoleIn.push(newRoleIn);
 		setRoleIn(on, guild, allRoleIn);
 		await interaction.reply({
-			content: i18next.t("roleIn.enabled.chan", {
+			content: ul("roleIn.enabled.chan", {
 				chan: channelMention(channel.channel?.id ?? ""),
 				mention: mention,
-				on: i18next.t(`roleIn.on.${on}`),
+				on: ul(`roleIn.on.${on}`),
 			}) as string,
 		});
 	}

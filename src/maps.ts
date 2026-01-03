@@ -8,6 +8,7 @@ import type {
 import Enmap from "enmap";
 import {
 	CommandName,
+	type Configuration,
 	DEFAULT_CONFIGURATION,
 	DEFAULT_IGNORE_FOLLOW,
 	type IgnoreFollow,
@@ -16,20 +17,20 @@ import {
 } from "./interface";
 import { logInDev } from "./utils";
 
-export const optionMaps = new Enmap({
+export const optionMaps = new Enmap<string, Configuration>({
 	autoFetch: true,
 	cloneLevel: "deep",
 	fetchAll: false,
 	name: "Configuration",
 });
 
-const ignoreMaps = new Enmap({
+const ignoreMaps = new Enmap<string, IgnoreFollow>({
 	autoFetch: true,
 	cloneLevel: "deep",
 	fetchAll: false,
 	name: "Ignore",
 });
-const followOnlyMaps = new Enmap({
+const followOnlyMaps = new Enmap<string, IgnoreFollow>({
 	autoFetch: true,
 	cloneLevel: "deep",
 	fetchAll: false,
@@ -122,30 +123,41 @@ export function getConfig(
 	name: CommandName,
 	guildID: string,
 	channel?: boolean
-): string | boolean | null {
-	try {
-		if (channel) {
-			return optionMaps.get(guildID, `${name}.channel`);
+): string | boolean {
+	// Assure que la configuration existe pour la guilde
+	optionMaps.ensure(guildID, DEFAULT_CONFIGURATION);
+
+	// Si on cherche un canal spécifique (pour les logs par exemple)
+	if (channel) {
+		const channelPath = `${name}.channel`;
+		const channelValue = optionMaps.get(guildID, channelPath);
+		if (channelValue !== undefined && channelValue !== null) {
+			return channelValue as string;
 		}
-		return optionMaps.get(guildID, name) as string | boolean;
-	} catch (e) {
-		switch (name) {
-			case CommandName.manualMode:
-				return optionMaps.ensure(guildID, false, name) as boolean;
-			case CommandName.followOnlyChannel:
-				return optionMaps.ensure(guildID, false, name) as boolean;
-			case CommandName.followOnlyRole:
-				return optionMaps.ensure(guildID, false, name) as boolean;
-			case CommandName.followOnlyRoleIn:
-				return optionMaps.ensure(guildID, false, name) as boolean;
-			case CommandName.log:
-				if (channel) {
-					return optionMaps.ensure(guildID, "", `${name}.channel`) as string;
-				}
-				return optionMaps.ensure(guildID, false, name) as boolean;
-			default:
-				return optionMaps.ensure(guildID, true, name) as boolean;
-		}
+		return "";
+	}
+
+	// Récupère la valeur de la configuration
+	const value = optionMaps.get(guildID, name);
+
+	// Si la valeur existe, la retourner
+	if (value !== undefined && value !== null) {
+		return value as string | boolean;
+	}
+
+	// Sinon, définir et retourner la valeur par défaut selon le type de commande
+	switch (name) {
+		case CommandName.manualMode:
+		case CommandName.followOnlyChannel:
+		case CommandName.followOnlyRole:
+		case CommandName.followOnlyRoleIn:
+		case CommandName.log:
+			optionMaps.set(guildID, false, name);
+			return false;
+		default:
+			// Pour les autres commandes (member, thread, channel, newMember)
+			optionMaps.set(guildID, true, name);
+			return true;
 	}
 }
 

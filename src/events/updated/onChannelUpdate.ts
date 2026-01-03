@@ -1,8 +1,8 @@
 import { ChannelType, type Client, type Snowflake, type TextChannel } from "discord.js";
-import i18next from "i18next";
+import { getTranslation } from "../../i18n";
 import { CommandName } from "../../interface";
 import { getConfig } from "../../maps";
-import { changeGuildLanguage, discordLogs, logInDev, updateCache } from "../../utils";
+import { discordLogs, logInDev, updateCache } from "../../utils";
 import { addRoleAndUserToThread } from "../../utils/add";
 import { checkThread, validateChannelType } from "../../utils/data_check";
 
@@ -24,7 +24,9 @@ export default (client: Client): void => {
 			return;
 		const guild = oldChannel.guild.id;
 		await updateCache(oldChannel.guild);
-		changeGuildLanguage(oldChannel.guild);
+		const ul = getTranslation(guild, {
+			locale: newChannel.guild.preferredLocale,
+		});
 		if (getConfig(CommandName.channel, guild) === false) return;
 		if (
 			!validateChannelType(oldChannel) ||
@@ -46,7 +48,7 @@ export default (client: Client): void => {
 						discordLogs(
 							guild,
 							client,
-							i18next.t("logs.updated.channel", {
+							ul("logs.updated.channel", {
 								child: child.name,
 								number: threads.size,
 							})
@@ -67,7 +69,7 @@ export default (client: Client): void => {
 			await discordLogs(
 				guild,
 				client,
-				i18next.t("logs.updated.channel", {
+				ul("logs.updated.channel", {
 					child: newTextChannel.name,
 					number: threads.size,
 				})

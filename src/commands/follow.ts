@@ -13,34 +13,26 @@ import {
 	TextChannel,
 	ThreadChannel,
 } from "discord.js";
-import { cmdLn } from "../i18n";
-import { default as i18next } from "../i18n/init";
-import { CommandName, TypeName } from "../interface";
+import { cmdLn, getUl, t } from "../i18n";
+import { CommandName, type Translation, TypeName } from "../interface";
 import { getConfig, getMaps, getRole, setFollow, setRole } from "../maps";
 import { toTitle } from "../utils";
 import { mapToStr } from "./index";
 import { interactionRoleInChannel } from "./utils";
 
-const en = i18next.getFixedT("en");
-
 export default {
 	data: new SlashCommandBuilder()
 		.setName("follow")
-		.setDescription(en("follow.description"))
-		.setDescriptionLocalizations(cmdLn("follow.description"))
+		.setDescriptions("follow.description")
 		.setDefaultMemberPermissions(PermissionFlagsBits.ManageThreads)
 		.addSubcommand((subcommand) =>
 			subcommand
-				.setName(en("common.channel").toLowerCase())
-				.setNameLocalizations(cmdLn("common.channel", true))
-				.setDescription(en("follow.thread.description"))
-				.setDescriptionLocalizations(cmdLn("follow.thread.description"))
+				.setNames("common.channel")
+				.setDescriptions("follow.thread.description")
 				.addChannelOption((option) =>
 					option
-						.setName(en("common.channel").toLowerCase())
-						.setNameLocalizations(cmdLn("common.channel", true))
-						.setDescription(en("follow.thread.option.description"))
-						.setDescriptionLocalizations(cmdLn("follow.thread.option.description"))
+						.setNames("common.channel")
+						.setDescriptions("follow.thread.option.description")
 						.addChannelTypes(
 							ChannelType.GuildCategory,
 							ChannelType.GuildText,
@@ -52,46 +44,34 @@ export default {
 		)
 		.addSubcommand((subcommand) =>
 			subcommand
-				.setName(en("common.role").toLowerCase())
-				.setNameLocalizations(cmdLn("common.role", true))
-				.setDescription(en("follow.role.description"))
-				.setDescriptionLocalizations(cmdLn("follow.role.description"))
+				.setNames(t("common.role"))
+				.setDescriptions("follow.role.description")
 				.addRoleOption((option) =>
 					option
-						.setName(en("common.role").toLowerCase())
+						.setName(t("common.role").toLowerCase())
 						.setNameLocalizations(cmdLn("common.role", true))
-						.setDescription(en("follow.role.option"))
+						.setDescription(t("follow.role.option"))
 						.setDescriptionLocalizations(cmdLn("follow.role.option"))
 						.setRequired(true)
 				)
 		)
 		.addSubcommand((subcommand) =>
-			subcommand
-				.setName(en("common.list"))
-				.setNameLocalizations(cmdLn("common.list"))
-				.setDescription(en("follow.list.description"))
-				.setDescriptionLocalizations(cmdLn("follow.list.description"))
+			subcommand.setNames("common.list").setDescriptions("follow.list.description")
 		)
 		.addSubcommand((subcommand) =>
 			subcommand
-				.setName(en("common.roleIn"))
-				.setNameLocalizations(cmdLn("common.roleIn"))
-				.setDescription(en("follow.roleIn.description"))
-				.setDescriptionLocalizations(cmdLn("follow.roleIn.description"))
+				.setNames("common.roleIn")
+				.setDescriptions("follow.roleIn.description")
 				.addRoleOption((option) =>
 					option
-						.setName(en("common.role").toLowerCase())
-						.setNameLocalizations(cmdLn("common.role", true))
-						.setDescription(en("follow.roleIn.option.role"))
-						.setDescriptionLocalizations(cmdLn("follow.roleIn.option.role"))
+						.setNames("common.role")
+						.setDescription("follow.roleIn.option.role")
 						.setRequired(true)
 				)
 				.addChannelOption((option) =>
 					option
-						.setName(en("common.channel").toLowerCase())
-						.setNameLocalizations(cmdLn("common.channel", true))
-						.setDescription(en("follow.roleIn.option.channel"))
-						.setDescriptionLocalizations(cmdLn("follow.roleIn.option.channel"))
+						.setNames("common.channel")
+						.setDescriptions("follow.roleIn.option.channel")
 						.addChannelTypes(
 							ChannelType.GuildCategory,
 							ChannelType.GuildText,
@@ -107,33 +87,35 @@ export default {
 		const guild = interaction.guild.id;
 		const options = interaction.options as CommandInteractionOptionResolver;
 		const commands = options.getSubcommand();
+		const ul = getUl(interaction);
+
 		switch (commands) {
-			case en("common.channel").toLowerCase():
+			case t("common.channel").toLowerCase():
 				if (!getConfig(CommandName.followOnlyChannel, guild)) {
 					await interaction.reply({
-						content: i18next.t("follow.disabled"),
+						content: ul("follow.disabled"),
 					});
 					return;
 				}
-				await followText(interaction);
+				await followText(interaction, ul);
 				break;
-			case en("common.role").toLowerCase():
+			case t("common.role").toLowerCase():
 				if (!getConfig(CommandName.followOnlyRole, guild)) {
 					await interaction.reply({
-						content: i18next.t("follow.disabled"),
+						content: ul("follow.disabled"),
 					});
 					return;
 				}
-				await followThisRole(interaction);
+				await followThisRole(interaction, ul);
 				break;
-			case en("common.list"):
-				await displayFollowed(interaction);
+			case t("common.list"):
+				await displayFollowed(interaction, ul);
 				break;
-			case en("common.roleIn"):
+			case t("common.roleIn"):
 				await interactionRoleInChannel(interaction, "follow");
 				break;
 			default:
-				await displayFollowed(interaction);
+				await displayFollowed(interaction, ul);
 				break;
 		}
 	},
@@ -146,8 +128,12 @@ export default {
  * - Followed roles if the CommandName.followOnlyRole is true
  * - Followed roles in chan
  * @param interaction {@link CommandInteraction} The interaction to reply to.
+ * @param ul
  */
-async function displayFollowed(interaction: ChatInputCommandInteraction) {
+async function displayFollowed(
+	interaction: ChatInputCommandInteraction,
+	ul: Translation
+) {
 	if (!interaction.guild) return;
 	const guildID = interaction.guild.id;
 	const followed = mapToStr("follow", guildID);
@@ -163,41 +149,41 @@ async function displayFollowed(interaction: ChatInputCommandInteraction) {
 	if (getConfig(CommandName.followOnlyChannel, guildID)) {
 		embed = new EmbedBuilder()
 			.setColor("#2f8e7d")
-			.setTitle(i18next.t("follow.list.title"))
+			.setTitle(ul("follow.list.title"))
 			.addFields({
-				name: i18next.t("common.category"),
-				value: followedCategoriesNames || i18next.t("common.none"),
+				name: ul("common.category"),
+				value: followedCategoriesNames || ul("common.none"),
 			})
 			.addFields({
-				name: i18next.t("common.channel"),
-				value: followedThreadsNames || i18next.t("common.none"),
+				name: ul("common.channel"),
+				value: followedThreadsNames || ul("common.none"),
 			})
 			.addFields({
-				name: i18next.t("common.channel"),
-				value: followedChannelsNames || i18next.t("common.none"),
+				name: ul("common.channel"),
+				value: followedChannelsNames || ul("common.none"),
 			})
 			.addFields({
-				name: i18next.t("common.forum"),
-				value: followedForumNames || i18next.t("common.none"),
+				name: ul("common.forum"),
+				value: followedForumNames || ul("common.none"),
 			});
 		if (getConfig(CommandName.followOnlyRole, guildID)) {
 			embed.addFields({
-				name: toTitle(i18next.t("common.role")),
-				value: followedRolesNames || i18next.t("common.none"),
+				name: toTitle(ul("common.role")),
+				value: followedRolesNames || ul("common.none"),
 			});
 		}
 	} else if (getConfig(CommandName.followOnlyRole, guildID)) {
 		embed = new EmbedBuilder()
 			.setColor("#2f8e7d")
-			.setTitle(i18next.t("follow.list.title"))
-			.setDescription(followedRolesNames || i18next.t("common.none"));
+			.setTitle(ul("follow.list.title"))
+			.setDescription(followedRolesNames || ul("common.none"));
 	} else if (getConfig(CommandName.followOnlyRoleIn, guildID)) {
 		embed = new EmbedBuilder()
 			.setColor("#2f8e7d")
-			.setTitle(i18next.t("follow.list.roleIn"))
-			.setDescription(followedRolesInNames || i18next.t("common.none"));
+			.setTitle(ul("follow.list.roleIn"))
+			.setDescription(followedRolesInNames || ul("common.none"));
 	} else {
-		embed = new EmbedBuilder().setColor("#2f8e7d").setTitle(i18next.t("common.disabled"));
+		embed = new EmbedBuilder().setColor("#2f8e7d").setTitle(ul("common.disabled"));
 	}
 
 	await interaction.reply({
@@ -209,13 +195,14 @@ async function displayFollowed(interaction: ChatInputCommandInteraction) {
  * Follow-unfollow a role
  * @param interaction {@link CommandInteraction} The interaction to reply to.
  * The role is required, linked to the option name.
+ * @param ul
  */
-async function followThisRole(interaction: ChatInputCommandInteraction) {
+async function followThisRole(interaction: ChatInputCommandInteraction, ul: Translation) {
 	if (!interaction.guild) return;
-	const role = interaction.options.get(en("common.role").toLowerCase());
+	const role = interaction.options.get(t("common.role").toLowerCase());
 	if (!role || !(role.role instanceof Role)) {
 		await interaction.reply({
-			content: i18next.t("ignore.role.error", { role: role }),
+			content: ul("ignore.role.error", { role: role }),
 		});
 		return;
 	}
@@ -231,14 +218,14 @@ async function followThisRole(interaction: ChatInputCommandInteraction) {
 		);
 		setRole("follow", interaction.guild.id, newFollowRoles);
 		await interaction.reply({
-			content: i18next.t("follow.role.removed", { role: mention }),
+			content: ul("follow.role.removed", { role: mention }),
 		});
 	} else {
 		//add to follow list
 		followedRoles.push(role.role);
 		setRole("follow", interaction.guild.id, followedRoles);
 		await interaction.reply({
-			content: i18next.t("follow.role.added", { role: mention }),
+			content: ul("follow.role.added", { role: mention }),
 		});
 	}
 }
@@ -246,21 +233,22 @@ async function followThisRole(interaction: ChatInputCommandInteraction) {
 /**
  * Check the type of the channel and run {@link followThis} with the right type
  * @param interaction {@link CommandInteraction} The interaction to reply to.
+ * @param ul
  */
-async function followText(interaction: ChatInputCommandInteraction) {
+async function followText(interaction: ChatInputCommandInteraction, ul: Translation) {
 	const toIgnore =
-		interaction.options.get(en("common.channel").toLowerCase()) ?? interaction;
+		interaction.options.get(t("common.channel").toLowerCase()) ?? interaction;
 	if (toIgnore.channel instanceof CategoryChannel) {
-		await followThis(interaction, TypeName.category, toIgnore.channel);
+		await followThis(interaction, TypeName.category, ul, toIgnore.channel);
 	} else if (toIgnore?.channel && toIgnore.channel instanceof ThreadChannel) {
-		await followThis(interaction, TypeName.thread, toIgnore.channel);
+		await followThis(interaction, TypeName.thread, ul, toIgnore.channel);
 	} else if (toIgnore?.channel && toIgnore.channel instanceof TextChannel) {
-		await followThis(interaction, TypeName.channel, toIgnore.channel);
+		await followThis(interaction, TypeName.channel, ul, toIgnore.channel);
 	} else if (toIgnore?.channel && toIgnore.channel instanceof ForumChannel) {
-		await followThis(interaction, TypeName.forum, toIgnore.channel);
+		await followThis(interaction, TypeName.forum, ul, toIgnore.channel);
 	} else {
 		await interaction.reply({
-			content: i18next.t("ignore.error"),
+			content: ul("ignore.error"),
 		});
 		return;
 	}
@@ -270,16 +258,18 @@ async function followText(interaction: ChatInputCommandInteraction) {
  * Follow-unfollow a channel
  * @param interaction {@link CommandInteraction} The interaction to reply to.
  * @param typeName {@link TypeName} The type of the channel to follow.
+ * @param ul
  * @param followChan {@link CategoryChannel} | {@link ThreadChannel} | {@link TextChannel} | {@link ForumChannel} The channel to follow.
  */
 async function followThis(
 	interaction: CommandInteraction,
 	typeName: TypeName,
+	ul: Translation,
 	followChan?: CategoryChannel | ThreadChannel | TextChannel | ForumChannel
 ) {
 	if (!followChan) {
 		await interaction.reply({
-			content: i18next.t("commands.error"),
+			content: ul("commands.error"),
 		});
 		return;
 	}
@@ -313,7 +303,7 @@ async function followThis(
 			newFollowed as ThreadChannel[] | CategoryChannel[] | TextChannel[] | ForumChannel[]
 		);
 		await interaction.reply({
-			content: i18next.t("follow.thread.remove", {
+			content: ul("follow.thread.remove", {
 				thread: followChan.name,
 			}),
 		});
@@ -326,7 +316,7 @@ async function followThis(
 			allFollowed as ThreadChannel[] | CategoryChannel[] | TextChannel[] | ForumChannel[]
 		);
 		await interaction.reply({
-			content: i18next.t("follow.thread.success", {
+			content: ul("follow.thread.success", {
 				thread: followChan.name,
 			}),
 		});

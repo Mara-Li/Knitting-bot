@@ -14,34 +14,26 @@ import {
 	TextChannel,
 	ThreadChannel,
 } from "discord.js";
-import { cmdLn } from "../i18n";
-import { default as i18next } from "../i18n/init";
-import { CommandName, TypeName } from "../interface";
+import { cmdLn, getUl, t } from "../i18n";
+import { CommandName, type Translation, TypeName } from "../interface";
 import { getConfig, getMaps, getRole, getRoleIn, setIgnore, setRole } from "../maps";
 import { toTitle } from "../utils";
 import { mapToStr } from "./index";
 import { interactionRoleInChannel } from "./utils";
 
-const en = i18next.getFixedT("en");
-
 export default {
 	data: new SlashCommandBuilder()
-		.setName("ignore")
-		.setDescription(en("ignore.description"))
-		.setDescriptionLocalizations(cmdLn("ignore.description"))
+		.setNames("ignore")
+		.setDescriptions("ignore.description")
 		.setDefaultMemberPermissions(PermissionFlagsBits.ManageThreads)
 		.addSubcommand((subcommand) =>
 			subcommand
-				.setName(en("common.channel").toLowerCase())
-				.setNameLocalizations(cmdLn("common.channel", true))
-				.setDescription(en("ignore.thread.description"))
-				.setDescriptionLocalizations(cmdLn("ignore.thread.description"))
+				.setNames("common.channel")
+				.setDescriptions("ignore.thread.description")
 				.addChannelOption((option) =>
 					option
-						.setName(en("common.channel").toLowerCase())
-						.setNameLocalizations(cmdLn("common.channel", true))
-						.setDescription(en("ignore.thread.option.description"))
-						.setDescriptionLocalizations(cmdLn("ignore.thread.option.description"))
+						.setNames("common.channel")
+						.setDescriptions("ignore.thread.option.description")
 						.addChannelTypes(
 							ChannelType.GuildCategory,
 							ChannelType.GuildText,
@@ -53,38 +45,32 @@ export default {
 		)
 		.addSubcommand((subcommand) =>
 			subcommand
-				.setName(en("common.role").toLowerCase())
-				.setNameLocalizations(cmdLn("common.role", true))
-				.setDescription(en("ignore.role.description"))
-				.setDescriptionLocalizations(cmdLn("ignore.role.description"))
-
+				.setNames("common.role".toLowerCase())
+				.setDescriptions("ignore.role.description")
 				.addRoleOption((option) =>
 					option
-						.setName(en("common.role").toLowerCase())
+						.setNames("common.role".toLowerCase())
 						.setNameLocalizations(cmdLn("common.role", true))
-						.setDescription(en("ignore.role.option"))
+						.setDescriptions("ignore.role.option")
 						.setDescriptionLocalizations(cmdLn("ignore.role.option"))
 						.setRequired(true)
 				)
 		)
 		.addSubcommand((subcommand) =>
 			subcommand
-				.setName(en("common.roleIn"))
-				.setNameLocalizations(cmdLn("common.roleIn"))
-				.setDescription(en("ignore.roleIn.description"))
-				.setDescriptionLocalizations(cmdLn("ignore.roleIn.description"))
+				.setNames("common.roleIn")
+				.setDescriptions("ignore.roleIn.description")
 				.addRoleOption((option) =>
 					option
-						.setName(en("common.role").toLowerCase())
-						.setDescription(en("ignore.roleIn.option.role"))
+						.setNames("common.role".toLowerCase())
+						.setDescriptions("ignore.roleIn.option.role")
 						.setDescriptionLocalizations(cmdLn("ignore.roleIn.option.role"))
 						.setRequired(true)
 				)
 				.addChannelOption((option) =>
 					option
-						.setName(en("common.channel").toLowerCase())
-						.setDescription(en("ignore.roleIn.option.chan"))
-						.setDescriptionLocalizations(cmdLn("ignore.roleIn.option.chan"))
+						.setNames("common.channel".toLowerCase())
+						.setDescriptions("ignore.roleIn.option.chan")
 						.setRequired(false)
 						.addChannelTypes(
 							ChannelType.GuildCategory,
@@ -96,47 +82,45 @@ export default {
 				)
 		)
 		.addSubcommand((subcommand) =>
-			subcommand
-				.setName(en("common.list"))
-				.setNameLocalizations(cmdLn("common.list"))
-				.setDescription(en("ignore.list.description"))
-				.setDescriptionLocalizations(cmdLn("ignore.list.description"))
+			subcommand.setNames("common.list").setDescriptions("ignore.list.description")
 		),
 	async execute(interaction: ChatInputCommandInteraction) {
 		if (!interaction.guild) return;
 		const guild = interaction.guild;
 		const options = interaction.options as CommandInteractionOptionResolver;
 		const commands = options.getSubcommand();
+		const ul = getUl(interaction);
+
 		/**
 		 * Verify if the "follow-only" mode is enabled ; return error if it is
 		 */
 		switch (commands) {
-			case en("common.channel").toLowerCase():
+			case t("common.channel").toLowerCase():
 				if (getConfig(CommandName.followOnlyChannel, guild.id)) {
 					await interaction.reply({
-						content: i18next.t("ignore.followError") as string,
+						content: ul("ignore.followError") as string,
 					});
 					return;
 				}
-				await ignoreText(interaction);
+				await ignoreText(interaction, ul);
 				break;
-			case en("common.role").toLowerCase():
+			case t("common.role").toLowerCase():
 				if (getConfig(CommandName.followOnlyRole, guild.id)) {
 					await interaction.reply({
-						content: i18next.t("ignore.followError") as string,
+						content: ul("ignore.followError") as string,
 					});
 					return;
 				}
-				await ignoreThisRole(interaction);
+				await ignoreThisRole(interaction, ul);
 				break;
-			case en("common.roleIn"):
+			case t("common.roleIn"):
 				await interactionRoleInChannel(interaction, "ignore");
 				break;
 			case "list":
-				await listIgnored(interaction);
+				await listIgnored(interaction, ul);
 				break;
 			default:
-				await listIgnored(interaction);
+				await listIgnored(interaction, ul);
 				break;
 		}
 	},
@@ -145,8 +129,9 @@ export default {
 /**
  * Display all ignored channels, roles and categories, but also the channels ignored by roles
  * @param interaction {@link CommandInteraction} the interaction to reply to
+ * @param ul
  */
-async function listIgnored(interaction: ChatInputCommandInteraction) {
+async function listIgnored(interaction: ChatInputCommandInteraction, ul: Translation) {
 	if (!interaction.guild) return;
 	const ignored = mapToStr("ignore", interaction.guild.id);
 	const roleIn = getRoleIn("ignore", interaction.guild.id);
@@ -160,31 +145,31 @@ async function listIgnored(interaction: ChatInputCommandInteraction) {
 	} = ignored;
 	const embed = new EmbedBuilder()
 		.setColor("#2f8e7d")
-		.setTitle(i18next.t("ignore.list.title"))
+		.setTitle(ul("ignore.list.title"))
 		.addFields({
-			name: i18next.t("common.category"),
-			value: ignoredCategoriesNames || i18next.t("ignore.list.none"),
+			name: ul("common.category"),
+			value: ignoredCategoriesNames || ul("ignore.list.none"),
 		})
 		.addFields({
-			name: i18next.t("common.channel"),
-			value: ignoredThreadsNames || i18next.t("ignore.list.none"),
+			name: ul("common.channel"),
+			value: ignoredThreadsNames || ul("ignore.list.none"),
 		})
 		.addFields({
-			name: i18next.t("common.channel"),
-			value: ignoredChannelsNames || i18next.t("ignore.list.none"),
+			name: ul("common.channel"),
+			value: ignoredChannelsNames || ul("ignore.list.none"),
 		})
 		.addFields({
-			name: i18next.t("common.forum"),
-			value: ignoredForumNames || i18next.t("ignore.list.none"),
+			name: ul("common.forum"),
+			value: ignoredForumNames || ul("ignore.list.none"),
 		})
 		.addFields({
-			name: toTitle(i18next.t("common.role")),
-			value: ignoredRolesNames || i18next.t("ignore.list.none"),
+			name: toTitle(ul("common.role")),
+			value: ignoredRolesNames || ul("ignore.list.none"),
 		});
 
 	if (roleIn.length > 0) {
 		const embed2 = new EmbedBuilder()
-			.setTitle(i18next.t("ignore.roleIn.title"))
+			.setTitle(ul("ignore.roleIn.title"))
 			.setColor("#2f8e7d")
 			.setDescription(ignoredRolesIn);
 		await interaction.reply({
@@ -201,14 +186,15 @@ async function listIgnored(interaction: ChatInputCommandInteraction) {
  * Ignore a role
  * @param interaction {@link CommandInteraction} the interaction to reply to
  * Also contains the role to ignore
+ * @param ul
  */
-async function ignoreThisRole(interaction: ChatInputCommandInteraction) {
+async function ignoreThisRole(interaction: ChatInputCommandInteraction, ul: Translation) {
 	if (!interaction.guild) return;
 	const guild = interaction.guild.id;
-	const role = interaction.options.get(en("common.role").toLowerCase());
+	const role = interaction.options.get(t("common.role").toLowerCase());
 	if (!role || !(role.role instanceof Role)) {
 		await interaction.reply({
-			content: i18next.t("ignore.role.error", { role: role?.name }) as string,
+			content: ul("ignore.role.error", { role: role?.name }) as string,
 		});
 		return;
 	}
@@ -225,14 +211,14 @@ async function ignoreThisRole(interaction: ChatInputCommandInteraction) {
 		);
 		setRole("ignore", guild, newIgnoreRoles);
 		await interaction.reply({
-			content: i18next.t("ignore.role.removed", { role: mention }) as string,
+			content: ul("ignore.role.removed", { role: mention }) as string,
 		});
 	} else {
 		//add to ignore list
 		allIgnoreRoles.push(role.role);
 		setRole("ignore", guild, allIgnoreRoles);
 		await interaction.reply({
-			content: i18next.t("ignore.role.added", { role: mention }) as string,
+			content: ul("ignore.role.added", { role: mention }) as string,
 		});
 	}
 }
@@ -242,21 +228,22 @@ async function ignoreThisRole(interaction: ChatInputCommandInteraction) {
  * Run the commands based on the type of the channel
  * @param interaction {@link CommandInteraction} the interaction to reply to
  * Also contains the channel to ignore
+ * @param ul
  */
-async function ignoreText(interaction: ChatInputCommandInteraction) {
+async function ignoreText(interaction: ChatInputCommandInteraction, ul: Translation) {
 	const toIgnore =
-		interaction.options.get(en("common.channel").toLowerCase()) ?? interaction;
+		interaction.options.get(t("common.channel").toLowerCase()) ?? interaction;
 	if (toIgnore.channel instanceof CategoryChannel) {
-		await ignoreThis(interaction, TypeName.category, toIgnore.channel);
+		await ignoreThis(interaction, TypeName.category, ul, toIgnore.channel);
 	} else if (toIgnore?.channel && toIgnore.channel instanceof ThreadChannel) {
-		await ignoreThis(interaction, TypeName.thread, toIgnore.channel);
+		await ignoreThis(interaction, TypeName.thread, ul, toIgnore.channel);
 	} else if (toIgnore?.channel && toIgnore.channel instanceof TextChannel) {
-		await ignoreThis(interaction, TypeName.channel, toIgnore.channel);
+		await ignoreThis(interaction, TypeName.channel, ul, toIgnore.channel);
 	} else if (toIgnore?.channel && toIgnore.channel instanceof ForumChannel) {
-		await ignoreThis(interaction, TypeName.forum, toIgnore.channel);
+		await ignoreThis(interaction, TypeName.forum, ul, toIgnore.channel);
 	} else {
 		await interaction.reply({
-			content: i18next.t("ignore.error") as string,
+			content: ul("ignore.error") as string,
 		});
 		return;
 	}
@@ -267,18 +254,20 @@ async function ignoreText(interaction: ChatInputCommandInteraction) {
  * Get maps based on the type of the channel
  * @param interaction {@link CommandInteraction} the interaction to reply to
  * @param typeName {@link TypeName} the type of the channel
+ * @param ul
  * @param ignoreCategory {@link CategoryChannel} the category to ignore
  */
 async function ignoreThis(
 	interaction: CommandInteraction,
 	typeName: TypeName,
+	ul: Translation,
 	ignoreCategory?: CategoryChannel | ThreadChannel | TextChannel | ForumChannel
 ) {
 	if (!interaction.guild) return;
 	const guild = interaction.guild.id;
 	if (!ignoreCategory) {
 		await interaction.reply({
-			content: i18next.t("commands.error") as string,
+			content: ul("commands.error") as string,
 		});
 		return;
 	}
@@ -330,7 +319,7 @@ async function ignoreThis(
 				| ForumChannel[]
 		);
 		await interaction.reply({
-			content: i18next.t("ignore.thread.remove", { thread: mention }) as string,
+			content: ul("ignore.thread.remove", { thread: mention }) as string,
 		});
 	} else {
 		//add to ignore list
@@ -341,7 +330,7 @@ async function ignoreThis(
 			allIgnored as ThreadChannel[] | CategoryChannel[] | TextChannel[] | ForumChannel[]
 		);
 		await interaction.reply({
-			content: i18next.t("ignore.thread.success", {
+			content: ul("ignore.thread.success", {
 				thread: mention,
 			}) as string,
 		});
