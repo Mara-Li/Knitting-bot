@@ -21,7 +21,8 @@
 		"dev:prod": "cross-env ENV=production tsx watch --clear-screen=false src/index.ts",
 		"prerelease": "pnpm run typecheck",
 		"release": "commit-and-tag-version",
-		"lint": "biome check --write src/ --unsafe"
+		"lint": "biome check --write src/ --unsafe",
+		"prod": "pnpm build && node dist/src/index.js"
 	},
 	"commit-and-tag-version": {
 		"t": ""

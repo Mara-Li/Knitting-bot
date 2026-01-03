@@ -8,7 +8,7 @@ import {
 } from "discord.js";
 import { getUl } from "../i18n";
 import { INFO_EMOJI, VERSION } from "../index";
-import "../discord_ext";
+import "../discord_ext.js";
 
 export default {
 	data: new SlashCommandBuilder().setName("info").setDescriptions("info.cmds"),

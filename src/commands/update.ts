@@ -15,7 +15,7 @@ import { getConfig } from "../maps";
 import { fetchArchived, updateCache } from "../utils";
 import { addRoleAndUserToThread } from "../utils/add";
 import { checkThread } from "../utils/data_check";
-import "../discord_ext";
+import "../discord_ext.js";
 
 export default {
 	data: new SlashCommandBuilder()
