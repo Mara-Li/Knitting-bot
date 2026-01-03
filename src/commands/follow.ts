@@ -8,6 +8,7 @@ import {
 	EmbedBuilder,
 	type ForumChannel,
 	LabelBuilder,
+	MessageFlags,
 	ModalBuilder,
 	type ModalSubmitInteraction,
 	PermissionFlagsBits,
@@ -25,6 +26,7 @@ import { toTitle } from "../utils";
 import { mapToStr } from "./index";
 import { interactionRoleInChannel } from "./utils";
 import "../discord_ext.js";
+import "uniformize";
 
 export default {
 	data: new SlashCommandBuilder()
@@ -180,17 +182,17 @@ async function followThisRole(interaction: ChatInputCommandInteraction, ul: Tran
 		.setCustomId("select_follow_roles")
 		.setDefaultRoles(followedRoles.map((r) => r.id))
 		.setMaxValues(25)
-		.setMinValues(0);
+		.setRequired(false);
 
 	const roleLabel = new LabelBuilder()
-		.setLabel(ul("common.role"))
+		.setLabel(ul("common.role").toTitle())
+		.setDescription(ul("follow.role.select.description"))
 		.setRoleSelectMenuComponent(roleSelect);
 
 	modal.addLabelComponents(roleLabel);
 
 	try {
 		const collectorFilter = (i: ModalSubmitInteraction) => {
-			i.deferUpdate();
 			return i.user.id === interaction.user.id;
 		};
 
@@ -201,28 +203,37 @@ async function followThisRole(interaction: ChatInputCommandInteraction, ul: Tran
 			time: 60_000,
 		});
 
-		const newRoles = selection.fields.getSelectedRoles("select_follow_roles", true);
+		const newRoles = selection.fields.getSelectedRoles("select_follow_roles", false);
 		const messages: string[] = [];
 
 		// Process roles
 		await processRoleType(
 			interaction,
 			followedRoles,
-			Array.from(newRoles.values()) as Role[],
+			Array.from((newRoles ?? new Map()).values()) as Role[],
 			ul,
 			messages
 		);
 
 		const finalMessage =
-			messages.length > 0 ? messages.join("\n") : ul("follow.thread.noSelection");
+			messages.length > 0
+				? `- ${messages.join("\n- ")}`
+				: ul("follow.thread.noSelection");
 
-		await interaction.editReply({
+		await selection.reply({
 			content: finalMessage,
+			flags: MessageFlags.Ephemeral,
 		});
 	} catch (e) {
-		await interaction.editReply({
-			content: "error.failedReply",
-		});
+		console.error(e);
+		try {
+			await interaction.reply({
+				content: "error.failedReply",
+				flags: MessageFlags.Ephemeral,
+			});
+		} catch {
+			// Interaction already acknowledged, ignore
+		}
 		return;
 	}
 }
@@ -272,7 +283,7 @@ async function channelSelectors(
 		.setChannelTypes(ChannelType.GuildCategory)
 		.setDefaultChannels(followedItems.categories.map((ch) => ch.id))
 		.setMaxValues(25)
-		.setMinValues(0);
+		.setRequired(false);
 
 	const categoryLabel = new LabelBuilder()
 		.setLabel(ul("common.category"))
@@ -284,10 +295,11 @@ async function channelSelectors(
 		.setChannelTypes(ChannelType.GuildText)
 		.setDefaultChannels(followedItems.channels.map((ch) => ch.id))
 		.setMaxValues(25)
-		.setMinValues(0);
+		.setRequired(false);
 
 	const channelLabel = new LabelBuilder()
 		.setLabel(ul("common.channel"))
+		.setDescription(ul("follow.thread.select.channelDescription"))
 		.setChannelSelectMenuComponent(channelSelect);
 
 	// Threads select menu
@@ -296,10 +308,11 @@ async function channelSelectors(
 		.setChannelTypes(ChannelType.PublicThread, ChannelType.PrivateThread)
 		.setDefaultChannels(followedItems.threads.map((ch) => ch.id))
 		.setMaxValues(25)
-		.setMinValues(0);
+		.setRequired(false);
 
 	const threadLabel = new LabelBuilder()
 		.setLabel(ul("common.thread"))
+		.setDescription(ul("follow.thread.select.threadDescription"))
 		.setChannelSelectMenuComponent(threadSelect);
 
 	// Forum select menu
@@ -308,34 +321,17 @@ async function channelSelectors(
 		.setChannelTypes(ChannelType.GuildForum)
 		.setDefaultChannels(followedItems.forums.map((ch) => ch.id))
 		.setMaxValues(25)
-		.setMinValues(0);
+		.setRequired(false);
 
 	const forumLabel = new LabelBuilder()
 		.setLabel(ul("common.forum"))
+		.setDescription(ul("follow.thread.select.forumDescription"))
 		.setChannelSelectMenuComponent(forumSelect);
 
-	// Roles select menu
-	const roleSelect = new RoleSelectMenuBuilder()
-		.setCustomId("select_roles")
-		.setDefaultRoles(followedItems.roles.map((r) => r.id))
-		.setMaxValues(25)
-		.setMinValues(0);
-
-	const roleLabel = new LabelBuilder()
-		.setLabel(ul("common.role"))
-		.setRoleSelectMenuComponent(roleSelect);
-
-	modal.addLabelComponents(
-		categoryLabel,
-		channelLabel,
-		threadLabel,
-		forumLabel,
-		roleLabel
-	);
+	modal.addLabelComponents(categoryLabel, channelLabel, threadLabel, forumLabel);
 
 	try {
 		const collectorFilter = (i: ModalSubmitInteraction) => {
-			i.deferUpdate();
 			return i.user.id === interaction.user.id;
 		};
 
@@ -348,20 +344,19 @@ async function channelSelectors(
 
 		const newCategories = selection.fields.getSelectedChannels(
 			"select_categories",
-			true,
+			false,
 			[ChannelType.GuildCategory]
 		);
-		const newChannels = selection.fields.getSelectedChannels("select_channels", true, [
+		const newChannels = selection.fields.getSelectedChannels("select_channels", false, [
 			ChannelType.GuildText,
 		]);
-		const newThreads = selection.fields.getSelectedChannels("select_threads", true, [
+		const newThreads = selection.fields.getSelectedChannels("select_threads", false, [
 			ChannelType.PublicThread,
 			ChannelType.PrivateThread,
 		]);
-		const newForums = selection.fields.getSelectedChannels("select_forums", true, [
+		const newForums = selection.fields.getSelectedChannels("select_forums", false, [
 			ChannelType.GuildForum,
 		]);
-		const newRoles = selection.fields.getSelectedRoles("select_roles", true);
 
 		const messages: string[] = [];
 
@@ -369,7 +364,7 @@ async function channelSelectors(
 		await processChannelType(
 			interaction,
 			followedItems.categories,
-			Array.from(newCategories.values()) as CategoryChannel[],
+			Array.from((newCategories ?? new Map()).values()) as CategoryChannel[],
 			TypeName.category,
 			ul,
 			messages
@@ -379,7 +374,7 @@ async function channelSelectors(
 		await processChannelType(
 			interaction,
 			followedItems.channels,
-			Array.from(newChannels.values()) as TextChannel[],
+			Array.from((newChannels ?? new Map()).values()) as TextChannel[],
 			TypeName.channel,
 			ul,
 			messages
@@ -389,7 +384,7 @@ async function channelSelectors(
 		await processChannelType(
 			interaction,
 			followedItems.threads,
-			Array.from(newThreads.values()) as ThreadChannel[],
+			Array.from((newThreads ?? new Map()).values()) as ThreadChannel[],
 			TypeName.thread,
 			ul,
 			messages
@@ -399,31 +394,31 @@ async function channelSelectors(
 		await processChannelType(
 			interaction,
 			followedItems.forums,
-			Array.from(newForums.values()) as ForumChannel[],
+			Array.from((newForums ?? new Map()).values()) as ForumChannel[],
 			TypeName.forum,
 			ul,
 			messages
 		);
 
-		// Process roles
-		await processRoleType(
-			interaction,
-			followedItems.roles,
-			Array.from(newRoles.values()) as Role[],
-			ul,
-			messages
-		);
-
 		const finalMessage =
-			messages.length > 0 ? messages.join("\n") : ul("follow.thread.noSelection");
+			messages.length > 0
+				? `- ${messages.join("\n- ")}`
+				: ul("follow.thread.noSelection");
 
-		await interaction.editReply({
+		await selection.reply({
 			content: finalMessage,
+			flags: MessageFlags.Ephemeral,
 		});
 	} catch (e) {
-		await interaction.editReply({
-			content: "error.failedReply",
-		});
+		console.error(e);
+		try {
+			await interaction.reply({
+				content: "error.failedReply",
+				flags: MessageFlags.Ephemeral,
+			});
+		} catch {
+			// Interaction already acknowledged, ignore
+		}
 		return;
 	}
 }
@@ -535,15 +530,32 @@ async function processChannelType(
 	const oldIds = new Set(oldItems.map((ch) => ch.id));
 	const newIds = new Set(newItems.map((ch) => ch.id));
 
+	// Get the type label for display
+	let typeLabel = ul("common.channel");
+	switch (typeName) {
+		case TypeName.category:
+			typeLabel = ul("common.category");
+			break;
+		case TypeName.thread:
+			typeLabel = ul("common.thread");
+			break;
+		case TypeName.forum:
+			typeLabel = ul("common.forum");
+			break;
+		case TypeName.channel:
+			typeLabel = ul("common.channel");
+			break;
+	}
+
 	// Find removed items (were followed, now deselected)
 	for (const oldItem of oldItems) {
 		if (!newIds.has(oldItem.id)) {
 			const result = await followThis(interaction, typeName, ul, oldItem, true);
 			if (result) {
 				messages.push(
-					ul("follow.thread.remove", {
+					`[${typeLabel}] ${ul("follow.thread.remove", {
 						thread: result,
-					})
+					})}`
 				);
 			}
 		}
@@ -555,9 +567,9 @@ async function processChannelType(
 			const result = await followThis(interaction, typeName, ul, newItem, false);
 			if (result) {
 				messages.push(
-					ul("follow.thread.success", {
+					`[${typeLabel}] ${ul("follow.thread.success", {
 						thread: result,
-					})
+					})}`
 				);
 			}
 		}
@@ -585,11 +597,13 @@ async function processRoleType(
 	const oldIds = new Set(oldRoles.map((r) => r.id));
 	const newIds = new Set(newRoles.map((r) => r.id));
 
+	const addedRoles: Role[] = [];
+	const removedRoles: Role[] = [];
+
 	// Find removed roles (were followed, now deselected)
 	for (const oldRole of oldRoles) {
 		if (!newIds.has(oldRole.id)) {
-			const updatedRoles = oldRoles.filter((r) => r.id !== oldRole.id);
-			setRole("follow", guildID, updatedRoles);
+			removedRoles.push(oldRole);
 			messages.push(
 				ul("follow.role.removed", {
 					role: roleMention(oldRole.id),
@@ -601,8 +615,7 @@ async function processRoleType(
 	// Find added roles (weren't followed, now selected)
 	for (const newRole of newRoles) {
 		if (!oldIds.has(newRole.id)) {
-			const updatedRoles = [...oldRoles, newRole];
-			setRole("follow", guildID, updatedRoles);
+			addedRoles.push(newRole);
 			messages.push(
 				ul("follow.role.added", {
 					role: roleMention(newRole.id),
@@ -610,4 +623,11 @@ async function processRoleType(
 			);
 		}
 	}
+
+	// Calculate final roles list and save once
+	let finalRoles = oldRoles.filter(
+		(r) => !removedRoles.some((removed) => removed.id === r.id)
+	);
+	finalRoles = [...finalRoles, ...addedRoles];
+	setRole("follow", guildID, finalRoles);
 }

@@ -186,10 +186,13 @@
       "title": "Suivi"
     },
     "role": {
-      "added": "{{- role}} suivi",
+      "added": "{{- role}} : suivi",
       "description": "Role à suivre ou ne plus suivre",
       "option": "Sélection le role",
-      "removed": "{{- role}} non-suivi"
+      "removed": "{{- role}} : non-suivi",
+      "select": {
+        "description": "Veuillez sélectionner les rôles à suivre. Désélectionner ceux qui ne sont plus à suivre."
+      }
     },
     "roleIn": {
       "description": "Suivre un role pour un salon spécifique",
@@ -200,10 +203,17 @@
     },
     "thread": {
       "description": "Sélectionne un salon, thread, catégorie, ou forum, à suivre",
+      "noSelection": "Aucune sélection n'a été faite.",
       "option": {
         "description": "Salon à suivre"
       },
       "remove": "{{- thread}} a été supprimé du suivi",
+      "select": {
+        "channelDescription": "Veuillez sélectionner les channels à suivre et déselectionner ceux à ne plus suivre.",
+        "forumDescription": "Veuillez sélectionner les forum à suivre et désélectionner ceux à ne plus suivre.",
+        "label": "Channels",
+        "threadDescription": "Veuillez sélectionner les fils à suivre et désélectionner ceux à ne plus suivre."
+      },
       "success": "{{- thread}} est maintenant suivi."
     }
   },

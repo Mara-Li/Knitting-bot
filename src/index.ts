@@ -10,10 +10,11 @@ import onThreadDeleted from "./events/delete/onThreadDeleted";
 import interactionCreate from "./events/interactionCreate";
 import onBotEnter from "./events/onBotEnter";
 import onGuildQuit from "./events/onGuildQuit";
+import onPinsUpdate from "./events/pinUpdate";
 import ready from "./events/ready";
 import memberUpdate from "./events/updated/memberUpdate";
 import onChannelUpdate from "./events/updated/onChannelUpdate";
-import onPinsUpdate from "./events/pinUpdate";
+import "uniformize";
 
 let config = dotenv.config({ path: ".env", quiet: true });
 if (process.env.ENV === "production") {

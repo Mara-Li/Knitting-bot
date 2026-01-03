@@ -186,10 +186,13 @@
       "title": "Follow"
     },
     "role": {
-      "added": "{{- role}} followed",
+      "added": "{{- role}}: followed",
       "description": "Role to follow/unfollow",
       "option": "Select the role",
-      "removed": "{{- role}} unfollowed"
+      "removed": "{{- role}} : unfollowed",
+      "select": {
+        "description": "Please select the roles to be followed. Deselect those no longer to be followed."
+      }
     },
     "roleIn": {
       "description": "Follow a role for a channel",
@@ -200,10 +203,17 @@
     },
     "thread": {
       "description": "Select a thread, channel, forum, category, to follow",
+      "noSelection": "",
       "option": {
         "description": "Salon à suivre"
       },
       "remove": "{{- thread}} is unfollowed.",
+      "select": {
+        "channelDescription": "",
+        "forumDescription": "Please select the forums you wish to follow and deselect those you no longer wish to follow.",
+        "label": "Channels",
+        "threadDescription": "Please select the feeds you wish to follow and deselect those you no longer wish to follow."
+      },
       "success": "{{- thread}} is now followed."
     }
   },

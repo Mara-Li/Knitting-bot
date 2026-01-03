@@ -47,6 +47,9 @@ importers:
       ts-dedent:
         specifier: ^2.2.0
         version: 2.2.0
+      uniformize:
+        specifier: ^2.5.0
+        version: 2.5.0(typescript@5.9.3)
     devDependencies:
       '@biomejs/biome':
         specifier: 2.3.10
@@ -1753,6 +1756,11 @@ packages:
   undici@6.21.3:
     resolution: {integrity: sha512-gBLkYIlEnSp8pFbT64yFgGE6UIB9tAkhukC23PmMDCe5Nd+cRqKxSjw5y54MK2AZMgZfJWMaNE4nYUHgi1XEOw==}
     engines: {node: '>=18.17'}
+
+  uniformize@2.5.0:
+    resolution: {integrity: sha512-6vGiMalxsg8h9mMDIrRo3bUsgsrBcQhReQkm2L98FviDKAUK6anugzXbNaQ2XGTCrRruIzGZuEBQlX5R1HXW/g==}
+    peerDependencies:
+      typescript: ^5.9.2
 
   util-deprecate@1.0.2:
     resolution: {integrity: sha512-EPD5q1uXyFxJpCrLnCc1nHnq3gOa6DZBocAIiI2TaSCA7VCJ1UJDMagCzIkXNsUYfD1daK//LTEQ8xiIbrHtcw==}
@@ -3508,6 +3516,10 @@ snapshots:
   undici-types@6.19.8: {}
 
   undici@6.21.3: {}
+
+  uniformize@2.5.0(typescript@5.9.3):
+    dependencies:
+      typescript: 5.9.3
 
   util-deprecate@1.0.2: {}
 
