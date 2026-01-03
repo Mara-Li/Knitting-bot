@@ -241,6 +241,24 @@ function getFollow(
 	}
 }
 
+export function getAllFollowedChannels(guildId: string) {
+	const followConfig = followOnlyMaps.ensure(
+		guildId,
+		DEFAULT_IGNORE_FOLLOW
+	) as IgnoreFollow;
+	const followedForum = followConfig[TypeName.forum];
+	const followedChannel = followConfig[TypeName.channel];
+	const followedCategory = followConfig[TypeName.category];
+	const followedThread = followConfig[TypeName.thread];
+	//combine all arrays into one
+	return [
+		...(followedForum ?? []),
+		...(followedChannel ?? []),
+		...(followedCategory ?? []),
+		...(followedThread ?? []),
+	];
+}
+
 /**
  * Get a value for the Emaps "Ignore"
  * @param ignore {TypeName}

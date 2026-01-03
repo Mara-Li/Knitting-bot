@@ -1,21 +1,36 @@
 import {
+	type APIChannel,
 	CategoryChannel,
+	type Channel,
+	ChannelSelectMenuBuilder,
+	type ChannelSelectMenuInteraction,
 	ChannelType,
 	type ChatInputCommandInteraction,
 	type CommandInteraction,
 	type CommandInteractionOptionResolver,
+	ComponentType,
 	EmbedBuilder,
 	ForumChannel,
+	LabelBuilder,
+	ModalBuilder,
 	PermissionFlagsBits,
 	Role,
 	roleMention,
 	SlashCommandBuilder,
+	type StringSelectMenuInteraction,
 	TextChannel,
 	ThreadChannel,
 } from "discord.js";
 import { cmdLn, getUl, t } from "../i18n";
 import { CommandName, type Translation, TypeName } from "../interface";
-import { getConfig, getMaps, getRole, setFollow, setRole } from "../maps";
+import {
+	getAllFollowedChannels,
+	getConfig,
+	getMaps,
+	getRole,
+	setFollow,
+	setRole,
+} from "../maps";
 import { toTitle } from "../utils";
 import { mapToStr } from "./index";
 import { interactionRoleInChannel } from "./utils";
@@ -27,21 +42,7 @@ export default {
 		.setDescriptions("follow.description")
 		.setDefaultMemberPermissions(PermissionFlagsBits.ManageThreads)
 		.addSubcommand((subcommand) =>
-			subcommand
-				.setNames("common.channel")
-				.setDescriptions("follow.thread.description")
-				.addChannelOption((option) =>
-					option
-						.setNames("common.channel")
-						.setDescriptions("follow.thread.option.description")
-						.addChannelTypes(
-							ChannelType.GuildCategory,
-							ChannelType.GuildText,
-							ChannelType.PublicThread,
-							ChannelType.PrivateThread,
-							ChannelType.GuildForum
-						)
-				)
+			subcommand.setNames("common.channel").setDescriptions("follow.thread.description")
 		)
 		.addSubcommand((subcommand) =>
 			subcommand
@@ -98,7 +99,7 @@ export default {
 					});
 					return;
 				}
-				await followText(interaction, ul);
+				await channelSelectors(interaction, ul);
 				break;
 			case t("common.role").toLowerCase():
 				if (!getConfig(CommandName.followOnlyRole, guild)) {
@@ -231,6 +232,79 @@ async function followThisRole(interaction: ChatInputCommandInteraction, ul: Tran
 	}
 }
 
+async function channelSelectors(
+	interaction: ChatInputCommandInteraction,
+	ul: Translation
+) {
+	const oldChannel = getAllFollowedChannels(interaction.guild?.id ?? "");
+	//now we can select multiple channels in a modal
+	//so we will using this instead of the current command
+	const modal = new ModalBuilder().setCustomId("myModal").setTitle("My Modal");
+	//create a select menu
+	const channelSelect = new ChannelSelectMenuBuilder()
+		.setCustomId("select_channels")
+		.setChannelTypes(
+			ChannelType.GuildText,
+			ChannelType.GuildCategory,
+			ChannelType.PublicThread,
+			ChannelType.PrivateThread,
+			ChannelType.GuildForum
+		)
+		.setDefaultChannels(oldChannel.map((ch) => ch.id))
+		.setMaxValues(25);
+
+	const label = new LabelBuilder()
+		.setLabel(ul("follow.thread.select.label"))
+		.setChannelSelectMenuComponent(channelSelect);
+
+	modal.addLabelComponents(label);
+
+	try {
+		const collectorFilter = (i) => {
+			i.deferUpdate();
+			return i.user.id === interaction.user.id;
+		};
+
+		await interaction.showModal(modal);
+
+		const selection = await interaction.awaitModalSubmit({
+			filter: collectorFilter,
+			time: 60_000,
+		});
+
+		const selections = [];
+		const channels = selection.fields.getSelectedChannels("select_channels", true, [
+			ChannelType.GuildText,
+			ChannelType.GuildCategory,
+			ChannelType.PublicThread,
+			ChannelType.PrivateThread,
+			ChannelType.GuildForum,
+		]);
+		if (!channels || channels.size === 0) {
+			await interaction.reply({
+				content: ul("follow.thread.noSelection"),
+			});
+			return;
+		}
+		for (const channel of channels.values()) selections.push(channel as Channel);
+
+		console.log(
+			"Selected channels collector started.",
+			selections.map((ch) => ch.id)
+		);
+		await Promise.all(
+			selections.map(async (sel) => {
+				await follow(interaction, sel, ul);
+			})
+		);
+	} catch (e) {
+		await interaction.editReply({
+			content: "error.failedReply",
+		});
+		return;
+	}
+}
+
 /**
  * Check the type of the channel and run {@link followThis} with the right type
  * @param interaction {@link CommandInteraction} The interaction to reply to.
@@ -247,6 +321,27 @@ async function followText(interaction: ChatInputCommandInteraction, ul: Translat
 		await followThis(interaction, TypeName.channel, ul, toIgnore.channel);
 	} else if (toIgnore?.channel && toIgnore.channel instanceof ForumChannel) {
 		await followThis(interaction, TypeName.forum, ul, toIgnore.channel);
+	} else {
+		await interaction.reply({
+			content: ul("ignore.error"),
+		});
+		return;
+	}
+}
+
+async function follow(
+	interaction: ChatInputCommandInteraction,
+	channel: Channel,
+	ul: Translation
+) {
+	if (channel instanceof CategoryChannel) {
+		await followThis(interaction, TypeName.category, ul, channel);
+	} else if (channel && channel instanceof ThreadChannel) {
+		await followThis(interaction, TypeName.thread, ul, channel);
+	} else if (channel && channel instanceof TextChannel) {
+		await followThis(interaction, TypeName.channel, ul, channel);
+	} else if (channel && channel instanceof ForumChannel) {
+		await followThis(interaction, TypeName.forum, ul, channel);
 	} else {
 		await interaction.reply({
 			content: ul("ignore.error"),
@@ -303,7 +398,7 @@ async function followThis(
 			guild,
 			newFollowed as ThreadChannel[] | CategoryChannel[] | TextChannel[] | ForumChannel[]
 		);
-		await interaction.reply({
+		await interaction.followUp({
 			content: ul("follow.thread.remove", {
 				thread: followChan.name,
 			}),
@@ -316,7 +411,7 @@ async function followThis(
 			guild,
 			allFollowed as ThreadChannel[] | CategoryChannel[] | TextChannel[] | ForumChannel[]
 		);
-		await interaction.reply({
+		await interaction.followUp({
 			content: ul("follow.thread.success", {
 				thread: followChan.name,
 			}),
