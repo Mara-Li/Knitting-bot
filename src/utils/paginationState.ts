@@ -1,0 +1,181 @@
+import type {
+	CategoryChannel,
+	ForumChannel,
+	TextChannel,
+	ThreadChannel,
+} from "discord.js";
+
+/**
+ * Temporary state for paginated channel selection
+ * Key: userId_guildId_mode (e.g., "123456789_987654321_follow")
+ */
+export interface PaginationState {
+	userId: string;
+	guildId: string;
+	mode: "follow" | "ignore";
+	currentPage: number;
+	selectedCategories: Set<string>;
+	selectedChannels: Set<string>;
+	selectedThreads: Set<string>;
+	selectedForums: Set<string>;
+	timestamp: number; // Pour cleanup automatique
+}
+
+const paginationStates = new Map<string, PaginationState>();
+
+// Cleanup automatique après 10 minutes
+const CLEANUP_TIMEOUT = 10 * 60 * 1000;
+
+/**
+ * Create or get pagination state
+ */
+export function getPaginationState(
+	userId: string,
+	guildId: string,
+	mode: "follow" | "ignore"
+): PaginationState {
+	const key = `${userId}_${guildId}_${mode}`;
+	let state = paginationStates.get(key);
+
+	if (!state) {
+		state = {
+			userId,
+			guildId,
+			mode,
+			currentPage: 0,
+			selectedCategories: new Set(),
+			selectedChannels: new Set(),
+			selectedThreads: new Set(),
+			selectedForums: new Set(),
+			timestamp: Date.now(),
+		};
+		paginationStates.set(key, state);
+	}
+
+	state.timestamp = Date.now();
+	return state;
+}
+
+/**
+ * Initialize pagination state with current tracked items
+ */
+export function initializePaginationState(
+	userId: string,
+	guildId: string,
+	mode: "follow" | "ignore",
+	currentItems: {
+		categories: CategoryChannel[];
+		channels: TextChannel[];
+		threads: ThreadChannel[];
+		forums: ForumChannel[];
+	}
+): PaginationState {
+	const key = `${userId}_${guildId}_${mode}`;
+	const state: PaginationState = {
+		userId,
+		guildId,
+		mode,
+		currentPage: 0,
+		selectedCategories: new Set(currentItems.categories.map((c) => c.id)),
+		selectedChannels: new Set(currentItems.channels.map((c) => c.id)),
+		selectedThreads: new Set(currentItems.threads.map((t) => t.id)),
+		selectedForums: new Set(currentItems.forums.map((f) => f.id)),
+		timestamp: Date.now(),
+	};
+	paginationStates.set(key, state);
+	return state;
+}
+
+/**
+ * Update pagination state with new selections from a page
+ */
+export function updatePaginationState(
+	userId: string,
+	guildId: string,
+	mode: "follow" | "ignore",
+	page: number,
+	newSelections: {
+		categories: string[];
+		channels: string[];
+		threads: string[];
+		forums: string[];
+	}
+): void {
+	const state = getPaginationState(userId, guildId, mode);
+	state.currentPage = page;
+
+	// Merge les nouvelles sélections avec l'état existant
+	for (const id of newSelections.categories) {
+		state.selectedCategories.add(id);
+	}
+	for (const id of newSelections.channels) {
+		state.selectedChannels.add(id);
+	}
+	for (const id of newSelections.threads) {
+		state.selectedThreads.add(id);
+	}
+	for (const id of newSelections.forums) {
+		state.selectedForums.add(id);
+	}
+
+	state.timestamp = Date.now();
+}
+
+/**
+ * Remove selections from state (when user deselects)
+ */
+export function removeFromPaginationState(
+	userId: string,
+	guildId: string,
+	mode: "follow" | "ignore",
+	removedSelections: {
+		categories: string[];
+		channels: string[];
+		threads: string[];
+		forums: string[];
+	}
+): void {
+	const state = getPaginationState(userId, guildId, mode);
+
+	for (const id of removedSelections.categories) {
+		state.selectedCategories.delete(id);
+	}
+	for (const id of removedSelections.channels) {
+		state.selectedChannels.delete(id);
+	}
+	for (const id of removedSelections.threads) {
+		state.selectedThreads.delete(id);
+	}
+	for (const id of removedSelections.forums) {
+		state.selectedForums.delete(id);
+	}
+
+	state.timestamp = Date.now();
+}
+
+/**
+ * Clear pagination state
+ */
+export function clearPaginationState(
+	userId: string,
+	guildId: string,
+	mode: "follow" | "ignore"
+): void {
+	const key = `${userId}_${guildId}_${mode}`;
+	paginationStates.delete(key);
+}
+
+/**
+ * Cleanup old states (called periodically)
+ */
+export function cleanupOldStates(): void {
+	const now = Date.now();
+	for (const [key, state] of paginationStates.entries()) {
+		if (now - state.timestamp > CLEANUP_TIMEOUT) {
+			paginationStates.delete(key);
+		}
+	}
+}
+
+// Auto-cleanup toutes les 5 minutes
+setInterval(cleanupOldStates, 5 * 60 * 1000);

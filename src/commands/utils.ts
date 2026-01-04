@@ -1,51 +1,385 @@
-import {
-	type CategoryChannel,
-	ChannelSelectMenuBuilder,
-	ChannelType,
-	type ChatInputCommandInteraction,
-	channelMention,
-	type ForumChannel,
-	LabelBuilder,
-	ModalBuilder,
-	type ModalSubmitInteraction,
-	type Role,
-	roleMention,
-	type TextChannel,
-	type ThreadChannel,
-} from "discord.js";
+import * as Djs from "discord.js";
 import { getUl, t } from "../i18n";
 import { CommandName, type RoleIn } from "../interface";
 import { getConfig, getRoleIn, setRoleIn } from "../maps";
+import { createPaginatedChannelModal } from "../utils/modalHandler";
 
 /**
  * Follow or ignore roles in specific channels using a modal
  * @param interaction {@link ChatInputCommandInteraction} The interaction that triggered the command.
  * @param on {"follow" | "ignore"} The mode to use
  */
-export async function interactionRoleInChannel(
-	interaction: ChatInputCommandInteraction,
-	on: "follow" | "ignore"
+type RoleInMode = "follow" | "ignore";
+
+type RoleInPaginationState = {
+	userId: string;
+	guildId: string;
+	mode: RoleInMode;
+	roleId: string;
+	currentPage: number;
+	selectedCategories: Set<string>;
+	selectedChannels: Set<string>;
+	selectedThreads: Set<string>;
+	selectedForums: Set<string>;
+};
+
+const roleInStates = new Map<string, RoleInPaginationState>();
+
+function roleInKey(userId: string, guildId: string, mode: RoleInMode, roleId: string) {
+	return `${userId}_${guildId}_${mode}_${roleId}`;
+}
+
+function initRoleInState(
+	userId: string,
+	guildId: string,
+	mode: RoleInMode,
+	roleId: string,
+	initialChannels: (
+		| Djs.CategoryChannel
+		| Djs.ForumChannel
+		| Djs.ThreadChannel
+		| Djs.TextChannel
+	)[]
+): RoleInPaginationState {
+	const key = roleInKey(userId, guildId, mode, roleId);
+	const state: RoleInPaginationState = {
+		currentPage: 0,
+		guildId,
+		mode,
+		roleId,
+		selectedCategories: new Set(
+			initialChannels
+				.filter((c) => c.type === Djs.ChannelType.GuildCategory)
+				.map((c) => c.id)
+		),
+		selectedChannels: new Set(
+			initialChannels.filter((c) => c.type === Djs.ChannelType.GuildText).map((c) => c.id)
+		),
+		selectedForums: new Set(
+			initialChannels
+				.filter((c) => c.type === Djs.ChannelType.GuildForum)
+				.map((c) => c.id)
+		),
+		selectedThreads: new Set(
+			initialChannels
+				.filter(
+					(c) =>
+						c.type === Djs.ChannelType.PublicThread ||
+						c.type === Djs.ChannelType.PrivateThread
+				)
+				.map((c) => c.id)
+		),
+		userId,
+	};
+	roleInStates.set(key, state);
+	return state;
+}
+
+function getRoleInState(
+	userId: string,
+	guildId: string,
+	mode: RoleInMode,
+	roleId: string
+): RoleInPaginationState | undefined {
+	return roleInStates.get(roleInKey(userId, guildId, mode, roleId));
+}
+
+function clearRoleInState(
+	userId: string,
+	guildId: string,
+	mode: RoleInMode,
+	roleId: string
 ) {
-	const opposite = on === "follow" ? "ignore" : "follow";
+	roleInStates.delete(roleInKey(userId, guildId, mode, roleId));
+}
+
+function buildRoleInButtons(
+	on: RoleInMode,
+	page: number,
+	hasMore: boolean,
+	roleId: string,
+	ul: ReturnType<typeof getUl>
+) {
+	const buttons: Djs.ButtonBuilder[] = [];
+	buttons.push(
+		new Djs.ButtonBuilder()
+			.setCustomId(`${on}_roleIn_prev_${roleId}_${page}`)
+			.setEmoji("◀️")
+			.setStyle(Djs.ButtonStyle.Secondary)
+			.setLabel(ul("common.previous"))
+			.setDisabled(page === 0)
+	);
+	buttons.push(
+		new Djs.ButtonBuilder()
+			.setCustomId(`${on}_roleIn_next_${roleId}_${page}`)
+			.setEmoji("➡️")
+			.setStyle(Djs.ButtonStyle.Secondary)
+			.setLabel(ul("common.next"))
+			.setDisabled(!hasMore)
+	);
+	buttons.push(
+		new Djs.ButtonBuilder()
+			.setCustomId(`${on}_roleIn_validate_${roleId}`)
+			.setEmoji("✅")
+			.setStyle(Djs.ButtonStyle.Success)
+			.setLabel(ul("common.validate"))
+	);
+	buttons.push(
+		new Djs.ButtonBuilder()
+			.setCustomId(`${on}_roleIn_cancel_${roleId}`)
+			.setEmoji("❌")
+			.setStyle(Djs.ButtonStyle.Danger)
+			.setLabel(ul("common.cancel"))
+	);
+	return [new Djs.ActionRowBuilder<Djs.ButtonBuilder>().addComponents(buttons)];
+}
+
+async function showRoleInPaginatedModal(
+	interaction: Djs.ButtonInteraction,
+	guild: NonNullable<Djs.ChatInputCommandInteraction["guild"]>,
+	userId: string,
+	guildID: string,
+	roleId: string,
+	page: number,
+	ul: ReturnType<typeof getUl>,
+	on: RoleInMode
+) {
+	let state = getRoleInState(userId, guildID, on, roleId);
+	if (!state) {
+		const allRoleIn = getRoleIn(on, guildID);
+		const existingRoleIn = allRoleIn.find((r) => r.role.id === roleId);
+		state = initRoleInState(userId, guildID, on, roleId, existingRoleIn?.channels ?? []);
+	}
+	state.currentPage = page;
+
+	const selectedIds = {
+		categories: state.selectedCategories,
+		channels: state.selectedChannels,
+		forums: state.selectedForums,
+		threads: state.selectedThreads,
+	};
+
+	const shortTitle = `${ul("common.role")}: ${ul("common.roleIn")}`;
+	const { modal, hasMore } = createPaginatedChannelModal(
+		on,
+		ul,
+		guild,
+		page,
+		selectedIds,
+		shortTitle
+	);
+
+	await interaction.showModal(modal);
+	const modalSubmit = await interaction.awaitModalSubmit({
+		filter: (i) => i.user.id === userId,
+		time: 60_000,
+	});
+
+	const newCategories =
+		modalSubmit.fields.getSelectedChannels("select_categories", false, [
+			Djs.ChannelType.GuildCategory,
+		]) ?? new Map();
+	const newChannels =
+		modalSubmit.fields.getSelectedChannels("select_channels", false, [
+			Djs.ChannelType.GuildText,
+		]) ?? new Map();
+	const newThreads =
+		modalSubmit.fields.getSelectedChannels("select_threads", false, [
+			Djs.ChannelType.PublicThread,
+			Djs.ChannelType.PrivateThread,
+		]) ?? new Map();
+	const newForums =
+		modalSubmit.fields.getSelectedChannels("select_forums", false, [
+			Djs.ChannelType.GuildForum,
+		]) ?? new Map();
+
+	const newSelectedIds = {
+		categories: Array.from(newCategories.keys()),
+		channels: Array.from(newChannels.keys()),
+		forums: Array.from(newForums.keys()),
+		threads: Array.from(newThreads.keys()),
+	};
+
+	const availableOnPage = {
+		categories: Array.from(
+			guild.channels.cache
+				.filter((c) => c.type === Djs.ChannelType.GuildCategory)
+				.values()
+		)
+			.slice(page * 25, (page + 1) * 25)
+			.map((c) => c.id),
+		channels: Array.from(
+			guild.channels.cache.filter((c) => c.type === Djs.ChannelType.GuildText).values()
+		)
+			.slice(page * 25, (page + 1) * 25)
+			.map((c) => c.id),
+		forums: Array.from(
+			guild.channels.cache.filter((c) => c.type === Djs.ChannelType.GuildForum).values()
+		)
+			.slice(page * 25, (page + 1) * 25)
+			.map((c) => c.id),
+		threads: Array.from(
+			guild.channels.cache
+				.filter(
+					(c) =>
+						c.type === Djs.ChannelType.PublicThread ||
+						c.type === Djs.ChannelType.PrivateThread
+				)
+				.values()
+		)
+			.slice(page * 25, (page + 1) * 25)
+			.map((c) => c.id),
+	};
+
+	for (const id of availableOnPage.categories) {
+		if (!newSelectedIds.categories.includes(id)) state.selectedCategories.delete(id);
+	}
+	for (const id of availableOnPage.channels) {
+		if (!newSelectedIds.channels.includes(id)) state.selectedChannels.delete(id);
+	}
+	for (const id of availableOnPage.threads) {
+		if (!newSelectedIds.threads.includes(id)) state.selectedThreads.delete(id);
+	}
+	for (const id of availableOnPage.forums) {
+		if (!newSelectedIds.forums.includes(id)) state.selectedForums.delete(id);
+	}
+
+	for (const id of newSelectedIds.categories) state.selectedCategories.add(id);
+	for (const id of newSelectedIds.channels) state.selectedChannels.add(id);
+	for (const id of newSelectedIds.threads) state.selectedThreads.add(id);
+	for (const id of newSelectedIds.forums) state.selectedForums.add(id);
+
+	const buttons = buildRoleInButtons(on, page, hasMore, roleId, ul);
+	const summary =
+		`Page ${page + 1} - ${ul("common.role")}: ${Djs.roleMention(roleId)}\n` +
+		`📁 Catégories: ${state.selectedCategories.size}\n` +
+		`💬 Salons: ${state.selectedChannels.size}\n` +
+		`🧵 Threads: ${state.selectedThreads.size}\n` +
+		`📋 Forums: ${state.selectedForums.size}`;
+
+	await modalSubmit.reply({
+		components: buttons,
+		content: summary,
+		flags: Djs.MessageFlags.Ephemeral,
+	});
+}
+
+async function validateRoleInSelection(
+	interaction: Djs.ButtonInteraction,
+	on: RoleInMode,
+	roleId: string,
+	ul: ReturnType<typeof getUl>
+) {
+	const userId = interaction.user.id;
+	const guildID = interaction.guild?.id;
+	if (!guildID) return;
+	const guild = interaction.guild;
+	if (!guild) return;
+
+	const state = getRoleInState(userId, guildID, on, roleId);
+	if (!state) {
+		await interaction.update({ components: [], content: ul("error.failedReply") });
+		return;
+	}
+
+	const role = guild.roles.cache.get(roleId);
+	if (!role) {
+		await interaction.update({ components: [], content: ul("ignore.role.error") });
+		return;
+	}
+
+	const channels = [
+		...Array.from(state.selectedCategories).map((id) => guild.channels.cache.get(id)),
+		...Array.from(state.selectedChannels).map((id) => guild.channels.cache.get(id)),
+		...Array.from(state.selectedThreads).map((id) => guild.channels.cache.get(id)),
+		...Array.from(state.selectedForums).map((id) => guild.channels.cache.get(id)),
+	].filter(Boolean) as (
+		| Djs.CategoryChannel
+		| Djs.ForumChannel
+		| Djs.ThreadChannel
+		| Djs.TextChannel
+	)[];
+
+	const allRoleIn = getRoleIn(on, guildID);
+	const existing = allRoleIn.find((r) => r.role.id === roleId);
+
+	if (channels.length === 0) {
+		const newRolesIn = allRoleIn.filter((r) => r.role.id !== roleId);
+		setRoleIn(on, guildID, newRolesIn);
+		await interaction.update({
+			components: [],
+			content: ul("roleIn.noLonger.any", {
+				mention: Djs.roleMention(role.id),
+				on: ul(`roleIn.on.${on}`),
+			}) as string,
+		});
+		clearRoleInState(userId, guildID, on, roleId);
+		return;
+	}
+
+	const newEntry: RoleIn = {
+		channels,
+		role,
+	};
+
+	if (existing) {
+		const updated = allRoleIn.map((r) => (r.role.id === roleId ? newEntry : r));
+		setRoleIn(on, guildID, updated);
+	} else {
+		allRoleIn.push(newEntry);
+		setRoleIn(on, guildID, allRoleIn);
+	}
+
+	const channelsByType = {
+		categories: channels.filter((c) => c.type === Djs.ChannelType.GuildCategory),
+		forums: channels.filter((c) => c.type === Djs.ChannelType.GuildForum),
+		textChannels: channels.filter((c) => c.type === Djs.ChannelType.GuildText),
+		threads: channels.filter(
+			(c) =>
+				c.type === Djs.ChannelType.PublicThread ||
+				c.type === Djs.ChannelType.PrivateThread
+		),
+	};
+
+	const channelLines: string[] = [];
+	for (const category of channelsByType.categories) {
+		channelLines.push(`- [${ul("common.category")}] ${category.name}`);
+	}
+	for (const channel of channelsByType.textChannels) {
+		channelLines.push(`- [${ul("common.channel")}] ${Djs.channelMention(channel.id)}`);
+	}
+	for (const thread of channelsByType.threads) {
+		channelLines.push(`- [${ul("common.thread")}] ${Djs.channelMention(thread.id)}`);
+	}
+	for (const forum of channelsByType.forums) {
+		channelLines.push(`- [${ul("common.forum")}] ${Djs.channelMention(forum.id)}`);
+	}
+
+	const finalMessage = `Le rôle ${Djs.roleMention(role.id)} sera maintenant ${ul(`roleIn.on.${on}`)} dans :\n${channelLines.join("\n")}`;
+
+	await interaction.update({ components: [], content: finalMessage });
+	clearRoleInState(userId, guildID, on, roleId);
+}
+
+export async function interactionRoleInChannel(
+	interaction: Djs.ChatInputCommandInteraction,
+	on: RoleInMode
+) {
 	if (!interaction.guild) return;
-	const guild = interaction.guild.id;
+	const guildID = interaction.guild.id;
 	const ul = getUl(interaction);
 
 	if (
 		on === "follow" &&
-		(getConfig(CommandName.followOnlyChannel, guild) ||
-			getConfig(CommandName.followOnlyRole, guild))
+		(getConfig(CommandName.followOnlyChannel, guildID) ||
+			getConfig(CommandName.followOnlyRole, guildID))
 	) {
-		await interaction.reply({
-			content: ul("roleIn.error.otherMode") as string,
-		});
+		await interaction.reply({ content: ul("roleIn.error.otherMode") as string });
 		return;
 	}
 
-	if (!getConfig(CommandName.followOnlyRoleIn, guild) && on === "follow") {
-		await interaction.reply({
-			content: ul("roleIn.error.need") as string,
-		});
+	if (!getConfig(CommandName.followOnlyRoleIn, guildID) && on === "follow") {
+		await interaction.reply({ content: ul("roleIn.error.need") as string });
 		return;
 	}
 
@@ -57,219 +391,97 @@ export async function interactionRoleInChannel(
 		return;
 	}
 
-	const allRoleIn = getRoleIn(on, guild);
-	const existingRoleIn = allRoleIn.find((r: RoleIn) => r.role.id === roleOpt.role?.id);
+	const roleId = roleOpt.role.id;
+	const userId = interaction.user.id;
+	const roleMentioned = Djs.roleMention(roleId);
 
-	// Create modal with 4 separate channel type selectors
-	const modal = new ModalBuilder()
-		.setCustomId("roleIn_modal")
-		.setTitle(ul(`roleIn.on.${on}`));
+	const prompt =
+		on === "follow"
+			? ul("follow.thread.description", { role: roleMentioned })
+			: ul("ignore.thread.description", { role: roleMentioned });
+	const startButton = new Djs.ButtonBuilder()
+		.setCustomId(`${on}_roleIn_start_${roleId}`)
+		.setStyle(Djs.ButtonStyle.Secondary)
+		.setLabel(`${ul(`roleIn.button.${on}`)} ▸`);
 
-	// Categories select menu
-	const categorySelect = new ChannelSelectMenuBuilder()
-		.setCustomId("select_roleIn_categories")
-		.setChannelTypes(ChannelType.GuildCategory)
-		.setDefaultChannels(
-			existingRoleIn?.channels
-				.filter((c) => c.type === ChannelType.GuildCategory)
-				.map((c) => c.id) ?? []
-		)
-		.setMaxValues(25)
-		.setRequired(false);
+	const row = new Djs.ActionRowBuilder<Djs.ButtonBuilder>().addComponents(startButton);
 
-	const categoryLabel = new LabelBuilder()
-		.setLabel(ul("common.category"))
-		.setChannelSelectMenuComponent(categorySelect);
+	const embed = new Djs.EmbedBuilder()
+		.setColor(on === "follow" ? 0x2f8e7d : 0x8e2f3a)
+		.setTitle(`${ul(`roleIn.on.${on}`)}`)
+		.setDescription(prompt);
 
-	// Text channels select menu
-	const channelSelect = new ChannelSelectMenuBuilder()
-		.setCustomId("select_roleIn_channels")
-		.setChannelTypes(ChannelType.GuildText)
-		.setDefaultChannels(
-			existingRoleIn?.channels
-				.filter((c) => c.type === ChannelType.GuildText)
-				.map((c) => c.id) ?? []
-		)
-		.setMaxValues(25)
-		.setRequired(false);
+	await interaction.reply({
+		components: [row],
+		embeds: [embed],
+		flags: Djs.MessageFlags.Ephemeral,
+	});
 
-	const channelLabel = new LabelBuilder()
-		.setLabel(ul("common.channel"))
-		.setChannelSelectMenuComponent(channelSelect);
+	const collector = interaction.channel?.createMessageComponentCollector({
+		componentType: Djs.ComponentType.Button,
+		filter: (i: Djs.ButtonInteraction) => i.user.id === userId,
+		time: 600_000,
+	});
 
-	// Threads select menu
-	const threadSelect = new ChannelSelectMenuBuilder()
-		.setCustomId("select_roleIn_threads")
-		.setChannelTypes(ChannelType.PublicThread, ChannelType.PrivateThread)
-		.setDefaultChannels(
-			existingRoleIn?.channels
-				.filter(
-					(c) =>
-						c.type === ChannelType.PublicThread || c.type === ChannelType.PrivateThread
-				)
-				.map((c) => c.id) ?? []
-		)
-		.setMaxValues(25)
-		.setRequired(false);
+	if (!collector) return;
 
-	const threadLabel = new LabelBuilder()
-		.setLabel(ul("common.thread"))
-		.setChannelSelectMenuComponent(threadSelect);
-
-	// Forums select menu
-	const forumSelect = new ChannelSelectMenuBuilder()
-		.setCustomId("select_roleIn_forums")
-		.setChannelTypes(ChannelType.GuildForum)
-		.setDefaultChannels(
-			existingRoleIn?.channels
-				.filter((c) => c.type === ChannelType.GuildForum)
-				.map((c) => c.id) ?? []
-		)
-		.setMaxValues(25)
-		.setRequired(false);
-
-	const forumLabel = new LabelBuilder()
-		.setLabel(ul("common.forum"))
-		.setChannelSelectMenuComponent(forumSelect);
-
-	modal.addLabelComponents(categoryLabel, channelLabel, threadLabel, forumLabel);
-
-	try {
-		const collectorFilter = (i: ModalSubmitInteraction) => {
-			return i.user.id === interaction.user.id;
-		};
-
-		await interaction.showModal(modal);
-
-		const selection = await interaction.awaitModalSubmit({
-			filter: collectorFilter,
-			time: 60_000,
-		});
-
-		const selectedCategories = selection.fields.getSelectedChannels(
-			"select_roleIn_categories",
-			false,
-			[ChannelType.GuildCategory]
-		);
-		const selectedChannels = selection.fields.getSelectedChannels(
-			"select_roleIn_channels",
-			false,
-			[ChannelType.GuildText]
-		);
-		const selectedThreads = selection.fields.getSelectedChannels(
-			"select_roleIn_threads",
-			false,
-			[ChannelType.PublicThread, ChannelType.PrivateThread]
-		);
-		const selectedForums = selection.fields.getSelectedChannels(
-			"select_roleIn_forums",
-			false,
-			[ChannelType.GuildForum]
-		);
-
-		// Combine all selected channels
-		const allSelectedChannels = [
-			...Array.from((selectedCategories ?? new Map()).values()),
-			...Array.from((selectedChannels ?? new Map()).values()),
-			...Array.from((selectedThreads ?? new Map()).values()),
-			...Array.from((selectedForums ?? new Map()).values()),
-		];
-
-		const role = roleOpt.role;
-		const channels = allSelectedChannels;
-		const mention = roleMention(role.id);
-
-		if (channels.length === 0) {
-			// No channels selected - remove the role entirely
-			const newRolesIn: RoleIn[] = allRoleIn.filter((r: RoleIn) => r.role.id !== role.id);
-			setRoleIn(on, guild, newRolesIn);
-			const translationOn = ul(`roleIn.on.${on}`);
-			const message = ul("roleIn.noLonger.any", {
-				mention: mention,
-				on: translationOn,
-			}) as string;
-			await selection.reply({
-				content: message,
-				ephemeral: true,
-			});
-		} else {
-			// Check if role already exists
-			const roleIn = allRoleIn.find((r: RoleIn) => r.role.id === role.id);
-
-			// Update or create role entry
-			if (roleIn) {
-				// Update existing role entry
-				const updatedRoles = allRoleIn.map((r) =>
-					r.role.id === role.id
-						? {
-								...r,
-								channels: channels as (
-									| CategoryChannel
-									| ForumChannel
-									| ThreadChannel
-									| TextChannel
-								)[],
-							}
-						: r
-				);
-				setRoleIn(on, guild, updatedRoles);
-			} else {
-				const newRoleIn: RoleIn = {
-					channels: channels as (
-						| CategoryChannel
-						| ForumChannel
-						| ThreadChannel
-						| TextChannel
-					)[],
-					role: role as Role,
-				};
-				allRoleIn.push(newRoleIn);
-				setRoleIn(on, guild, allRoleIn);
-			}
-
-			// Build the final message with all selected channels grouped by type
-			const channelsByType = {
-				categories: channels.filter((c) => c.type === ChannelType.GuildCategory),
-				forums: channels.filter((c) => c.type === ChannelType.GuildForum),
-				textChannels: channels.filter((c) => c.type === ChannelType.GuildText),
-				threads: channels.filter(
-					(c) =>
-						c.type === ChannelType.PublicThread || c.type === ChannelType.PrivateThread
-				),
-			};
-
-			const channelLines: string[] = [];
-			for (const category of channelsByType.categories) {
-				channelLines.push(`- [${ul("common.category")}] ${category.name}`);
-			}
-			for (const channel of channelsByType.textChannels) {
-				channelLines.push(`- [${ul("common.channel")}] ${channelMention(channel.id)}`);
-			}
-			for (const thread of channelsByType.threads) {
-				channelLines.push(`- [${ul("common.thread")}] ${channelMention(thread.id)}`);
-			}
-			for (const forum of channelsByType.forums) {
-				channelLines.push(`- [${ul("common.forum")}] ${channelMention(forum.id)}`);
-			}
-
-			const translationOn = ul(`roleIn.on.${on}`);
-			const finalMessage = `Le rôle ${mention} sera maintenant ${translationOn} dans :\n${channelLines.join("\n")}`;
-
-			await selection.reply({
-				content: finalMessage,
-				ephemeral: true,
-			});
+	collector.on("collect", async (i: Djs.ButtonInteraction) => {
+		if (i.customId === `${on}_roleIn_start_${roleId}`) {
+			await showRoleInPaginatedModal(
+				i,
+				interaction.guild!,
+				userId,
+				guildID,
+				roleId,
+				0,
+				ul,
+				on
+			);
+			return;
 		}
-	} catch (e) {
-		console.error(e);
-		try {
-			await interaction.reply({
-				content: "error.failedReply",
-				ephemeral: true,
-			});
-		} catch {
-			// Interaction already acknowledged, ignore
+		if (i.customId.startsWith(`${on}_roleIn_prev_${roleId}_`)) {
+			const page = Number.parseInt(i.customId.split("_").pop() || "0", 10);
+			const prev = Math.max(0, page - 1);
+			await showRoleInPaginatedModal(
+				i,
+				interaction.guild!,
+				userId,
+				guildID,
+				roleId,
+				prev,
+				ul,
+				on
+			);
+			return;
 		}
-		return;
-	}
+		if (i.customId.startsWith(`${on}_roleIn_next_${roleId}_`)) {
+			const page = Number.parseInt(i.customId.split("_").pop() || "0", 10);
+			const next = page + 1;
+			await showRoleInPaginatedModal(
+				i,
+				interaction.guild!,
+				userId,
+				guildID,
+				roleId,
+				next,
+				ul,
+				on
+			);
+			return;
+		}
+		if (i.customId === `${on}_roleIn_validate_${roleId}`) {
+			await validateRoleInSelection(i as Djs.ButtonInteraction, on, roleId, ul);
+			collector.stop();
+			return;
+		}
+		if (i.customId === `${on}_roleIn_cancel_${roleId}`) {
+			clearRoleInState(userId, guildID, on, roleId);
+			await i.update({ components: [], content: "❌ Annulé" });
+			collector.stop();
+		}
+	});
+
+	collector.on("end", () => {
+		clearRoleInState(userId, guildID, on, roleId);
+	});
 }

@@ -43,11 +43,14 @@
     "forum": "Forum",
     "here": "ici",
     "list": "liste",
+    "next": "Suivant",
     "no": "Non",
     "none": "/",
+    "previous": "Précédent",
     "role": "role",
     "roleIn": "spécifique",
     "thread": "Thread",
+    "validate": "Valider",
     "yes": "Oui"
   },
   "configuration": {
@@ -175,6 +178,7 @@
     }
   },
   "error": {
+    "failedReply": "Error: failed reply",
     "missingPermission": "Knitting n'a pas les permissions pour écrire dans <#{{-thread}}>."
   },
   "follow": {
@@ -202,7 +206,7 @@
       }
     },
     "thread": {
-      "description": "Sélectionne un salon, thread, catégorie, ou forum, à suivre",
+      "description": "Sélectionne un salon, thread, catégorie, ou forum, à suivre pour {{- role}}",
       "noSelection": "Aucune sélection n'a été faite.",
       "option": {
         "description": "Salon à suivre"
@@ -244,7 +248,7 @@
       "title": "Rôle ignorés dans des channels spécifiques"
     },
     "thread": {
-      "description": "Ignore un thread, channel, forum ou catégorie spécifique",
+      "description": "Ignore un fil, channel, forum ou catégorie spécifique pour {{- role}}.",
       "error": "Cette commande ne peut être utilisée que pour une catégorie, forum, channel ou un thread.",
       "option": {
         "description": "Sélectionner le thread/channel/catégorie/forum à ignorer ou à dés-ignorer"
@@ -277,6 +281,10 @@
   },
   "roleIn": {
     "already": "Le rôle {{- mention }} est déjà {{- opposite }} dans {{- channel }}.",
+    "button": {
+      "follow": "Suivre",
+      "ignore": "Ignorer"
+    },
     "enabled": {
       "chan": "{{- chan}} est maintenant {{- on}} pour {{- mention }}"
     },
@@ -286,12 +294,12 @@
       "support": "Ce type de salon n'est pas supporté"
     },
     "noLonger": {
-      "any": "Le role {{- mention }} n'est plus {{- on}} dans aucun channel.",
+      "any": "Le rôle {{- mention}} n'est plus {{- on }} aucun salon.",
       "chan": "{{- chan}} n'est plus {{- on }} pour {{- mention }}"
     },
     "on": {
-      "follow": "suivi",
-      "ignore": "ignoré"
+      "follow": "Suivi",
+      "ignore": "Ignoré"
     }
   }
 }

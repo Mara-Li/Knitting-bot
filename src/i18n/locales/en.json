@@ -43,11 +43,14 @@
     "forum": "Forum",
     "here": "here",
     "list": "list",
+    "next": "Next",
     "no": "No",
     "none": "/",
+    "previous": "Previous",
     "role": "role",
     "roleIn": "specific",
     "thread": "Thread",
+    "validate": "Validate",
     "yes": "Yes"
   },
   "configuration": {
@@ -175,6 +178,7 @@
     }
   },
   "error": {
+    "failedReply": "Error: failed reply",
     "missingPermission": "Knitting doesn't have the permissions to write in <<#{{-thread}}>."
   },
   "follow": {
@@ -202,7 +206,7 @@
       }
     },
     "thread": {
-      "description": "Select a thread, channel, forum, category, to follow",
+      "description": "Select a thread, channel, forum, category, to follow for {{- role}}",
       "noSelection": "",
       "option": {
         "description": "Salon à suivre"
@@ -244,7 +248,7 @@
       "title": "Roles ignored in specifics channels"
     },
     "thread": {
-      "description": "Ignore a specific thread",
+      "description": "Ignore a specific thread, channel, forum or specific category for {{- role}}.",
       "error": "This command can only be used for a thread, channel, forum or category.",
       "option": {
         "description": "Select channel, thread, forum or category to ignore or to un-ignore"
@@ -277,6 +281,10 @@
   },
   "roleIn": {
     "already": "The role {{- mention }} is already {{- opposite }} in {{- channel }}.",
+    "button": {
+      "follow": "",
+      "ignore": ""
+    },
     "enabled": {
       "chan": "{{- chan }} is now {{- on}} for {{- mention}}"
     },
@@ -290,8 +298,8 @@
       "chan": "{{- chan }} is no longer {{- on }} for {{- mention }}"
     },
     "on": {
-      "follow": "followed",
-      "ignore": "ignored"
+      "follow": "followed in",
+      "ignore": "ignored in"
     }
   }
 }

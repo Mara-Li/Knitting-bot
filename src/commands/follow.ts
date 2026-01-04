@@ -1,28 +1,39 @@
 import {
+	ActionRowBuilder,
+	type AnyThreadChannel,
+	ButtonBuilder,
+	type ButtonInteraction,
 	type CategoryChannel,
-	ChannelSelectMenuBuilder,
 	ChannelType,
 	type ChatInputCommandInteraction,
 	type CommandInteraction,
 	type CommandInteractionOptionResolver,
 	EmbedBuilder,
 	type ForumChannel,
-	LabelBuilder,
 	MessageFlags,
-	ModalBuilder,
 	type ModalSubmitInteraction,
 	PermissionFlagsBits,
 	type Role,
-	RoleSelectMenuBuilder,
-	roleMention,
 	SlashCommandBuilder,
 	type TextChannel,
-	type ThreadChannel,
 } from "discord.js";
 import { getUl, t } from "../i18n";
 import { CommandName, type Translation, TypeName } from "../interface";
-import { getConfig, getMaps, getRole, setFollow, setRole } from "../maps";
+import { getConfig, getRole } from "../maps";
 import { toTitle } from "../utils";
+import { getTrackedItems } from "../utils/itemsManager";
+import {
+	createPaginatedChannelModal,
+	createPaginationButtons,
+	createRoleSelectModal,
+	processChannelTypeChanges,
+	processRoleTypeChanges,
+} from "../utils/modalHandler";
+import {
+	clearPaginationState,
+	getPaginationState,
+	initializePaginationState,
+} from "../utils/paginationState";
 import { mapToStr } from "./index";
 import { interactionRoleInChannel } from "./utils";
 import "../discord_ext.js";
@@ -68,7 +79,6 @@ export default {
 					});
 					return;
 				}
-				await channelSelectors(interaction, ul);
 				await channelSelectors(interaction, ul);
 				break;
 			case t("common.role").toLowerCase():
@@ -165,37 +175,19 @@ async function displayFollowed(
 
 /**
  * Follow-unfollow a role via modal
- * @param interaction {@link CommandInteraction} The interaction to reply to.
- * @param ul
  */
 async function followThisRole(interaction: ChatInputCommandInteraction, ul: Translation) {
 	if (!interaction.guild) return;
 
 	const guildID = interaction.guild.id;
 	const followedRoles = (getRole("follow", guildID) as Role[]) ?? [];
+	const modal = createRoleSelectModal("follow", ul, followedRoles);
 
-	const modal = new ModalBuilder()
-		.setCustomId("follow_roles_modal")
-		.setTitle(ul("follow.role.description"));
-
-	const roleSelect = new RoleSelectMenuBuilder()
-		.setCustomId("select_follow_roles")
-		.setDefaultRoles(followedRoles.map((r) => r.id))
-		.setMaxValues(25)
-		.setRequired(false);
-
-	const roleLabel = new LabelBuilder()
-		.setLabel(ul("common.role").toTitle())
-		.setDescription(ul("follow.role.select.description"))
-		.setRoleSelectMenuComponent(roleSelect);
-
-	modal.addLabelComponents(roleLabel);
+	const collectorFilter = (i: ModalSubmitInteraction) => {
+		return i.user.id === interaction.user.id;
+	};
 
 	try {
-		const collectorFilter = (i: ModalSubmitInteraction) => {
-			return i.user.id === interaction.user.id;
-		};
-
 		await interaction.showModal(modal);
 
 		const selection = await interaction.awaitModalSubmit({
@@ -203,12 +195,12 @@ async function followThisRole(interaction: ChatInputCommandInteraction, ul: Tran
 			time: 60_000,
 		});
 
-		const newRoles = selection.fields.getSelectedRoles("select_follow_roles", false);
+		const newRoles = selection.fields.getSelectedRoles("select_roles", false);
 		const messages: string[] = [];
 
-		// Process roles
-		await processRoleType(
-			interaction,
+		processRoleTypeChanges(
+			guildID,
+			"follow",
 			followedRoles,
 			Array.from((newRoles ?? new Map()).values()) as Role[],
 			ul,
@@ -238,31 +230,6 @@ async function followThisRole(interaction: ChatInputCommandInteraction, ul: Tran
 	}
 }
 
-/**
- * Get all followed channels and roles for display
- * @param guildID The guild ID
- * @returns Object containing all followed channels and roles organized by type
- */
-function getFollowedItems(guildID: string) {
-	const followedCategories =
-		(getMaps("follow", TypeName.category, guildID) as CategoryChannel[]) ?? [];
-	const followedChannels =
-		(getMaps("follow", TypeName.channel, guildID) as TextChannel[]) ?? [];
-	const followedThreads =
-		(getMaps("follow", TypeName.thread, guildID) as ThreadChannel[]) ?? [];
-	const followedForums =
-		(getMaps("follow", TypeName.forum, guildID) as ForumChannel[]) ?? [];
-	const followedRoles = (getRole("follow", guildID) as Role[]) ?? [];
-
-	return {
-		categories: followedCategories,
-		channels: followedChannels,
-		forums: followedForums,
-		roles: followedRoles,
-		threads: followedThreads,
-	};
-}
-
 async function channelSelectors(
 	interaction: ChatInputCommandInteraction,
 	ul: Translation
@@ -270,364 +237,323 @@ async function channelSelectors(
 	if (!interaction.guild) return;
 
 	const guildID = interaction.guild.id;
-	const followedItems = getFollowedItems(guildID);
+	const guild = interaction.guild;
+	const userId = interaction.user.id;
+	const followedItems = getTrackedItems("follow", guildID);
 
-	// Create modal with 5 select menus (one for each type)
-	const modal = new ModalBuilder()
-		.setCustomId("follow_modal")
-		.setTitle(ul("follow.thread.select.label"));
+	// Initialiser l'état de pagination avec les éléments actuellement suivis
+	const state = initializePaginationState(userId, guildID, "follow", followedItems);
 
-	// Categories select menu
-	const categorySelect = new ChannelSelectMenuBuilder()
-		.setCustomId("select_categories")
-		.setChannelTypes(ChannelType.GuildCategory)
-		.setDefaultChannels(followedItems.categories.map((ch) => ch.id))
-		.setMaxValues(25)
-		.setRequired(false);
+	// Créer le message initial avec bouton
+	const startButton = new ButtonBuilder()
+		.setCustomId("follow_channels_start")
+		.setLabel("🎯 Gérer les channels suivis")
+		.setStyle(2); // Secondary
 
-	const categoryLabel = new LabelBuilder()
-		.setLabel(ul("common.category"))
-		.setChannelSelectMenuComponent(categorySelect);
+	const row = new ActionRowBuilder<ButtonBuilder>().addComponents(startButton);
 
-	// Text channels select menu
-	const channelSelect = new ChannelSelectMenuBuilder()
-		.setCustomId("select_channels")
-		.setChannelTypes(ChannelType.GuildText)
-		.setDefaultChannels(followedItems.channels.map((ch) => ch.id))
-		.setMaxValues(25)
-		.setRequired(false);
+	await interaction.reply({
+		components: [row],
+		content: ul("follow.thread.description"),
+		flags: MessageFlags.Ephemeral,
+	});
 
-	const channelLabel = new LabelBuilder()
-		.setLabel(ul("common.channel"))
-		.setDescription(ul("follow.thread.select.channelDescription"))
-		.setChannelSelectMenuComponent(channelSelect);
+	// Collecter les interactions de boutons et modals
+	const collector = interaction.channel?.createMessageComponentCollector({
+		filter: (i) => i.user.id === userId,
+		time: 600_000, // 10 minutes
+	});
 
-	// Threads select menu
-	const threadSelect = new ChannelSelectMenuBuilder()
-		.setCustomId("select_threads")
-		.setChannelTypes(ChannelType.PublicThread, ChannelType.PrivateThread)
-		.setDefaultChannels(followedItems.threads.map((ch) => ch.id))
-		.setMaxValues(25)
-		.setRequired(false);
+	if (!collector) return;
 
-	const threadLabel = new LabelBuilder()
-		.setLabel(ul("common.thread"))
-		.setDescription(ul("follow.thread.select.threadDescription"))
-		.setChannelSelectMenuComponent(threadSelect);
+	collector.on("collect", async (buttonInteraction: ButtonInteraction) => {
+		const customId = buttonInteraction.customId;
 
-	// Forum select menu
-	const forumSelect = new ChannelSelectMenuBuilder()
-		.setCustomId("select_forums")
-		.setChannelTypes(ChannelType.GuildForum)
-		.setDefaultChannels(followedItems.forums.map((ch) => ch.id))
-		.setMaxValues(25)
-		.setRequired(false);
+		if (customId === "follow_channels_start") {
+			// Afficher la première page
+			await showPaginatedModalForFollow(buttonInteraction, guild, userId, guildID, 0, ul);
+		} else if (customId.startsWith("follow_page_prev_")) {
+			const currentPage = Number.parseInt(customId.split("_").pop() || "0");
+			const prevPage = Math.max(0, currentPage - 1);
+			await showPaginatedModalForFollow(
+				buttonInteraction,
+				guild,
+				userId,
+				guildID,
+				prevPage,
+				ul
+			);
+		} else if (customId.startsWith("follow_page_next_")) {
+			const currentPage = Number.parseInt(customId.split("_").pop() || "0");
+			const nextPage = currentPage + 1;
+			await showPaginatedModalForFollow(
+				buttonInteraction,
+				guild,
+				userId,
+				guildID,
+				nextPage,
+				ul
+			);
+		} else if (customId === "follow_page_validate") {
+			// Valider et sauvegarder
+			await validateAndSaveForFollow(
+				buttonInteraction,
+				userId,
+				guildID,
+				followedItems,
+				ul
+			);
+			collector.stop();
+		} else if (customId === "follow_page_cancel") {
+			// Annuler
+			clearPaginationState(userId, guildID, "follow");
+			await buttonInteraction.update({
+				components: [],
+				content: "❌ Annulé",
+			});
+			collector.stop();
+		}
+	});
 
-	const forumLabel = new LabelBuilder()
-		.setLabel(ul("common.forum"))
-		.setDescription(ul("follow.thread.select.forumDescription"))
-		.setChannelSelectMenuComponent(forumSelect);
+	collector.on("end", () => {
+		clearPaginationState(userId, guildID, "follow");
+	});
+}
 
-	modal.addLabelComponents(categoryLabel, channelLabel, threadLabel, forumLabel);
+/**
+ * Show paginated modal for channel selection (follow)
+ */
+async function showPaginatedModalForFollow(
+	interaction: ButtonInteraction,
+	guild: NonNullable<ChatInputCommandInteraction["guild"]>,
+	userId: string,
+	guildID: string,
+	page: number,
+	ul: Translation
+) {
+	if (!guild) return;
+
+	const state = getPaginationState(userId, guildID, "follow");
+	state.currentPage = page;
+
+	const selectedIds = {
+		categories: state.selectedCategories,
+		channels: state.selectedChannels,
+		forums: state.selectedForums,
+		threads: state.selectedThreads,
+	};
+
+	const { modal, hasMore } = createPaginatedChannelModal(
+		"follow",
+		ul,
+		guild,
+		page,
+		selectedIds
+	);
 
 	try {
-		const collectorFilter = (i: ModalSubmitInteraction) => {
-			return i.user.id === interaction.user.id;
-		};
-
 		await interaction.showModal(modal);
 
-		const selection = await interaction.awaitModalSubmit({
-			filter: collectorFilter,
+		// Attendre la soumission du modal
+		const modalSubmit = await interaction.awaitModalSubmit({
+			filter: (i) => i.user.id === userId,
 			time: 60_000,
 		});
 
-		const newCategories = selection.fields.getSelectedChannels(
-			"select_categories",
-			false,
-			[ChannelType.GuildCategory]
-		);
-		const newChannels = selection.fields.getSelectedChannels("select_channels", false, [
-			ChannelType.GuildText,
-		]);
-		const newThreads = selection.fields.getSelectedChannels("select_threads", false, [
-			ChannelType.PublicThread,
-			ChannelType.PrivateThread,
-		]);
-		const newForums = selection.fields.getSelectedChannels("select_forums", false, [
-			ChannelType.GuildForum,
-		]);
+		// Récupérer les nouvelles sélections
+		const newCategories =
+			modalSubmit.fields.getSelectedChannels("select_categories", false, [
+				ChannelType.GuildCategory,
+			]) ?? new Map();
+		const newChannels =
+			modalSubmit.fields.getSelectedChannels("select_channels", false, [
+				ChannelType.GuildText,
+			]) ?? new Map();
+		const newThreads =
+			modalSubmit.fields.getSelectedChannels("select_threads", false, [
+				ChannelType.PublicThread,
+				ChannelType.PrivateThread,
+			]) ?? new Map();
+		const newForums =
+			modalSubmit.fields.getSelectedChannels("select_forums", false, [
+				ChannelType.GuildForum,
+			]) ?? new Map();
 
-		const messages: string[] = [];
+		// Mettre à jour l'état avec les sélections de cette page
+		const newSelectedIds = {
+			categories: Array.from(newCategories.keys()),
+			channels: Array.from(newChannels.keys()),
+			forums: Array.from(newForums.keys()),
+			threads: Array.from(newThreads.keys()),
+		};
 
-		// Process categories
-		await processChannelType(
-			interaction,
-			followedItems.categories,
-			Array.from((newCategories ?? new Map()).values()) as CategoryChannel[],
-			TypeName.category,
-			ul,
-			messages
-		);
+		// Synchroniser les sélections
+		const availableOnPage = {
+			categories: Array.from(
+				guild.channels.cache.filter((c) => c.type === ChannelType.GuildCategory).values()
+			)
+				.slice(page * 25, (page + 1) * 25)
+				.map((c) => c.id),
+			channels: Array.from(
+				guild.channels.cache.filter((c) => c.type === ChannelType.GuildText).values()
+			)
+				.slice(page * 25, (page + 1) * 25)
+				.map((c) => c.id),
+			forums: Array.from(
+				guild.channels.cache.filter((c) => c.type === ChannelType.GuildForum).values()
+			)
+				.slice(page * 25, (page + 1) * 25)
+				.map((c) => c.id),
+			threads: Array.from(
+				guild.channels.cache
+					.filter(
+						(c) =>
+							c.type === ChannelType.PublicThread || c.type === ChannelType.PrivateThread
+					)
+					.values()
+			)
+				.slice(page * 25, (page + 1) * 25)
+				.map((c) => c.id),
+		};
 
-		// Process channels
-		await processChannelType(
-			interaction,
-			followedItems.channels,
-			Array.from((newChannels ?? new Map()).values()) as TextChannel[],
-			TypeName.channel,
-			ul,
-			messages
-		);
+		// Supprimer les désélections
+		for (const id of availableOnPage.categories) {
+			if (!newSelectedIds.categories.includes(id)) {
+				state.selectedCategories.delete(id);
+			}
+		}
+		for (const id of availableOnPage.channels) {
+			if (!newSelectedIds.channels.includes(id)) {
+				state.selectedChannels.delete(id);
+			}
+		}
+		for (const id of availableOnPage.threads) {
+			if (!newSelectedIds.threads.includes(id)) {
+				state.selectedThreads.delete(id);
+			}
+		}
+		for (const id of availableOnPage.forums) {
+			if (!newSelectedIds.forums.includes(id)) {
+				state.selectedForums.delete(id);
+			}
+		}
 
-		// Process threads
-		await processChannelType(
-			interaction,
-			followedItems.threads,
-			Array.from((newThreads ?? new Map()).values()) as ThreadChannel[],
-			TypeName.thread,
-			ul,
-			messages
-		);
+		// Ajouter les nouveaux
+		for (const id of newSelectedIds.categories) {
+			state.selectedCategories.add(id);
+		}
+		for (const id of newSelectedIds.channels) {
+			state.selectedChannels.add(id);
+		}
+		for (const id of newSelectedIds.threads) {
+			state.selectedThreads.add(id);
+		}
+		for (const id of newSelectedIds.forums) {
+			state.selectedForums.add(id);
+		}
 
-		// Process forums
-		await processChannelType(
-			interaction,
-			followedItems.forums,
-			Array.from((newForums ?? new Map()).values()) as ForumChannel[],
-			TypeName.forum,
-			ul,
-			messages
-		);
+		// Afficher les boutons de navigation
+		const buttons = createPaginationButtons("follow", page, hasMore, ul);
+		const summary =
+			`Page ${page + 1} - Sélections actuelles:\n` +
+			`📁 Catégories: ${state.selectedCategories.size}\n` +
+			`💬 Salons: ${state.selectedChannels.size}\n` +
+			`🧵 Threads: ${state.selectedThreads.size}\n` +
+			`📋 Forums: ${state.selectedForums.size}`;
 
-		const finalMessage =
-			messages.length > 0
-				? `- ${messages.join("\n- ")}`
-				: ul("follow.thread.noSelection");
-
-		await selection.reply({
-			content: finalMessage,
-			flags: MessageFlags.Ephemeral,
+		await modalSubmit.reply({
+			components: buttons,
+			content: summary,
 		});
 	} catch (e) {
 		console.error(e);
-		try {
-			await interaction.reply({
-				content: "error.failedReply",
-				flags: MessageFlags.Ephemeral,
-			});
-		} catch {
-			// Interaction already acknowledged, ignore
-		}
-		return;
 	}
 }
 
 /**
- * Follow-unfollow a channel
- * @param interaction {@link CommandInteraction} The interaction to reply to.
- * @param typeName {@link TypeName} The type of the channel to follow.
- * @param ul
- * @param followChan {@link CategoryChannel} | {@link ThreadChannel} | {@link TextChannel} | {@link ForumChannel} The channel to follow.
- * @param isRemoving Whether this is a removal (true) or addition (false) operation
- * @returns The name of the channel that was modified, or null if operation failed
+ * Validate and save all selections (follow)
  */
-async function followThis(
-	interaction: CommandInteraction,
-	typeName: TypeName,
-	ul: Translation,
-	followChan?: CategoryChannel | ThreadChannel | TextChannel | ForumChannel,
-	isRemoving = false
-): Promise<string | null> {
-	if (!followChan) {
-		if (!isRemoving) {
-			await interaction.reply({
-				content: ul("commands.error"),
-			});
-		}
-		return null;
-	}
-	let allFollowed: (ThreadChannel | CategoryChannel | TextChannel | ForumChannel)[] = [];
-	if (!interaction.guild) return null;
-	const guild = interaction.guild.id;
-	switch (typeName) {
-		case TypeName.category:
-			allFollowed =
-				(getMaps("follow", TypeName.category, guild) as CategoryChannel[]) ?? [];
-			break;
-		case TypeName.thread:
-			allFollowed = (getMaps("follow", TypeName.thread, guild) as ThreadChannel[]) ?? [];
-			break;
-		case TypeName.channel:
-			allFollowed = (getMaps("follow", TypeName.channel, guild) as TextChannel[]) ?? [];
-			break;
-		case TypeName.forum:
-			allFollowed = (getMaps("follow", TypeName.forum, guild) as ForumChannel[]) ?? [];
-			break;
-	}
-	const isAlreadyFollowed = allFollowed.some(
-		(ignoredCategory: CategoryChannel | ForumChannel | ThreadChannel | TextChannel) =>
-			ignoredCategory.id === followChan?.id
+async function validateAndSaveForFollow(
+	interaction: ButtonInteraction,
+	userId: string,
+	guildID: string,
+	originalItems: ReturnType<typeof getTrackedItems>,
+	ul: Translation
+) {
+	const state = getPaginationState(userId, guildID, "follow");
+
+	// Convertir les Sets en arrays d'objets Channel
+	const guild = interaction.guild;
+	if (!guild) return;
+
+	const finalCategories = Array.from(state.selectedCategories)
+		.map((id) => guild.channels.cache.get(id))
+		.filter((c): c is CategoryChannel => c?.type === ChannelType.GuildCategory);
+	const finalChannels = Array.from(state.selectedChannels)
+		.map((id) => guild.channels.cache.get(id))
+		.filter((c): c is TextChannel => c?.type === ChannelType.GuildText);
+	const finalThreads = Array.from(state.selectedThreads)
+		.map((id) => guild.channels.cache.get(id))
+		.filter(
+			(c): c is AnyThreadChannel =>
+				c?.type === ChannelType.PublicThread || c?.type === ChannelType.PrivateThread
+		);
+	const finalForums = Array.from(state.selectedForums)
+		.map((id) => guild.channels.cache.get(id))
+		.filter((c): c is ForumChannel => c?.type === ChannelType.GuildForum);
+
+	const messages: string[] = [];
+
+	// Traiter les changements pour chaque type
+	processChannelTypeChanges(
+		originalItems.categories,
+		finalCategories,
+		TypeName.category,
+		guildID,
+		"follow",
+		ul,
+		messages
 	);
 
-	// If removing, we expect it to be followed. If adding, we expect it not to be followed.
-	if (isRemoving) {
-		if (isAlreadyFollowed) {
-			const newFollowed = allFollowed.filter(
-				(ignoredCategory: CategoryChannel | ForumChannel | ThreadChannel | TextChannel) =>
-					ignoredCategory.id !== followChan?.id
-			);
-			setFollow(
-				typeName,
-				guild,
-				newFollowed as
-					| ThreadChannel[]
-					| CategoryChannel[]
-					| TextChannel[]
-					| ForumChannel[]
-			);
-			return followChan.name;
-		}
-	} else {
-		if (!isAlreadyFollowed) {
-			allFollowed.push(followChan);
-			setFollow(
-				typeName,
-				guild,
-				allFollowed as
-					| ThreadChannel[]
-					| CategoryChannel[]
-					| TextChannel[]
-					| ForumChannel[]
-			);
-			return followChan.name;
-		}
-	}
-
-	return null;
-}
-
-/**
- * Process channel type changes (additions and removals)
- * @param interaction The interaction to reply to
- * @param oldItems Previously followed items of this type
- * @param newItems Currently selected items of this type
- * @param typeName The type of channels being processed
- * @param ul The translation function
- * @param messages Accumulator for response messages
- */
-async function processChannelType(
-	interaction: ChatInputCommandInteraction,
-	oldItems: (CategoryChannel | TextChannel | ThreadChannel | ForumChannel)[],
-	newItems: (CategoryChannel | TextChannel | ThreadChannel | ForumChannel)[],
-	typeName: TypeName,
-	ul: Translation,
-	messages: string[]
-) {
-	if (!interaction.guild) return;
-
-	const guildID = interaction.guild.id;
-	const oldIds = new Set(oldItems.map((ch) => ch.id));
-	const newIds = new Set(newItems.map((ch) => ch.id));
-
-	// Get the type label for display
-	let typeLabel = ul("common.channel");
-	switch (typeName) {
-		case TypeName.category:
-			typeLabel = ul("common.category");
-			break;
-		case TypeName.thread:
-			typeLabel = ul("common.thread");
-			break;
-		case TypeName.forum:
-			typeLabel = ul("common.forum");
-			break;
-		case TypeName.channel:
-			typeLabel = ul("common.channel");
-			break;
-	}
-
-	// Find removed items (were followed, now deselected)
-	for (const oldItem of oldItems) {
-		if (!newIds.has(oldItem.id)) {
-			const result = await followThis(interaction, typeName, ul, oldItem, true);
-			if (result) {
-				messages.push(
-					`[${typeLabel}] ${ul("follow.thread.remove", {
-						thread: result,
-					})}`
-				);
-			}
-		}
-	}
-
-	// Find added items (weren't followed, now selected)
-	for (const newItem of newItems) {
-		if (!oldIds.has(newItem.id)) {
-			const result = await followThis(interaction, typeName, ul, newItem, false);
-			if (result) {
-				messages.push(
-					`[${typeLabel}] ${ul("follow.thread.success", {
-						thread: result,
-					})}`
-				);
-			}
-		}
-	}
-}
-
-/**
- * Process role changes (additions and removals)
- * @param interaction The interaction to reply to
- * @param oldRoles Previously followed roles
- * @param newRoles Currently selected roles
- * @param ul The translation function
- * @param messages Accumulator for response messages
- */
-async function processRoleType(
-	interaction: ChatInputCommandInteraction,
-	oldRoles: Role[],
-	newRoles: Role[],
-	ul: Translation,
-	messages: string[]
-) {
-	if (!interaction.guild) return;
-
-	const guildID = interaction.guild.id;
-	const oldIds = new Set(oldRoles.map((r) => r.id));
-	const newIds = new Set(newRoles.map((r) => r.id));
-
-	const addedRoles: Role[] = [];
-	const removedRoles: Role[] = [];
-
-	// Find removed roles (were followed, now deselected)
-	for (const oldRole of oldRoles) {
-		if (!newIds.has(oldRole.id)) {
-			removedRoles.push(oldRole);
-			messages.push(
-				ul("follow.role.removed", {
-					role: roleMention(oldRole.id),
-				})
-			);
-		}
-	}
-
-	// Find added roles (weren't followed, now selected)
-	for (const newRole of newRoles) {
-		if (!oldIds.has(newRole.id)) {
-			addedRoles.push(newRole);
-			messages.push(
-				ul("follow.role.added", {
-					role: roleMention(newRole.id),
-				})
-			);
-		}
-	}
-
-	// Calculate final roles list and save once
-	let finalRoles = oldRoles.filter(
-		(r) => !removedRoles.some((removed) => removed.id === r.id)
+	processChannelTypeChanges(
+		originalItems.channels,
+		finalChannels,
+		TypeName.channel,
+		guildID,
+		"follow",
+		ul,
+		messages
 	);
-	finalRoles = [...finalRoles, ...addedRoles];
-	setRole("follow", guildID, finalRoles);
+
+	processChannelTypeChanges(
+		originalItems.threads,
+		finalThreads,
+		TypeName.thread,
+		guildID,
+		"follow",
+		ul,
+		messages
+	);
+
+	processChannelTypeChanges(
+		originalItems.forums,
+		finalForums,
+		TypeName.forum,
+		guildID,
+		"follow",
+		ul,
+		messages
+	);
+
+	const finalMessage =
+		messages.length > 0
+			? `✅ Modifications enregistrées :\n- ${messages.join("\n- ")}`
+			: "Aucune modification effectuée.";
+
+	await interaction.update({
+		components: [],
+		content: finalMessage,
+	});
+
+	clearPaginationState(userId, guildID, "follow");
 }
