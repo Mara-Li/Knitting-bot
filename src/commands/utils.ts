@@ -402,7 +402,7 @@ export async function interactionRoleInChannel(
 	const startButton = new Djs.ButtonBuilder()
 		.setCustomId(`${on}_roleIn_start_${roleId}`)
 		.setStyle(Djs.ButtonStyle.Secondary)
-		.setLabel(`${ul(`roleIn.button.${on}`)} ▸`);
+		.setLabel(`${ul("roleIn.button")} ▸`);
 
 	const row = new Djs.ActionRowBuilder<Djs.ButtonBuilder>().addComponents(startButton);
 

@@ -206,7 +206,7 @@
       }
     },
     "thread": {
-      "description": "Sélectionne un salon, thread, catégorie, ou forum, à suivre pour {{- role}}",
+      "description": "Gérer le suivi des salons, fils, catégories, ou forum pour {{- role}}",
       "noSelection": "Aucune sélection n'a été faite.",
       "option": {
         "description": "Salon à suivre"
@@ -248,7 +248,7 @@
       "title": "Rôle ignorés dans des channels spécifiques"
     },
     "thread": {
-      "description": "Ignore un fil, channel, forum ou catégorie spécifique pour {{- role}}.",
+      "description": "Gérer les fils, salons, forum ou catégories ignorées pour {{- role}}.",
       "error": "Cette commande ne peut être utilisée que pour une catégorie, forum, channel ou un thread.",
       "option": {
         "description": "Sélectionner le thread/channel/catégorie/forum à ignorer ou à dés-ignorer"
@@ -281,10 +281,7 @@
   },
   "roleIn": {
     "already": "Le rôle {{- mention }} est déjà {{- opposite }} dans {{- channel }}.",
-    "button": {
-      "follow": "Suivre",
-      "ignore": "Ignorer"
-    },
+    "button": "Ouvrir le menu",
     "enabled": {
       "chan": "{{- chan}} est maintenant {{- on}} pour {{- mention }}"
     },
