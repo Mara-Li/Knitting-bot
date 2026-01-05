@@ -10,7 +10,13 @@ import {
 import { getTranslation } from "../i18n";
 import { EMOJI } from "../index";
 import { CommandName } from "../interface";
-import { getConfig, optionMaps } from "../maps";
+import {
+	deleteCachedMessage,
+	getCachedMessage,
+	getConfig,
+	optionMaps,
+	setCachedMessage,
+} from "../maps";
 import {
 	checkIfUserNotInTheThread,
 	checkMemberRole,
@@ -36,36 +42,18 @@ export async function addUserToThread(thread: ThreadChannel, user: GuildMember) 
 		(await checkIfUserNotInTheThread(thread, user))
 	) {
 		try {
-			let message = await fetchMessage(thread);
+			const message = await fetchMessage(thread);
 			if (getConfig(CommandName.followOnlyRoleIn, guild)) {
-				if (message) {
-					await message.edit(userMention(user.id));
-					await message.edit(emoji);
-				} else {
-					message = await thread.send({
-						content: emoji,
-						flags: MessageFlags.SuppressNotifications,
-					});
-					await message.edit(userMention(user.id));
-					await message.edit(emoji);
-				}
+				await message.edit(userMention(user.id));
+				await message.edit(emoji);
 				await discordLogs(
 					guild,
 					thread.client,
 					`Add @${user.user.username} to #${thread.name}`
 				);
 			} else if (!checkMemberRole(user.roles, "ignore")) {
-				if (message) {
-					await message.edit(userMention(user.id));
-					await message.edit(emoji);
-				} else {
-					message = await thread.send({
-						content: emoji,
-						flags: MessageFlags.SuppressNotifications,
-					});
-					await message.edit(userMention(user.id));
-					await message.edit(emoji);
-				}
+				await message.edit(userMention(user.id));
+				await message.edit(emoji);
 				await discordLogs(
 					guild,
 					thread.client,
@@ -75,17 +63,8 @@ export async function addUserToThread(thread: ThreadChannel, user: GuildMember) 
 				getConfig(CommandName.followOnlyRole, guild) &&
 				checkMemberRole(user.roles, "follow")
 			) {
-				if (message) {
-					await message.edit(userMention(user.id));
-					await message.edit(emoji);
-				} else {
-					message = await thread.send({
-						content: emoji,
-						flags: MessageFlags.SuppressNotifications,
-					});
-					await message.edit(userMention(user.id));
-					await message.edit(emoji);
-				}
+				await message.edit(userMention(user.id));
+				await message.edit(emoji);
 				await discordLogs(
 					guild,
 					thread.client,
@@ -272,7 +251,7 @@ export async function fetchUntilMessage(
 ): Promise<Message | undefined | null> {
 	const fetchMessage = await thread.messages.fetch({ limit: 100 });
 	let find = fetchMessage.filter((m) => m.author.id === thread.client.user.id).first();
-	console.log("Initial fetch size:", fetchMessage.size);
+	console.log("Initial fetch size:", fetchMessage.size, "Found:", !!find);
 	// Return early if found
 	if (find) return find;
 
@@ -280,7 +259,6 @@ export async function fetchUntilMessage(
 	const maxIterations = 10;
 	let iterations = 0;
 	let previousLastMessageId: string | undefined;
-	console.log(fetchMessage.size);
 
 	while (!find && fetchMessage.size > 0 && iterations < maxIterations) {
 		iterations++;
@@ -379,6 +357,30 @@ async function sendAndPin(thread: ThreadChannel): Promise<Message> {
 }
 
 async function fetchMessage(thread: ThreadChannel): Promise<Message> {
+	const guildId = thread.guild.id;
+	// Try cache first
+	const cachedId = getCachedMessage(guildId, thread.id);
+	if (cachedId) {
+		try {
+			const message = await thread.messages.fetch(cachedId);
+			// Verify pin status
+			const shouldBePinned = optionMaps.get(guildId, "pin");
+			if (shouldBePinned && !message.pinned) await message.pin();
+			return message;
+		} catch {
+			// Message deleted, clear cache
+			deleteCachedMessage(guildId, thread.id);
+		}
+	}
+
+	// Fallback to fetching
 	const firstMessage = await fetchFirstMessage(thread);
-	return firstMessage ?? (await sendAndPin(thread));
+	const shouldBePinned = optionMaps.get(guildId, "pin");
+	if (shouldBePinned && firstMessage && !firstMessage.pinned) await firstMessage.pin();
+
+	const message = firstMessage ?? (await sendAndPin(thread));
+
+	// Cache the result
+	setCachedMessage(guildId, thread.id, message.id);
+	return message;
 }

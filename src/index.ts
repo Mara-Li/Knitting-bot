@@ -2,19 +2,22 @@ import * as process from "node:process";
 import { Client, GatewayIntentBits, Partials } from "discord.js";
 import dotenv from "dotenv";
 import * as pkg from "../package.json" with { type: "json" };
-import onNewMember from "./events/created/onNewMember";
-import onThreadCreated from "./events/created/onThreadCreated";
-import onChannelDelete from "./events/delete/onChannelDelete";
-import onRoleDeleted from "./events/delete/onRoleDeleted";
-import onThreadDeleted from "./events/delete/onThreadDeleted";
-import interactionCreate from "./events/interactionCreate";
-import onBotEnter from "./events/onBotEnter";
-import onGuildQuit from "./events/onGuildQuit";
-import onPinsUpdate from "./events/pinUpdate";
-import ready from "./events/ready";
-import memberUpdate from "./events/updated/memberUpdate";
-import onChannelUpdate from "./events/updated/onChannelUpdate";
 import "uniformize";
+import {
+	interactionCreate,
+	memberUpdate,
+	onBotEnter,
+	onChannelDelete,
+	onChannelUpdate,
+	onGuildQuit,
+	onMessageDelete,
+	onNewMember,
+	onPinsUpdate,
+	onRoleDeleted,
+	onThreadCreated,
+	onThreadDeleted,
+	ready,
+} from "./events";
 
 let config = dotenv.config({ path: ".env", quiet: true });
 if (process.env.ENV === "production") {
@@ -51,6 +54,7 @@ try {
 	onNewMember(client);
 	onBotEnter(client);
 	onChannelDelete(client);
+	onMessageDelete(client);
 	onRoleDeleted(client);
 	onThreadDeleted(client);
 	interactionCreate(client);

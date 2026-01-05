@@ -8,7 +8,13 @@ import {
 	type TextChannel,
 } from "discord.js";
 import { TypeName } from "../../interface";
-import { getMaps, getRoleIn, setIgnore, setRoleIn } from "../../maps";
+import {
+	deleteCachedMessage,
+	getMaps,
+	getRoleIn,
+	setIgnore,
+	setRoleIn,
+} from "../../maps";
 
 /**
  * @param {Client} client - Discord.js Client
@@ -55,6 +61,15 @@ export default (client: Client): void => {
 		}
 		if (channelType === ChannelType.GuildText) {
 			/**
+			 * Clean up message cache for all threads in this text channel
+			 */
+			const textChannel = channelGuild as TextChannel;
+			const threads = textChannel.threads.cache;
+			threads.forEach((thread) => {
+				deleteCachedMessage(guildID, thread.id);
+			});
+
+			/**
 			 * Remove the channel from the database "follow" and "ignore" maps
 			 */
 			const allIgnore = getMaps("ignore", TypeName.channel, guildID) as TextChannel[];
@@ -72,6 +87,19 @@ export default (client: Client): void => {
 				setIgnore(TypeName.channel, guildID, allFollow);
 			}
 		} else if (channelType === ChannelType.GuildCategory) {
+			/**
+			 * Clean up message cache for all threads in channels within this category
+			 */
+			const category = channelGuild as CategoryChannel;
+			category.children.cache.forEach((child) => {
+				if (child.type === ChannelType.GuildText) {
+					const textChannel = child as TextChannel;
+					textChannel.threads.cache.forEach((thread) => {
+						deleteCachedMessage(guildID, thread.id);
+					});
+				}
+			});
+
 			/**
 			 * Remove the category from the database "follow" and "ignore" maps
 			 */
@@ -104,6 +132,14 @@ export default (client: Client): void => {
 				setIgnore(TypeName.category, guildID, allCategoryFollow);
 			}
 		} else if (channelType === ChannelType.GuildForum) {
+			/**
+			 * Clean up message cache for all threads in this forum
+			 */
+			const forum = channelGuild as ForumChannel;
+			forum.threads.cache.forEach((thread) => {
+				deleteCachedMessage(guildID, thread.id);
+			});
+
 			/**
 			 * Remove the forum from the database "follow" and "ignore" maps
 			 */

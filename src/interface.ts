@@ -78,8 +78,8 @@ export const DEFAULT_CONFIGURATION: Configuration = {
 	[CommandName.followOnlyRole]: false,
 	[CommandName.followOnlyRoleIn]: false,
 	language: Locale.EnglishUS,
-	pin: false,
 	messageToSend: "_ _",
+	pin: false,
 };
 
 export const DEFAULT_IGNORE_FOLLOW: IgnoreFollow = {

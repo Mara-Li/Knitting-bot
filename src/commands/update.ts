@@ -5,9 +5,10 @@ import {
 	type CommandInteractionOptionResolver,
 	channelMention,
 	EmbedBuilder,
+	MessageFlags,
 	PermissionFlagsBits,
 	SlashCommandBuilder,
-	ThreadChannel, MessageFlags,
+	ThreadChannel,
 } from "discord.js";
 import { getUl, t } from "../i18n";
 import { CommandName, type Translation } from "../interface";
@@ -94,9 +95,7 @@ async function updateAllThreads(
 	if (includeArchived) {
 		//fetch archived threads
 		const archived = await fetchArchived(interaction.guild);
-		for (const thread of archived)
-			toUpdate.add(thread);
-		
+		for (const thread of archived) toUpdate.add(thread);
 	}
 	//merge both collections
 	for (const thread of threads.threads.values()) {
@@ -134,7 +133,7 @@ async function updateThread(interaction: ChatInputCommandInteraction, ul: Transl
 	const threadOption =
 		interaction.options.get(ul("common.thread").toLowerCase()) ?? interaction;
 	const channel = threadOption?.channel;
-	await interaction.deferReply({flags: MessageFlags.Ephemeral});
+	await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
 	if (!channel || !(channel instanceof ThreadChannel)) {
 		await interaction.editReply({

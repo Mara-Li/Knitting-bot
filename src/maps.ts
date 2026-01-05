@@ -17,6 +17,47 @@ import {
 } from "./interface";
 import { logInDev } from "./utils";
 
+/**
+ * Get cached bot message ID for a thread
+ * @param guildId The guild ID
+ * @param threadId The thread ID
+ * @returns The cached message ID or undefined
+ */
+export function getCachedMessage(guildId: string, threadId: string): string | undefined {
+	return botMessageCache.get(guildId, threadId);
+}
+
+/**
+ * Cache a bot message ID for a thread
+ * @param guildId The guild ID
+ * @param threadId The thread ID
+ * @param messageId The message ID to cache
+ */
+export function setCachedMessage(
+	guildId: string,
+	threadId: string,
+	messageId: string
+): void {
+	botMessageCache.set(guildId, messageId, threadId);
+}
+
+/**
+ * Delete cached bot message for a thread
+ * @param guildId The guild ID
+ * @param threadId The thread ID
+ */
+export function deleteCachedMessage(guildId: string, threadId: string): void {
+	botMessageCache.delete(guildId, threadId);
+}
+
+/**
+ * Delete all cached messages for a guild
+ * @param guildId The guild ID
+ */
+export function clearGuildMessageCache(guildId: string): void {
+	botMessageCache.delete(guildId);
+}
+
 export const optionMaps = new Enmap<string, Configuration>({
 	autoFetch: true,
 	cloneLevel: "deep",
@@ -35,6 +76,17 @@ const followOnlyMaps = new Enmap<string, IgnoreFollow>({
 	cloneLevel: "deep",
 	fetchAll: false,
 	name: "FollowOnly",
+});
+
+/**
+ * Cache for bot messages in threads
+ * Structure: { guildId: { threadId: messageId } }
+ */
+const botMessageCache = new Enmap<string, Record<string, string>>({
+	autoFetch: true,
+	cloneLevel: "deep",
+	fetchAll: false,
+	name: "BotMessageCache",
 });
 
 /**

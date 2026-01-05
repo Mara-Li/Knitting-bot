@@ -1,10 +1,21 @@
 import type { Client, ThreadChannel } from "discord.js";
 import { TypeName } from "../../interface";
-import { getMaps, getRoleIn, setFollow, setIgnore, setRoleIn } from "../../maps";
+import {
+	deleteCachedMessage,
+	getMaps,
+	getRoleIn,
+	setFollow,
+	setIgnore,
+	setRoleIn,
+} from "../../maps";
 
 export default (client: Client): void => {
 	client.on("threadDelete", async (thread) => {
 		const guildID = thread.guild.id;
+
+		// Clean up message cache for this thread
+		deleteCachedMessage(guildID, thread.id);
+
 		const threadIsFollowed = getMaps("follow", TypeName.thread, guildID).some(
 			(followed) => followed.id === thread.id
 		);

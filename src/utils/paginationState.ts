@@ -39,15 +39,15 @@ export function getPaginationState(
 
 	if (!state) {
 		state = {
-			userId,
+			currentPage: 0,
 			guildId,
 			mode,
-			currentPage: 0,
 			selectedCategories: new Set(),
 			selectedChannels: new Set(),
-			selectedThreads: new Set(),
 			selectedForums: new Set(),
+			selectedThreads: new Set(),
 			timestamp: Date.now(),
+			userId,
 		};
 		paginationStates.set(key, state);
 	}
@@ -72,15 +72,15 @@ export function initializePaginationState(
 ): PaginationState {
 	const key = `${userId}_${guildId}_${mode}`;
 	const state: PaginationState = {
-		userId,
+		currentPage: 0,
 		guildId,
 		mode,
-		currentPage: 0,
 		selectedCategories: new Set(currentItems.categories.map((c) => c.id)),
 		selectedChannels: new Set(currentItems.channels.map((c) => c.id)),
-		selectedThreads: new Set(currentItems.threads.map((t) => t.id)),
 		selectedForums: new Set(currentItems.forums.map((f) => f.id)),
+		selectedThreads: new Set(currentItems.threads.map((t) => t.id)),
 		timestamp: Date.now(),
+		userId,
 	};
 	paginationStates.set(key, state);
 	return state;

@@ -39,10 +39,7 @@ export function toTitle(name: string) {
 
 export async function updateCache(guild: Guild) {
 	try {
-		await Promise.all([
-			guild.members.fetch(),
-			guild.roles.fetch()
-		]);
+		await Promise.all([guild.members.fetch(), guild.roles.fetch()]);
 	} catch (e) {
 		console.log(e);
 		//ignore error
