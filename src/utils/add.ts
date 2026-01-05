@@ -19,7 +19,7 @@ import {
 	checkRoleIn,
 	getMemberPermission,
 } from "./data_check";
-import { discordLogs } from "./index";
+import { discordLogs, logInDev } from "./index";
 
 /**
  * Add a user to a thread, with verification the permission.
@@ -190,20 +190,17 @@ export async function addRoleAndUserToThread(thread: ThreadChannel) {
 	const toPing: GuildMember[] = [];
 	const rolesWithAccess: Role[] = thread.guild.roles.cache.toJSON();
 	if (rolesWithAccess.length > 0) {
+		logInDev("Getting roles to ping");
 		try {
-			getRoleToPing(thread, rolesWithAccess).then((roles) => {
-				roles.forEach((role) => {
-					toPing.push(...role.members.toJSON());
-				});
-			});
+			const roles = await getRoleToPing(thread, rolesWithAccess);
+			for (const role of roles) toPing.push(...role.members.toJSON());
 		} catch (error) {
 			console.error(error);
 		}
 	} else {
 		const guildMembers: GuildMember[] = members.toJSON();
-		await getUsersToPing(thread, guildMembers).then((users) => {
-			toPing.push(...users);
-		});
+		const users = await getUsersToPing(thread, guildMembers);
+		toPing.push(...users);
 	}
 	//getConfig all member that have access to the thread (overwriting permission)
 	//use cache
@@ -211,11 +208,11 @@ export async function addRoleAndUserToThread(thread: ThreadChannel) {
 	const memberWithAccess = getMemberPermission(reloadMembers, thread);
 	if (memberWithAccess) {
 		const memberWithAccessArray: GuildMember[] = memberWithAccess.toJSON();
-		await getUsersToPing(thread, memberWithAccessArray).then((users) => {
-			toPing.push(...users);
-		});
+		const users = await getUsersToPing(thread, memberWithAccessArray);
+		toPing.push(...users);
 	}
 	const emoji = optionMaps.get(thread.guild.id, "messageToSend") ?? EMOJI;
+	logInDev(`Total members to add: ${toPing.length}`);
 	if (toPing.length > 0) {
 		try {
 			const message = await fetchMessage(thread);

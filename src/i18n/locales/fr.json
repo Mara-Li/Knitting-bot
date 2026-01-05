@@ -49,7 +49,9 @@
     "previous": "Précédent",
     "role": "role",
     "roleIn": "spécifique",
+    "space": " ",
     "thread": "Thread",
+    "timeOut": "Temps écoulé",
     "validate": "Valider",
     "yes": "Oui"
   },
@@ -297,6 +299,7 @@
     "on": {
       "follow": "Suivi",
       "ignore": "Ignoré"
-    }
+    },
+    "updated": "Le rôle {{- mention}} sera maintenant {{-on}} dans :{{- channels }}"
   }
 }

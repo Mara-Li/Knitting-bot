@@ -231,31 +231,30 @@ async function showRoleInPaginatedModal(
 			.map((c) => c.id),
 	};
 
-	for (const id of availableOnPage.categories) {
+	for (const id of availableOnPage.categories)
 		if (!newSelectedIds.categories.includes(id)) state.selectedCategories.delete(id);
-	}
-	for (const id of availableOnPage.channels) {
+
+	for (const id of availableOnPage.channels)
 		if (!newSelectedIds.channels.includes(id)) state.selectedChannels.delete(id);
-	}
-	for (const id of availableOnPage.threads) {
+
+	for (const id of availableOnPage.threads)
 		if (!newSelectedIds.threads.includes(id)) state.selectedThreads.delete(id);
-	}
-	for (const id of availableOnPage.forums) {
+
+	for (const id of availableOnPage.forums)
 		if (!newSelectedIds.forums.includes(id)) state.selectedForums.delete(id);
-	}
 
 	for (const id of newSelectedIds.categories) state.selectedCategories.add(id);
 	for (const id of newSelectedIds.channels) state.selectedChannels.add(id);
 	for (const id of newSelectedIds.threads) state.selectedThreads.add(id);
 	for (const id of newSelectedIds.forums) state.selectedForums.add(id);
-
+	const s = ul("common.space");
 	const buttons = buildRoleInButtons(on, page, hasMore, roleId, ul);
 	const summary =
 		`Page ${page + 1} - ${ul("common.role")}: ${Djs.roleMention(roleId)}\n` +
-		`📁 Catégories: ${state.selectedCategories.size}\n` +
-		`💬 Salons: ${state.selectedChannels.size}\n` +
-		`🧵 Threads: ${state.selectedThreads.size}\n` +
-		`📋 Forums: ${state.selectedForums.size}`;
+		`📁 ${ul("common.category")}${s}: ${state.selectedCategories.size}\n` +
+		`💬 ${ul("common.channel")}${s}: ${state.selectedChannels.size}\n` +
+		`🧵 ${ul("common.thread")}${s}: ${state.selectedThreads.size}\n` +
+		`📋 ${ul("common.forum")}${s}: ${state.selectedForums.size}`;
 
 	await modalSubmit.reply({
 		components: buttons,
@@ -311,7 +310,7 @@ async function validateRoleInSelection(
 			content: ul("roleIn.noLonger.any", {
 				mention: Djs.roleMention(role.id),
 				on: ul(`roleIn.on.${on}`),
-			}) as string,
+			}),
 		});
 		clearRoleInState(userId, guildID, on, roleId);
 		return;
@@ -342,20 +341,23 @@ async function validateRoleInSelection(
 	};
 
 	const channelLines: string[] = [];
-	for (const category of channelsByType.categories) {
+	for (const category of channelsByType.categories)
 		channelLines.push(`- [${ul("common.category")}] ${category.name}`);
-	}
-	for (const channel of channelsByType.textChannels) {
-		channelLines.push(`- [${ul("common.channel")}] ${Djs.channelMention(channel.id)}`);
-	}
-	for (const thread of channelsByType.threads) {
-		channelLines.push(`- [${ul("common.thread")}] ${Djs.channelMention(thread.id)}`);
-	}
-	for (const forum of channelsByType.forums) {
-		channelLines.push(`- [${ul("common.forum")}] ${Djs.channelMention(forum.id)}`);
-	}
 
-	const finalMessage = `Le rôle ${Djs.roleMention(role.id)} sera maintenant ${ul(`roleIn.on.${on}`)} dans :\n${channelLines.join("\n")}`;
+	for (const channel of channelsByType.textChannels)
+		channelLines.push(`- [${ul("common.channel")}] ${Djs.channelMention(channel.id)}`);
+
+	for (const thread of channelsByType.threads)
+		channelLines.push(`- [${ul("common.thread")}] ${Djs.channelMention(thread.id)}`);
+
+	for (const forum of channelsByType.forums)
+		channelLines.push(`- [${ul("common.forum")}] ${Djs.channelMention(forum.id)}`);
+
+	const finalMessage = ul("roleIn.updated", {
+		channels: `\n${channelLines.join("\n")}`,
+		mention: Djs.roleMention(role.id),
+		on: ul(`roleIn.on.${on}`).toLowerCase(),
+	});
 
 	await interaction.update({ components: [], content: finalMessage });
 	clearRoleInState(userId, guildID, on, roleId);
@@ -476,12 +478,16 @@ export async function interactionRoleInChannel(
 		}
 		if (i.customId === `${on}_roleIn_cancel_${roleId}`) {
 			clearRoleInState(userId, guildID, on, roleId);
-			await i.update({ components: [], content: "❌ Annulé" });
+			await i.update({ components: [], content: ul("common.cancel") });
 			collector.stop();
 		}
 	});
 
 	collector.on("end", () => {
 		clearRoleInState(userId, guildID, on, roleId);
+		// Remove buttons when the collector times out and update content
+		void interaction
+			.editReply({ components: [], content: ul("common.timeOut") })
+			.catch(() => undefined);
 	});
 }

@@ -49,7 +49,9 @@
     "previous": "Previous",
     "role": "role",
     "roleIn": "specific",
+    "space": "",
     "thread": "Thread",
+    "timeOut": "",
     "validate": "Validate",
     "yes": "Yes"
   },
@@ -295,8 +297,9 @@
       "chan": "{{- chan }} is no longer {{- on }} for {{- mention }}"
     },
     "on": {
-      "follow": "followed in",
-      "ignore": "ignored in"
-    }
+      "follow": "followed",
+      "ignore": "ignored"
+    },
+    "updated": "The role {{- mention}} will be {{- on}} in:{{- channels}}"
   }
 }
