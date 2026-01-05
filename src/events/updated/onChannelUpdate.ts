@@ -35,17 +35,20 @@ export default (client: Client): void => {
 		) {
 			return;
 		}
-		//getConfig all threads of this channel
+
+		const followOnlyChannelEnabled = getConfig(CommandName.followOnlyChannel, guild);
 		const isCategory = newChannel.type === ChannelType.GuildCategory;
+
 		if (isCategory) {
 			//get all threads of the channels in the category
 			const children = newChannel.children.cache;
 			if (children.size === 0) return;
-			children.forEach((child) => {
+
+			for (const child of children.values()) {
 				if (child.type === ChannelType.GuildText) {
 					const threads = (child as TextChannel).threads.cache;
 					if (threads.size > 0)
-						discordLogs(
+						await discordLogs(
 							guild,
 							client,
 							ul("logs.updated.channel", {
@@ -53,19 +56,25 @@ export default (client: Client): void => {
 								number: threads.size,
 							})
 						);
-					threads.forEach((thread) => {
-						if (!getConfig(CommandName.followOnlyChannel, guild)) {
-							if (!checkThread(thread, "ignore")) addRoleAndUserToThread(thread);
-						} else {
-							if (checkThread(thread, "follow")) addRoleAndUserToThread(thread);
+
+					for (const thread of threads.values()) {
+						const shouldUpdate = followOnlyChannelEnabled
+							? checkThread(thread, "follow")
+							: !checkThread(thread, "ignore");
+
+						if (shouldUpdate) {
+							await addRoleAndUserToThread(thread);
+							// Add delay between requests to avoid gateway rate limit
+							await new Promise((resolve) => setTimeout(resolve, 250));
 						}
-					});
+					}
 				}
-			});
+			}
 		} else {
 			const newTextChannel = newChannel as TextChannel;
 			const threads = newTextChannel.threads.cache;
 			if (threads.size === 0) return;
+
 			await discordLogs(
 				guild,
 				client,
@@ -74,13 +83,18 @@ export default (client: Client): void => {
 					number: threads.size,
 				})
 			);
-			threads.forEach((thread) => {
-				if (!getConfig(CommandName.followOnlyChannel, guild)) {
-					if (!checkThread(thread, "ignore")) addRoleAndUserToThread(thread);
-				} else {
-					if (checkThread(thread, "follow")) addRoleAndUserToThread(thread);
+
+			for (const thread of threads.values()) {
+				const shouldUpdate = followOnlyChannelEnabled
+					? checkThread(thread, "follow")
+					: !checkThread(thread, "ignore");
+
+				if (shouldUpdate) {
+					await addRoleAndUserToThread(thread);
+					// Add delay between requests to avoid gateway rate limit
+					await new Promise((resolve) => setTimeout(resolve, 250));
 				}
-			});
+			}
 		}
 	});
 };

@@ -22,6 +22,8 @@ export default (client: Client): void => {
 		await discordLogs(guildID, client, ul("logs.joined", { user: member.user.username }));
 		const guild = member.guild;
 		const channels = guild.channels.cache.filter((channel) => channel.isThread());
+
+		// Process threads with a delay to avoid rate limiting
 		for (const channel of channels.values()) {
 			const threadChannel = channel as ThreadChannel;
 			const roleIsAllowed =
@@ -34,6 +36,8 @@ export default (client: Client): void => {
 				if (roleIsAllowed && checkThread(threadChannel, "follow"))
 					await addUserToThread(threadChannel, member);
 			}
+			// Add delay between requests to avoid gateway rate limit
+			await new Promise((resolve) => setTimeout(resolve, 250));
 		}
 	});
 };

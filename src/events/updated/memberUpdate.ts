@@ -44,6 +44,8 @@ export default (client: Client): void => {
 			);
 			const guild = newMember.guild;
 			const channels = guild.channels.cache.filter((channel) => channel.isThread());
+			const followOnlyChannelEnabled = getConfig(CommandName.followOnlyChannel, guildID);
+
 			for (const channel of channels.values()) {
 				const threadChannel = channel as ThreadChannel;
 				const updatedRoleAllowed = updatedRoles.filter((role) => {
@@ -69,24 +71,27 @@ export default (client: Client): void => {
 						checkMemberRoleIn("ignore", newMember.roles, threadChannel);
 				}
 
-				if (!getConfig(CommandName.followOnlyChannel, guildID)) {
+				let shouldAddUser = false;
+				if (!followOnlyChannelEnabled) {
 					/**
 					 * followOnlyChannel is disabled && followOnlyRole can be enabled or disabled
 					 */
-					if (!checkThread(threadChannel, "ignore") && roleIsAllowed)
-						await addUserToThread(threadChannel, newMember);
+					shouldAddUser = !checkThread(threadChannel, "ignore") && roleIsAllowed;
 				} else {
 					/**
 					 * followOnlyChannel is enabled && followOnlyRole can be enabled or disabled
 					 */
-					const followedThread = checkThread(threadChannel, "follow");
-					if (roleIsAllowed && followedThread)
-						await addUserToThread(threadChannel, newMember);
+					shouldAddUser = roleIsAllowed && checkThread(threadChannel, "follow");
+				}
+
+				if (shouldAddUser) {
+					await addUserToThread(threadChannel, newMember);
+					// Add delay between requests to avoid gateway rate limit
+					await new Promise((resolve) => setTimeout(resolve, 250));
 				}
 			}
 		} catch (error) {
 			console.error(error);
-			logInDev(`Error on memberUpdate: ${error}`);
 		}
 		logInDev(`Member ${newMember.user.username} has been updated.`);
 	});

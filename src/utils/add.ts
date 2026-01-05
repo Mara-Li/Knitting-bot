@@ -272,7 +272,7 @@ export async function fetchUntilMessage(
 ): Promise<Message | undefined | null> {
 	const fetchMessage = await thread.messages.fetch({ limit: 100 });
 	let find = fetchMessage.filter((m) => m.author.id === thread.client.user.id).first();
-
+	console.log("Initial fetch size:", fetchMessage.size);
 	// Return early if found
 	if (find) return find;
 
@@ -280,8 +280,9 @@ export async function fetchUntilMessage(
 	const maxIterations = 10;
 	let iterations = 0;
 	let previousLastMessageId: string | undefined;
+	console.log(fetchMessage.size);
 
-	while (!find && fetchMessage.size === 100 && iterations < maxIterations) {
+	while (!find && fetchMessage.size > 0 && iterations < maxIterations) {
 		iterations++;
 		const lastMessageId = fetchMessage.last()?.id;
 		// Break if no valid message ID or if we're stuck on the same message
@@ -293,11 +294,11 @@ export async function fetchUntilMessage(
 		});
 		// Break if no new messages were fetched
 		if (moreMessages.size === 0) break;
-		find = moreMessages.filter((m) => m.author.id === thread.client.user.id).first();
+		find = moreMessages.find((m) => m.author.id === thread.client.user.id);
 		// If found, return immediately
 		if (find) return find;
 	}
-	return find ?? null;
+	return find ?? undefined;
 }
 
 async function fetchAllPinnedMessages(
@@ -349,6 +350,7 @@ async function fetchFirstMessage(
 	thread: ThreadChannel
 ): Promise<Message | undefined | null> {
 	const pin = optionMaps.get(thread.guild.id, "pin");
+	console.log("Pin is:", pin);
 	if (pin) {
 		//fetch pinned messages
 		const pinnedMessages = thread.messages.cache.filter((m) => m.pinned);
