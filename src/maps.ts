@@ -24,6 +24,8 @@ import { logInDev } from "./utils";
  * @returns The cached message ID or undefined
  */
 export function getCachedMessage(guildId: string, threadId: string): string | undefined {
+	if (!botMessageCache.has(guildId, threadId)) return undefined;
+
 	return botMessageCache.get(guildId, threadId);
 }
 
@@ -47,6 +49,7 @@ export function setCachedMessage(
  * @param threadId The thread ID
  */
 export function deleteCachedMessage(guildId: string, threadId: string): void {
+	if (!botMessageCache.has(guildId, threadId)) return;
 	botMessageCache.delete(guildId, threadId);
 }
 
@@ -55,6 +58,7 @@ export function deleteCachedMessage(guildId: string, threadId: string): void {
  * @param guildId The guild ID
  */
 export function clearGuildMessageCache(guildId: string): void {
+	if (!botMessageCache.has(guildId)) return;
 	botMessageCache.delete(guildId);
 }
 
@@ -200,15 +204,13 @@ export function getConfig(
 	}
 
 	// Otherwise, set and return the default value based on command type
-	const defaultValue = [
+	const defaultValue = ![
 		CommandName.manualMode,
 		CommandName.followOnlyChannel,
 		CommandName.followOnlyRole,
 		CommandName.followOnlyRoleIn,
 		CommandName.log,
-	].includes(name)
-		? false
-		: true;
+	].includes(name);
 
 	optionMaps.set(guildID, defaultValue, name);
 	return defaultValue;
@@ -292,20 +294,6 @@ function getMapValues(
 	}
 }
 
-/**
- * Get a value for the Emaps "FollowOnly"
- * @deprecated Use getMapValues instead
- * @param follow {TypeName}
- * @param guildID
- * @returns {ThreadChannel[] | CategoryChannel[] | Role[] | TextChannel[]}
- */
-function getFollow(
-	follow: TypeName,
-	guildID: string
-): ThreadChannel[] | CategoryChannel[] | TextChannel[] | ForumChannel[] {
-	return getMapValues("follow", follow, guildID);
-}
-
 export function getAllFollowedChannels(guildId: string) {
 	const followConfig = followOnlyMaps.ensure(
 		guildId,
@@ -322,20 +310,6 @@ export function getAllFollowedChannels(guildId: string) {
 		...(followedCategory ?? []),
 		...(followedThread ?? []),
 	];
-}
-
-/**
- * Get a value for the Emaps "Ignore"
- * @deprecated Use getMapValues instead
- * @param ignore {TypeName}
- * @param guildID
- * @returns {ThreadChannel[] | CategoryChannel[] | Role[] | TextChannel[]}
- */
-function getIgnored(
-	ignore: TypeName,
-	guildID: string
-): ThreadChannel[] | CategoryChannel[] | TextChannel[] | ForumChannel[] {
-	return getMapValues("ignore", ignore, guildID);
 }
 
 export function destroyDB(): void {
