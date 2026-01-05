@@ -247,7 +247,8 @@ async function channelSelectors(
 	// Créer le message initial avec bouton
 	const startButton = new ButtonBuilder()
 		.setCustomId("follow_channels_start")
-		.setLabel("🎯 Gérer les channels suivis")
+		.setLabel(ul("follow.thread.startButton"))
+		.setEmoji("🎯")
 		.setStyle(2); // Secondary
 
 	const row = new ActionRowBuilder<ButtonBuilder>().addComponents(startButton);
@@ -273,7 +274,7 @@ async function channelSelectors(
 			// Afficher la première page
 			await showPaginatedModalForFollow(buttonInteraction, guild, userId, guildID, 0, ul);
 		} else if (customId.startsWith("follow_page_prev_")) {
-			const currentPage = Number.parseInt(customId.split("_").pop() || "0");
+			const currentPage = Number.parseInt(customId.split("_").pop() || "0", 10);
 			const prevPage = Math.max(0, currentPage - 1);
 			await showPaginatedModalForFollow(
 				buttonInteraction,
@@ -284,7 +285,7 @@ async function channelSelectors(
 				ul
 			);
 		} else if (customId.startsWith("follow_page_next_")) {
-			const currentPage = Number.parseInt(customId.split("_").pop() || "0");
+			const currentPage = Number.parseInt(customId.split("_").pop() || "0", 10);
 			const nextPage = currentPage + 1;
 			await showPaginatedModalForFollow(
 				buttonInteraction,
@@ -309,7 +310,7 @@ async function channelSelectors(
 			clearPaginationState(userId, guildID, "follow");
 			await buttonInteraction.update({
 				components: [],
-				content: "❌ Annulé",
+				content: ul("common.cancelled"),
 			});
 			collector.stop();
 		}
@@ -455,7 +456,7 @@ async function showPaginatedModalForFollow(
 		// Afficher les boutons de navigation
 		const buttons = createPaginationButtons("follow", page, hasMore, ul);
 		const summary =
-			`Page ${page + 1} - Sélections actuelles:\n` +
+			`${ul("common.page")} ${page + 1} - ${ul("common.selection")}:\n` +
 			`📁 Catégories: ${state.selectedCategories.size}\n` +
 			`💬 Salons: ${state.selectedChannels.size}\n` +
 			`🧵 Threads: ${state.selectedThreads.size}\n` +
@@ -547,8 +548,8 @@ async function validateAndSaveForFollow(
 
 	const finalMessage =
 		messages.length > 0
-			? `✅ Modifications enregistrées :\n- ${messages.join("\n- ")}`
-			: "Aucune modification effectuée.";
+			? ul("follow.thread.summary", { changes: `\n${messages.join("\n")}` })
+			: ul("follow.thread.noChanges");
 
 	await interaction.update({
 		components: [],

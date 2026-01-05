@@ -245,7 +245,8 @@ async function channelSelectors(
 	// Créer le message initial avec bouton
 	const startButton = new ButtonBuilder()
 		.setCustomId("ignore_channels_start")
-		.setLabel("🎯 Gérer les channels ignorés")
+		.setLabel(ul("ignore.thread.startButton"))
+		.setEmoji("🎯")
 		.setStyle(2); // Secondary
 
 	const row = new ActionRowBuilder<ButtonBuilder>().addComponents(startButton);
@@ -287,7 +288,7 @@ async function channelSelectors(
 			clearPaginationState(userId, guildID, "ignore");
 			await buttonInteraction.update({
 				components: [],
-				content: ul("common.cancel"),
+				content: ul("common.cancelled"),
 			});
 			collector.stop();
 		}
@@ -433,12 +434,13 @@ async function showPaginatedModal(
 
 		// Afficher les boutons de navigation
 		const buttons = createPaginationButtons("ignore", page, hasMore, ul);
+		const s = ul("common.space");
 		const summary =
-			`Page ${page + 1} - Sélections actuelles:\n` +
-			`📁 Catégories: ${state.selectedCategories.size}\n` +
-			`💬 Salons: ${state.selectedChannels.size}\n` +
-			`🧵 Threads: ${state.selectedThreads.size}\n` +
-			`📋 Forums: ${state.selectedForums.size}`;
+			`${ul("common.page")} ${page + 1} - ${ul("common.selection")}${s}:\n` +
+			`📁 ${ul("common.category")}${s}: ${state.selectedCategories.size}\n` +
+			`💬 ${ul("common.channel")}${s}: ${state.selectedChannels.size}\n` +
+			`🧵 ${ul("common.thread")}${s}: ${state.selectedThreads.size}\n` +
+			`📋 ${ul("common.forum")}${s}: ${state.selectedForums.size}`;
 
 		await modalSubmit.reply({
 			components: buttons,
@@ -526,8 +528,8 @@ async function validateAndSave(
 
 	const finalMessage =
 		messages.length > 0
-			? `✅ Modifications enregistrées :\n- ${messages.join("\n- ")}`
-			: "Aucune modification effectuée.";
+			? ul("follow.thread.summary", { changes: `\n${messages.join("\n")}` })
+			: ul("follow.thread.noChanges");
 
 	await interaction.update({
 		components: [],
