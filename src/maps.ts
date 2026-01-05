@@ -105,7 +105,7 @@ export function setConfig(
 }
 
 /**
- * setConfig value in Emaps "ignore"
+ * Set value in Emaps "ignore"
  */
 
 export function setIgnore<T extends keyof IgnoreFollow>(
@@ -120,7 +120,7 @@ export function setIgnore<T extends keyof IgnoreFollow>(
 }
 
 /**
- * setConfig value in Emaps "followOnly"
+ * Set value in Emaps "followOnly"
  */
 
 export function setFollow<T extends keyof IgnoreFollow>(
@@ -165,21 +165,23 @@ export function setRoleIn(on: "follow" | "ignore", guildID: string, value: RoleI
 
 /**
  * Get a value in the Emaps "configuration"
- * Return "en" if CommandName.language is not setConfig
- * return true if value is not setConfig (for the other options)
+ * Return "en" if CommandName.language is not set
+ * return true if value is not set (for the other options)
  * @param {CommandName} name
  * @param guildID
- * @param channel
+ * @param channel - If true, get channel configuration
  */
+export function getConfig(name: CommandName, guildID: string, channel?: false): boolean;
+export function getConfig(name: CommandName, guildID: string, channel: true): string;
 export function getConfig(
 	name: CommandName,
 	guildID: string,
 	channel?: boolean
 ): string | boolean {
-	// Assure que la configuration existe pour la guilde
+	// Ensure configuration exists for the guild
 	optionMaps.ensure(guildID, DEFAULT_CONFIGURATION);
 
-	// Si on cherche un canal spécifique (pour les logs par exemple)
+	// If looking for a specific channel (e.g., for logs)
 	if (channel) {
 		const channelPath = `${name}.channel`;
 		const channelValue = optionMaps.get(guildID, channelPath);
@@ -189,28 +191,27 @@ export function getConfig(
 		return "";
 	}
 
-	// Récupère la valeur de la configuration
+	// Retrieve the configuration value
 	const value = optionMaps.get(guildID, name);
 
-	// Si la valeur existe, la retourner
+	// If the value exists, return it
 	if (value !== undefined && value !== null) {
 		return value as string | boolean;
 	}
 
-	// Sinon, définir et retourner la valeur par défaut selon le type de commande
-	switch (name) {
-		case CommandName.manualMode:
-		case CommandName.followOnlyChannel:
-		case CommandName.followOnlyRole:
-		case CommandName.followOnlyRoleIn:
-		case CommandName.log:
-			optionMaps.set(guildID, false, name);
-			return false;
-		default:
-			// Pour les autres commandes (member, thread, channel, newMember)
-			optionMaps.set(guildID, true, name);
-			return true;
-	}
+	// Otherwise, set and return the default value based on command type
+	const defaultValue = [
+		CommandName.manualMode,
+		CommandName.followOnlyChannel,
+		CommandName.followOnlyRole,
+		CommandName.followOnlyRoleIn,
+		CommandName.log,
+	].includes(name)
+		? false
+		: true;
+
+	optionMaps.set(guildID, defaultValue, name);
+	return defaultValue;
 }
 
 export function getRoleIn(ignore: "follow" | "ignore", guildID: string): RoleIn[] {
@@ -254,16 +255,46 @@ export function getMaps(
 	typeName: TypeName,
 	guildID: string
 ): ThreadChannel[] | CategoryChannel[] | TextChannel[] | ForumChannel[] {
-	switch (maps) {
-		case "follow":
-			return getFollow(typeName, guildID);
-		case "ignore":
-			return getIgnored(typeName, guildID);
+	return getMapValues(maps, typeName, guildID);
+}
+
+/**
+ * Generic function to retrieve values from ignore or follow maps
+ * @param mapType - Type of map to query ("follow" or "ignore")
+ * @param typeName - Type of entity to retrieve
+ * @param guildID - Guild identifier
+ * @returns Array of channels/categories/forums/threads
+ */
+function getMapValues(
+	mapType: "follow" | "ignore",
+	typeName: TypeName,
+	guildID: string
+): ThreadChannel[] | CategoryChannel[] | TextChannel[] | ForumChannel[] {
+	const map = mapType === "follow" ? followOnlyMaps : ignoreMaps;
+	const config = map.ensure(guildID, DEFAULT_IGNORE_FOLLOW) as IgnoreFollow;
+
+	if (!config[typeName]) {
+		const setter = mapType === "follow" ? setFollow : setIgnore;
+		setter(typeName, guildID, []);
+	}
+
+	switch (typeName) {
+		case TypeName.thread:
+			return (config[TypeName.thread] as ThreadChannel[]) ?? [];
+		case TypeName.category:
+			return (config[TypeName.category] as CategoryChannel[]) ?? [];
+		case TypeName.channel:
+			return (config[TypeName.channel] as TextChannel[]) ?? [];
+		case TypeName.forum:
+			return (config[TypeName.forum] as ForumChannel[]) ?? [];
+		default:
+			return [];
 	}
 }
 
 /**
  * Get a value for the Emaps "FollowOnly"
+ * @deprecated Use getMapValues instead
  * @param follow {TypeName}
  * @param guildID
  * @returns {ThreadChannel[] | CategoryChannel[] | Role[] | TextChannel[]}
@@ -272,25 +303,7 @@ function getFollow(
 	follow: TypeName,
 	guildID: string
 ): ThreadChannel[] | CategoryChannel[] | TextChannel[] | ForumChannel[] {
-	const followConfig = followOnlyMaps.ensure(
-		guildID,
-		DEFAULT_IGNORE_FOLLOW
-	) as IgnoreFollow;
-	if (!followConfig[follow]) {
-		setFollow(follow, guildID, []);
-	}
-	switch (follow) {
-		case TypeName.thread:
-			return (followConfig[TypeName.thread] as ThreadChannel[]) ?? [];
-		case TypeName.category:
-			return (followConfig[TypeName.category] as CategoryChannel[]) ?? [];
-		case TypeName.channel:
-			return (followConfig[TypeName.channel] as TextChannel[]) ?? [];
-		case TypeName.forum:
-			return (followConfig[TypeName.forum] as ForumChannel[]) ?? [];
-		default:
-			return [];
-	}
+	return getMapValues("follow", follow, guildID);
 }
 
 export function getAllFollowedChannels(guildId: string) {
@@ -313,6 +326,7 @@ export function getAllFollowedChannels(guildId: string) {
 
 /**
  * Get a value for the Emaps "Ignore"
+ * @deprecated Use getMapValues instead
  * @param ignore {TypeName}
  * @param guildID
  * @returns {ThreadChannel[] | CategoryChannel[] | Role[] | TextChannel[]}
@@ -321,22 +335,7 @@ function getIgnored(
 	ignore: TypeName,
 	guildID: string
 ): ThreadChannel[] | CategoryChannel[] | TextChannel[] | ForumChannel[] {
-	const ignoreConfig = ignoreMaps.ensure(guildID, DEFAULT_IGNORE_FOLLOW) as IgnoreFollow;
-	if (!ignoreConfig[ignore]) {
-		setIgnore(ignore, guildID, []);
-	}
-	switch (ignore) {
-		case TypeName.thread:
-			return (ignoreConfig[TypeName.thread] as ThreadChannel[]) ?? [];
-		case TypeName.category:
-			return (ignoreConfig[TypeName.category] as CategoryChannel[]) ?? [];
-		case TypeName.channel:
-			return (ignoreConfig[TypeName.channel] as TextChannel[]) ?? [];
-		case TypeName.forum:
-			return (ignoreConfig[TypeName.forum] as ForumChannel[]) ?? [];
-		default:
-			return [];
-	}
+	return getMapValues("ignore", ignore, guildID);
 }
 
 export function destroyDB(): void {

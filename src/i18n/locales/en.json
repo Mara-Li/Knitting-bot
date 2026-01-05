@@ -32,7 +32,7 @@
 	"common": {
 		"archived": "archived",
 		"cancel": "Cancel",
-		"cancelled": "",
+		"cancelled": "Cancelled",
 		"category": "Category",
 		"channel": "Channel",
 		"confirm": "Confirm",
@@ -47,14 +47,14 @@
 		"next": "Next",
 		"no": "No",
 		"none": "/",
-		"page": "",
+		"page": "Page",
 		"previous": "Previous",
 		"role": "role",
 		"roleIn": "specific",
-		"selection": "",
-		"space": "",
+		"selection": "Selection",
+		"space": " ",
 		"thread": "Thread",
-		"timeOut": "",
+		"timeOut": "Timed out",
 		"validate": "Validate",
 		"yes": "Yes"
 	},
@@ -212,19 +212,19 @@
 		},
 		"thread": {
 			"description": "Manage the following of salons, threads, categories, or forums for {{- role}}",
-			"noChanges": "",
-			"noSelection": "",
+			"noChanges": "No changes were made.",
+			"noSelection": "No selection was made.",
 			"option": {
-				"description": "Salon à suivre"
+				"description": "Channel to follow"
 			},
 			"remove": "{{- thread}} is unfollowed.",
 			"select": {
-				"channelDescription": "",
+				"channelDescription": "Please select the channels to follow and deselect those you no longer wish to follow.",
 				"forumDescription": "Please select the forums you wish to follow and deselect those you no longer wish to follow.",
 				"label": "Channels",
 				"threadDescription": "Please select the feeds you wish to follow and deselect those you no longer wish to follow."
 			},
-			"startButton": "",
+			"startButton": "Manage followed channels",
 			"success": "{{- thread}} is now followed.",
 			"summary": "✅ Saved changes :{{-changes}}"
 		}
@@ -277,7 +277,7 @@
 		"joined": "{{- user}} joined the server",
 		"member": {
 			"updated": {
-				"noRole": "{{- user}} has been updated but no role has been added.`",
+				"noRole": "{{- user}} has been updated but no role has been added.",
 				"roleList": "{{- user}} has been updated with roles: {{- role}}"
 			}
 		},

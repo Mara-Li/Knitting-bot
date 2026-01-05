@@ -92,24 +92,24 @@ export const DEFAULT_IGNORE_FOLLOW: IgnoreFollow = {
 };
 
 /**
- * Interface pour l'EnMap "Configuration" (optionMaps)
- * Stocke les configurations des guildes avec leurs valeurs
+ * Interface for EnMap "Configuration" (optionMaps)
+ * Stores guild configurations with their values
  */
 export interface ConfigurationEnMap {
 	[guildId: string]: Configuration;
 }
 
 /**
- * Interface pour l'EnMap "Ignore" (ignoreMaps)
- * Stocke les éléments ignorés par guilde
+ * Interface for EnMap "Ignore" (ignoreMaps)
+ * Stores ignored items by guild
  */
 export interface IgnoreEnMap {
 	[guildId: string]: IgnoreFollow;
 }
 
 /**
- * Interface pour l'EnMap "FollowOnly" (followOnlyMaps)
- * Stocke les éléments suivis uniquement par guilde
+ * Interface for EnMap "FollowOnly" (followOnlyMaps)
+ * Stores followed-only items by guild
  */
 export interface FollowOnlyEnMap {
 	[guildId: string]: IgnoreFollow;

@@ -28,6 +28,40 @@ import {
 import { discordLogs, logInDev } from "./index";
 
 /**
+ * Check if a user should be added to the thread based on guild configuration
+ * @param user - Guild member to check
+ * @param thread - Thread channel
+ * @param guild - Guild ID
+ * @returns true if user should be added
+ */
+function shouldAddUserToThread(
+	user: GuildMember,
+	thread: ThreadChannel,
+	guild: string
+): boolean {
+	const followOnlyRoleIn = getConfig(CommandName.followOnlyRoleIn, guild);
+	const followOnlyRole = getConfig(CommandName.followOnlyRole, guild);
+
+	// Early return for followOnlyRoleIn mode
+	if (followOnlyRoleIn) {
+		return checkMemberRoleIn("follow", user.roles, thread);
+	}
+
+	// Check if user is ignored
+	if (checkMemberRole(user.roles, "ignore")) {
+		return false;
+	}
+
+	// followOnlyRole mode
+	if (followOnlyRole) {
+		return checkMemberRole(user.roles, "follow");
+	}
+
+	// Default: add user if not ignored
+	return true;
+}
+
+/**
  * Add a user to a thread, with verification the permission.
  * Check if the role is allowed by the settings for the thread.
  * @param thread {@link ThreadChannel} The thread to add the user
@@ -37,49 +71,35 @@ export async function addUserToThread(thread: ThreadChannel, user: GuildMember) 
 	const guild = thread.guild.id;
 	const ul = getTranslation(guild, { locale: thread.guild.preferredLocale });
 	const emoji = optionMaps.get(guild, "messageToSend") ?? EMOJI;
-	if (
-		thread.permissionsFor(user).has("ViewChannel", true) &&
-		(await checkIfUserNotInTheThread(thread, user))
-	) {
-		try {
-			const message = await fetchMessage(thread);
-			if (getConfig(CommandName.followOnlyRoleIn, guild)) {
-				await message.edit(userMention(user.id));
-				await message.edit(emoji);
-				await discordLogs(
-					guild,
-					thread.client,
-					`Add @${user.user.username} to #${thread.name}`
-				);
-			} else if (!checkMemberRole(user.roles, "ignore")) {
-				await message.edit(userMention(user.id));
-				await message.edit(emoji);
-				await discordLogs(
-					guild,
-					thread.client,
-					`Add @${user.user.username} to #${thread.name}`
-				);
-			} else if (
-				getConfig(CommandName.followOnlyRole, guild) &&
-				checkMemberRole(user.roles, "follow")
-			) {
-				await message.edit(userMention(user.id));
-				await message.edit(emoji);
-				await discordLogs(
-					guild,
-					thread.client,
-					`Add @${user.user.username} to #${thread.name}`
-				);
-			}
-		} catch (error) {
-			console.error(error);
-			if (error instanceof DiscordAPIError && error.code === 50001)
-				await discordLogs(
-					guild,
-					thread.client,
-					ul("error.missingPermission", { thread: thread.id })
-				);
-		}
+
+	const hasPermission = thread.permissionsFor(user).has("ViewChannel", true);
+	const isNotInThread = await checkIfUserNotInTheThread(thread, user);
+
+	if (!hasPermission || !isNotInThread) {
+		return;
+	}
+
+	if (!shouldAddUserToThread(user, thread, guild)) {
+		return;
+	}
+
+	try {
+		const message = await fetchMessage(thread);
+		await message.edit(userMention(user.id));
+		await message.edit(emoji);
+		await discordLogs(
+			guild,
+			thread.client,
+			`Add @${user.user.username} to #${thread.name}`
+		);
+	} catch (error) {
+		console.error(error);
+		if (error instanceof DiscordAPIError && error.code === 50001)
+			await discordLogs(
+				guild,
+				thread.client,
+				ul("error.missingPermission", { thread: thread.id })
+			);
 	}
 }
 
@@ -217,12 +237,20 @@ export async function addRoleAndUserToThread(thread: ThreadChannel) {
 	}
 }
 
+/**
+ * Split user mentions into multiple messages to avoid Discord's 2000 character limit
+ *
+ * Calculation:
+ * - User mention format: <@id>
+ * - Length: 2(<@) + 18(id) + 1(>) = 21 characters
+ * - For roles: 22 characters (includes &)
+ * - Max message length: 2000 characters
+ * - Max mentions per message: 2000 / 22 ≈ 90
+ *
+ * @param toPing - Array of guild members to mention
+ * @param message - Message to edit with mentions
+ */
 async function splitAndSend(toPing: GuildMember[], message: Message) {
-	//okay on réfléchit.
-	//On envoie par id sous forme de <@id> ce qui fait que l'on a :
-	//longueur d'un user mention = 2(<@) + 18(id) + 1(>) + 1 (& si c'est un rôle) = 21-22
-	//soit 2000 / 22 = 90,9
-	//Vu que la longueur max d'un message est de 2000 caractères, on peut envoyer 90 mentions par message
 	const maxMentions = 90;
 	let currentMessage = "";
 	for (let i = 0; i < toPing.length; i++) {
