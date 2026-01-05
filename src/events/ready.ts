@@ -14,6 +14,7 @@ export default (client: Client): void => {
 		if (!client.user || !client.application || !process.env.CLIENT_ID) return;
 
 		console.info(`${client.user.username} is online; v.${VERSION}`);
+
 		const serializedCommands = commands.map((command) => command.data.toJSON());
 
 		// ID application (priorité à process.env, fallback sur fichier .env/*.prod)

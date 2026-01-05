@@ -1,11 +1,4 @@
-import {
-	type CategoryChannel,
-	type ForumChannel,
-	Locale,
-	type Role,
-	type TextChannel,
-	type ThreadChannel,
-} from "discord.js";
+import { Locale } from "discord.js";
 import type { TFunction } from "i18next";
 
 export enum DefaultMenuBuilder {
@@ -42,8 +35,8 @@ export enum TypeName {
 }
 
 export interface RoleIn {
-	role: Role;
-	channels: (ThreadChannel | CategoryChannel | TextChannel | ForumChannel)[];
+	roleId: string;
+	channelIds: string[];
 }
 
 export interface Configuration {
@@ -61,11 +54,11 @@ export interface Configuration {
 }
 
 export interface IgnoreFollow {
-	[TypeName.thread]: ThreadChannel[];
-	[TypeName.role]: Role[];
-	[TypeName.category]: CategoryChannel[];
-	[TypeName.channel]: TextChannel[];
-	[TypeName.forum]: ForumChannel[];
+	[TypeName.thread]: string[];
+	[TypeName.role]: string[];
+	[TypeName.category]: string[];
+	[TypeName.channel]: string[];
+	[TypeName.forum]: string[];
 	[TypeName.OnlyRoleIn]: RoleIn[];
 }
 
@@ -92,27 +85,14 @@ export const DEFAULT_IGNORE_FOLLOW: IgnoreFollow = {
 };
 
 /**
- * Interface for EnMap "Configuration" (optionMaps)
- * Stores guild configurations with their values
+ * Interface for unified ServerData Enmap
+ * Stores all server configuration data in a single Enmap
  */
-export interface ConfigurationEnMap {
-	[guildId: string]: Configuration;
-}
-
-/**
- * Interface for EnMap "Ignore" (ignoreMaps)
- * Stores ignored items by guild
- */
-export interface IgnoreEnMap {
-	[guildId: string]: IgnoreFollow;
-}
-
-/**
- * Interface for EnMap "FollowOnly" (followOnlyMaps)
- * Stores followed-only items by guild
- */
-export interface FollowOnlyEnMap {
-	[guildId: string]: IgnoreFollow;
+export interface ServerData {
+	configuration: Configuration;
+	ignore: IgnoreFollow;
+	follow: IgnoreFollow;
+	messageCache: Record<string, string>;
 }
 
 export type Translation = TFunction<"translation", undefined>;

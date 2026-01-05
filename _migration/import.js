@@ -7,10 +7,10 @@ const follow = new Enmap({ name: "FollowOnly" });
 const cache = new Enmap({ name: "BotMessageCache" });
 
 const maps = [
-	{ filename: "./migrate/export_config.json", map: config },
-	{ filename: "./migrate/export_ignore.json", map: ignore },
-	{ filename: "./migrate/export_follow.json", map: follow },
-	{ filename: "./migrate/export_cache.json", map: cache },
+	{ filename: "./_migration/files/export_config.json", map: config },
+	{ filename: "./_migration/files/export_ignore.json", map: ignore },
+	{ filename: "./_migration/files/export_follow.json", map: follow },
+	{ filename: "./_migration/files/export_cache.json", map: cache },
 ];
 
 maps.forEach(({ map, filename }) => {
@@ -19,6 +19,6 @@ maps.forEach(({ map, filename }) => {
 			console.error(`Error reading file ${filename}:`, err);
 			return;
 		}
-		map.import(data);
+		map.import(data, true, true);
 	});
 });

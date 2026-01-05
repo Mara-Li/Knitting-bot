@@ -147,8 +147,35 @@ async function showRoleInPaginatedModal(
 	let state = getRoleInState(userId, guildID, on, roleId);
 	if (!state) {
 		const allRoleIn = getRoleIn(on, guildID);
-		const existingRoleIn = allRoleIn.find((r) => r.role.id === roleId);
-		state = initRoleInState(userId, guildID, on, roleId, existingRoleIn?.channels ?? []);
+		const existingRoleIn = allRoleIn.find((r) => r.roleId === roleId);
+		// Résoudre les IDs en objets Discord depuis le cache de la guilde
+		const initialChannels: (
+			| Djs.CategoryChannel
+			| Djs.ForumChannel
+			| Djs.ThreadChannel
+			| Djs.TextChannel
+		)[] = [];
+		for (const id of existingRoleIn?.channelIds ?? []) {
+			const channel = guild.channels.cache.get(id);
+			if (channel) {
+				if (
+					channel.type === Djs.ChannelType.GuildCategory ||
+					channel.type === Djs.ChannelType.GuildText ||
+					channel.type === Djs.ChannelType.GuildForum ||
+					channel.type === Djs.ChannelType.PublicThread ||
+					channel.type === Djs.ChannelType.PrivateThread
+				) {
+					initialChannels.push(
+						channel as
+							| Djs.CategoryChannel
+							| Djs.ForumChannel
+							| Djs.ThreadChannel
+							| Djs.TextChannel
+					);
+				}
+			}
+		}
+		state = initRoleInState(userId, guildID, on, roleId, initialChannels);
 	}
 	state.currentPage = page;
 
@@ -300,10 +327,10 @@ async function validateRoleInSelection(
 	)[];
 
 	const allRoleIn = getRoleIn(on, guildID);
-	const existing = allRoleIn.find((r) => r.role.id === roleId);
+	const existing = allRoleIn.find((r) => r.roleId === roleId);
 
 	if (channels.length === 0) {
-		const newRolesIn = allRoleIn.filter((r) => r.role.id !== roleId);
+		const newRolesIn = allRoleIn.filter((r) => r.roleId !== roleId);
 		setRoleIn(on, guildID, newRolesIn);
 		await interaction.update({
 			components: [],
@@ -317,12 +344,12 @@ async function validateRoleInSelection(
 	}
 
 	const newEntry: RoleIn = {
-		channels,
-		role,
+		channelIds: channels.map((ch) => ch.id),
+		roleId,
 	};
 
 	if (existing) {
-		const updated = allRoleIn.map((r) => (r.role.id === roleId ? newEntry : r));
+		const updated = allRoleIn.map((r) => (r.roleId === roleId ? newEntry : r));
 		setRoleIn(on, guildID, updated);
 	} else {
 		allRoleIn.push(newEntry);

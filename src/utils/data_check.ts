@@ -1,8 +1,6 @@
 import {
-	type CategoryChannel,
 	ChannelType,
 	type Collection,
-	type ForumChannel,
 	type GuildBasedChannel,
 	type GuildMember,
 	type GuildMemberRoleManager,
@@ -62,9 +60,9 @@ export async function checkIfUserNotInTheThread(
 export function checkMemberRole(role: GuildMemberRoleManager, on: "ignore" | "follow") {
 	const guild = role.guild.id;
 	if (on === "follow" && !getConfig(CommandName.followOnlyRole, guild)) return true;
-	const roles = getRole(on, guild);
+	const roleIds = getRole(on, guild);
 	const allMemberRoles = role.cache;
-	return allMemberRoles.some((memberRole) => roles.some((r) => r.id === memberRole.id));
+	return allMemberRoles.some((memberRole) => roleIds.includes(memberRole.id));
 }
 
 /**
@@ -77,8 +75,8 @@ export function checkMemberRole(role: GuildMemberRoleManager, on: "ignore" | "fo
 export function checkRole(role: Role, on: "ignore" | "follow") {
 	const guild = role.guild.id;
 	if (on === "follow" && !getConfig(CommandName.followOnlyRole, guild)) return true;
-	const allFollowedRoles = getRole(on, guild);
-	return allFollowedRoles.some((followedRole) => followedRole.id === role.id);
+	const roleIds = getRole(on, guild);
+	return roleIds.includes(role.id);
 }
 
 /**
@@ -101,12 +99,12 @@ export function checkMemberRoleIn(
 	const categoryOfParent = parentChannel?.parent;
 	const roleIn = getRoleIn(on, guild);
 	return roles.some((role) => {
-		const find = roleIn.find((r) => r.role.id === role.id);
+		const find = roleIn.find((r) => r.roleId === role.id);
 		if (!find) return false;
-		return find.channels.some((channel) => {
-			if (channel.id === thread.id) return true;
-			if (channel.id === parentChannel?.id) return true;
-			return channel.id === categoryOfParent?.id;
+		return find.channelIds.some((channelId) => {
+			if (channelId === thread.id) return true;
+			if (channelId === parentChannel?.id) return true;
+			return channelId === categoryOfParent?.id;
 		});
 	});
 }
@@ -125,12 +123,12 @@ export function checkRoleIn(on: "follow" | "ignore", role: Role, thread: ThreadC
 	const parentChannel = thread.parent;
 	const categoryOfParent = parentChannel?.parent;
 	const roleIns = getRoleIn(on, guild);
-	const find = roleIns.find((followedRole) => followedRole.role.id === role.id);
+	const find = roleIns.find((followedRole) => followedRole.roleId === role.id);
 	if (!find) return false;
-	return find.channels.some((channel) => {
-		if (channel.id === thread.id) return true;
-		if (channel.id === parentChannel?.id) return true;
-		return channel.id === categoryOfParent?.id;
+	return find.channelIds.some((channelId) => {
+		if (channelId === thread.id) return true;
+		if (channelId === parentChannel?.id) return true;
+		return channelId === categoryOfParent?.id;
 	});
 }
 
@@ -146,18 +144,15 @@ export function checkThread(channel: ThreadChannel, on: "ignore" | "follow") {
 	const guild = channel.guild.id;
 	const parentChannels = channel.parent;
 	const categoryOfParent = parentChannels?.parent;
-	const followedThread = (getMaps(on, TypeName.thread, guild) as ThreadChannel[]) || [];
-	const followedChannels = (getMaps(on, TypeName.channel, guild) as TextChannel[]) || [];
-	const followedCategories =
-		(getMaps(on, TypeName.category, guild) as CategoryChannel[]) || [];
-	const followedForum = (getMaps(on, TypeName.forum, guild) as ForumChannel[]) || [];
+	const threadIds = getMaps(on, TypeName.thread, guild);
+	const channelIds = getMaps(on, TypeName.channel, guild);
+	const categoryIds = getMaps(on, TypeName.category, guild);
+	const forumIds = getMaps(on, TypeName.forum, guild);
 	return (
-		followedChannels.some((followedChannel) => followedChannel.id === channel.id) ||
-		followedForum.some((followedForum) => followedForum.id === channel.id) ||
-		followedCategories.some(
-			(followedCategory) => followedCategory.id === categoryOfParent?.id
-		) ||
-		followedThread.some((followedThread) => followedThread.id === channel.id)
+		channelIds.includes(channel.id) ||
+		forumIds.includes(channel.id) ||
+		(categoryOfParent && categoryIds.includes(categoryOfParent.id)) ||
+		threadIds.includes(channel.id)
 	);
 }
 

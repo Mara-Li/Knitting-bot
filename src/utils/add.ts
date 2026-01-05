@@ -14,7 +14,8 @@ import {
 	deleteCachedMessage,
 	getCachedMessage,
 	getConfig,
-	optionMaps,
+	getMessageToSend,
+	getPinSetting,
 	setCachedMessage,
 } from "../maps";
 import {
@@ -70,7 +71,7 @@ function shouldAddUserToThread(
 export async function addUserToThread(thread: ThreadChannel, user: GuildMember) {
 	const guild = thread.guild.id;
 	const ul = getTranslation(guild, { locale: thread.guild.preferredLocale });
-	const emoji = optionMaps.get(guild, "messageToSend") ?? EMOJI;
+	const emoji = getMessageToSend(guild) || EMOJI;
 
 	const hasPermission = thread.permissionsFor(user).has("ViewChannel", true);
 	const isNotInThread = await checkIfUserNotInTheThread(thread, user);
@@ -210,7 +211,7 @@ export async function addRoleAndUserToThread(thread: ThreadChannel) {
 		const users = await getUsersToPing(thread, memberWithAccessArray);
 		toPing.push(...users);
 	}
-	const emoji = optionMaps.get(thread.guild.id, "messageToSend") ?? EMOJI;
+	const emoji = getMessageToSend(thread.guild.id) || EMOJI;
 	logInDev(`Total members to add: ${toPing.length}`);
 	if (toPing.length > 0) {
 		try {
@@ -270,7 +271,7 @@ async function splitAndSend(toPing: GuildMember[], message: Message) {
 		await message.edit(currentMessage);
 	}
 	// Send the emoji at the end
-	const emoji = optionMaps.get(message.guild!.id, "messageToSend") ?? EMOJI;
+	const emoji = getMessageToSend(message.guild!.id) || EMOJI;
 	return await message.edit(emoji);
 }
 
@@ -355,7 +356,7 @@ async function fetchAllPinnedMessages(
 async function fetchFirstMessage(
 	thread: ThreadChannel
 ): Promise<Message | undefined | null> {
-	const pin = optionMaps.get(thread.guild.id, "pin");
+	const pin = getPinSetting(thread.guild.id);
 	console.log("Pin is:", pin);
 	if (pin) {
 		//fetch pinned messages
@@ -373,8 +374,8 @@ async function fetchFirstMessage(
 }
 
 async function sendAndPin(thread: ThreadChannel): Promise<Message> {
-	const toPin = optionMaps.get(thread.guild.id, "pin");
-	const messageToSend = optionMaps.get(thread.guild.id, "messageToSend") ?? EMOJI;
+	const toPin = getPinSetting(thread.guild.id);
+	const messageToSend = getMessageToSend(thread.guild.id) || EMOJI;
 	const message = await thread.send({
 		content: messageToSend,
 		flags: MessageFlags.SuppressNotifications,
@@ -392,7 +393,7 @@ async function fetchMessage(thread: ThreadChannel): Promise<Message> {
 		try {
 			const message = await thread.messages.fetch(cachedId);
 			// Verify pin status
-			const shouldBePinned = optionMaps.get(guildId, "pin");
+			const shouldBePinned = getPinSetting(guildId);
 			if (shouldBePinned && !message.pinned) await message.pin();
 			return message;
 		} catch {
@@ -403,7 +404,7 @@ async function fetchMessage(thread: ThreadChannel): Promise<Message> {
 
 	// Fallback to fetching
 	const firstMessage = await fetchFirstMessage(thread);
-	const shouldBePinned = optionMaps.get(guildId, "pin");
+	const shouldBePinned = getPinSetting(guildId);
 	if (shouldBePinned && firstMessage && !firstMessage.pinned) await firstMessage.pin();
 
 	const message = firstMessage ?? (await sendAndPin(thread));

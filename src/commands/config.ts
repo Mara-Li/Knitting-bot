@@ -26,7 +26,7 @@ import {
 } from "discord.js";
 import { getUl, ln, t } from "../i18n";
 import { CommandName, type Translation } from "../interface";
-import { getConfig, optionMaps, setConfig } from "../maps";
+import { getConfig, getLanguage, setConfig } from "../maps";
 import { logInDev } from "../utils";
 
 import "../discord_ext.js";
@@ -160,7 +160,7 @@ async function handleMessageConfig(
 	);
 
 	if (!messageToSend) {
-		optionMaps.set(interaction.guild.id, "_ _", "messageToSend");
+		setConfig("messageToSend", interaction.guild.id, "_ _");
 		await interaction.reply({
 			content: ul("configuration.message.response.default"),
 		});
@@ -172,7 +172,7 @@ async function handleMessageConfig(
 		});
 		return;
 	}
-	optionMaps.set(interaction.guild.id, messageToSend, "messageToSend");
+	setConfig("messageToSend", interaction.guild.id, messageToSend);
 	await interaction.reply({
 		content: ul("configuration.message.response.custom", {
 			message: messageToSend,
@@ -217,7 +217,7 @@ async function handlePinConfig(
 	if (!interaction.guild) return;
 
 	const toggle = options.getBoolean(t("configuration.pin.option.name"));
-	optionMaps.set(interaction.guild.id, toggle ?? false, "pin");
+	setConfig("pin", interaction.guild.id, toggle ?? false);
 
 	await interaction.reply({
 		content: toggle
@@ -276,19 +276,23 @@ async function handleLocaleConfig(
 	if (!interaction.guild) return;
 
 	const locale = options.getString("locale", true);
-	let lang = optionMaps.get(interaction.guild.id, "language");
+	let lang = getLanguage(interaction.guild.id);
 
 	if (locale === "en") {
-		optionMaps.set(interaction.guild.id, Locale.EnglishUS, "language");
+		setConfig("language", interaction.guild.id, Locale.EnglishUS);
 		lang = Locale.EnglishUS;
 	} else if (locale === "fr") {
-		optionMaps.set(interaction.guild.id, Locale.French, "language");
+		setConfig("language", interaction.guild.id, Locale.French);
 		lang = Locale.French;
 	}
 
-	const ul = ln(lang ?? interaction.locale);
+	// Fallback to interaction.locale if lang is still undefined
+	const finalLang = lang ?? interaction.locale;
+	const ul = ln(finalLang as Locale);
 	await interaction.reply({
-		content: `${ul("configuration.language.validate", { lang: (locale as Locale).toUpperCase() })}`,
+		content: `${ul("configuration.language.validate", {
+			lang: (typeof finalLang === "string" ? finalLang : locale).toUpperCase(),
+		})}`,
 	});
 }
 

@@ -180,7 +180,11 @@ async function followThisRole(interaction: ChatInputCommandInteraction, ul: Tran
 	if (!interaction.guild) return;
 
 	const guildID = interaction.guild.id;
-	const followedRoles = (getRole("follow", guildID) as Role[]) ?? [];
+	const followedRoleIds = getRole("follow", guildID) ?? [];
+	// Résoudre les IDs en objets Role depuis le cache
+	const followedRoles = followedRoleIds
+		.map((id) => interaction.guild!.roles.cache.get(id))
+		.filter((r): r is Role => r !== undefined);
 	const modal = createRoleSelectModal("follow", ul, followedRoles);
 
 	const collectorFilter = (i: ModalSubmitInteraction) => {
@@ -505,9 +509,17 @@ async function validateAndSaveForFollow(
 
 	const messages: string[] = [];
 
+	// Résoudre les IDs de catégories et channels en objets
+	const originalCategories = originalItems.categories
+		.map((id) => guild.channels.cache.get(id))
+		.filter((c): c is CategoryChannel => c?.type === ChannelType.GuildCategory);
+	const originalChannels = originalItems.channels
+		.map((id) => guild.channels.cache.get(id))
+		.filter((c): c is TextChannel => c?.type === ChannelType.GuildText);
+
 	// Traiter les changements pour chaque type
 	processChannelTypeChanges(
-		originalItems.categories,
+		originalCategories,
 		finalCategories,
 		TypeName.category,
 		guildID,
@@ -517,7 +529,7 @@ async function validateAndSaveForFollow(
 	);
 
 	processChannelTypeChanges(
-		originalItems.channels,
+		originalChannels,
 		finalChannels,
 		TypeName.channel,
 		guildID,
@@ -526,8 +538,16 @@ async function validateAndSaveForFollow(
 		messages
 	);
 
+	// Résoudre les IDs de threads en objets
+	const originalThreads = originalItems.threads
+		.map((id) => guild.channels.cache.get(id))
+		.filter(
+			(c): c is AnyThreadChannel =>
+				c?.type === ChannelType.PublicThread || c?.type === ChannelType.PrivateThread
+		);
+
 	processChannelTypeChanges(
-		originalItems.threads,
+		originalThreads,
 		finalThreads,
 		TypeName.thread,
 		guildID,
@@ -536,8 +556,13 @@ async function validateAndSaveForFollow(
 		messages
 	);
 
+	// Résoudre les IDs de forums en objets
+	const originalForums = originalItems.forums
+		.map((id) => guild.channels.cache.get(id))
+		.filter((c): c is ForumChannel => c?.type === ChannelType.GuildForum);
+
 	processChannelTypeChanges(
-		originalItems.forums,
+		originalForums,
 		finalForums,
 		TypeName.forum,
 		guildID,

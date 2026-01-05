@@ -39,7 +39,7 @@ export function createChannelSelectorsModal(
 	const categorySelect = new ChannelSelectMenuBuilder()
 		.setCustomId("select_categories")
 		.setChannelTypes(ChannelType.GuildCategory)
-		.setDefaultChannels(trackedItems.categories.map((ch) => ch.id))
+		.setDefaultChannels(trackedItems.categories)
 		.setMaxValues(25)
 		.setRequired(false);
 
@@ -51,7 +51,7 @@ export function createChannelSelectorsModal(
 	const channelSelect = new ChannelSelectMenuBuilder()
 		.setCustomId("select_channels")
 		.setChannelTypes(ChannelType.GuildText)
-		.setDefaultChannels(trackedItems.channels.map((ch) => ch.id))
+		.setDefaultChannels(trackedItems.channels)
 		.setMaxValues(25)
 		.setRequired(false);
 
@@ -63,7 +63,7 @@ export function createChannelSelectorsModal(
 	const threadSelect = new ChannelSelectMenuBuilder()
 		.setCustomId("select_threads")
 		.setChannelTypes(ChannelType.PublicThread, ChannelType.PrivateThread)
-		.setDefaultChannels(trackedItems.threads.map((ch) => ch.id))
+		.setDefaultChannels(trackedItems.threads)
 		.setMaxValues(25)
 		.setRequired(false);
 
@@ -75,7 +75,7 @@ export function createChannelSelectorsModal(
 	const forumSelect = new ChannelSelectMenuBuilder()
 		.setCustomId("select_forums")
 		.setChannelTypes(ChannelType.GuildForum)
-		.setDefaultChannels(trackedItems.forums.map((ch) => ch.id))
+		.setDefaultChannels(trackedItems.forums)
 		.setMaxValues(25)
 		.setRequired(false);
 
@@ -350,11 +350,7 @@ export function processChannelTypeChanges(
 			setFunc(
 				typeName,
 				guildID,
-				newItemsList as
-					| ThreadChannel[]
-					| CategoryChannel[]
-					| TextChannel[]
-					| ForumChannel[]
+				newItemsList.map((item) => item.id)
 			);
 			messages.push(
 				`[${typeLabel}] ${ul(removeKey, {
@@ -371,11 +367,7 @@ export function processChannelTypeChanges(
 			setFunc(
 				typeName,
 				guildID,
-				updatedItems as
-					| ThreadChannel[]
-					| CategoryChannel[]
-					| TextChannel[]
-					| ForumChannel[]
+				updatedItems.map((item) => item.id)
 			);
 			messages.push(
 				`[${typeLabel}] ${ul(successKey, {
@@ -435,5 +427,9 @@ export function processRoleTypeChanges(
 		(r) => !removedRoles.some((removed) => removed.id === r.id)
 	);
 	finalRoles = [...finalRoles, ...addedRoles];
-	setRole(mode, guildID, finalRoles);
+	setRole(
+		mode,
+		guildID,
+		finalRoles.map((r) => r.id)
+	);
 }

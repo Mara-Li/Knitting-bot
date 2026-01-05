@@ -1,10 +1,3 @@
-import type {
-	CategoryChannel,
-	ForumChannel,
-	TextChannel,
-	ThreadChannel,
-} from "discord.js";
-
 /**
  * Temporary state for paginated channel selection
  * Key: userId_guildId_mode (e.g., "123456789_987654321_follow")
@@ -64,10 +57,10 @@ export function initializePaginationState(
 	guildId: string,
 	mode: "follow" | "ignore",
 	currentItems: {
-		categories: CategoryChannel[];
-		channels: TextChannel[];
-		threads: ThreadChannel[];
-		forums: ForumChannel[];
+		categories: string[];
+		channels: string[];
+		threads: string[];
+		forums: string[];
 	}
 ): PaginationState {
 	const key = `${userId}_${guildId}_${mode}`;
@@ -75,10 +68,10 @@ export function initializePaginationState(
 		currentPage: 0,
 		guildId,
 		mode,
-		selectedCategories: new Set(currentItems.categories.map((c) => c.id)),
-		selectedChannels: new Set(currentItems.channels.map((c) => c.id)),
-		selectedForums: new Set(currentItems.forums.map((f) => f.id)),
-		selectedThreads: new Set(currentItems.threads.map((t) => t.id)),
+		selectedCategories: new Set(currentItems.categories),
+		selectedChannels: new Set(currentItems.channels),
+		selectedForums: new Set(currentItems.forums),
+		selectedThreads: new Set(currentItems.threads),
 		timestamp: Date.now(),
 		userId,
 	};

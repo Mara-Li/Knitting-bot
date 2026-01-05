@@ -3,7 +3,8 @@ import { EMOJI } from "../../index";
 import {
 	deleteCachedMessage,
 	getCachedMessage,
-	optionMaps,
+	getMessageToSend,
+	getPinSetting,
 	setCachedMessage,
 } from "../../maps";
 
@@ -28,8 +29,8 @@ export default (client: Client): void => {
 
 			try {
 				const thread = message.channel as ThreadChannel;
-				const messageToSend = optionMaps.get(guildId, "messageToSend") ?? EMOJI;
-				const shouldPin = optionMaps.get(guildId, "pin");
+				const messageToSend = getMessageToSend(guildId) || EMOJI;
+				const shouldPin = getPinSetting(guildId);
 
 				// Recreate the bot message
 				const newMessage = await thread.send({

@@ -1,21 +1,25 @@
-import type {
-	CategoryChannel,
-	ForumChannel,
-	Role,
-	TextChannel,
-	ThreadChannel,
-} from "discord.js";
 import Enmap from "enmap";
 import {
 	CommandName,
-	type Configuration,
 	DEFAULT_CONFIGURATION,
 	DEFAULT_IGNORE_FOLLOW,
 	type IgnoreFollow,
 	type RoleIn,
+	type ServerData,
 	TypeName,
 } from "./interface";
 import { logInDev } from "./utils";
+
+/**
+ * Unified ServerData Enmap
+ * Structure: { guildId: { configuration, ignore, follow, messageCache } }
+ */
+export const serverDataDb = new Enmap<string, ServerData>({
+	autoFetch: true,
+	cloneLevel: "deep",
+	fetchAll: false,
+	name: "Database",
+});
 
 /**
  * Get cached bot message ID for a thread
@@ -24,9 +28,8 @@ import { logInDev } from "./utils";
  * @returns The cached message ID or undefined
  */
 export function getCachedMessage(guildId: string, threadId: string): string | undefined {
-	if (!botMessageCache.has(guildId, threadId)) return undefined;
-
-	return botMessageCache.get(guildId, threadId);
+	const serverData = serverDataDb.ensure(guildId, getDefaultServerData());
+	return serverData.messageCache[threadId];
 }
 
 /**
@@ -40,7 +43,9 @@ export function setCachedMessage(
 	threadId: string,
 	messageId: string
 ): void {
-	botMessageCache.set(guildId, messageId, threadId);
+	const serverData = serverDataDb.ensure(guildId, getDefaultServerData());
+	serverData.messageCache[threadId] = messageId;
+	serverDataDb.set(guildId, serverData);
 }
 
 /**
@@ -49,8 +54,9 @@ export function setCachedMessage(
  * @param threadId The thread ID
  */
 export function deleteCachedMessage(guildId: string, threadId: string): void {
-	if (!botMessageCache.has(guildId, threadId)) return;
-	botMessageCache.delete(guildId, threadId);
+	const serverData = serverDataDb.ensure(guildId, getDefaultServerData());
+	delete serverData.messageCache[threadId];
+	serverDataDb.set(guildId, serverData);
 }
 
 /**
@@ -58,121 +64,104 @@ export function deleteCachedMessage(guildId: string, threadId: string): void {
  * @param guildId The guild ID
  */
 export function clearGuildMessageCache(guildId: string): void {
-	if (!botMessageCache.has(guildId)) return;
-	botMessageCache.delete(guildId);
+	const serverData = serverDataDb.ensure(guildId, getDefaultServerData());
+	serverData.messageCache = {};
+	serverDataDb.set(guildId, serverData);
 }
 
-export const optionMaps = new Enmap<string, Configuration>({
-	autoFetch: true,
-	cloneLevel: "deep",
-	fetchAll: false,
-	name: "Configuration",
-});
-
-const ignoreMaps = new Enmap<string, IgnoreFollow>({
-	autoFetch: true,
-	cloneLevel: "deep",
-	fetchAll: false,
-	name: "Ignore",
-});
-const followOnlyMaps = new Enmap<string, IgnoreFollow>({
-	autoFetch: true,
-	cloneLevel: "deep",
-	fetchAll: false,
-	name: "FollowOnly",
-});
-
 /**
- * Cache for bot messages in threads
- * Structure: { guildId: { threadId: messageId } }
+ * Get default ServerData structure
  */
-const botMessageCache = new Enmap<string, Record<string, string>>({
-	autoFetch: true,
-	cloneLevel: "deep",
-	fetchAll: false,
-	name: "BotMessageCache",
-});
+function getDefaultServerData(): ServerData {
+	return {
+		configuration: DEFAULT_CONFIGURATION,
+		follow: DEFAULT_IGNORE_FOLLOW,
+		ignore: DEFAULT_IGNORE_FOLLOW,
+		messageCache: {},
+	};
+}
 
 /**
- * Set a value in Emaps "configuration"
- * @param {CommandName} name
- * @param guildID
- * @param {string | boolean} value
+ * Set a value in configuration
+ * @param name Configuration key
+ * @param guildID Guild ID
+ * @param value Configuration value
  */
 export function setConfig(
 	name: CommandName | string,
 	guildID: string,
 	value: string | boolean
-) {
+): void {
 	if (name === CommandName.manualMode) return;
-	optionMaps.set(guildID, value, name);
+	const serverData = serverDataDb.ensure(guildID, getDefaultServerData());
+	(serverData.configuration as Record<string, string | boolean>)[name] = value;
+	serverDataDb.set(guildID, serverData);
 }
 
 /**
- * Set value in Emaps "ignore"
+ * Set value in ignore configuration
  */
-
 export function setIgnore<T extends keyof IgnoreFollow>(
 	name: T,
 	guildID: string,
 	value: IgnoreFollow[T]
-) {
-	const guildConfig = (ignoreMaps.get(guildID) as IgnoreFollow) ?? DEFAULT_IGNORE_FOLLOW;
+): void {
 	if (name === TypeName.OnlyRoleIn) return;
-	guildConfig[name] = value;
-	ignoreMaps.set(guildID, guildConfig);
+	const serverData = serverDataDb.ensure(guildID, getDefaultServerData());
+	serverData.ignore[name] = value;
+	serverDataDb.set(guildID, serverData);
 }
 
 /**
- * Set value in Emaps "followOnly"
+ * Set value in follow configuration
  */
-
 export function setFollow<T extends keyof IgnoreFollow>(
 	name: T,
 	guildID: string,
 	value: IgnoreFollow[T]
-) {
-	const guildConfig =
-		(followOnlyMaps.get(guildID) as IgnoreFollow) ?? DEFAULT_IGNORE_FOLLOW;
+): void {
 	if (name === TypeName.OnlyRoleIn) return;
-	guildConfig[name] = value;
-	followOnlyMaps.set(guildID, guildConfig);
-}
-
-export function setRole(on: "follow" | "ignore", guildID: string, value: Role[]) {
-	if (on === "follow") {
-		const guildConfig =
-			(followOnlyMaps.get(guildID) as IgnoreFollow) ?? DEFAULT_IGNORE_FOLLOW;
-		guildConfig[TypeName.role] = value;
-		followOnlyMaps.set(guildID, guildConfig);
-	} else {
-		const guildConfig =
-			(ignoreMaps.get(guildID) as IgnoreFollow) ?? DEFAULT_IGNORE_FOLLOW;
-		guildConfig[TypeName.role] = value;
-		ignoreMaps.set(guildID, guildConfig);
-	}
-}
-
-export function setRoleIn(on: "follow" | "ignore", guildID: string, value: RoleIn[]) {
-	if (on === "follow") {
-		const guildConfig =
-			(followOnlyMaps.get(guildID) as IgnoreFollow) ?? DEFAULT_IGNORE_FOLLOW;
-		guildConfig[TypeName.OnlyRoleIn] = value;
-		followOnlyMaps.set(guildID, guildConfig);
-	} else {
-		const guildConfig =
-			(ignoreMaps.get(guildID) as IgnoreFollow) ?? DEFAULT_IGNORE_FOLLOW;
-		guildConfig[TypeName.OnlyRoleIn] = value;
-		ignoreMaps.set(guildID, guildConfig);
-	}
+	const serverData = serverDataDb.ensure(guildID, getDefaultServerData());
+	serverData.follow[name] = value;
+	serverDataDb.set(guildID, serverData);
 }
 
 /**
- * Get a value in the Emaps "configuration"
+ * Set role list for ignore or follow
+ */
+export function setRole(on: "follow" | "ignore", guildID: string, value: string[]): void {
+	const serverData = serverDataDb.ensure(guildID, getDefaultServerData());
+	if (on === "follow") {
+		serverData.follow[TypeName.role] = value;
+	} else {
+		serverData.ignore[TypeName.role] = value;
+	}
+	serverDataDb.set(guildID, serverData);
+}
+
+/**
+ * Set RoleIn configuration for ignore or follow
+ */
+export function setRoleIn(
+	on: "follow" | "ignore",
+	guildID: string,
+	value: RoleIn[]
+): void {
+	const serverData = serverDataDb.ensure(guildID, getDefaultServerData());
+	if (on === "follow") {
+		serverData.follow[TypeName.OnlyRoleIn] = value;
+	} else {
+		serverData.ignore[TypeName.OnlyRoleIn] = value;
+	}
+	serverDataDb.set(guildID, serverData);
+}
+
+/**
+ * Get a value from configuration
  * Return "en" if CommandName.language is not set
  * return true if value is not set (for the other options)
- * @param {CommandName} name
- * @param guildID
+ * @param name Configuration key
+ * @param guildID Guild ID
  * @param channel - If true, get channel configuration
  */
 export function getConfig(name: CommandName, guildID: string, channel?: false): boolean;
@@ -182,13 +171,13 @@ export function getConfig(
 	guildID: string,
 	channel?: boolean
 ): string | boolean {
-	// Ensure configuration exists for the guild
-	optionMaps.ensure(guildID, DEFAULT_CONFIGURATION);
+	const serverData = serverDataDb.ensure(guildID, getDefaultServerData());
 
 	// If looking for a specific channel (e.g., for logs)
 	if (channel) {
-		const channelPath = `${name}.channel`;
-		const channelValue = optionMaps.get(guildID, channelPath);
+		const channelValue = (serverData.configuration as Record<string, unknown>)[
+			`${name}.channel`
+		];
 		if (channelValue !== undefined && channelValue !== null) {
 			return channelValue as string;
 		}
@@ -196,7 +185,7 @@ export function getConfig(
 	}
 
 	// Retrieve the configuration value
-	const value = optionMaps.get(guildID, name);
+	const value = serverData.configuration[name];
 
 	// If the value exists, return it
 	if (value !== undefined && value !== null) {
@@ -212,128 +201,118 @@ export function getConfig(
 		CommandName.log,
 	].includes(name);
 
-	optionMaps.set(guildID, defaultValue, name);
+	setConfig(name, guildID, defaultValue);
 	return defaultValue;
 }
 
+/**
+ * Get RoleIn list for ignore or follow
+ */
 export function getRoleIn(ignore: "follow" | "ignore", guildID: string): RoleIn[] {
-	const ignoreConfig = ignoreMaps.ensure(guildID, DEFAULT_IGNORE_FOLLOW) as IgnoreFollow;
-	const followConfig = followOnlyMaps.ensure(
-		guildID,
-		DEFAULT_IGNORE_FOLLOW
-	) as IgnoreFollow;
-
-	if (!ignoreConfig[TypeName.OnlyRoleIn] || !followConfig[TypeName.OnlyRoleIn]) {
-		setRoleIn(ignore, guildID, []);
-	}
-	switch (ignore) {
-		case "follow":
-			return (followConfig[TypeName.OnlyRoleIn] as RoleIn[]) ?? [];
-		case "ignore":
-			return (ignoreConfig[TypeName.OnlyRoleIn] as RoleIn[]) ?? [];
-	}
+	const serverData = serverDataDb.ensure(guildID, getDefaultServerData());
+	const config = ignore === "follow" ? serverData.follow : serverData.ignore;
+	return (config[TypeName.OnlyRoleIn] as RoleIn[]) ?? [];
 }
 
-export function getRole(ignore: "follow" | "ignore", guildID: string): Role[] {
-	const ignoreConfig = ignoreMaps.ensure(guildID, DEFAULT_IGNORE_FOLLOW) as IgnoreFollow;
-	const followConfig = followOnlyMaps.ensure(
-		guildID,
-		DEFAULT_IGNORE_FOLLOW
-	) as IgnoreFollow;
-
-	if (!ignoreConfig[TypeName.role] || !followConfig[TypeName.role]) {
-		setRole(ignore, guildID, []);
-	}
-	switch (ignore) {
-		case "follow":
-			return (followConfig[TypeName.role] as Role[]) ?? [];
-		case "ignore":
-			return (ignoreConfig[TypeName.role] as Role[]) ?? [];
-	}
+/**
+ * Get role ID list for ignore or follow
+ */
+export function getRole(ignore: "follow" | "ignore", guildID: string): string[] {
+	const serverData = serverDataDb.ensure(guildID, getDefaultServerData());
+	const config = ignore === "follow" ? serverData.follow : serverData.ignore;
+	return (config[TypeName.role] as string[]) ?? [];
 }
 
+/**
+ * Get channel/category/forum/thread IDs for ignore or follow
+ */
 export function getMaps(
 	maps: "follow" | "ignore",
 	typeName: TypeName,
 	guildID: string
-): ThreadChannel[] | CategoryChannel[] | TextChannel[] | ForumChannel[] {
-	return getMapValues(maps, typeName, guildID);
-}
-
-/**
- * Generic function to retrieve values from ignore or follow maps
- * @param mapType - Type of map to query ("follow" or "ignore")
- * @param typeName - Type of entity to retrieve
- * @param guildID - Guild identifier
- * @returns Array of channels/categories/forums/threads
- */
-function getMapValues(
-	mapType: "follow" | "ignore",
-	typeName: TypeName,
-	guildID: string
-): ThreadChannel[] | CategoryChannel[] | TextChannel[] | ForumChannel[] {
-	const map = mapType === "follow" ? followOnlyMaps : ignoreMaps;
-	const config = map.ensure(guildID, DEFAULT_IGNORE_FOLLOW) as IgnoreFollow;
-
-	if (!config[typeName]) {
-		const setter = mapType === "follow" ? setFollow : setIgnore;
-		setter(typeName, guildID, []);
-	}
+): string[] {
+	const serverData = serverDataDb.ensure(guildID, getDefaultServerData());
+	const config = maps === "follow" ? serverData.follow : serverData.ignore;
 
 	switch (typeName) {
 		case TypeName.thread:
-			return (config[TypeName.thread] as ThreadChannel[]) ?? [];
+			return (config[TypeName.thread] as string[]) ?? [];
 		case TypeName.category:
-			return (config[TypeName.category] as CategoryChannel[]) ?? [];
+			return (config[TypeName.category] as string[]) ?? [];
 		case TypeName.channel:
-			return (config[TypeName.channel] as TextChannel[]) ?? [];
+			return (config[TypeName.channel] as string[]) ?? [];
 		case TypeName.forum:
-			return (config[TypeName.forum] as ForumChannel[]) ?? [];
+			return (config[TypeName.forum] as string[]) ?? [];
 		default:
 			return [];
 	}
 }
 
-export function getAllFollowedChannels(guildId: string) {
-	const followConfig = followOnlyMaps.ensure(
-		guildId,
-		DEFAULT_IGNORE_FOLLOW
-	) as IgnoreFollow;
-	const followedForum = followConfig[TypeName.forum];
-	const followedChannel = followConfig[TypeName.channel];
-	const followedCategory = followConfig[TypeName.category];
-	const followedThread = followConfig[TypeName.thread];
-	//combine all arrays into one
+/**
+ * Get language for a guild
+ */
+export function getLanguage(guildID: string): string {
+	const serverData = serverDataDb.ensure(guildID, getDefaultServerData());
+	return (serverData.configuration.language as string) ?? "en-US";
+}
+
+/**
+ * Get all followed channel IDs (all types combined)
+ */
+export function getAllFollowedChannels(guildId: string): string[] {
+	const serverData = serverDataDb.ensure(guildId, getDefaultServerData());
+	const follow = serverData.follow;
+
 	return [
-		...(followedForum ?? []),
-		...(followedChannel ?? []),
-		...(followedCategory ?? []),
-		...(followedThread ?? []),
+		...(follow[TypeName.forum] ?? []),
+		...(follow[TypeName.channel] ?? []),
+		...(follow[TypeName.category] ?? []),
+		...(follow[TypeName.thread] ?? []),
 	];
 }
 
+/**
+ * Get message to send for a guild
+ */
+export function getMessageToSend(guildID: string): string {
+	const serverData = serverDataDb.ensure(guildID, getDefaultServerData());
+	return (serverData.configuration.messageToSend as string) ?? "_ _";
+}
+
+/**
+ * Get pin setting for a guild
+ */
+export function getPinSetting(guildID: string): boolean {
+	const serverData = serverDataDb.ensure(guildID, getDefaultServerData());
+	return (serverData.configuration.pin as boolean) ?? false;
+}
+
+/**
+ * Destroy the entire database
+ */
 export function destroyDB(): void {
-	followOnlyMaps.deleteAll();
-	ignoreMaps.deleteAll();
-	optionMaps.deleteAll();
+	serverDataDb.deleteAll();
 	console.log("Destroyed DB");
 }
 
-export function exportDB() {
+/**
+ * Export database for backup
+ */
+export function exportDB(): string {
 	logInDev("Exporting DB");
-	logInDev("FollowOnlyMaps", followOnlyMaps.export());
-	logInDev("IgnoreMaps", ignoreMaps.export());
-	logInDev("OptionMaps", optionMaps.export());
+	return serverDataDb.export();
 }
 
-export function deleteGuild(id: string) {
-	followOnlyMaps.delete(id);
-	ignoreMaps.delete(id);
-	optionMaps.delete(id);
+/**
+ * Delete all data for a guild
+ */
+export function deleteGuild(id: string): void {
+	serverDataDb.delete(id);
 }
 
-export function loadDBFirstTime(guild: string) {
-	followOnlyMaps.set(guild, DEFAULT_IGNORE_FOLLOW);
-	ignoreMaps.set(guild, DEFAULT_IGNORE_FOLLOW);
-	optionMaps.set(guild, DEFAULT_CONFIGURATION);
+/**
+ * Initialize a guild with default data
+ */
+export function loadDBFirstTime(guild: string): void {
+	serverDataDb.set(guild, getDefaultServerData());
 }
