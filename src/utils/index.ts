@@ -1,5 +1,11 @@
 import process from "node:process";
-import { ChannelType, type Client, type Guild } from "discord.js";
+import {
+	type AnyThreadChannel,
+	ChannelType,
+	type Client,
+	Collection,
+	type Guild,
+} from "discord.js";
 import { CommandName } from "../interface";
 import { getConfig } from "../maps";
 
@@ -76,27 +82,97 @@ export async function updateCache(guild: Guild) {
  * @param guild - Guild to fetch archived threads from
  * @returns Array of archived threads
  */
-export async function fetchArchived(guild: Guild) {
-	const textChannels = guild.channels.cache.filter(
-		(c) => c.type === ChannelType.GuildText
-	);
-	const results = await Promise.allSettled(
-		textChannels.map((channel) => channel.threads.fetchArchived({ fetchAll: true }))
+export async function fetchArchived(guild: Guild): Promise<AnyThreadChannel[]> {
+	// Collect text channels and forum channels
+	const parents = guild.channels.cache.filter(
+		(c) => c.type === ChannelType.GuildText || c.type === ChannelType.GuildForum
 	);
 
-	// Collect all accessible threads, ignoring individual errors
-	return results
-		.filter((result) => result.status === "fulfilled")
-		.flatMap((result) => {
+	// Fetch public archived threads
+	const publicResults = await Promise.allSettled(
+		parents.map((channel) =>
+			channel.threads.fetchArchived({ fetchAll: true, type: "public" }).catch(() => {
+				// ignore per-channel errors
+				return { threads: new Collection<string, AnyThreadChannel>() } as unknown as {
+					threads: Collection<string, AnyThreadChannel>;
+				};
+			})
+		)
+	);
+
+	// Fetch private archived threads (requires proper permissions)
+	const privateResults = await Promise.allSettled(
+		parents.map((channel) =>
+			channel.threads.fetchArchived({ fetchAll: true, type: "private" }).catch(() => {
+				return { threads: new Collection<string, AnyThreadChannel>() } as unknown as {
+					threads: Collection<string, AnyThreadChannel>;
+				};
+			})
+		)
+	);
+
+	const threads: Map<string, AnyThreadChannel> = new Map();
+
+	const collect = (results: PromiseSettledResult<any>[]) => {
+		for (const result of results) {
 			if (result.status === "fulfilled") {
-				return Array.from(result.value.threads.values());
+				const threadsCollection = result.value?.threads as
+					| Collection<string, AnyThreadChannel>
+					| undefined;
+				if (!threadsCollection) continue;
+				for (const thr of threadsCollection.values()) {
+					threads.set(thr.id, thr);
+				}
 			}
-			return [];
-		});
+		}
+	};
+
+	collect(publicResults);
+	collect(privateResults);
+
+	return Array.from(threads.values());
 }
 
 export async function getCommandId(commandName: string, guild: Guild) {
 	const cmdsId = await guild.commands.fetch();
 	const command = cmdsId.find((cmd) => cmd.name === commandName);
 	return command?.id;
+}
+
+/**
+ * Resolve channel IDs to channel objects, fetching from API when not in cache.
+ * Filters by allowed channel types.
+ */
+export async function resolveChannelsByIds<T extends { type: number }>(
+	guild: Guild,
+	ids: string[],
+	allowedTypes: number[]
+): Promise<T[]> {
+	const resolved: T[] = [];
+	const toFetch: string[] = [];
+
+	for (const id of ids) {
+		const ch = guild.channels.cache.get(id) as unknown as T | undefined;
+		if (ch && allowedTypes.includes((ch as unknown as { type: number }).type)) {
+			resolved.push(ch);
+		} else {
+			toFetch.push(id);
+		}
+	}
+
+	if (toFetch.length > 0) {
+		const results = await Promise.allSettled(
+			toFetch.map((id) => guild.channels.fetch(id))
+		);
+		for (const r of results) {
+			if (r.status === "fulfilled" && r.value) {
+				const ch = r.value as unknown as T;
+				if (allowedTypes.includes((ch as unknown as { type: number }).type)) {
+					resolved.push(ch);
+				}
+			}
+		}
+	}
+
+	return resolved;
 }

@@ -31,6 +31,14 @@ export default {
 						.setRequired(true)
 						.setMinValue(1)
 				)
+				.addStringOption((option) =>
+					option
+						.setName("name")
+						.setDescription(
+							"Base name for the created items, use i for numbering and type for the type"
+						)
+						.setRequired(false)
+				)
 		),
 	async execute(interaction: Djs.ChatInputCommandInteraction) {
 		if (!interaction.guild) {
@@ -51,6 +59,8 @@ export default {
 			await interaction.deferReply();
 			const number = interaction.options.getNumber("number", true);
 			const type = interaction.options.getString("type", true);
+			const name = interaction.options.getString("name") || `${type}-i`;
+
 			const channel = interaction.channel;
 			if (
 				!channel ||
@@ -66,25 +76,26 @@ export default {
 				return;
 			}
 			for (let i = 0; i < number; i++) {
+				const nameIndexed = name.replace("i", `${i + 1}`).replace("type", type);
 				if (type === "channel") {
 					await interaction.guild!.channels.create({
-						name: `channel-${i + 1}`,
+						name: nameIndexed,
 						type: Djs.ChannelType.GuildText,
 					});
 				} else if (type === "forum") {
 					await interaction.guild!.channels.create({
-						name: `forum-${i + 1}`,
+						name: nameIndexed,
 						type: Djs.ChannelType.GuildForum,
 					});
 				} else if (type === "category") {
 					await interaction.guild!.channels.create({
-						name: `category-${i + 1}`,
+						name: nameIndexed,
 						type: Djs.ChannelType.GuildCategory,
 					});
 				} else if (type === "thread") {
 					await channel.threads.create({
 						autoArchiveDuration: Djs.ThreadAutoArchiveDuration.OneHour,
-						name: `Thread - ${i + 1}`,
+						name: nameIndexed,
 					});
 				}
 				//sleep for 1 second to avoid rate limit

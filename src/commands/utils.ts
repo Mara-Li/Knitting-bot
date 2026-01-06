@@ -187,7 +187,7 @@ async function showRoleInPaginatedModal(
 	};
 
 	const shortTitle = `${ul("common.role")}: ${ul("common.roleIn")}`;
-	const { modal, hasMore } = createPaginatedChannelModal(
+	const { modal, hasMore, pageItemIds } = await createPaginatedChannelModal(
 		on,
 		ul,
 		guild,
@@ -227,36 +227,7 @@ async function showRoleInPaginatedModal(
 		threads: Array.from(newThreads.keys()),
 	};
 
-	const availableOnPage = {
-		categories: Array.from(
-			guild.channels.cache
-				.filter((c) => c.type === Djs.ChannelType.GuildCategory)
-				.values()
-		)
-			.slice(page * 25, (page + 1) * 25)
-			.map((c) => c.id),
-		channels: Array.from(
-			guild.channels.cache.filter((c) => c.type === Djs.ChannelType.GuildText).values()
-		)
-			.slice(page * 25, (page + 1) * 25)
-			.map((c) => c.id),
-		forums: Array.from(
-			guild.channels.cache.filter((c) => c.type === Djs.ChannelType.GuildForum).values()
-		)
-			.slice(page * 25, (page + 1) * 25)
-			.map((c) => c.id),
-		threads: Array.from(
-			guild.channels.cache
-				.filter(
-					(c) =>
-						c.type === Djs.ChannelType.PublicThread ||
-						c.type === Djs.ChannelType.PrivateThread
-				)
-				.values()
-		)
-			.slice(page * 25, (page + 1) * 25)
-			.map((c) => c.id),
-	};
+	const availableOnPage = pageItemIds;
 
 	for (const id of availableOnPage.categories)
 		if (!newSelectedIds.categories.includes(id)) state.selectedCategories.delete(id);
@@ -314,17 +285,23 @@ async function validateRoleInSelection(
 		return;
 	}
 
-	const channels = [
-		...Array.from(state.selectedCategories).map((id) => guild.channels.cache.get(id)),
-		...Array.from(state.selectedChannels).map((id) => guild.channels.cache.get(id)),
-		...Array.from(state.selectedThreads).map((id) => guild.channels.cache.get(id)),
-		...Array.from(state.selectedForums).map((id) => guild.channels.cache.get(id)),
-	].filter(Boolean) as (
-		| Djs.CategoryChannel
-		| Djs.ForumChannel
-		| Djs.ThreadChannel
-		| Djs.TextChannel
-	)[];
+	const allIds = [
+		...Array.from(state.selectedCategories),
+		...Array.from(state.selectedChannels),
+		...Array.from(state.selectedThreads),
+		...Array.from(state.selectedForums),
+	];
+	const channels = await import("../utils/index.js").then(({ resolveChannelsByIds }) =>
+		resolveChannelsByIds<
+			Djs.CategoryChannel | Djs.ForumChannel | Djs.ThreadChannel | Djs.TextChannel
+		>(guild, allIds, [
+			Djs.ChannelType.GuildCategory,
+			Djs.ChannelType.GuildText,
+			Djs.ChannelType.PublicThread,
+			Djs.ChannelType.PrivateThread,
+			Djs.ChannelType.GuildForum,
+		])
+	);
 
 	const allRoleIn = getRoleIn(on, guildID);
 	const existing = allRoleIn.find((r) => r.roleId === roleId);

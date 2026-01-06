@@ -332,7 +332,7 @@ async function showPaginatedModal(
 		threads: state.selectedThreads,
 	};
 
-	const { modal, hasMore } = createPaginatedChannelModal(
+	const { modal, hasMore, pageItemIds } = await createPaginatedChannelModal(
 		"ignore",
 		ul,
 		guild,
@@ -376,35 +376,8 @@ async function showPaginatedModal(
 			threads: Array.from(newThreads.keys()),
 		};
 
-		// Synchroniser les sélections : ajouter les nouvelles, garder les anciennes sauf celles désélectionnées
-		// Pour chaque type, on doit savoir quels items étaient disponibles sur cette page
-		const availableOnPage = {
-			categories: Array.from(
-				guild.channels.cache.filter((c) => c.type === ChannelType.GuildCategory).values()
-			)
-				.slice(page * 25, (page + 1) * 25)
-				.map((c) => c.id),
-			channels: Array.from(
-				guild.channels.cache.filter((c) => c.type === ChannelType.GuildText).values()
-			)
-				.slice(page * 25, (page + 1) * 25)
-				.map((c) => c.id),
-			forums: Array.from(
-				guild.channels.cache.filter((c) => c.type === ChannelType.GuildForum).values()
-			)
-				.slice(page * 25, (page + 1) * 25)
-				.map((c) => c.id),
-			threads: Array.from(
-				guild.channels.cache
-					.filter(
-						(c) =>
-							c.type === ChannelType.PublicThread || c.type === ChannelType.PrivateThread
-					)
-					.values()
-			)
-				.slice(page * 25, (page + 1) * 25)
-				.map((c) => c.id),
-		};
+		// Synchroniser les sélections en se basant sur les éléments effectivement affichés sur cette page
+		const availableOnPage = pageItemIds;
 
 		// Supprimer de l'état les items de cette page qui n'ont pas été sélectionnés
 		for (const id of availableOnPage.categories) {
@@ -477,36 +450,52 @@ async function validateAndSave(
 	const guild = interaction.guild;
 	if (!guild) return;
 
-	const finalCategories = Array.from(state.selectedCategories)
-		.map((id) => guild.channels.cache.get(id))
-		.filter((c): c is CategoryChannel => c?.type === ChannelType.GuildCategory);
-	const finalChannels = Array.from(state.selectedChannels)
-		.map((id) => guild.channels.cache.get(id))
-		.filter((c): c is TextChannel => c?.type === ChannelType.GuildText);
-	const finalThreads = Array.from(state.selectedThreads)
-		.map((id) => guild.channels.cache.get(id))
-		.filter(
-			(c): c is AnyThreadChannel =>
-				c?.type === ChannelType.PublicThread || c?.type === ChannelType.PrivateThread
-		);
-	const finalForums = Array.from(state.selectedForums)
-		.map((id) => guild.channels.cache.get(id))
-		.filter((c): c is ForumChannel => c?.type === ChannelType.GuildForum);
+	const finalCategories = Array.from(state.selectedCategories).map((id) => id);
+	const finalCategoriesResolved = await import("../utils/index.js").then(
+		({ resolveChannelsByIds }) =>
+			resolveChannelsByIds<CategoryChannel>(guild, finalCategories, [
+				ChannelType.GuildCategory,
+			])
+	);
+	const finalChannels = Array.from(state.selectedChannels).map((id) => id);
+	const finalChannelsResolved = await import("../utils/index.js").then(
+		({ resolveChannelsByIds }) =>
+			resolveChannelsByIds<TextChannel>(guild, finalChannels, [ChannelType.GuildText])
+	);
+	const finalThreads = Array.from(state.selectedThreads).map((id) => id);
+	const finalThreadsResolved = await import("../utils/index.js").then(
+		({ resolveChannelsByIds }) =>
+			resolveChannelsByIds<AnyThreadChannel>(guild, finalThreads, [
+				ChannelType.PublicThread,
+				ChannelType.PrivateThread,
+			])
+	);
+	const finalForums = Array.from(state.selectedForums).map((id) => id);
+	const finalForumsResolved = await import("../utils/index.js").then(
+		({ resolveChannelsByIds }) =>
+			resolveChannelsByIds<ForumChannel>(guild, finalForums, [ChannelType.GuildForum])
+	);
 
 	const messages: string[] = [];
 
 	// Résoudre les IDs de catégories et channels en objets
-	const originalCategories = originalItems.categories
-		.map((id) => guild.channels.cache.get(id))
-		.filter((c): c is CategoryChannel => c?.type === ChannelType.GuildCategory);
-	const originalChannels = originalItems.channels
-		.map((id) => guild.channels.cache.get(id))
-		.filter((c): c is TextChannel => c?.type === ChannelType.GuildText);
+	const originalCategoriesResolved = await import("../utils/index.js").then(
+		({ resolveChannelsByIds }) =>
+			resolveChannelsByIds<CategoryChannel>(guild, originalItems.categories, [
+				ChannelType.GuildCategory,
+			])
+	);
+	const originalChannelsResolved = await import("../utils/index.js").then(
+		({ resolveChannelsByIds }) =>
+			resolveChannelsByIds<TextChannel>(guild, originalItems.channels, [
+				ChannelType.GuildText,
+			])
+	);
 
 	// Traiter les changements pour chaque type
 	processChannelTypeChanges(
-		originalCategories,
-		finalCategories,
+		originalCategoriesResolved,
+		finalCategoriesResolved,
 		TypeName.category,
 		guildID,
 		"ignore",
@@ -515,8 +504,8 @@ async function validateAndSave(
 	);
 
 	processChannelTypeChanges(
-		originalChannels,
-		finalChannels,
+		originalChannelsResolved,
+		finalChannelsResolved,
 		TypeName.channel,
 		guildID,
 		"ignore",
@@ -525,16 +514,17 @@ async function validateAndSave(
 	);
 
 	// Résoudre les IDs de threads en objets
-	const originalThreads = originalItems.threads
-		.map((id) => guild.channels.cache.get(id))
-		.filter(
-			(c): c is AnyThreadChannel =>
-				c?.type === ChannelType.PublicThread || c?.type === ChannelType.PrivateThread
-		);
+	const originalThreadsResolved = await import("../utils/index.js").then(
+		({ resolveChannelsByIds }) =>
+			resolveChannelsByIds<AnyThreadChannel>(guild, originalItems.threads, [
+				ChannelType.PublicThread,
+				ChannelType.PrivateThread,
+			])
+	);
 
 	processChannelTypeChanges(
-		originalThreads,
-		finalThreads,
+		originalThreadsResolved,
+		finalThreadsResolved,
 		TypeName.thread,
 		guildID,
 		"ignore",
@@ -543,13 +533,16 @@ async function validateAndSave(
 	);
 
 	// Résoudre les IDs de forums en objets
-	const originalForums = originalItems.forums
-		.map((id) => guild.channels.cache.get(id))
-		.filter((c): c is ForumChannel => c?.type === ChannelType.GuildForum);
+	const originalForumsResolved = await import("../utils/index.js").then(
+		({ resolveChannelsByIds }) =>
+			resolveChannelsByIds<ForumChannel>(guild, originalItems.forums, [
+				ChannelType.GuildForum,
+			])
+	);
 
 	processChannelTypeChanges(
-		originalForums,
-		finalForums,
+		originalForumsResolved,
+		finalForumsResolved,
 		TypeName.forum,
 		guildID,
 		"ignore",
