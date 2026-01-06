@@ -1,15 +1,4 @@
-import {
-	ChannelType,
-	type ChatInputCommandInteraction,
-	type CommandInteraction,
-	type CommandInteractionOptionResolver,
-	channelMention,
-	EmbedBuilder,
-	MessageFlags,
-	PermissionFlagsBits,
-	SlashCommandBuilder,
-	ThreadChannel,
-} from "discord.js";
+import * as Djs from "discord.js";
 import { getUl, t } from "../i18n";
 import { CommandName, type Translation } from "../interface";
 import { getConfig } from "../maps";
@@ -19,10 +8,10 @@ import { checkThread } from "../utils/data_check";
 import "../discord_ext.js";
 
 export default {
-	data: new SlashCommandBuilder()
+	data: new Djs.SlashCommandBuilder()
 		.setNames("commands.name")
 		.setDescriptions("commands.description")
-		.setDefaultMemberPermissions(PermissionFlagsBits.ManageThreads)
+		.setDefaultMemberPermissions(Djs.PermissionFlagsBits.ManageThreads)
 		.addSubcommand((subcommand) =>
 			subcommand
 				.setNames("common.thread")
@@ -32,7 +21,7 @@ export default {
 						.setNames("common.thread")
 						.setDescriptions("commands.updateSpecificThread.option.description")
 						.setRequired(false)
-						.addChannelTypes(ChannelType.PrivateThread, ChannelType.PublicThread)
+						.addChannelTypes(Djs.ChannelType.PrivateThread, Djs.ChannelType.PublicThread)
 				)
 		)
 		.addSubcommand((subcommand) =>
@@ -50,11 +39,11 @@ export default {
 				.setNames("commands.help.name")
 				.setDescriptions("commands.help.description")
 		),
-	async execute(interaction: ChatInputCommandInteraction) {
+	async execute(interaction: Djs.ChatInputCommandInteraction) {
 		if (!interaction.guild) return;
 		const ul = getUl(interaction);
 
-		const options = interaction.options as CommandInteractionOptionResolver;
+		const options = interaction.options as Djs.CommandInteractionOptionResolver;
 		const commands = options.getSubcommand();
 		switch (commands) {
 			case t("commands.updateAllThreads.name"):
@@ -83,7 +72,7 @@ export default {
  * @param includeArchived
  */
 async function updateAllThreads(
-	interaction: CommandInteraction,
+	interaction: Djs.CommandInteraction,
 	ul: Translation,
 	includeArchived?: boolean
 ) {
@@ -91,7 +80,7 @@ async function updateAllThreads(
 	const guild = interaction.guild.id;
 	await interaction.deferReply();
 	const threads = await interaction.guild.channels.fetchActiveThreads(true);
-	const toUpdate = new Set<ThreadChannel>();
+	const toUpdate = new Set<Djs.ThreadChannel>();
 	if (includeArchived) {
 		//fetch archived threads
 		const archived = await fetchArchived(interaction.guild);
@@ -126,31 +115,34 @@ async function updateAllThreads(
  * - If not thread is provided, the thread is the current channel
  * @param ul
  */
-async function updateThread(interaction: ChatInputCommandInteraction, ul: Translation) {
+async function updateThread(
+	interaction: Djs.ChatInputCommandInteraction,
+	ul: Translation
+) {
 	if (!interaction.guild) return;
 	await updateCache(interaction.guild);
 	const guild = interaction.guild.id;
 	const threadOption =
 		interaction.options.get(ul("common.thread").toLowerCase()) ?? interaction;
 	const channel = threadOption?.channel;
-	await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+	await interaction.deferReply({ flags: Djs.MessageFlags.Ephemeral });
 
-	if (!channel || !(channel instanceof ThreadChannel)) {
+	if (!channel || !(channel instanceof Djs.ThreadChannel)) {
 		await interaction.editReply({
 			content: ul("commands.error"),
 		});
 		return;
 	}
-	await fetchUntilMessage(threadOption!.channel as ThreadChannel);
+	await fetchUntilMessage(threadOption!.channel as Djs.ThreadChannel);
 
-	const mention = channelMention(channel?.id as string);
+	const mention = Djs.channelMention(channel?.id as string);
 	const isFollowed =
 		getConfig(CommandName.followOnlyChannel, guild) &&
-		checkThread(threadOption?.channel as ThreadChannel, "follow");
+		checkThread(threadOption?.channel as Djs.ThreadChannel, "follow");
 
 	if (
 		!getConfig(CommandName.followOnlyRoleIn, guild) &&
-		checkThread(threadOption?.channel as ThreadChannel, "ignore") &&
+		checkThread(threadOption?.channel as Djs.ThreadChannel, "ignore") &&
 		!isFollowed
 	) {
 		await interaction.editReply({
@@ -169,10 +161,10 @@ async function updateThread(interaction: ChatInputCommandInteraction, ul: Transl
  * @param interaction {@link CommandInteraction} The trigger, to reply to it
  * @param ul
  */
-async function displayHelp(interaction: CommandInteraction, ul: Translation) {
+async function displayHelp(interaction: Djs.CommandInteraction, ul: Translation) {
 	const constructDesc: string = ((((ul("commands.help.desc") as string) +
 		ul("commands.help.all")) as string) + ul("commands.help.thread")) as string;
-	const embed = new EmbedBuilder()
+	const embed = new Djs.EmbedBuilder()
 		.setTitle(ul("commands.help.title") as string)
 		.setDescription(constructDesc)
 		.setColor("#53dcaa");

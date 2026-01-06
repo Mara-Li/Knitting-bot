@@ -1,6 +1,6 @@
 import * as Djs from "discord.js";
 import { getUl, t } from "../i18n";
-import { CommandName, type RoleIn } from "../interface";
+import { CommandName, type RoleIn, TIMEOUT } from "../interface";
 import { getConfig, getRoleIn, setRoleIn } from "../maps";
 import { createPaginatedChannelModal } from "../utils/modalHandler";
 
@@ -199,7 +199,7 @@ async function showRoleInPaginatedModal(
 	await interaction.showModal(modal);
 	const modalSubmit = await interaction.awaitModalSubmit({
 		filter: (i) => i.user.id === userId,
-		time: 60_000,
+		time: TIMEOUT,
 	});
 
 	const newCategories =

@@ -2,12 +2,17 @@ import * as djs from "discord.js";
 import { type RoleIn, TypeName } from "../interface";
 import { getMaps, getRole, getRoleIn } from "../maps";
 import configuration from "./config";
+import dev from "./dev";
 import follow from "./follow";
 import ignore from "./ignore";
 import info from "./info";
 import update from "./update";
 
 export const ALL_COMMANDS = [ignore, configuration, update, follow, info];
+
+if (process.env.NODE_ENV !== "production") {
+	ALL_COMMANDS.push(dev);
+}
 
 function mapRoleIn(followed: RoleIn[]) {
 	if (!followed.length) return "/";
