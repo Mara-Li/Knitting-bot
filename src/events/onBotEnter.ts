@@ -1,5 +1,5 @@
 import type { Client } from "discord.js";
-import { commands } from "../commands";
+import { ALL_COMMANDS } from "../commands";
 import { loadDBFirstTime } from "../maps";
 import { logInDev } from "../utils";
 
@@ -12,7 +12,7 @@ import { logInDev } from "../utils";
 export default (client: Client): void => {
 	client.on("guildCreate", async (guild) => {
 		try {
-			for (const command of commands) {
+			for (const command of ALL_COMMANDS) {
 				await guild.commands.create(command.data);
 			}
 		} catch (error) {

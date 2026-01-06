@@ -94,3 +94,9 @@ export async function fetchArchived(guild: Guild) {
 			return [];
 		});
 }
+
+export async function getCommandId(commandName: string, guild: Guild) {
+	const cmdsId = await guild.commands.fetch();
+	const command = cmdsId.find((cmd) => cmd.name === commandName);
+	return command?.id;
+}

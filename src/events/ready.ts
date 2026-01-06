@@ -1,7 +1,7 @@
 import process from "node:process";
 import type { Client } from "discord.js";
 import dotenv from "dotenv";
-import { commands } from "../commands";
+import { ALL_COMMANDS } from "../commands";
 import { VERSION } from "../index";
 
 let config = dotenv.config({ path: ".env", quiet: true }).parsed;
@@ -15,7 +15,7 @@ export default (client: Client): void => {
 
 		console.info(`${client.user.username} is online; v.${VERSION}`);
 
-		const serializedCommands = commands.map((command) => command.data.toJSON());
+		const serializedCommands = ALL_COMMANDS.map((command) => command.data.toJSON());
 
 		// ID application (priorité à process.env, fallback sur fichier .env/*.prod)
 		const applicationId = process.env.CLIENT_ID || config?.CLIENT_ID;

@@ -426,8 +426,8 @@ export async function interactionRoleInChannel(
 
 	const prompt =
 		on === "follow"
-			? ul("follow.thread.description", { role: roleMentioned })
-			: ul("ignore.thread.description", { role: roleMentioned });
+			? ul("follow.thread.descriptionWithRole", { role: roleMentioned })
+			: ul("ignore.thread.descriptionWithRole", { role: roleMentioned });
 	const startButton = new Djs.ButtonBuilder()
 		.setCustomId(`${on}_roleIn_start_${roleId}`)
 		.setStyle(Djs.ButtonStyle.Secondary)

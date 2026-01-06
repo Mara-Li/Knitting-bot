@@ -7,7 +7,7 @@ import ignore from "./ignore";
 import info from "./info";
 import update from "./update";
 
-export const commands = [ignore, configuration, update, follow, info];
+export const ALL_COMMANDS = [ignore, configuration, update, follow, info];
 
 function mapRoleIn(followed: RoleIn[]) {
 	if (!followed.length) return "/";

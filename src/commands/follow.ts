@@ -1,26 +1,8 @@
-import {
-	ActionRowBuilder,
-	type AnyThreadChannel,
-	ButtonBuilder,
-	type ButtonInteraction,
-	type CategoryChannel,
-	ChannelType,
-	type ChatInputCommandInteraction,
-	type CommandInteraction,
-	type CommandInteractionOptionResolver,
-	EmbedBuilder,
-	type ForumChannel,
-	MessageFlags,
-	type ModalSubmitInteraction,
-	PermissionFlagsBits,
-	type Role,
-	SlashCommandBuilder,
-	type TextChannel,
-} from "discord.js";
+import * as Djs from "discord.js";
 import { getUl, t } from "../i18n";
 import { CommandName, type Translation, TypeName } from "../interface";
 import { getConfig, getRole } from "../maps";
-import { toTitle } from "../utils";
+import { getCommandId, toTitle } from "../utils";
 import { getTrackedItems } from "../utils/itemsManager";
 import {
 	createPaginatedChannelModal,
@@ -40,10 +22,10 @@ import "../discord_ext.js";
 import "uniformize";
 
 export default {
-	data: new SlashCommandBuilder()
+	data: new Djs.SlashCommandBuilder()
 		.setName("follow")
 		.setDescriptions("follow.description")
-		.setDefaultMemberPermissions(PermissionFlagsBits.ManageThreads)
+		.setDefaultMemberPermissions(Djs.PermissionFlagsBits.ManageThreads)
 		.addSubcommand((subcommand) =>
 			subcommand.setNames("common.channel").setDescriptions("follow.thread.description")
 		)
@@ -64,10 +46,10 @@ export default {
 						.setRequired(true)
 				)
 		),
-	async execute(interaction: ChatInputCommandInteraction) {
+	async execute(interaction: Djs.ChatInputCommandInteraction) {
 		if (!interaction.guild) return;
 		const guild = interaction.guild.id;
-		const options = interaction.options as CommandInteractionOptionResolver;
+		const options = interaction.options as Djs.CommandInteractionOptionResolver;
 		const commands = options.getSubcommand();
 		const ul = getUl(interaction);
 
@@ -75,7 +57,9 @@ export default {
 			case t("common.channel").toLowerCase():
 				if (!getConfig(CommandName.followOnlyChannel, guild)) {
 					await interaction.reply({
-						content: ul("follow.disabled"),
+						content: ul("follow.error.followChannel", {
+							id: await getCommandId("ignore", interaction.guild),
+						}),
 					});
 					return;
 				}
@@ -84,7 +68,9 @@ export default {
 			case t("common.role").toLowerCase():
 				if (!getConfig(CommandName.followOnlyRole, guild)) {
 					await interaction.reply({
-						content: ul("follow.disabled"),
+						content: ul("follow.error.role", {
+							id: await getCommandId("ignore", interaction.guild),
+						}),
 					});
 					return;
 				}
@@ -113,7 +99,7 @@ export default {
  * @param ul
  */
 async function displayFollowed(
-	interaction: ChatInputCommandInteraction,
+	interaction: Djs.ChatInputCommandInteraction,
 	ul: Translation
 ) {
 	if (!interaction.guild) return;
@@ -127,9 +113,9 @@ async function displayFollowed(
 		rolesInNames: followedRolesInNames,
 		forumNames: followedForumNames,
 	} = followed;
-	let embed: EmbedBuilder;
+	let embed: Djs.EmbedBuilder;
 	if (getConfig(CommandName.followOnlyChannel, guildID)) {
-		embed = new EmbedBuilder()
+		embed = new Djs.EmbedBuilder()
 			.setColor("#2f8e7d")
 			.setTitle(ul("follow.list.title"))
 			.addFields({
@@ -155,17 +141,17 @@ async function displayFollowed(
 			});
 		}
 	} else if (getConfig(CommandName.followOnlyRole, guildID)) {
-		embed = new EmbedBuilder()
+		embed = new Djs.EmbedBuilder()
 			.setColor("#2f8e7d")
 			.setTitle(ul("follow.list.title"))
 			.setDescription(followedRolesNames || ul("common.none"));
 	} else if (getConfig(CommandName.followOnlyRoleIn, guildID)) {
-		embed = new EmbedBuilder()
+		embed = new Djs.EmbedBuilder()
 			.setColor("#2f8e7d")
 			.setTitle(ul("follow.list.roleIn"))
 			.setDescription(followedRolesInNames || ul("common.none"));
 	} else {
-		embed = new EmbedBuilder().setColor("#2f8e7d").setTitle(ul("common.disabled"));
+		embed = new Djs.EmbedBuilder().setColor("#2f8e7d").setTitle(ul("common.disabled"));
 	}
 
 	await interaction.reply({
@@ -176,7 +162,10 @@ async function displayFollowed(
 /**
  * Follow-unfollow a role via modal
  */
-async function followThisRole(interaction: ChatInputCommandInteraction, ul: Translation) {
+async function followThisRole(
+	interaction: Djs.ChatInputCommandInteraction,
+	ul: Translation
+) {
 	if (!interaction.guild) return;
 
 	const guildID = interaction.guild.id;
@@ -184,10 +173,10 @@ async function followThisRole(interaction: ChatInputCommandInteraction, ul: Tran
 	// Résoudre les IDs en objets Role depuis le cache
 	const followedRoles = followedRoleIds
 		.map((id) => interaction.guild!.roles.cache.get(id))
-		.filter((r): r is Role => r !== undefined);
+		.filter((r): r is Djs.Role => r !== undefined);
 	const modal = createRoleSelectModal("follow", ul, followedRoles);
 
-	const collectorFilter = (i: ModalSubmitInteraction) => {
+	const collectorFilter = (i: Djs.ModalSubmitInteraction) => {
 		return i.user.id === interaction.user.id;
 	};
 
@@ -206,7 +195,7 @@ async function followThisRole(interaction: ChatInputCommandInteraction, ul: Tran
 			guildID,
 			"follow",
 			followedRoles,
-			Array.from((newRoles ?? new Map()).values()) as Role[],
+			Array.from((newRoles ?? new Map()).values()) as Djs.Role[],
 			ul,
 			messages
 		);
@@ -218,14 +207,14 @@ async function followThisRole(interaction: ChatInputCommandInteraction, ul: Tran
 
 		await selection.reply({
 			content: finalMessage,
-			flags: MessageFlags.Ephemeral,
+			flags: Djs.MessageFlags.Ephemeral,
 		});
 	} catch (e) {
 		console.error(e);
 		try {
 			await interaction.reply({
 				content: "error.failedReply",
-				flags: MessageFlags.Ephemeral,
+				flags: Djs.MessageFlags.Ephemeral,
 			});
 		} catch {
 			// Interaction already acknowledged, ignore
@@ -235,7 +224,7 @@ async function followThisRole(interaction: ChatInputCommandInteraction, ul: Tran
 }
 
 async function channelSelectors(
-	interaction: ChatInputCommandInteraction,
+	interaction: Djs.ChatInputCommandInteraction,
 	ul: Translation
 ) {
 	if (!interaction.guild) return;
@@ -249,18 +238,18 @@ async function channelSelectors(
 	const state = initializePaginationState(userId, guildID, "follow", followedItems);
 
 	// Créer le message initial avec bouton
-	const startButton = new ButtonBuilder()
+	const startButton = new Djs.ButtonBuilder()
 		.setCustomId("follow_channels_start")
 		.setLabel(ul("follow.thread.startButton"))
 		.setEmoji("🎯")
 		.setStyle(2); // Secondary
 
-	const row = new ActionRowBuilder<ButtonBuilder>().addComponents(startButton);
+	const row = new Djs.ActionRowBuilder<Djs.ButtonBuilder>().addComponents(startButton);
 
 	await interaction.reply({
 		components: [row],
 		content: ul("follow.thread.description"),
-		flags: MessageFlags.Ephemeral,
+		flags: Djs.MessageFlags.Ephemeral,
 	});
 
 	// Collecter les interactions de boutons et modals
@@ -271,7 +260,7 @@ async function channelSelectors(
 
 	if (!collector) return;
 
-	collector.on("collect", async (buttonInteraction: ButtonInteraction) => {
+	collector.on("collect", async (buttonInteraction: Djs.ButtonInteraction) => {
 		const customId = buttonInteraction.customId;
 
 		if (customId === "follow_channels_start") {
@@ -329,8 +318,8 @@ async function channelSelectors(
  * Show paginated modal for channel selection (follow)
  */
 async function showPaginatedModalForFollow(
-	interaction: ButtonInteraction,
-	guild: NonNullable<ChatInputCommandInteraction["guild"]>,
+	interaction: Djs.ButtonInteraction,
+	guild: NonNullable<Djs.ChatInputCommandInteraction["guild"]>,
 	userId: string,
 	guildID: string,
 	page: number,
@@ -368,20 +357,20 @@ async function showPaginatedModalForFollow(
 		// Récupérer les nouvelles sélections
 		const newCategories =
 			modalSubmit.fields.getSelectedChannels("select_categories", false, [
-				ChannelType.GuildCategory,
+				Djs.ChannelType.GuildCategory,
 			]) ?? new Map();
 		const newChannels =
 			modalSubmit.fields.getSelectedChannels("select_channels", false, [
-				ChannelType.GuildText,
+				Djs.ChannelType.GuildText,
 			]) ?? new Map();
 		const newThreads =
 			modalSubmit.fields.getSelectedChannels("select_threads", false, [
-				ChannelType.PublicThread,
-				ChannelType.PrivateThread,
+				Djs.ChannelType.PublicThread,
+				Djs.ChannelType.PrivateThread,
 			]) ?? new Map();
 		const newForums =
 			modalSubmit.fields.getSelectedChannels("select_forums", false, [
-				ChannelType.GuildForum,
+				Djs.ChannelType.GuildForum,
 			]) ?? new Map();
 
 		// Mettre à jour l'état avec les sélections de cette page
@@ -395,17 +384,19 @@ async function showPaginatedModalForFollow(
 		// Synchroniser les sélections
 		const availableOnPage = {
 			categories: Array.from(
-				guild.channels.cache.filter((c) => c.type === ChannelType.GuildCategory).values()
+				guild.channels.cache
+					.filter((c) => c.type === Djs.ChannelType.GuildCategory)
+					.values()
 			)
 				.slice(page * 25, (page + 1) * 25)
 				.map((c) => c.id),
 			channels: Array.from(
-				guild.channels.cache.filter((c) => c.type === ChannelType.GuildText).values()
+				guild.channels.cache.filter((c) => c.type === Djs.ChannelType.GuildText).values()
 			)
 				.slice(page * 25, (page + 1) * 25)
 				.map((c) => c.id),
 			forums: Array.from(
-				guild.channels.cache.filter((c) => c.type === ChannelType.GuildForum).values()
+				guild.channels.cache.filter((c) => c.type === Djs.ChannelType.GuildForum).values()
 			)
 				.slice(page * 25, (page + 1) * 25)
 				.map((c) => c.id),
@@ -413,7 +404,8 @@ async function showPaginatedModalForFollow(
 				guild.channels.cache
 					.filter(
 						(c) =>
-							c.type === ChannelType.PublicThread || c.type === ChannelType.PrivateThread
+							c.type === Djs.ChannelType.PublicThread ||
+							c.type === Djs.ChannelType.PrivateThread
 					)
 					.values()
 			)
@@ -479,7 +471,7 @@ async function showPaginatedModalForFollow(
  * Validate and save all selections (follow)
  */
 async function validateAndSaveForFollow(
-	interaction: ButtonInteraction,
+	interaction: Djs.ButtonInteraction,
 	userId: string,
 	guildID: string,
 	originalItems: ReturnType<typeof getTrackedItems>,
@@ -493,29 +485,30 @@ async function validateAndSaveForFollow(
 
 	const finalCategories = Array.from(state.selectedCategories)
 		.map((id) => guild.channels.cache.get(id))
-		.filter((c): c is CategoryChannel => c?.type === ChannelType.GuildCategory);
+		.filter((c): c is Djs.CategoryChannel => c?.type === Djs.ChannelType.GuildCategory);
 	const finalChannels = Array.from(state.selectedChannels)
 		.map((id) => guild.channels.cache.get(id))
-		.filter((c): c is TextChannel => c?.type === ChannelType.GuildText);
+		.filter((c): c is Djs.TextChannel => c?.type === Djs.ChannelType.GuildText);
 	const finalThreads = Array.from(state.selectedThreads)
 		.map((id) => guild.channels.cache.get(id))
 		.filter(
-			(c): c is AnyThreadChannel =>
-				c?.type === ChannelType.PublicThread || c?.type === ChannelType.PrivateThread
+			(c): c is Djs.AnyThreadChannel =>
+				c?.type === Djs.ChannelType.PublicThread ||
+				c?.type === Djs.ChannelType.PrivateThread
 		);
 	const finalForums = Array.from(state.selectedForums)
 		.map((id) => guild.channels.cache.get(id))
-		.filter((c): c is ForumChannel => c?.type === ChannelType.GuildForum);
+		.filter((c): c is Djs.ForumChannel => c?.type === Djs.ChannelType.GuildForum);
 
 	const messages: string[] = [];
 
 	// Résoudre les IDs de catégories et channels en objets
 	const originalCategories = originalItems.categories
 		.map((id) => guild.channels.cache.get(id))
-		.filter((c): c is CategoryChannel => c?.type === ChannelType.GuildCategory);
+		.filter((c): c is Djs.CategoryChannel => c?.type === Djs.ChannelType.GuildCategory);
 	const originalChannels = originalItems.channels
 		.map((id) => guild.channels.cache.get(id))
-		.filter((c): c is TextChannel => c?.type === ChannelType.GuildText);
+		.filter((c): c is Djs.TextChannel => c?.type === Djs.ChannelType.GuildText);
 
 	// Traiter les changements pour chaque type
 	processChannelTypeChanges(
@@ -542,8 +535,9 @@ async function validateAndSaveForFollow(
 	const originalThreads = originalItems.threads
 		.map((id) => guild.channels.cache.get(id))
 		.filter(
-			(c): c is AnyThreadChannel =>
-				c?.type === ChannelType.PublicThread || c?.type === ChannelType.PrivateThread
+			(c): c is Djs.AnyThreadChannel =>
+				c?.type === Djs.ChannelType.PublicThread ||
+				c?.type === Djs.ChannelType.PrivateThread
 		);
 
 	processChannelTypeChanges(
@@ -559,7 +553,7 @@ async function validateAndSaveForFollow(
 	// Résoudre les IDs de forums en objets
 	const originalForums = originalItems.forums
 		.map((id) => guild.channels.cache.get(id))
-		.filter((c): c is ForumChannel => c?.type === ChannelType.GuildForum);
+		.filter((c): c is Djs.ForumChannel => c?.type === Djs.ChannelType.GuildForum);
 
 	processChannelTypeChanges(
 		originalForums,

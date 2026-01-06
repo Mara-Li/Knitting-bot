@@ -19,7 +19,7 @@ import {
 import { getUl, t } from "../i18n";
 import { CommandName, type Translation, TypeName } from "../interface";
 import { getConfig, getRole, getRoleIn } from "../maps";
-import { toTitle } from "../utils";
+import { getCommandId, toTitle } from "../utils";
 import { getTrackedItems } from "../utils/itemsManager";
 import {
 	createPaginatedChannelModal,
@@ -78,16 +78,20 @@ export default {
 			case t("common.channel").toLowerCase():
 				if (getConfig(CommandName.followOnlyChannel, guildID)) {
 					await interaction.reply({
-						content: ul("ignore.followError") as string,
+						content: ul("ignore.error.followChannel", {
+							id: await getCommandId("follow", interaction.guild),
+						}),
 					});
 					return;
 				}
 				await channelSelectors(interaction, ul);
 				break;
-			case t("common.role").toLowerCase():
+			case t("common.role"):
 				if (getConfig(CommandName.followOnlyRole, guildID)) {
 					await interaction.reply({
-						content: ul("ignore.followError") as string,
+						content: ul("ignore.error.followRole", {
+							id: await getCommandId("follow", interaction.guild),
+						}),
 					});
 					return;
 				}
@@ -96,7 +100,9 @@ export default {
 			case t("common.roleIn"):
 				if (followOnlyRoleIn) {
 					await interaction.reply({
-						content: ul("ignore.followError") as string,
+						content: ul("ignore.error.followRoleIn", {
+							id: await getCommandId("follow", interaction.guild),
+						}),
 					});
 					return;
 				}
