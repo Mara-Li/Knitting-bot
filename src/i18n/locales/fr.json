@@ -229,7 +229,7 @@
         "label": "Channels",
         "threadDescription": "Veuillez sélectionner les fils à suivre et désélectionner ceux à ne plus suivre."
       },
-      "startButton": "Gérer les channels à suivre",
+      "startButton": "Ouvrir le menu de gestion",
       "success": "{{- thread}} est maintenant suivi.",
       "summary": "✅ Modifications enregistrées :{{-changes}}"
     }

@@ -352,9 +352,11 @@ export function processChannelTypeChanges(
 				guildID,
 				newItemsList.map((item) => item.id)
 			);
+			const mention =
+				oldItem.type === ChannelType.GuildCategory ? oldItem.name : `<#${oldItem.id}>`;
 			messages.push(
 				`[${typeLabel}] ${ul(removeKey, {
-					thread: oldItem.name,
+					thread: mention,
 				})}`
 			);
 		}
@@ -369,9 +371,11 @@ export function processChannelTypeChanges(
 				guildID,
 				updatedItems.map((item) => item.id)
 			);
+			const mention =
+				newItem.type === ChannelType.GuildCategory ? newItem.name : `<#${newItem.id}>`;
 			messages.push(
 				`[${typeLabel}] ${ul(successKey, {
-					thread: newItem.name,
+					thread: mention,
 				})}`
 			);
 		}

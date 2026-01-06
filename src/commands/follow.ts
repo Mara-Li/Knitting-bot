@@ -567,7 +567,7 @@ async function validateAndSaveForFollow(
 
 	const finalMessage =
 		messages.length > 0
-			? ul("follow.thread.summary", { changes: `\n${messages.join("\n")}` })
+			? ul("follow.thread.summary", { changes: `\n- ${messages.join("\n- ")}` })
 			: ul("follow.thread.noChanges");
 
 	await interaction.update({

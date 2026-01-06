@@ -229,7 +229,7 @@
         "label": "Channels",
         "threadDescription": "Please select the feeds you wish to follow and deselect those you no longer wish to follow."
       },
-      "startButton": "Manage followed channels",
+      "startButton": "Open the management menu",
       "success": "{{- thread}} is now followed.",
       "summary": "✅ Saved changes :{{-changes}}"
     }
