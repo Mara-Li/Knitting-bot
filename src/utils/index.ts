@@ -162,13 +162,43 @@ export async function resolveChannelsByIds<T extends { type: number }>(
 
 	if (toFetch.length > 0) {
 		const results = await Promise.allSettled(
-			toFetch.map((id) => guild.channels.fetch(id))
+			toFetch.map((id) => guild.channels.fetch(id).catch(() => null))
 		);
 		for (const r of results) {
 			if (r.status === "fulfilled" && r.value) {
 				const ch = r.value as unknown as T;
 				if (allowedTypes.includes((ch as unknown as { type: number }).type)) {
 					resolved.push(ch);
+				}
+			}
+		}
+
+		// Pour les threads qui n'ont pas pu être récupérés, chercher dans tous les canaux
+		const stillMissing = toFetch.filter(
+			(id) => !resolved.some((ch: any) => ch.id === id)
+		);
+
+		if (stillMissing.length > 0 && allowedTypes.includes(ChannelType.PublicThread)) {
+			for (const channel of guild.channels.cache.values()) {
+				if (
+					channel.type === ChannelType.GuildText ||
+					channel.type === ChannelType.GuildForum
+				) {
+					try {
+						const threads = await channel.threads.fetchArchived({
+							limit: 100,
+						});
+						for (const thread of threads.threads.values()) {
+							const idx = stillMissing.indexOf(thread.id);
+							if (idx !== -1) {
+								resolved.push(thread as unknown as T);
+								stillMissing.splice(idx, 1);
+							}
+						}
+						if (stillMissing.length === 0) break;
+					} catch (e) {
+						// Continuer si l'accès aux threads archivés échoue
+					}
 				}
 			}
 		}

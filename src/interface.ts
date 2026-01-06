@@ -97,3 +97,4 @@ export interface ServerData {
 
 export type Translation = TFunction<"translation", undefined>;
 export const TIMEOUT = 600000; // 10 minutes
+export type ChannelType_ = "channel" | "thread" | "category" | "forum";

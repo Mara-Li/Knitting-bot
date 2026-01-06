@@ -1,21 +1,17 @@
 import * as Djs from "discord.js";
-import { getUl, t } from "../i18n";
-import { CommandName, type Translation, TypeName } from "../interface";
+import type { ChannelType_ } from "src/interface";
+import { cmdLn, getUl, t } from "../i18n";
+import { CommandName, TIMEOUT, type Translation, TypeName } from "../interface";
 import { getConfig, getRole } from "../maps";
 import { getCommandId, toTitle } from "../utils";
 import { getTrackedItems } from "../utils/itemsManager";
 import {
-	createPaginatedChannelModal,
+	createPaginatedChannelModalByType,
 	createPaginationButtons,
 	createRoleSelectModal,
 	processChannelTypeChanges,
 	processRoleTypeChanges,
 } from "../utils/modalHandler";
-import {
-	clearPaginationState,
-	getPaginationState,
-	initializePaginationState,
-} from "../utils/paginationState";
 import { mapToStr } from "./index";
 import { interactionRoleInChannel } from "./utils";
 import "../discord_ext.js";
@@ -27,10 +23,40 @@ export default {
 		.setDescriptions("follow.description")
 		.setDefaultMemberPermissions(Djs.PermissionFlagsBits.ManageThreads)
 		.addSubcommand((subcommand) =>
-			subcommand.setNames("common.channel").setDescriptions("follow.thread.description")
+			subcommand
+				.setNames("common.channel")
+				.setDescriptions("follow.thread.description")
+				.addStringOption((option) =>
+					option
+						.setName("type")
+						.setDescription("follow.select.type")
+						.setChoices(
+							{
+								name: t("common.channel"),
+								name_localizations: cmdLn("common.channel"),
+								value: "channel",
+							},
+							{
+								name: t("common.thread"),
+								name_localizations: cmdLn("common.thread"),
+								value: "thread",
+							},
+							{
+								name: t("common.category"),
+								name_localizations: cmdLn("common.category"),
+								value: "category",
+							},
+							{
+								name: t("common.forum"),
+								name_localizations: cmdLn("common.forum"),
+								value: "forum",
+							}
+						)
+						.setRequired(true)
+				)
 		)
 		.addSubcommand((subcommand) =>
-			subcommand.setNames(t("common.role")).setDescriptions("follow.role.description")
+			subcommand.setNames("common.role").setDescriptions("follow.role.description")
 		)
 		.addSubcommand((subcommand) =>
 			subcommand.setNames("common.list").setDescriptions("follow.list.description")
@@ -54,17 +80,12 @@ export default {
 		const ul = getUl(interaction);
 
 		switch (commands) {
-			case t("common.channel").toLowerCase():
-				if (!getConfig(CommandName.followOnlyChannel, guild)) {
-					await interaction.reply({
-						content: ul("follow.error.followChannel", {
-							id: await getCommandId("ignore", interaction.guild),
-						}),
-					});
-					return;
-				}
-				await channelSelectors(interaction, ul);
+			case t("common.channel").toLowerCase(): {
+				const channelType = options.getString("type") as ChannelType_;
+				console.log(`[follow] Received command with type: ${channelType}`);
+				await channelSelectorsForType(interaction, ul, channelType);
 				break;
+			}
 			case t("common.role").toLowerCase():
 				if (!getConfig(CommandName.followOnlyRole, guild)) {
 					await interaction.reply({
@@ -223,9 +244,10 @@ async function followThisRole(
 	}
 }
 
-async function channelSelectors(
+async function channelSelectorsForType(
 	interaction: Djs.ChatInputCommandInteraction,
-	ul: Translation
+	ul: Translation,
+	channelType: ChannelType_
 ) {
 	if (!interaction.guild) return;
 
@@ -234,202 +256,261 @@ async function channelSelectors(
 	const userId = interaction.user.id;
 	const followedItems = getTrackedItems("follow", guildID);
 
-	// Initialiser l'état de pagination avec les éléments actuellement suivis
-	const state = initializePaginationState(userId, guildID, "follow", followedItems);
+	console.log(`[follow ${channelType}] followedItems:`, followedItems);
 
-	// Créer le message initial avec bouton
-	const startButton = new Djs.ButtonBuilder()
-		.setCustomId("follow_channels_start")
-		.setLabel(ul("follow.thread.startButton"))
-		.setEmoji("🎯")
-		.setStyle(2); // Secondary
+	// Récupérer les items du type demandé
+	let trackedIds: string[] = [];
+	switch (channelType) {
+		case "channel":
+			trackedIds = followedItems.channels;
+			break;
+		case "thread":
+			trackedIds = followedItems.threads;
+			break;
+		case "category":
+			trackedIds = followedItems.categories;
+			break;
+		case "forum":
+			trackedIds = followedItems.forums;
+			break;
+	}
 
-	const row = new Djs.ActionRowBuilder<Djs.ButtonBuilder>().addComponents(startButton);
+	console.log(`[follow ${channelType}] trackedIds:`, trackedIds);
 
-	await interaction.reply({
-		components: [row],
-		content: ul("follow.thread.description"),
-		flags: Djs.MessageFlags.Ephemeral,
-	});
+	// Découper les trackedIds en pages (25 par page)
+	const paginatedItems: Record<number, string[]> = {};
+	for (let i = 0; i < Math.ceil(trackedIds.length / 25); i++) {
+		const startIndex = i * 25;
+		const endIndex = startIndex + 25;
+		paginatedItems[i] = trackedIds.slice(startIndex, endIndex);
+	}
 
-	// Collecter les interactions de boutons et modals
-	const collector = interaction.channel?.createMessageComponentCollector({
-		filter: (i) => i.user.id === userId,
-		time: 600_000, // 10 minutes
-	});
+	console.log(`[follow ${channelType}] paginatedItems:`, paginatedItems);
 
-	if (!collector) return;
-
-	collector.on("collect", async (buttonInteraction: Djs.ButtonInteraction) => {
-		const customId = buttonInteraction.customId;
-
-		if (customId === "follow_channels_start") {
-			// Afficher la première page
-			await showPaginatedModalForFollow(buttonInteraction, guild, userId, guildID, 0, ul);
-		} else if (customId.startsWith("follow_page_prev_")) {
-			const currentPage = Number.parseInt(customId.split("_").pop() || "0", 10);
-			const prevPage = Math.max(0, currentPage - 1);
-			await showPaginatedModalForFollow(
-				buttonInteraction,
-				guild,
-				userId,
-				guildID,
-				prevPage,
-				ul
-			);
-		} else if (customId.startsWith("follow_page_next_")) {
-			const currentPage = Number.parseInt(customId.split("_").pop() || "0", 10);
-			const nextPage = currentPage + 1;
-			await showPaginatedModalForFollow(
-				buttonInteraction,
-				guild,
-				userId,
-				guildID,
-				nextPage,
-				ul
-			);
-		} else if (customId === "follow_page_validate") {
-			// Valider et sauvegarder
-			await validateAndSaveForFollow(
-				buttonInteraction,
-				userId,
-				guildID,
-				followedItems,
-				ul
-			);
-			collector.stop();
-		} else if (customId === "follow_page_cancel") {
-			// Annuler
-			clearPaginationState(userId, guildID, "follow");
-			await buttonInteraction.update({
-				components: [],
-				content: ul("common.cancelled"),
-			});
-			collector.stop();
-		}
-	});
-
-	collector.on("end", () => {
-		clearPaginationState(userId, guildID, "follow");
-	});
-}
-
-/**
- * Show paginated modal for channel selection (follow)
- */
-async function showPaginatedModalForFollow(
-	interaction: Djs.ButtonInteraction,
-	guild: NonNullable<Djs.ChatInputCommandInteraction["guild"]>,
-	userId: string,
-	guildID: string,
-	page: number,
-	ul: Translation
-) {
-	if (!guild) return;
-
-	const state = getPaginationState(userId, guildID, "follow");
-	state.currentPage = page;
-
-	const selectedIds = {
-		categories: state.selectedCategories,
-		channels: state.selectedChannels,
-		forums: state.selectedForums,
-		threads: state.selectedThreads,
+	// Initialiser l'état de pagination avec les éléments paginés
+	const stateKey = `${userId}_${guildID}_follow_${channelType}`;
+	const state = {
+		currentPage: 0,
+		originalIds: trackedIds, // Stocker les IDs originaux pour la validation
+		paginatedItems,
+		selectedIds: new Set(trackedIds),
 	};
+	paginationStates.set(stateKey, state);
 
-	const { modal, hasMore, pageItemIds } = await createPaginatedChannelModal(
+	// Si 25 items ou plus, afficher un message avec boutons
+	if (trackedIds.length >= 25) {
+		// Nombre d'items sur la première page
+		const trackedOnFirstPage = paginatedItems[0]?.length ?? 0;
+
+		// Y a-t-il d'autres pages ?
+		const hasMore = Object.keys(paginatedItems).length >= 1;
+
+		const buttons = createPaginationButtons("follow", 0, hasMore, ul);
+		const summary = `Page 1 - ${ul(`common.${channelType}`)} : ${trackedOnFirstPage} ${ul("common.elements")}`;
+
+		await interaction.reply({
+			components: buttons,
+			content: summary,
+			flags: Djs.MessageFlags.Ephemeral,
+		});
+
+		const buttonMessage = await interaction.fetchReply();
+
+		// Créer un collector pour les boutons
+		const collector = buttonMessage.createMessageComponentCollector({
+			filter: (i) => i.user.id === userId,
+			time: TIMEOUT,
+		});
+
+		collector.on("collect", async (buttonInteraction: Djs.ButtonInteraction) => {
+			const customId = buttonInteraction.customId;
+
+			if (customId.startsWith("follow_page_modify_")) {
+				const page = Number.parseInt(customId.split("_").pop() || "0", 10);
+				await handleFollowModalModify(
+					buttonInteraction,
+					guild,
+					userId,
+					page,
+					ul,
+					channelType,
+					state
+				);
+			} else if (customId.startsWith("follow_page_prev_")) {
+				await buttonInteraction.deferUpdate();
+				const currentPage = Number.parseInt(customId.split("_").pop() || "0", 10);
+				const prevPage = Math.max(0, currentPage - 1);
+				await showPaginatedMessageForFollowType(
+					buttonInteraction,
+					guild,
+					prevPage,
+					ul,
+					channelType,
+					state
+				);
+			} else if (customId.startsWith("follow_page_next_")) {
+				await buttonInteraction.deferUpdate();
+				const currentPage = Number.parseInt(customId.split("_").pop() || "0", 10);
+				const nextPage = currentPage + 1;
+				await showPaginatedMessageForFollowType(
+					buttonInteraction,
+					guild,
+					nextPage,
+					ul,
+					channelType,
+					state
+				);
+			} else if (customId === "follow_page_validate") {
+				await buttonInteraction.deferUpdate();
+				await validateAndSaveForFollowType(
+					buttonInteraction,
+					userId,
+					guildID,
+					channelType,
+					state.originalIds,
+					ul
+				);
+				collector.stop();
+			} else if (customId === "follow_page_cancel") {
+				await buttonInteraction.deferUpdate();
+				paginationStates.delete(stateKey);
+				await buttonInteraction.update({
+					components: [],
+					content: ul("common.cancelled"),
+				});
+				collector.stop();
+			}
+		});
+
+		collector.on("end", () => {
+			if (paginationStates.has(stateKey)) {
+				paginationStates.delete(stateKey);
+			}
+		});
+
+		return;
+	}
+
+	// Créer le modal pour la page 0 (≤25 items)
+	const { modal, pageItemIds } = await createPaginatedChannelModalByType(
 		"follow",
 		ul,
 		guild,
-		page,
-		selectedIds
+		0,
+		channelType,
+		paginatedItems[0] ?? [],
+		undefined,
+		true
 	);
 
 	try {
+		// Afficher le modal directement si ≤25 items
 		await interaction.showModal(modal);
 
-		// Attendre la soumission du modal
 		const modalSubmit = await interaction.awaitModalSubmit({
 			filter: (i) => i.user.id === userId,
 			time: 60_000,
 		});
 
-		// Récupérer les nouvelles sélections
-		const newCategories =
-			modalSubmit.fields.getSelectedChannels("select_categories", false, [
-				Djs.ChannelType.GuildCategory,
-			]) ?? new Map();
-		const newChannels =
-			modalSubmit.fields.getSelectedChannels("select_channels", false, [
-				Djs.ChannelType.GuildText,
-			]) ?? new Map();
-		const newThreads =
-			modalSubmit.fields.getSelectedChannels("select_threads", false, [
-				Djs.ChannelType.PublicThread,
-				Djs.ChannelType.PrivateThread,
-			]) ?? new Map();
-		const newForums =
-			modalSubmit.fields.getSelectedChannels("select_forums", false, [
-				Djs.ChannelType.GuildForum,
-			]) ?? new Map();
+		const newSelection =
+			modalSubmit.fields.getSelectedChannels(`select_${channelType}`, false) ?? new Map();
+		const newSelectedIds = Array.from(newSelection.keys());
 
-		// Mettre à jour l'état avec les sélections de cette page
-		const newSelectedIds = {
-			categories: Array.from(newCategories.keys()),
-			channels: Array.from(newChannels.keys()),
-			forums: Array.from(newForums.keys()),
-			threads: Array.from(newThreads.keys()),
-		};
+		// Mettre à jour les items de la page 0
+		state.paginatedItems[0] = newSelectedIds;
 
-		// Synchroniser les sélections en se basant sur les éléments effectivement affichés sur cette page
-		const availableOnPage = pageItemIds;
+		// Reconstruire selectedIds
+		state.selectedIds.clear();
+		for (const id of newSelectedIds) {
+			state.selectedIds.add(id);
+		}
 
-		// Supprimer les désélections
-		for (const id of availableOnPage.categories) {
-			if (!newSelectedIds.categories.includes(id)) {
-				state.selectedCategories.delete(id);
+		// Valider directement
+		await validateAndSaveForFollowType(
+			modalSubmit,
+			userId,
+			guildID,
+			channelType,
+			state.originalIds,
+			ul
+		);
+	} catch (e) {
+		console.error(`[follow ${channelType}] Error:`, e);
+	}
+}
+
+// State management pour pagination par type
+const paginationStates = new Map<
+	string,
+	{ currentPage: number; selectedIds: Set<string> }
+>();
+
+/**
+ * Handle modal modification for a specific page (follow)
+ */
+async function handleFollowModalModify(
+	interaction: Djs.ButtonInteraction,
+	guild: NonNullable<Djs.ChatInputCommandInteraction["guild"]>,
+	userId: string,
+	page: number,
+	ul: Translation,
+	channelType: ChannelType_,
+	state: {
+		currentPage: number;
+		paginatedItems: Record<number, string[]>;
+		selectedIds: Set<string>;
+	}
+) {
+	if (!guild) return;
+
+	// Récupérer les items tracked de cette page
+	const pageTrackedIds = state.paginatedItems[page] ?? [];
+
+	// Le modal affiche les items tracked de cette page
+	const { modal, pageItemIds } = await createPaginatedChannelModalByType(
+		"follow",
+		ul,
+		guild,
+		0, // Toujours page 0 car on passe déjà les items filtrés
+		channelType,
+		pageTrackedIds,
+		undefined,
+		true // Afficher les items de cette page uniquement
+	);
+
+	try {
+		await interaction.showModal(modal);
+
+		const modalSubmit = await interaction.awaitModalSubmit({
+			filter: (i) => i.user.id === userId,
+			time: 60_000,
+		});
+
+		// Defer immédiatement pour éviter l'expiration du token
+		await modalSubmit.deferUpdate();
+
+		const newSelection =
+			modalSubmit.fields.getSelectedChannels(`select_${channelType}`, false) ?? new Map();
+		const newSelectedIds = Array.from(newSelection.keys());
+
+		// Mettre à jour les items de cette page
+		state.paginatedItems[page] = newSelectedIds;
+
+		// Reconstruire selectedIds à partir de toutes les pages
+		state.selectedIds.clear();
+		for (const pageItems of Object.values(state.paginatedItems)) {
+			for (const id of pageItems) {
+				state.selectedIds.add(id);
 			}
 		}
-		for (const id of availableOnPage.channels) {
-			if (!newSelectedIds.channels.includes(id)) {
-				state.selectedChannels.delete(id);
-			}
-		}
-		for (const id of availableOnPage.threads) {
-			if (!newSelectedIds.threads.includes(id)) {
-				state.selectedThreads.delete(id);
-			}
-		}
-		for (const id of availableOnPage.forums) {
-			if (!newSelectedIds.forums.includes(id)) {
-				state.selectedForums.delete(id);
-			}
-		}
 
-		// Ajouter les nouveaux
-		for (const id of newSelectedIds.categories) {
-			state.selectedCategories.add(id);
-		}
-		for (const id of newSelectedIds.channels) {
-			state.selectedChannels.add(id);
-		}
-		for (const id of newSelectedIds.threads) {
-			state.selectedThreads.add(id);
-		}
-		for (const id of newSelectedIds.forums) {
-			state.selectedForums.add(id);
-		}
-
-		// Afficher les boutons de navigation
+		// Retour au message avec boutons
+		const pageItemsCount = state.paginatedItems[page]?.length ?? 0;
+		const hasMore = Object.keys(state.paginatedItems).length > page + 1;
 		const buttons = createPaginationButtons("follow", page, hasMore, ul);
-		const summary =
-			`${ul("common.page")} ${page + 1} - ${ul("common.selection")}:\n` +
-			`📁 Catégories: ${state.selectedCategories.size}\n` +
-			`💬 Salons: ${state.selectedChannels.size}\n` +
-			`🧵 Threads: ${state.selectedThreads.size}\n` +
-			`📋 Forums: ${state.selectedForums.size}`;
+		const summary = `Page ${page + 1} - ${ul(`common.${channelType}`)} : ${pageItemsCount} ${ul("common.elements")}`;
 
-		await modalSubmit.reply({
+		await modalSubmit.editReply({
 			components: buttons,
 			content: summary,
 		});
@@ -439,119 +520,100 @@ async function showPaginatedModalForFollow(
 }
 
 /**
- * Validate and save all selections (follow)
+ * Show paginated message for channel selection by type (follow)
  */
-async function validateAndSaveForFollow(
+async function showPaginatedMessageForFollowType(
 	interaction: Djs.ButtonInteraction,
+	guild: NonNullable<Djs.ChatInputCommandInteraction["guild"]>,
+	page: number,
+	ul: Translation,
+	channelType: ChannelType_,
+	state: {
+		currentPage: number;
+		paginatedItems: Record<number, string[]>;
+		selectedIds: Set<string>;
+	}
+) {
+	if (!guild) return;
+
+	state.currentPage = page;
+
+	// Afficher le nombre d'éléments suivis sur cette page
+	const trackedOnThisPage = state.paginatedItems[page]?.length ?? 0;
+	const hasMore = Object.keys(state.paginatedItems).length > page + 1;
+
+	const buttons = createPaginationButtons("follow", page, hasMore, ul);
+	const summary = `Page ${page + 1} - ${ul(`common.${channelType}`)} : ${trackedOnThisPage} ${ul("common.elements")}`;
+
+	await interaction.editReply({
+		components: buttons,
+		content: summary,
+	});
+}
+
+/**
+ * Validate and save selections by type (follow)
+ */
+async function validateAndSaveForFollowType(
+	interaction: Djs.ButtonInteraction | Djs.ModalSubmitInteraction,
 	userId: string,
 	guildID: string,
-	originalItems: ReturnType<typeof getTrackedItems>,
+	channelType: ChannelType_,
+	trackedIds: string[],
 	ul: Translation
 ) {
-	const state = getPaginationState(userId, guildID, "follow");
+	const stateKey = `${userId}_${guildID}_follow_${channelType}`;
+	const state = paginationStates.get(stateKey);
+	if (!state) return;
 
-	// Convertir les Sets en arrays d'objets Channel
 	const guild = interaction.guild;
 	if (!guild) return;
 
-	const finalCategories = Array.from(state.selectedCategories).map((id) => id);
-	const finalCategoriesResolved = await import("../utils/index.js").then(
-		({ resolveChannelsByIds }) =>
-			resolveChannelsByIds<Djs.CategoryChannel>(guild, finalCategories, [
-				Djs.ChannelType.GuildCategory,
-			])
-	);
-	const finalChannels = Array.from(state.selectedChannels).map((id) => id);
-	const finalChannelsResolved = await import("../utils/index.js").then(
-		({ resolveChannelsByIds }) =>
-			resolveChannelsByIds<Djs.TextChannel>(guild, finalChannels, [
-				Djs.ChannelType.GuildText,
-			])
-	);
-	const finalThreads = Array.from(state.selectedThreads).map((id) => id);
-	const finalThreadsResolved = await import("../utils/index.js").then(
-		({ resolveChannelsByIds }) =>
-			resolveChannelsByIds<Djs.AnyThreadChannel>(guild, finalThreads, [
-				Djs.ChannelType.PublicThread,
-				Djs.ChannelType.PrivateThread,
-			])
-	);
-	const finalForums = Array.from(state.selectedForums).map((id) => id);
-	const finalForumsResolved = await import("../utils/index.js").then(
-		({ resolveChannelsByIds }) =>
-			resolveChannelsByIds<Djs.ForumChannel>(guild, finalForums, [
-				Djs.ChannelType.GuildForum,
-			])
-	);
-
+	const finalIds = Array.from(state.selectedIds);
 	const messages: string[] = [];
 
-	// Résoudre les IDs de catégories et channels en objets
-	const originalCategoriesResolved = await import("../utils/index.js").then(
+	// Mapper le type de channel au TypeName
+	let typeName: TypeName;
+	let channelTypeFilter: Djs.ChannelType[];
+
+	switch (channelType) {
+		case "channel":
+			typeName = TypeName.channel;
+			channelTypeFilter = [Djs.ChannelType.GuildText];
+			break;
+		case "thread":
+			typeName = TypeName.thread;
+			channelTypeFilter = [Djs.ChannelType.PublicThread, Djs.ChannelType.PrivateThread];
+			break;
+		case "category":
+			typeName = TypeName.category;
+			channelTypeFilter = [Djs.ChannelType.GuildCategory];
+			break;
+		case "forum":
+			typeName = TypeName.forum;
+			channelTypeFilter = [Djs.ChannelType.GuildForum];
+			break;
+	}
+
+	// Résoudre les IDs en objets Channel
+	const finalChannelsResolved = await import("../utils/index.js").then(
 		({ resolveChannelsByIds }) =>
-			resolveChannelsByIds<Djs.CategoryChannel>(guild, originalItems.categories, [
-				Djs.ChannelType.GuildCategory,
-			])
-	);
-	const originalChannelsResolved = await import("../utils/index.js").then(
-		({ resolveChannelsByIds }) =>
-			resolveChannelsByIds<Djs.TextChannel>(guild, originalItems.channels, [
-				Djs.ChannelType.GuildText,
-			])
+			resolveChannelsByIds<
+				Djs.CategoryChannel | Djs.TextChannel | Djs.AnyThreadChannel | Djs.ForumChannel
+			>(guild, finalIds, channelTypeFilter)
 	);
 
-	// Traiter les changements pour chaque type
-	processChannelTypeChanges(
-		originalCategoriesResolved,
-		finalCategoriesResolved,
-		TypeName.category,
-		guildID,
-		"follow",
-		ul,
-		messages
+	const originalChannelsResolved = await import("../utils/index.js").then(
+		({ resolveChannelsByIds }) =>
+			resolveChannelsByIds<
+				Djs.CategoryChannel | Djs.TextChannel | Djs.AnyThreadChannel | Djs.ForumChannel
+			>(guild, trackedIds, channelTypeFilter)
 	);
 
 	processChannelTypeChanges(
 		originalChannelsResolved,
 		finalChannelsResolved,
-		TypeName.channel,
-		guildID,
-		"follow",
-		ul,
-		messages
-	);
-
-	// Résoudre les IDs de threads en objets
-	const originalThreadsResolved = await import("../utils/index.js").then(
-		({ resolveChannelsByIds }) =>
-			resolveChannelsByIds<Djs.AnyThreadChannel>(guild, originalItems.threads, [
-				Djs.ChannelType.PublicThread,
-				Djs.ChannelType.PrivateThread,
-			])
-	);
-
-	processChannelTypeChanges(
-		originalThreadsResolved,
-		finalThreadsResolved,
-		TypeName.thread,
-		guildID,
-		"follow",
-		ul,
-		messages
-	);
-
-	// Résoudre les IDs de forums en objets
-	const originalForumsResolved = await import("../utils/index.js").then(
-		({ resolveChannelsByIds }) =>
-			resolveChannelsByIds<Djs.ForumChannel>(guild, originalItems.forums, [
-				Djs.ChannelType.GuildForum,
-			])
-	);
-
-	processChannelTypeChanges(
-		originalForumsResolved,
-		finalForumsResolved,
-		TypeName.forum,
+		typeName,
 		guildID,
 		"follow",
 		ul,
@@ -563,10 +625,30 @@ async function validateAndSaveForFollow(
 			? ul("follow.thread.summary", { changes: `\n- ${messages.join("\n- ")}` })
 			: ul("follow.thread.noChanges");
 
-	await interaction.update({
-		components: [],
-		content: finalMessage,
-	});
+	// Handle both ButtonInteraction and ModalSubmitInteraction
+	if (interaction.isModalSubmit()) {
+		// For ModalSubmitInteraction, use reply
+		await interaction.reply({
+			components: [],
+			content: finalMessage,
+			flags: Djs.MessageFlags.Ephemeral,
+		});
+	} else {
+		// For ButtonInteraction
+		if (interaction.deferred) {
+			// If already deferred, use editReply
+			await interaction.editReply({
+				components: [],
+				content: finalMessage,
+			});
+		} else {
+			// If not deferred, use update
+			await interaction.update({
+				components: [],
+				content: finalMessage,
+			});
+		}
+	}
 
-	clearPaginationState(userId, guildID, "follow");
+	paginationStates.delete(stateKey);
 }

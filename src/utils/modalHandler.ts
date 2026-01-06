@@ -15,9 +15,8 @@ import {
 	type TextChannel,
 	type ThreadChannel,
 } from "discord.js";
-import { type Translation, TypeName } from "../interface";
+import { type ChannelType_, type Translation, TypeName } from "../interface";
 import { setFollow, setIgnore, setRole } from "../maps";
-import { fetchArchived } from "./index";
 import type { CommandMode, TrackedItems } from "./itemsManager";
 
 /**
@@ -90,12 +89,65 @@ export function createChannelSelectorsModal(
 }
 
 /**
- * Get available channels for a specific page (25 per page)
+ * Create a paginated modal for a specific channel type
  */
-function paginateChannels<T extends { id: string }>(items: T[], page: number): T[] {
-	const startIndex = page * 25;
-	const endIndex = startIndex + 25;
-	return items.slice(startIndex, endIndex);
+export async function createPaginatedChannelModalByType(
+	mode: CommandMode,
+	ul: Translation,
+	guild: Guild,
+	page: number,
+	channelType: ChannelType_,
+	trackedIds: string[],
+	shortTitle?: string,
+	showOnlyTracked = true
+): Promise<{
+	modal: ModalBuilder;
+	hasMore: boolean;
+	pageItemIds: string[];
+}> {
+	// Déterminer les types Discord selon le type de channel
+	let djsChannelTypes: ChannelType[] = [];
+
+	if (channelType === "category") {
+		djsChannelTypes = [ChannelType.GuildCategory];
+	} else if (channelType === "channel") {
+		djsChannelTypes = [ChannelType.GuildText];
+	} else if (channelType === "thread") {
+		djsChannelTypes = [ChannelType.PublicThread, ChannelType.PrivateThread];
+	} else if (channelType === "forum") {
+		djsChannelTypes = [ChannelType.GuildForum];
+	}
+
+	const baseTitle = shortTitle ?? `${ul(`common.${channelType}`)}`;
+	const title = `${baseTitle} (P${page + 1})`.slice(0, 45);
+
+	const modal = new ModalBuilder()
+		.setCustomId(`${mode}_${channelType}_page_${page}`)
+		.setTitle(title);
+
+	// Toujours créer le select, avec defaultChannels si items existent
+	const select = new ChannelSelectMenuBuilder()
+		.setCustomId(`select_${channelType}`)
+		.setChannelTypes(...djsChannelTypes)
+		.setMaxValues(25)
+		.setRequired(false);
+
+	// Ajouter les defaultChannels si il y a des items tracked
+	if (trackedIds.length > 0) {
+		select.setDefaultChannels(trackedIds);
+	}
+
+	const label = new LabelBuilder()
+		.setLabel(ul(`common.${channelType}`))
+		.setChannelSelectMenuComponent(select);
+
+	modal.addLabelComponents(label);
+
+	return {
+		hasMore: false, // Calculé en dehors maintenant
+		modal,
+		pageItemIds: trackedIds,
+	};
 }
 
 /**
@@ -107,10 +159,10 @@ export async function createPaginatedChannelModal(
 	guild: Guild,
 	page: number,
 	selectedIds: {
-		categories: Set<string>;
-		channels: Set<string>;
-		threads: Set<string>;
-		forums: Set<string>;
+		categories: string[];
+		channels: string[];
+		threads: string[];
+		forums: string[];
 	},
 	shortTitle?: string
 ): Promise<{
@@ -123,49 +175,6 @@ export async function createPaginatedChannelModal(
 		forums: string[];
 	};
 }> {
-	// Récupérer tous les channels du serveur
-	const allCategories = Array.from(
-		guild.channels.cache.filter((c) => c.type === ChannelType.GuildCategory).values()
-	) as CategoryChannel[];
-	const allChannels = Array.from(
-		guild.channels.cache.filter((c) => c.type === ChannelType.GuildText).values()
-	) as TextChannel[];
-	// Inclure les threads archivés (public & private) en plus des threads déjà en cache
-	const cachedThreads = Array.from(
-		guild.channels.cache
-			.filter(
-				(c) => c.type === ChannelType.PublicThread || c.type === ChannelType.PrivateThread
-			)
-			.values()
-	) as ThreadChannel[];
-	const archivedThreads = await fetchArchived(guild);
-	const threadMap = new Map<string, ThreadChannel>();
-	for (const t of cachedThreads) threadMap.set(t.id, t);
-	for (const t of archivedThreads) threadMap.set(t.id, t as ThreadChannel);
-	const allThreads = Array.from(threadMap.values());
-	const allForums = Array.from(
-		guild.channels.cache.filter((c) => c.type === ChannelType.GuildForum).values()
-	) as ForumChannel[];
-
-	// Ne conserver QUE les éléments suivis/ignorés actuellement (exigence UX)
-	const trackedCategories = allCategories.filter((c) => selectedIds.categories.has(c.id));
-	const trackedChannels = allChannels.filter((c) => selectedIds.channels.has(c.id));
-	const trackedThreads = allThreads.filter((t) => selectedIds.threads.has(t.id));
-	const trackedForums = allForums.filter((f) => selectedIds.forums.has(f.id));
-
-	// Paginer chaque type
-	const pageCategories = paginateChannels(trackedCategories, page);
-	const pageChannels = paginateChannels(trackedChannels, page);
-	const pageThreads = paginateChannels(trackedThreads, page);
-	const pageForums = paginateChannels(trackedForums, page);
-
-	// Déterminer s'il y a plus de pages
-	const hasMore =
-		trackedCategories.length > (page + 1) * 25 ||
-		trackedChannels.length > (page + 1) * 25 ||
-		trackedThreads.length > (page + 1) * 25 ||
-		trackedForums.length > (page + 1) * 25;
-
 	const baseTitle = shortTitle ?? `${ul("common.channel")}/${ul("common.thread")}`;
 	const title = `${baseTitle} (P${page + 1})`.slice(0, 45);
 
@@ -174,13 +183,12 @@ export async function createPaginatedChannelModal(
 		.setTitle(title);
 
 	// Categories
-	if (pageCategories.length > 0) {
+	if (selectedIds.categories.length > 0) {
 		const categorySelect = new ChannelSelectMenuBuilder()
 			.setCustomId("select_categories")
 			.setChannelTypes(ChannelType.GuildCategory)
-			// Pré-sélectionner tous les éléments de la page afin d'afficher aussi les éléments non listables (ex: threads archivés)
-			.setDefaultChannels(pageCategories.map((c) => c.id))
-			.setMaxValues(Math.min(25, pageCategories.length))
+			.setDefaultChannels(selectedIds.categories)
+			.setMaxValues(Math.min(25, selectedIds.categories.length))
 			.setRequired(false);
 
 		const categoryLabel = new LabelBuilder()
@@ -190,13 +198,12 @@ export async function createPaginatedChannelModal(
 	}
 
 	// Channels
-	if (pageChannels.length > 0) {
+	if (selectedIds.channels.length > 0) {
 		const channelSelect = new ChannelSelectMenuBuilder()
 			.setCustomId("select_channels")
 			.setChannelTypes(ChannelType.GuildText)
-			// Pré-sélectionner tous les éléments de la page
-			.setDefaultChannels(pageChannels.map((c) => c.id))
-			.setMaxValues(Math.min(25, pageChannels.length))
+			.setDefaultChannels(selectedIds.channels)
+			.setMaxValues(Math.min(25, selectedIds.channels.length))
 			.setRequired(false);
 
 		const channelLabel = new LabelBuilder()
@@ -206,13 +213,12 @@ export async function createPaginatedChannelModal(
 	}
 
 	// Threads
-	if (pageThreads.length > 0) {
+	if (selectedIds.threads.length > 0) {
 		const threadSelect = new ChannelSelectMenuBuilder()
 			.setCustomId("select_threads")
 			.setChannelTypes(ChannelType.PublicThread, ChannelType.PrivateThread)
-			// Pré-sélectionner tous les éléments de la page (incluant les threads archivés)
-			.setDefaultChannels(pageThreads.map((t) => t.id))
-			.setMaxValues(Math.min(25, pageThreads.length))
+			.setDefaultChannels(selectedIds.threads)
+			.setMaxValues(Math.min(25, selectedIds.threads.length))
 			.setRequired(false);
 
 		const threadLabel = new LabelBuilder()
@@ -222,13 +228,12 @@ export async function createPaginatedChannelModal(
 	}
 
 	// Forums
-	if (pageForums.length > 0) {
+	if (selectedIds.forums.length > 0) {
 		const forumSelect = new ChannelSelectMenuBuilder()
 			.setCustomId("select_forums")
 			.setChannelTypes(ChannelType.GuildForum)
-			// Pré-sélectionner tous les éléments de la page
-			.setDefaultChannels(pageForums.map((f) => f.id))
-			.setMaxValues(Math.min(25, pageForums.length))
+			.setDefaultChannels(selectedIds.forums)
+			.setMaxValues(Math.min(25, selectedIds.forums.length))
 			.setRequired(false);
 
 		const forumLabel = new LabelBuilder()
@@ -238,14 +243,9 @@ export async function createPaginatedChannelModal(
 	}
 
 	return {
-		hasMore,
+		hasMore: false, // Calculé en dehors
 		modal,
-		pageItemIds: {
-			categories: pageCategories.map((c) => c.id),
-			channels: pageChannels.map((c) => c.id),
-			forums: pageForums.map((f) => f.id),
-			threads: pageThreads.map((t) => t.id),
-		},
+		pageItemIds: selectedIds,
 	};
 }
 
@@ -259,6 +259,15 @@ export function createPaginationButtons(
 	ul: Translation
 ): ActionRowBuilder<ButtonBuilder>[] {
 	const buttons: ButtonBuilder[] = [];
+
+	// Bouton modifier (ouvre le modal pour cette page)
+	buttons.push(
+		new ButtonBuilder()
+			.setCustomId(`${mode}_page_modify_${page}`)
+			.setLabel(ul("common.modify"))
+			.setEmoji("✏️")
+			.setStyle(ButtonStyle.Primary)
+	);
 
 	// Bouton page précédente (disabled si page 0)
 	buttons.push(

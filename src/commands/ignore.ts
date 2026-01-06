@@ -1,7 +1,5 @@
 import {
-	ActionRowBuilder,
 	type AnyThreadChannel,
-	ButtonBuilder,
 	type ButtonInteraction,
 	type CategoryChannel,
 	ChannelType,
@@ -9,6 +7,7 @@ import {
 	type CommandInteractionOptionResolver,
 	EmbedBuilder,
 	type ForumChannel,
+	type Message,
 	MessageFlags,
 	type ModalSubmitInteraction,
 	PermissionFlagsBits,
@@ -16,23 +15,19 @@ import {
 	SlashCommandBuilder,
 	type TextChannel,
 } from "discord.js";
-import { getUl, t } from "../i18n";
+import type { ChannelType_ } from "src/interface";
+import { cmdLn, getUl, t } from "../i18n";
 import { CommandName, type Translation, TypeName } from "../interface";
 import { getConfig, getRole, getRoleIn } from "../maps";
 import { getCommandId, toTitle } from "../utils";
 import { getTrackedItems } from "../utils/itemsManager";
 import {
-	createPaginatedChannelModal,
+	createPaginatedChannelModalByType,
 	createPaginationButtons,
 	createRoleSelectModal,
 	processChannelTypeChanges,
 	processRoleTypeChanges,
 } from "../utils/modalHandler";
-import {
-	clearPaginationState,
-	getPaginationState,
-	initializePaginationState,
-} from "../utils/paginationState";
 import { mapToStr } from "./index";
 import { interactionRoleInChannel } from "./utils";
 import "../discord_ext.js";
@@ -44,7 +39,37 @@ export default {
 		.setDescriptions("ignore.description")
 		.setDefaultMemberPermissions(PermissionFlagsBits.ManageThreads)
 		.addSubcommand((subcommand) =>
-			subcommand.setNames("common.channel").setDescriptions("ignore.thread.description")
+			subcommand
+				.setNames("common.channel")
+				.setDescriptions("ignore.thread.description")
+				.addStringOption((option) =>
+					option
+						.setName("type")
+						.setDescription("ignore.select.type")
+						.setChoices(
+							{
+								name: t("common.channel"),
+								name_localizations: cmdLn("common.channel"),
+								value: "channel",
+							},
+							{
+								name: t("common.thread"),
+								name_localizations: cmdLn("common.thread"),
+								value: "thread",
+							},
+							{
+								name: t("common.category"),
+								name_localizations: cmdLn("common.category"),
+								value: "category",
+							},
+							{
+								name: t("common.forum"),
+								name_localizations: cmdLn("common.forum"),
+								value: "forum",
+							}
+						)
+						.setRequired(true)
+				)
 		)
 		.addSubcommand((subcommand) =>
 			subcommand.setNames("common.role").setDescriptions("ignore.role.description")
@@ -75,17 +100,11 @@ export default {
 		 * Verify if the "follow-only" mode is enabled ; return error if it is
 		 */
 		switch (commands) {
-			case t("common.channel").toLowerCase():
-				if (getConfig(CommandName.followOnlyChannel, guildID)) {
-					await interaction.reply({
-						content: ul("ignore.error.followChannel", {
-							id: await getCommandId("follow", interaction.guild),
-						}),
-					});
-					return;
-				}
-				await channelSelectors(interaction, ul);
+			case t("common.channel").toLowerCase(): {
+				const channelType = options.getString("type") as ChannelType_;
+				await channelSelectorsForType(interaction, ul, channelType);
 				break;
+			}
 			case t("common.role"):
 				if (getConfig(CommandName.followOnlyRole, guildID)) {
 					await interaction.reply({
@@ -236,11 +255,12 @@ async function ignoreThisRole(interaction: ChatInputCommandInteraction, ul: Tran
 }
 
 /**
- * Ignore / un-ignore channels via paginated modal selectors
+ * Ignore / un-ignore channels via paginated modal selectors by type
  */
-async function channelSelectors(
+async function channelSelectorsForType(
 	interaction: ChatInputCommandInteraction,
-	ul: Translation
+	ul: Translation,
+	channelType: ChannelType_
 ) {
 	if (!interaction.guild) return;
 
@@ -249,183 +269,288 @@ async function channelSelectors(
 	const userId = interaction.user.id;
 	const ignoredItems = getTrackedItems("ignore", guildID);
 
-	// Initialiser l'état de pagination avec les éléments actuellement ignorés
-	const state = initializePaginationState(userId, guildID, "ignore", ignoredItems);
+	// Récupérer les items du type demandé
+	let trackedIds: string[] = [];
+	switch (channelType) {
+		case "channel":
+			trackedIds = ignoredItems.channels;
+			break;
+		case "thread":
+			trackedIds = ignoredItems.threads;
+			break;
+		case "category":
+			trackedIds = ignoredItems.categories;
+			break;
+		case "forum":
+			trackedIds = ignoredItems.forums;
+			break;
+	}
 
-	// Créer le message initial avec bouton
-	const startButton = new ButtonBuilder()
-		.setCustomId("ignore_channels_start")
-		.setLabel(ul("ignore.thread.startButton"))
-		.setEmoji("🎯")
-		.setStyle(2); // Secondary
+	// Découper les trackedIds en pages (25 par page)
+	const paginatedItems: Record<number, string[]> = {};
+	for (let i = 0; i < Math.ceil(trackedIds.length / 25); i++) {
+		const startIndex = i * 25;
+		const endIndex = startIndex + 25;
+		paginatedItems[i] = trackedIds.slice(startIndex, endIndex);
+	}
 
-	const row = new ActionRowBuilder<ButtonBuilder>().addComponents(startButton);
-
-	await interaction.reply({
-		components: [row],
-		content: ul("ignore.thread.description"),
-		flags: MessageFlags.Ephemeral,
-	});
-
-	// Collecter les interactions de boutons et modals
-	const collector = interaction.channel?.createMessageComponentCollector({
-		filter: (i) => i.user.id === userId,
-		time: 600_000, // 10 minutes
-	});
-
-	if (!collector) return;
-
-	collector.on("collect", async (buttonInteraction: ButtonInteraction) => {
-		const customId = buttonInteraction.customId;
-
-		if (customId === "ignore_channels_start") {
-			// Afficher la première page
-			await showPaginatedModal(buttonInteraction, guild, userId, guildID, 0, ul);
-		} else if (customId.startsWith("ignore_page_prev_")) {
-			const currentPage = Number.parseInt(customId.split("_").pop() || "0", 10);
-			const prevPage = Math.max(0, currentPage - 1);
-			await showPaginatedModal(buttonInteraction, guild, userId, guildID, prevPage, ul);
-		} else if (customId.startsWith("ignore_page_next_")) {
-			const currentPage = Number.parseInt(customId.split("_").pop() || "0", 10);
-			const nextPage = currentPage + 1;
-			await showPaginatedModal(buttonInteraction, guild, userId, guildID, nextPage, ul);
-		} else if (customId === "ignore_page_validate") {
-			// Valider et sauvegarder
-			await validateAndSave(buttonInteraction, userId, guildID, ignoredItems, ul);
-			collector.stop();
-		} else if (customId === "ignore_page_cancel") {
-			// Annuler
-			clearPaginationState(userId, guildID, "ignore");
-			await buttonInteraction.update({
-				components: [],
-				content: ul("common.cancelled"),
-			});
-			collector.stop();
-		}
-	});
-
-	collector.on("end", () => {
-		clearPaginationState(userId, guildID, "ignore");
-	});
-}
-
-/**
- * Show paginated modal for channel selection
- */
-async function showPaginatedModal(
-	interaction: ButtonInteraction,
-	guild: NonNullable<ChatInputCommandInteraction["guild"]>,
-	userId: string,
-	guildID: string,
-	page: number,
-	ul: Translation
-) {
-	if (!guild) return;
-
-	const state = getPaginationState(userId, guildID, "ignore");
-	state.currentPage = page;
-
-	const selectedIds = {
-		categories: state.selectedCategories,
-		channels: state.selectedChannels,
-		forums: state.selectedForums,
-		threads: state.selectedThreads,
+	// Initialiser l'état de pagination avec les éléments paginés
+	const stateKey = `${userId}_${guildID}_ignore_${channelType}`;
+	const state = {
+		currentPage: 0,
+		originalIds: trackedIds, // Stocker les IDs originaux pour la validation
+		paginatedItems,
+		selectedIds: new Set(trackedIds),
 	};
+	paginationStates.set(stateKey, state);
 
-	const { modal, hasMore, pageItemIds } = await createPaginatedChannelModal(
+	// Si 25 items ou plus, afficher un message avec boutons
+	if (trackedIds.length >= 25) {
+		// Nombre d'items sur la première page
+		const trackedOnFirstPage = paginatedItems[0]?.length ?? 0;
+
+		// Y a-t-il d'autres pages ?
+		const hasMore = Object.keys(paginatedItems).length > 1;
+
+		const buttons = createPaginationButtons("ignore", 0, hasMore, ul);
+		const s = ul("common.space");
+		const summary = `Page 1 - ${ul(`common.${channelType}`)}${s}: ${trackedOnFirstPage} ${ul("common.elements")}`;
+
+		await interaction.reply({
+			components: buttons,
+			content: summary,
+			flags: MessageFlags.Ephemeral,
+		});
+
+		const buttonMessage = await interaction.fetchReply();
+
+		// Créer un collector pour les boutons
+		const collector = buttonMessage.createMessageComponentCollector({
+			filter: (i) => i.user.id === userId,
+			time: 600_000,
+		});
+
+		collector.on("collect", async (buttonInteraction: ButtonInteraction) => {
+			const customId = buttonInteraction.customId;
+
+			if (customId.startsWith("ignore_page_modify_")) {
+				const page = Number.parseInt(customId.split("_").pop() || "0", 10);
+				await handleIgnoreModalModify(
+					buttonInteraction,
+					guild,
+					userId,
+					guildID,
+					page,
+					ul,
+					channelType,
+					state,
+					stateKey,
+					buttonMessage
+				);
+			} else if (customId.startsWith("ignore_page_prev_")) {
+				await buttonInteraction.deferUpdate();
+				const currentPage = Number.parseInt(customId.split("_").pop() || "0", 10);
+				const prevPage = Math.max(0, currentPage - 1);
+				await showPaginatedMessageForIgnoreType(
+					buttonInteraction,
+					guild,
+					userId,
+					guildID,
+					prevPage,
+					ul,
+					channelType,
+					state,
+					stateKey,
+					buttonMessage
+				);
+			} else if (customId.startsWith("ignore_page_next_")) {
+				await buttonInteraction.deferUpdate();
+				const currentPage = Number.parseInt(customId.split("_").pop() || "0", 10);
+				const nextPage = currentPage + 1;
+				await showPaginatedMessageForIgnoreType(
+					buttonInteraction,
+					guild,
+					userId,
+					guildID,
+					nextPage,
+					ul,
+					channelType,
+					state,
+					stateKey,
+					buttonMessage
+				);
+			} else if (customId === "ignore_page_validate") {
+				await buttonInteraction.deferUpdate();
+				await validateAndSaveForIgnoreType(
+					buttonInteraction,
+					userId,
+					guildID,
+					channelType,
+					state.originalIds,
+					ul
+				);
+				collector.stop();
+			} else if (customId === "ignore_page_cancel") {
+				await buttonInteraction.deferUpdate();
+				paginationStates.delete(stateKey);
+				await buttonInteraction.update({
+					components: [],
+					content: ul("common.cancelled"),
+				});
+				collector.stop();
+			}
+		});
+
+		collector.on("end", () => {
+			if (paginationStates.has(stateKey)) {
+				paginationStates.delete(stateKey);
+			}
+		});
+
+		return;
+	}
+
+	// Créer le modal pour la page 0 (≤25 items)
+	const { modal, pageItemIds } = await createPaginatedChannelModalByType(
 		"ignore",
 		ul,
 		guild,
-		page,
-		selectedIds
+		0,
+		channelType,
+		paginatedItems[0] ?? [],
+		undefined,
+		true
 	);
 
+	if (pageItemIds.length === 0) {
+		await interaction.reply({
+			content: ul("common.noMore"),
+			flags: MessageFlags.Ephemeral,
+		});
+		return;
+	}
+
 	try {
+		// Afficher le modal directement si ≤25 items
 		await interaction.showModal(modal);
 
-		// Attendre la soumission du modal
 		const modalSubmit = await interaction.awaitModalSubmit({
 			filter: (i) => i.user.id === userId,
 			time: 60_000,
 		});
 
-		// Récupérer les nouvelles sélections
-		const newCategories =
-			modalSubmit.fields.getSelectedChannels("select_categories", false, [
-				ChannelType.GuildCategory,
-			]) ?? new Map();
-		const newChannels =
-			modalSubmit.fields.getSelectedChannels("select_channels", false, [
-				ChannelType.GuildText,
-			]) ?? new Map();
-		const newThreads =
-			modalSubmit.fields.getSelectedChannels("select_threads", false, [
-				ChannelType.PublicThread,
-				ChannelType.PrivateThread,
-			]) ?? new Map();
-		const newForums =
-			modalSubmit.fields.getSelectedChannels("select_forums", false, [
-				ChannelType.GuildForum,
-			]) ?? new Map();
+		const newSelection =
+			modalSubmit.fields.getSelectedChannels(`select_${channelType}`, false) ?? new Map();
+		const newSelectedIds = Array.from(newSelection.keys());
 
-		// Mettre à jour l'état avec les sélections de cette page
-		const newSelectedIds = {
-			categories: Array.from(newCategories.keys()),
-			channels: Array.from(newChannels.keys()),
-			forums: Array.from(newForums.keys()),
-			threads: Array.from(newThreads.keys()),
-		};
+		// Mettre à jour les items de la page 0
+		state.paginatedItems[0] = newSelectedIds;
 
-		// Synchroniser les sélections en se basant sur les éléments effectivement affichés sur cette page
-		const availableOnPage = pageItemIds;
+		// Reconstruire selectedIds
+		state.selectedIds.clear();
+		for (const id of newSelectedIds) {
+			state.selectedIds.add(id);
+		}
 
-		// Supprimer de l'état les items de cette page qui n'ont pas été sélectionnés
-		for (const id of availableOnPage.categories) {
-			if (!newSelectedIds.categories.includes(id)) {
-				state.selectedCategories.delete(id);
+		// Valider directement
+		await validateAndSaveForIgnoreType(
+			modalSubmit,
+			userId,
+			guildID,
+			channelType,
+			state.originalIds,
+			ul
+		);
+	} catch (e) {
+		console.error(e);
+	}
+}
+
+// State management pour pagination par type
+const paginationStates = new Map<
+	string,
+	{ currentPage: number; selectedIds: Set<string> }
+>();
+
+/**
+ * Handle modal modification for a specific page (ignore)
+ */
+async function handleIgnoreModalModify(
+	interaction: ButtonInteraction,
+	guild: NonNullable<ChatInputCommandInteraction["guild"]>,
+	userId: string,
+	guildID: string,
+	page: number,
+	ul: Translation,
+	channelType: ChannelType_,
+	state: {
+		currentPage: number;
+		paginatedItems: Record<number, string[]>;
+		selectedIds: Set<string>;
+	},
+	stateKey: string,
+	buttonMessage: Message<boolean>
+) {
+	if (!guild) return;
+
+	// Récupérer les items tracked de cette page
+	const pageTrackedIds = state.paginatedItems[page] ?? [];
+
+	// Le modal affiche les items tracked de cette page
+	const { modal, pageItemIds } = await createPaginatedChannelModalByType(
+		"ignore",
+		ul,
+		guild,
+		0, // Toujours page 0 car on passe déjà les items filtrés
+		channelType,
+		pageTrackedIds,
+		undefined,
+		true // Afficher les items de cette page uniquement
+	);
+
+	// Si la page est vide, retourner à la page précédente
+	if (pageItemIds.length === 0) {
+		await interaction.reply({
+			content: ul("common.noMore"),
+			flags: MessageFlags.Ephemeral,
+		});
+		return;
+	}
+
+	try {
+		await interaction.showModal(modal);
+
+		const modalSubmit = await interaction.awaitModalSubmit({
+			filter: (i) => i.user.id === userId,
+			time: 60_000,
+		});
+
+		// Defer immédiatement pour éviter l'expiration du token
+		await modalSubmit.deferUpdate();
+
+		const newSelection =
+			modalSubmit.fields.getSelectedChannels(`select_${channelType}`, false) ?? new Map();
+		const newSelectedIds = Array.from(newSelection.keys());
+
+		// Mettre à jour les items de cette page
+		state.paginatedItems[page] = newSelectedIds;
+
+		// Reconstruire selectedIds à partir de toutes les pages
+		state.selectedIds.clear();
+		for (const pageItems of Object.values(state.paginatedItems)) {
+			for (const id of pageItems) {
+				state.selectedIds.add(id);
 			}
 		}
-		for (const id of availableOnPage.channels) {
-			if (!newSelectedIds.channels.includes(id)) {
-				state.selectedChannels.delete(id);
-			}
-		}
-		for (const id of availableOnPage.threads) {
-			if (!newSelectedIds.threads.includes(id)) {
-				state.selectedThreads.delete(id);
-			}
-		}
-		for (const id of availableOnPage.forums) {
-			if (!newSelectedIds.forums.includes(id)) {
-				state.selectedForums.delete(id);
-			}
-		}
 
-		// Ajouter les nouveaux
-		for (const id of newSelectedIds.categories) {
-			state.selectedCategories.add(id);
-		}
-		for (const id of newSelectedIds.channels) {
-			state.selectedChannels.add(id);
-		}
-		for (const id of newSelectedIds.threads) {
-			state.selectedThreads.add(id);
-		}
-		for (const id of newSelectedIds.forums) {
-			state.selectedForums.add(id);
-		}
-
-		// Afficher les boutons de navigation
+		// Retour au message avec boutons
+		const pageItemsCount = state.paginatedItems[page]?.length ?? 0;
+		const hasMore = Object.keys(state.paginatedItems).length > page + 1;
 		const buttons = createPaginationButtons("ignore", page, hasMore, ul);
 		const s = ul("common.space");
-		const summary =
-			`${ul("common.page")} ${page + 1} - ${ul("common.selection")}${s}:\n` +
-			`📁 ${ul("common.category")}${s}: ${state.selectedCategories.size}\n` +
-			`💬 ${ul("common.channel")}${s}: ${state.selectedChannels.size}\n` +
-			`🧵 ${ul("common.thread")}${s}: ${state.selectedThreads.size}\n` +
-			`📋 ${ul("common.forum")}${s}: ${state.selectedForums.size}`;
+		const summary = `Page ${page + 1} - ${ul(`common.${channelType}`)}${s}: ${pageItemsCount} ${ul("common.elements")}`;
 
-		await modalSubmit.reply({
+		await modalSubmit.editReply({
 			components: buttons,
 			content: summary,
 		});
@@ -435,115 +560,105 @@ async function showPaginatedModal(
 }
 
 /**
- * Validate and save all selections
+ * Show paginated message for channel selection by type (ignore)
  */
-async function validateAndSave(
+async function showPaginatedMessageForIgnoreType(
 	interaction: ButtonInteraction,
+	guild: NonNullable<ChatInputCommandInteraction["guild"]>,
 	userId: string,
 	guildID: string,
-	originalItems: ReturnType<typeof getTrackedItems>,
+	page: number,
+	ul: Translation,
+	channelType: ChannelType_,
+	state: {
+		currentPage: number;
+		paginatedItems: Record<number, string[]>;
+		selectedIds: Set<string>;
+	},
+	stateKey: string,
+	buttonMessage: Message<boolean>
+) {
+	if (!guild) return;
+
+	state.currentPage = page;
+
+	// Afficher le nombre d'éléments ignorés sur cette page
+	const trackedOnThisPage = state.paginatedItems[page]?.length ?? 0;
+	const hasMore = Object.keys(state.paginatedItems).length > page + 1;
+
+	const buttons = createPaginationButtons("ignore", page, hasMore, ul);
+	const s = ul("common.space");
+	const summary = `Page ${page + 1} - ${ul(`common.${channelType}`)}${s}: ${trackedOnThisPage} ${ul("common.elements")}`;
+
+	await interaction.update({
+		components: buttons,
+		content: summary,
+	});
+}
+
+/**
+ * Validate and save selections by type (ignore)
+ */
+async function validateAndSaveForIgnoreType(
+	interaction: ButtonInteraction | ModalSubmitInteraction,
+	userId: string,
+	guildID: string,
+	channelType: ChannelType_,
+	trackedIds: string[],
 	ul: Translation
 ) {
-	const state = getPaginationState(userId, guildID, "ignore");
+	const stateKey = `${userId}_${guildID}_ignore_${channelType}`;
+	const state = paginationStates.get(stateKey);
+	if (!state) return;
 
-	// Convertir les Sets en arrays d'objets Channel
 	const guild = interaction.guild;
 	if (!guild) return;
 
-	const finalCategories = Array.from(state.selectedCategories).map((id) => id);
-	const finalCategoriesResolved = await import("../utils/index.js").then(
-		({ resolveChannelsByIds }) =>
-			resolveChannelsByIds<CategoryChannel>(guild, finalCategories, [
-				ChannelType.GuildCategory,
-			])
-	);
-	const finalChannels = Array.from(state.selectedChannels).map((id) => id);
-	const finalChannelsResolved = await import("../utils/index.js").then(
-		({ resolveChannelsByIds }) =>
-			resolveChannelsByIds<TextChannel>(guild, finalChannels, [ChannelType.GuildText])
-	);
-	const finalThreads = Array.from(state.selectedThreads).map((id) => id);
-	const finalThreadsResolved = await import("../utils/index.js").then(
-		({ resolveChannelsByIds }) =>
-			resolveChannelsByIds<AnyThreadChannel>(guild, finalThreads, [
-				ChannelType.PublicThread,
-				ChannelType.PrivateThread,
-			])
-	);
-	const finalForums = Array.from(state.selectedForums).map((id) => id);
-	const finalForumsResolved = await import("../utils/index.js").then(
-		({ resolveChannelsByIds }) =>
-			resolveChannelsByIds<ForumChannel>(guild, finalForums, [ChannelType.GuildForum])
-	);
-
+	const finalIds = Array.from(state.selectedIds);
 	const messages: string[] = [];
 
-	// Résoudre les IDs de catégories et channels en objets
-	const originalCategoriesResolved = await import("../utils/index.js").then(
+	// Mapper le type de channel au TypeName
+	let typeName: TypeName;
+	let channelTypeFilter: ChannelType[];
+
+	switch (channelType) {
+		case "channel":
+			typeName = TypeName.channel;
+			channelTypeFilter = [ChannelType.GuildText];
+			break;
+		case "thread":
+			typeName = TypeName.thread;
+			channelTypeFilter = [ChannelType.PublicThread, ChannelType.PrivateThread];
+			break;
+		case "category":
+			typeName = TypeName.category;
+			channelTypeFilter = [ChannelType.GuildCategory];
+			break;
+		case "forum":
+			typeName = TypeName.forum;
+			channelTypeFilter = [ChannelType.GuildForum];
+			break;
+	}
+
+	// Résoudre les IDs en objets Channel
+	const finalChannelsResolved = await import("../utils/index.js").then(
 		({ resolveChannelsByIds }) =>
-			resolveChannelsByIds<CategoryChannel>(guild, originalItems.categories, [
-				ChannelType.GuildCategory,
-			])
-	);
-	const originalChannelsResolved = await import("../utils/index.js").then(
-		({ resolveChannelsByIds }) =>
-			resolveChannelsByIds<TextChannel>(guild, originalItems.channels, [
-				ChannelType.GuildText,
-			])
+			resolveChannelsByIds<
+				CategoryChannel | TextChannel | AnyThreadChannel | ForumChannel
+			>(guild, finalIds, channelTypeFilter)
 	);
 
-	// Traiter les changements pour chaque type
-	processChannelTypeChanges(
-		originalCategoriesResolved,
-		finalCategoriesResolved,
-		TypeName.category,
-		guildID,
-		"ignore",
-		ul,
-		messages
+	const originalChannelsResolved = await import("../utils/index.js").then(
+		({ resolveChannelsByIds }) =>
+			resolveChannelsByIds<
+				CategoryChannel | TextChannel | AnyThreadChannel | ForumChannel
+			>(guild, trackedIds, channelTypeFilter)
 	);
 
 	processChannelTypeChanges(
 		originalChannelsResolved,
 		finalChannelsResolved,
-		TypeName.channel,
-		guildID,
-		"ignore",
-		ul,
-		messages
-	);
-
-	// Résoudre les IDs de threads en objets
-	const originalThreadsResolved = await import("../utils/index.js").then(
-		({ resolveChannelsByIds }) =>
-			resolveChannelsByIds<AnyThreadChannel>(guild, originalItems.threads, [
-				ChannelType.PublicThread,
-				ChannelType.PrivateThread,
-			])
-	);
-
-	processChannelTypeChanges(
-		originalThreadsResolved,
-		finalThreadsResolved,
-		TypeName.thread,
-		guildID,
-		"ignore",
-		ul,
-		messages
-	);
-
-	// Résoudre les IDs de forums en objets
-	const originalForumsResolved = await import("../utils/index.js").then(
-		({ resolveChannelsByIds }) =>
-			resolveChannelsByIds<ForumChannel>(guild, originalItems.forums, [
-				ChannelType.GuildForum,
-			])
-	);
-
-	processChannelTypeChanges(
-		originalForumsResolved,
-		finalForumsResolved,
-		TypeName.forum,
+		typeName,
 		guildID,
 		"ignore",
 		ul,
@@ -555,10 +670,27 @@ async function validateAndSave(
 			? ul("follow.thread.summary", { changes: `\n${messages.join("\n")}` })
 			: ul("follow.thread.noChanges");
 
-	await interaction.update({
-		components: [],
-		content: finalMessage,
-	});
+	// Handle both ButtonInteraction and ModalSubmitInteraction
+	if (interaction.isModalSubmit()) {
+		// For ModalSubmitInteraction, use reply
+		await interaction.reply({
+			components: [],
+			content: finalMessage,
+			flags: MessageFlags.Ephemeral,
+		});
+	} else if (interaction.deferred) {
+		// For deferred ButtonInteraction, use editReply
+		await interaction.editReply({
+			components: [],
+			content: finalMessage,
+		});
+	} else {
+		// For non-deferred ButtonInteraction, use update
+		await interaction.update({
+			components: [],
+			content: finalMessage,
+		});
+	}
 
-	clearPaginationState(userId, guildID, "ignore");
+	paginationStates.delete(stateKey);
 }
