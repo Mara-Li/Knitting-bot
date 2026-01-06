@@ -43,6 +43,7 @@ function convertToIds(data: IgnoreFollow): IgnoreFollow {
 		category: Array.isArray(data.category) ? data.category.map(toId).filter(Boolean) : [],
 		channel: Array.isArray(data.channel) ? data.channel.map(toId).filter(Boolean) : [],
 		forum: Array.isArray(data.forum) ? data.forum.map(toId).filter(Boolean) : [],
+		// biome-ignore lint/style/useNamingConvention: fail for TypeName.OnlyRoleIn
 		OnlyRoleIn: Array.isArray(data.OnlyRoleIn)
 			? data.OnlyRoleIn.map((roleIn: unknown) => {
 					const r = roleIn as Record<string, unknown>;
