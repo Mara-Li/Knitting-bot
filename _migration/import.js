@@ -1,24 +1,24 @@
 import fs from "node:fs";
+import path from "node:path";
 import Enmap from "enmap";
+import { fileURLToPath } from "node:url";
 
-const config = new Enmap({ name: "Configuration" });
-const ignore = new Enmap({ name: "Ignore" });
-const follow = new Enmap({ name: "FollowOnly" });
-const cache = new Enmap({ name: "BotMessageCache" });
+const dirname = path.dirname(fileURLToPath(import.meta.url));
 
-const maps = [
-	{ filename: "./_migration/files/export_config.json", map: config },
-	{ filename: "./_migration/files/export_ignore.json", map: ignore },
-	{ filename: "./_migration/files/export_follow.json", map: follow },
-	{ filename: "./_migration/files/export_cache.json", map: cache },
-];
+const databaseFolder = path.join(dirname, "../data");
 
-maps.forEach(({ map, filename }) => {
-	fs.readFile(filename, "utf8", (err, data) => {
-		if (err) {
-			console.error(`Error reading file ${filename}:`, err);
-			return;
-		}
-		map.import(data, true, true);
-	});
+const database = new Enmap({
+	name: "Database",
+	dataDir: databaseFolder,
+});
+
+const exportPath = path.join(dirname, "files", "export_database.json");
+
+fs.readFile(exportPath, "utf8", (err, data) => {
+	if (err) {
+		console.error("Error reading export file:", err);
+		return;
+	}
+	database.import(data);
+	console.log(`Database imported from ${exportPath}`);
 });
