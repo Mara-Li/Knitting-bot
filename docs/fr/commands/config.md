@@ -28,16 +28,16 @@ Affiche les informations générale sur la configuration du bot, ainsi qu'un lie
 
 ## `/config pin`
 
-Normalement, le bot envoie un message ( `_ _` par défaut) dans le fil de discussion, et le modifie pour ajouter les utilisateurs/ rôles. Ensuite, lorsque le bot met à jour le fil pour ajouter les utilisateurs, il modifie ce message.
+Normalement, le bot envoie un message (`_ _` par défaut) dans le fil de discussion, et le modifie pour ajouter les utilisateurs/rôles. Ensuite, lorsque le bot met à jour le fil pour ajouter les utilisateurs, il modifie ce message.
 
 Ce message est automatiquement sauvegardé dans la base de données via ses identifiants (`thread.id` puis `message.id`).
 
 Cependant, lors de rares cas, le message peut ne pas être retrouvé alors qu'il existe.
 
-Ce paramètre permet d'épingler automatiquement le *placeholder* afin de retrouver plus facilement le message dans le cas où il ne se trouve pas dans la base de données.
+Ce paramètre permet d'épingler automatiquement le *placeholder* pour retrouver plus facilement le message lorsqu'il ne se trouve pas dans la base de données.
 
 > [!warning] 
-> Si le message n'est pas retrouvé ni dans la base ni dans les messages épinglés, le bot tentera de le retrouver dans les messages des fils avec une certaines limites au nombre de message. Si le message n'est pas retrouvé, il sera reconstruit.
+> Si le message n'est pas retrouvé ni dans la base ni dans les messages épinglés, le bot tentera de le retrouver dans les messages des fils avec une certaine limite au nombre de messages. Si le message n'est pas retrouvé, il sera reconstruit.
 
 ## `/config placeholder`
 Par défaut, le bot envoie un message avec le contenu `_ _` dans le fil de discussion pour le modifier plus tard.

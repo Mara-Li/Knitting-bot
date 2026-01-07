@@ -21,25 +21,14 @@ if (!fs.existsSync(path.dirname(exportPath))) {
 }
 
 function exportDatabase() {
-	fs.writeFile(exportPath, database.export(), (err) => {
-		if (err) {
-			console.error("Error exporting database:", err);
-			return;
-		}
-	});
-
+	fs.writeFileSync(exportPath, database.export(), "utf-8");
 	console.log(`Database exported to ${exportPath}`);
 }
 
 function importDatabase() {
-	fs.readFile(exportPath, "utf8", (err, data) => {
-		if (err) {
-			console.error("Error reading export file:", err);
-			return;
-		}
-		database.import(data);
-		console.log(`Database imported from ${exportPath}`);
-	});
+	const data = fs.readFileSync(exportPath, "utf-8");
+	database.import(data);
+	console.log("Database imported successfully.");
 }
 
 function verifyEnmapVersion() {
