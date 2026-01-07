@@ -152,7 +152,6 @@ export default {
 			} else {
 				serverDataDb.delete(guildID, type);
 			}
-			const result = serverDataDb.get(guildID);
 			await interaction.editReply(
 				`Cleared ${type} ${itemType ? `for ${itemType}` : ""}.`
 			);
