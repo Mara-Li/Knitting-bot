@@ -235,24 +235,16 @@ export function getLanguage(guildID: string): string {
  */
 export function getAllFollowedChannels(guildId: string): string[] {
 	ensureGuild(guildId);
-	const forums = serverDataDb.get(guildId, `follow.${TypeName.forum}`) as
-		| string[]
-		| undefined;
-	const channels = serverDataDb.get(guildId, `follow.${TypeName.channel}`) as
-		| string[]
-		| undefined;
-	const categories = serverDataDb.get(guildId, `follow.${TypeName.category}`) as
-		| string[]
-		| undefined;
-	const threads = serverDataDb.get(guildId, `follow.${TypeName.thread}`) as
-		| string[]
-		| undefined;
+	const follow = serverDataDb.get(guildId, "follow");
+	if (!follow) return [];
+	
 	return [
-		...(forums ?? []),
-		...(channels ?? []),
-		...(categories ?? []),
-		...(threads ?? []),
-	];
+		...(follow[TypeName.forum] ?? []),
+		...(follow[TypeName.channel] ?? []),
+		...(follow[TypeName.category] ?? []),
+		...(follow[TypeName.thread] ?? []),
+	]
+
 }
 
 /**
