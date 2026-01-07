@@ -8,7 +8,7 @@ import { createRoleSelectModal, processRoleTypeChanges } from "../utils/modalHan
 import { channelSelectorsForType } from "./channelPagination";
 import { mapToStr } from "./index";
 import { roleInSelectorsForType } from "./roleInPagination";
-import { interactionRoleInChannel } from "./utils";
+import { extractAndValidateRoleOption, interactionRoleInChannel } from "./utils";
 import "../discord_ext.js";
 import "uniformize";
 
@@ -129,15 +129,14 @@ export default {
 					});
 					return;
 				}
-				const roleOpt = options.get(t("common.role").toLowerCase());
-				if (!roleOpt || !roleOpt.role) {
+				const roleId = await extractAndValidateRoleOption(options, ul);
+				if (!roleId) {
 					await interaction.reply({
-						content: ul("ignore.role.error", { role: roleOpt?.name }),
+						content: ul("ignore.role.error", { role: "Unknown" }),
 						flags: Djs.MessageFlags.Ephemeral,
 					});
 					return;
 				}
-				const roleId = roleOpt.role.id;
 				const channelType = options.getString("type") as ChannelType_;
 				if (!channelType) {
 					// Fallback vers l'ancienne interface multi-types

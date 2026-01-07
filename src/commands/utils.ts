@@ -5,6 +5,23 @@ import { getConfig, getRoleIn, setRoleIn } from "../maps";
 import { createPaginatedChannelModal } from "../utils/modalHandler";
 
 /**
+ * Extract and validate role option from interaction
+ * @param options The command options
+ * @param ul Translation function
+ * @returns The role ID or null if invalid
+ */
+export async function extractAndValidateRoleOption(
+	options: Djs.CommandInteractionOptionResolver,
+	ul: ReturnType<typeof getUl>
+): Promise<string | null> {
+	const roleOpt = options.get(t("common.role").toLowerCase());
+	if (!roleOpt || !roleOpt.role) {
+		return null;
+	}
+	return roleOpt.role.id;
+}
+
+/**
  * Follow or ignore roles in specific channels using a modal
  * @param interaction {@link ChatInputCommandInteraction} The interaction that triggered the command.
  * @param on {"follow" | "ignore"} The mode to use
