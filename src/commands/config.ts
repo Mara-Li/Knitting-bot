@@ -283,7 +283,7 @@ async function handleLocaleConfig(
 	if (!interaction.guild) return;
 
 	const locale = options.getString("locale", true);
-	let lang: Djs.Locale;
+	let lang: Djs.Locale = interaction.locale;
 
 	if (locale === "en") {
 		setConfig("language", interaction.guild.id, Djs.Locale.EnglishUS);
@@ -291,7 +291,7 @@ async function handleLocaleConfig(
 	} else if (locale === "fr") {
 		setConfig("language", interaction.guild.id, Djs.Locale.French);
 		lang = Djs.Locale.French;
-	} else lang = interaction.locale;
+	}
 
 	const ul = ln(lang);
 	await interaction.reply({
