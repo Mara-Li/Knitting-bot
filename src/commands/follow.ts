@@ -201,7 +201,7 @@ async function displayFollowed(
 			});
 		if (getConfig(CommandName.followOnlyRole, guildID)) {
 			embed.addFields({
-				name: toTitle(ul("common.role")),
+				name: ul("common.role").toTitle(),
 				value: followedRolesNames || ul("common.none"),
 			});
 		}

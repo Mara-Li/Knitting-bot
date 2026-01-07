@@ -23,7 +23,7 @@ export default (client: Client): void => {
 		)
 			return;
 		const guild = oldChannel.guild.id;
-		await updateCache(oldChannel.guild);
+		
 		const ul = getTranslation(guild, {
 			locale: newChannel.guild.preferredLocale,
 		});

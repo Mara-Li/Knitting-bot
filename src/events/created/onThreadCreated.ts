@@ -23,7 +23,6 @@ export default (client: Client): void => {
 		await discordLogs(guild, client, ul("logs.thread.created", { thread: thread.name }));
 		/** automatically add the bot to the thread */
 		await thread.join();
-		await updateCache(thread.guild);
 		if (!getConfig(CommandName.followOnlyChannel, guild)) {
 			logInDev("Thread is not follow only", !checkThread(thread, "ignore"));
 			if (!checkThread(thread, "ignore")) await addRoleAndUserToThread(thread);
