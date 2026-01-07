@@ -93,7 +93,6 @@ export async function channelSelectorsForType({
 				onShowPage: async (buttonInteraction, page) => {
 					await showPaginatedMessage(
 						buttonInteraction,
-						guild,
 						page,
 						ul,
 						channelType,
@@ -234,7 +233,6 @@ async function handleModalModify(
  */
 async function showPaginatedMessage(
 	interaction: Djs.ButtonInteraction,
-	_guild: Djs.Guild,
 	page: number,
 	ul: Translation,
 	channelType: TChannel,
