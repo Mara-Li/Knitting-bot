@@ -16,7 +16,6 @@ export type PaginatedHandlers = {
 	onEnd?: (buttonMessage: Djs.Message) => Promise<void> | void;
 };
 
-// Stockage partagé des states de pagination (clé arbitraire fournie par l'appelant)
 const globalPaginationStates = new Map<string, PaginatedIdsState>();
 const messageToStateKey = new Map<string, string>();
 
@@ -196,10 +195,9 @@ export function createPaginationButtons(
 	page: number,
 	hasMore: boolean,
 	ul: (key: string) => string
-): import("discord.js").ActionRowBuilder<import("discord.js").ButtonBuilder>[] {
-	const buttons: import("discord.js").ButtonBuilder[] = [];
+) {
+	const buttons = [];
 
-	// Bouton modifier (ouvre le modal pour cette page)
 	buttons.push(
 		new Djs.ButtonBuilder()
 			.setCustomId(`${mode}_page_modify_${page}`)
@@ -208,7 +206,6 @@ export function createPaginationButtons(
 			.setStyle(Djs.ButtonStyle.Primary)
 	);
 
-	// Bouton page précédente (disabled si page 0)
 	buttons.push(
 		new Djs.ButtonBuilder()
 			.setCustomId(`${mode}_page_prev_${page}`)
@@ -218,7 +215,6 @@ export function createPaginationButtons(
 			.setDisabled(page === 0)
 	);
 
-	// Bouton page suivante (disabled si pas de suite)
 	buttons.push(
 		new Djs.ButtonBuilder()
 			.setCustomId(`${mode}_page_next_${page}`)
@@ -228,7 +224,6 @@ export function createPaginationButtons(
 			.setDisabled(!hasMore)
 	);
 
-	// Bouton valider (toujours actif)
 	buttons.push(
 		new Djs.ButtonBuilder()
 			.setCustomId(`${mode}_page_validate`)
@@ -237,7 +232,6 @@ export function createPaginationButtons(
 			.setStyle(Djs.ButtonStyle.Success)
 	);
 
-	// Bouton annuler
 	buttons.push(
 		new Djs.ButtonBuilder()
 			.setCustomId(`${mode}_page_cancel`)

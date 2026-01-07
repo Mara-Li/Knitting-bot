@@ -187,7 +187,7 @@ async function handleLogChannelConfig(
 
 	const channel = options.getChannel(t("common.channel").toLowerCase());
 	if (channel) {
-		if (channel.type !== Djs.ChannelType.GuildText) {
+		if (channel.type !== Djs.ChannelType.GuildText ) {
 			await interaction.reply({
 				content: ul("configuration.menu.log.channel.error"),
 			});
