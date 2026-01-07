@@ -308,6 +308,10 @@ async function setupMessageCollector(
 				await interaction.editReply({ components: [] });
 			});
 	} catch (error) {
+		if (error instanceof Djs.DiscordAPIError && error.code === 10008) {
+			// Message was deleted, no need to log error
+			return;
+		}
 		logInDev(error);
 		await interaction.editReply({ components: [] });
 	}
