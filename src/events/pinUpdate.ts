@@ -10,7 +10,11 @@ export default (client: Client): void => {
 				return msg.system && msg.createdTimestamp >= timeNb - 5000;
 			});
 			if (systemMessage && systemMessage.author.id === client.user?.id)
-				await systemMessage.delete();
+				try {
+					await systemMessage.delete();
+				} catch (err) {
+					//ignore
+				}
 		}
 	);
 };
