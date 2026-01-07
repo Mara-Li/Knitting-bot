@@ -23,6 +23,8 @@ export enum CommandName {
 	followOnlyChannel = "followOnlyChannel",
 	followOnlyRoleIn = "followOnlyRoleIn",
 	log = "log",
+	pin = "pin",
+	messageToSend = "messageToSend",
 }
 
 export enum TypeName {

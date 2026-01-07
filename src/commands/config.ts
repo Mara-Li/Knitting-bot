@@ -155,7 +155,7 @@ async function handleMessageConfig(
 	);
 
 	if (!messageToSend) {
-		setConfig("messageToSend", interaction.guild.id, "_ _");
+		setConfig(CommandName.messageToSend, interaction.guild.id, "_ _");
 		await interaction.reply({
 			content: ul("configuration.message.response.default"),
 		});
@@ -167,7 +167,7 @@ async function handleMessageConfig(
 		});
 		return;
 	}
-	setConfig("messageToSend", interaction.guild.id, messageToSend);
+	setConfig(CommandName.messageToSend, interaction.guild.id, messageToSend);
 	await interaction.reply({
 		content: ul("configuration.message.response.custom", {
 			message: messageToSend,
@@ -224,7 +224,7 @@ async function handlePinConfig(
 	if (!interaction.guild) return;
 
 	const toggle = options.getBoolean(t("configuration.pin.option.name"));
-	setConfig("pin", interaction.guild.id, toggle ?? false);
+	setConfig(CommandName.pin, interaction.guild.id, toggle ?? false);
 
 	await interaction.reply({
 		content: toggle
