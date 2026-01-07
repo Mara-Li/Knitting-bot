@@ -160,13 +160,7 @@ export default {
 					});
 					return;
 				}
-				const channelType = options.getString("type") as TChannel;
-				if (!channelType) {
-					// Fallback vers l'ancienne interface multi-types
-					await interactionRoleInChannel(interaction, "ignore");
-					return;
-				}
-
+				const channelType = opt as TChannel;
 				await roleInSelectorsForType(interaction, ul, channelType, "ignore", roleId);
 				break;
 			}
