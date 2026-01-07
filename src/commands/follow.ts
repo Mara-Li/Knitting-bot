@@ -287,7 +287,7 @@ async function followThisRole(
 		console.warn(e);
 		try {
 			await interaction.reply({
-				content: "error.failedReply",
+				content: ul("error.failedReply"),
 				flags: Djs.MessageFlags.Ephemeral,
 			});
 		} catch {
