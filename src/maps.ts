@@ -201,7 +201,6 @@ export function getMaps(
 	typeName: TypeName,
 	guildID: string
 ): string[] {
-	console.log(`[getMaps] Called with maps="${maps}", typeName="${typeName}"`);
 	ensureGuild(guildID);
 	const config = serverDataDb.get(guildID, maps) as ServerData["follow"];
 
