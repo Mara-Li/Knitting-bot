@@ -2,7 +2,7 @@ import * as Djs from "discord.js";
 import type { TChannel } from "src/interface";
 import { CommandName, type RoleIn, TIMEOUT, type Translation } from "../interface";
 import { getConfig, getRoleIn, setRoleIn } from "../maps";
-import { resolveChannelsByIds } from "../utils";
+import { discordLogs, resolveChannelsByIds } from "../utils";
 import { getPaginationButtons } from "./channel";
 import {
 	createPaginationButtons,
@@ -189,6 +189,11 @@ export async function roleInSelectorsForType(
 		);
 	} catch (e) {
 		console.error(`[${mode} roleIn ${channelType}] Error:`, e);
+		await discordLogs(
+			guildID,
+			interaction.client,
+			`[${mode} roleIn ${channelType}] Error: ${e}`
+		);
 	}
 }
 
