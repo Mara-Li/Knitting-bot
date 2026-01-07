@@ -205,7 +205,7 @@ async function displayIgnored(
 				value: ignoredCategoriesNames || ul("common.none"),
 			})
 			.addFields({
-				name: ul("common.channel"),
+				name: ul("common.thread"),
 				value: ignoredThreadsNames || ul("common.none"),
 			})
 			.addFields({
