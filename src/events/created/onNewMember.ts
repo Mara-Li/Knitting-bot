@@ -15,7 +15,7 @@ import { checkMemberRole, checkThread } from "../../utils/data_check";
 export default (client: Client): void => {
 	client.on("guildMemberAdd", async (member) => {
 		const guildID = member.guild.id;
-		if (getConfig(CommandName.newMember, guildID) === false) return;
+		if (!getConfig(CommandName.newMember, guildID)) return;
 		if (member.user.bot) return;
 		logInDev(`${member.user.username} joined the server`);
 		const ul = getTranslation(guildID, { locale: member.guild.preferredLocale });

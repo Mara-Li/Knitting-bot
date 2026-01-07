@@ -67,9 +67,6 @@ export default {
 
 /**
  * Update all thread, unless they are ignored
- * @param interaction {@link CommandInteraction} The interaction, contains the guild to update + reply to it
- * @param ul
- * @param includeArchived
  */
 async function updateAllThreads(
 	interaction: Djs.CommandInteraction,
@@ -111,9 +108,7 @@ async function updateAllThreads(
 
 /**
  * Update the thread with adding the role and the user needed
- * @param interaction {@link CommandInteraction} The interaction, contains the thread to update
  * - If not thread is provided, the thread is the current channel
- * @param ul
  */
 async function updateThread(
 	interaction: Djs.ChatInputCommandInteraction,
@@ -158,8 +153,6 @@ async function updateThread(
 
 /**
  * Display the help message
- * @param interaction {@link CommandInteraction} The trigger, to reply to it
- * @param ul
  */
 async function displayHelp(interaction: Djs.CommandInteraction, ul: Translation) {
 	const constructDesc: string = ((((ul("commands.help.desc") as string) +

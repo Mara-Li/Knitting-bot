@@ -166,14 +166,9 @@ export function getConfig(
 		return value as string | boolean;
 	}
 
+	const defaultConfiguration = getDefaultServerData();
 	// Otherwise, set and return the default value based on command type
-	const defaultValue = ![
-		CommandName.manualMode,
-		CommandName.followOnlyChannel,
-		CommandName.followOnlyRole,
-		CommandName.followOnlyRoleIn,
-		CommandName.log,
-	].includes(name);
+	const defaultValue = defaultConfiguration.configuration[name];
 
 	setConfig(name, guildID, defaultValue);
 	return defaultValue;

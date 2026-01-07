@@ -17,7 +17,7 @@ export default (client: Client): void => {
 		//return if the thread is not a public thread
 		const guild = thread.guild.id;
 		if (thread.type !== ChannelType.PublicThread) return;
-		if (getConfig(CommandName.thread, guild) === false) return;
+		if (!getConfig(CommandName.thread, guild)) return;
 		logInDev(`Thread ${thread.name} created!`);
 		const ul = getTranslation(thread.guild.id, { locale: thread.guild.preferredLocale });
 		await discordLogs(guild, client, ul("logs.thread.created", { thread: thread.name }));

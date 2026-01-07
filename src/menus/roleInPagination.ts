@@ -1,19 +1,15 @@
 import * as Djs from "discord.js";
-import type { ChannelType_ } from "src/interface";
-import {
-	CommandName,
-	type RoleIn,
-	TIMEOUT,
-	type Translation,
-	TypeName,
-} from "../interface";
+import type { TChannel } from "src/interface";
+import { CommandName, type RoleIn, TIMEOUT, type Translation } from "../interface";
 import { getConfig, getRoleIn, setRoleIn } from "../maps";
 import { resolveChannelsByIds } from "../utils";
-import type { CommandMode } from "../utils/itemsManager";
+import { getPaginationButtons } from "./channelPagination";
+import type { CommandMode } from "./itemsManager";
 import {
 	createPaginatedChannelModalByType,
 	createPaginationButtons,
-} from "../utils/modalHandler";
+} from "./modalHandler";
+import { getChannelType, resolveIds } from "./utils";
 
 type PaginationState = {
 	currentPage: number;
@@ -31,7 +27,7 @@ const roleInPaginationStates = new Map<string, PaginationState>();
 export async function roleInSelectorsForType(
 	interaction: Djs.ChatInputCommandInteraction,
 	ul: Translation,
-	channelType: ChannelType_,
+	channelType: TChannel,
 	mode: CommandMode,
 	roleId: string
 ) {
@@ -71,28 +67,7 @@ export async function roleInSelectorsForType(
 	const existingRoleIn = allRoleIn.find((r) => r.roleId === roleId);
 	const allChannelIds = existingRoleIn?.channelIds ?? [];
 
-	// Mapper le type de channel au TypeName
-	let typeName: TypeName;
-	let channelTypeFilter: Djs.ChannelType[];
-
-	switch (channelType) {
-		case "channel":
-			typeName = TypeName.channel;
-			channelTypeFilter = [Djs.ChannelType.GuildText];
-			break;
-		case "thread":
-			typeName = TypeName.thread;
-			channelTypeFilter = [Djs.ChannelType.PublicThread, Djs.ChannelType.PrivateThread];
-			break;
-		case "category":
-			typeName = TypeName.category;
-			channelTypeFilter = [Djs.ChannelType.GuildCategory];
-			break;
-		case "forum":
-			typeName = TypeName.forum;
-			channelTypeFilter = [Djs.ChannelType.GuildForum];
-			break;
-	}
+	const { channelTypeFilter } = getChannelType(channelType);
 
 	// Résoudre tous les channels pour filtrer par type
 	const allChannels = await resolveChannelsByIds<
@@ -277,7 +252,7 @@ async function handleRoleInModalModify(
 	roleId: string,
 	page: number,
 	ul: Translation,
-	channelType: ChannelType_,
+	channelType: TChannel,
 	state: PaginationState,
 	mode: CommandMode
 ) {
@@ -317,22 +292,14 @@ async function handleRoleInModalModify(
 			throw e;
 		}
 
-		const newSelection =
-			modalSubmit.fields.getSelectedChannels(`select_${channelType}`, false) ?? new Map();
-		const newSelectedIds = Array.from(newSelection.keys());
-
-		state.paginatedItems[page] = newSelectedIds;
-
-		state.selectedIds.clear();
-		for (const pageItems of Object.values(state.paginatedItems)) {
-			for (const id of pageItems) {
-				state.selectedIds.add(id);
-			}
-		}
-
-		const pageItemsCount = state.paginatedItems[page]?.length ?? 0;
-		const hasMore = Object.keys(state.paginatedItems).length > page + 1;
-		const buttons = createPaginationButtons(mode, page, hasMore, ul);
+		const { pageItemsCount, buttons } = getPaginationButtons(
+			modalSubmit,
+			page,
+			ul,
+			channelType,
+			state,
+			mode
+		);
 		const roleLabel = Djs.roleMention(roleId);
 		const summary = `Page ${page + 1} - ${ul("common.role")}: ${roleLabel} - ${ul(`common.${channelType}`)} : ${pageItemsCount} ${ul("common.elements")}`;
 
@@ -354,7 +321,7 @@ async function showRoleInPaginatedMessage(
 	roleId: string,
 	page: number,
 	ul: Translation,
-	channelType: ChannelType_,
+	channelType: TChannel,
 	state: PaginationState,
 	mode: CommandMode
 ) {
@@ -383,7 +350,7 @@ async function validateRoleInAndSave(
 	userId: string,
 	guildID: string,
 	roleId: string,
-	channelType: ChannelType_,
+	channelType: TChannel,
 	trackedIds: string[],
 	ul: Translation,
 	mode: CommandMode
@@ -418,37 +385,8 @@ async function validateRoleInAndSave(
 
 	console.log(`[${mode} roleIn ${channelType}] finalIds:`, state.selectedIds);
 
-	// Mapper le type de channel au TypeName
-	let typeName: TypeName;
-	let channelTypeFilter: Djs.ChannelType[];
-
-	switch (channelType) {
-		case "channel":
-			typeName = TypeName.channel;
-			channelTypeFilter = [Djs.ChannelType.GuildText];
-			break;
-		case "thread":
-			typeName = TypeName.thread;
-			channelTypeFilter = [Djs.ChannelType.PublicThread, Djs.ChannelType.PrivateThread];
-			break;
-		case "category":
-			typeName = TypeName.category;
-			channelTypeFilter = [Djs.ChannelType.GuildCategory];
-			break;
-		case "forum":
-			typeName = TypeName.forum;
-			channelTypeFilter = [Djs.ChannelType.GuildForum];
-			break;
-	}
-
-	// Résoudre les IDs en objets Channel
-	const finalChannelsResolved = await resolveChannelsByIds<
-		Djs.CategoryChannel | Djs.TextChannel | Djs.AnyThreadChannel | Djs.ForumChannel
-	>(guild, finalIds, channelTypeFilter);
-
-	const originalChannelsResolved = await resolveChannelsByIds<
-		Djs.CategoryChannel | Djs.TextChannel | Djs.AnyThreadChannel | Djs.ForumChannel
-	>(guild, trackedIds, channelTypeFilter);
+	const { finalChannelsResolved, originalChannelsResolved, channelTypeFilter } =
+		await resolveIds(channelType, guild, trackedIds, finalIds);
 
 	const mentionFromChannel = (
 		channel:

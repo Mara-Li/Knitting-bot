@@ -1,18 +1,18 @@
+import type { CommandInteractionOptionResolver } from "discord.js";
 import * as Djs from "discord.js";
 import { getUl, t } from "../i18n";
-import { CommandName, type RoleIn, TIMEOUT } from "../interface";
+import { CommandName, type RoleIn, type TChannel, TIMEOUT, TypeName } from "../interface";
 import { getConfig, getRoleIn, setRoleIn } from "../maps";
-import { createPaginatedChannelModal } from "../utils/modalHandler";
+import { resolveChannelsByIds } from "../utils";
+import { createPaginatedChannelModal } from "./modalHandler";
 
 /**
  * Extract and validate role option from interaction
  * @param options The command options
- * @param ul Translation function
  * @returns The role ID or null if invalid
  */
 export async function extractAndValidateRoleOption(
-	options: Djs.CommandInteractionOptionResolver,
-	ul: ReturnType<typeof getUl>
+	options: CommandInteractionOptionResolver
 ): Promise<string | null> {
 	const roleOpt = options.get(t("common.role").toLowerCase());
 	if (!roleOpt || !roleOpt.role) {
@@ -23,7 +23,6 @@ export async function extractAndValidateRoleOption(
 
 /**
  * Follow or ignore roles in specific channels using a modal
- * @param interaction {@link ChatInputCommandInteraction} The interaction that triggered the command.
  * @param on {"follow" | "ignore"} The mode to use
  */
 type RoleInMode = "follow" | "ignore";
@@ -511,4 +510,49 @@ export async function interactionRoleInChannel(
 			.editReply({ components: [], content: ul("common.timeOut") })
 			.catch(() => undefined);
 	});
+}
+
+export async function resolveIds(
+	channelType: TChannel,
+	guild: Djs.Guild,
+	trackedIds: string[],
+	finalIds: string[]
+) {
+	const { channelTypeFilter, typeName } = getChannelType(channelType);
+
+	// Résoudre les IDs en objets Channel
+	const finalChannelsResolved = await resolveChannelsByIds<
+		Djs.CategoryChannel | Djs.TextChannel | Djs.AnyThreadChannel | Djs.ForumChannel
+	>(guild, finalIds, channelTypeFilter);
+
+	const originalChannelsResolved = await resolveChannelsByIds<
+		Djs.CategoryChannel | Djs.TextChannel | Djs.AnyThreadChannel | Djs.ForumChannel
+	>(guild, trackedIds, channelTypeFilter);
+
+	return { channelTypeFilter, finalChannelsResolved, originalChannelsResolved, typeName };
+}
+
+export function getChannelType(channelType: TChannel) {
+	let typeName: TypeName;
+	let channelTypeFilter: Djs.ChannelType[];
+
+	switch (channelType) {
+		case "channel":
+			typeName = TypeName.channel;
+			channelTypeFilter = [Djs.ChannelType.GuildText];
+			break;
+		case "thread":
+			typeName = TypeName.thread;
+			channelTypeFilter = [Djs.ChannelType.PublicThread, Djs.ChannelType.PrivateThread];
+			break;
+		case "category":
+			typeName = TypeName.category;
+			channelTypeFilter = [Djs.ChannelType.GuildCategory];
+			break;
+		case "forum":
+			typeName = TypeName.forum;
+			channelTypeFilter = [Djs.ChannelType.GuildForum];
+			break;
+	}
+	return { channelTypeFilter, typeName };
 }

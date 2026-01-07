@@ -1,14 +1,19 @@
+/** biome-ignore-all lint/style/useNamingConvention: Discord API doesn't respect specs */
 import * as Djs from "discord.js";
-import type { ChannelType_ } from "src/interface";
+import type { TChannel } from "src/interface";
 import { cmdLn, getUl, t } from "../i18n";
 import { CommandName, TIMEOUT, type Translation } from "../interface";
 import { getConfig, getRole } from "../maps";
+import {
+	channelSelectorsForType,
+	createRoleSelectModal,
+	extractAndValidateRoleOption,
+	interactionRoleInChannel,
+	processRoleTypeChanges,
+	roleInSelectorsForType,
+} from "../menus";
 import { getCommandId, toTitle } from "../utils";
-import { createRoleSelectModal, processRoleTypeChanges } from "../utils/modalHandler";
-import { channelSelectorsForType } from "./channelPagination";
 import { mapToStr } from "./index";
-import { roleInSelectorsForType } from "./roleInPagination";
-import { extractAndValidateRoleOption, interactionRoleInChannel } from "./utils";
 import "../discord_ext.js";
 import "uniformize";
 
@@ -104,7 +109,7 @@ export default {
 
 		switch (commands) {
 			case t("common.channel").toLowerCase(): {
-				const channelType = options.getString("type") as ChannelType_;
+				const channelType = options.getString("type") as TChannel;
 				console.log(`[follow] Received command with type: ${channelType}`);
 				await channelSelectorsForType(interaction, ul, channelType, "follow");
 				break;
@@ -124,7 +129,7 @@ export default {
 				await displayFollowed(interaction, ul);
 				break;
 			case t("common.roleIn"): {
-				const roleId = await extractAndValidateRoleOption(options, ul);
+				const roleId = await extractAndValidateRoleOption(options);
 				if (!roleId) {
 					await interaction.reply({
 						content: ul("ignore.role.error", { role: "Unknown" }),
@@ -132,7 +137,7 @@ export default {
 					});
 					return;
 				}
-				const channelType = options.getString("type") as ChannelType_;
+				const channelType = options.getString("type") as TChannel;
 				if (!channelType) {
 					// Fallback vers l'ancienne interface multi-types
 					await interactionRoleInChannel(interaction, "follow");
@@ -157,8 +162,6 @@ export default {
  * - Followed categories if the CommandName.followOnlyChannel is true
  * - Followed roles if the CommandName.followOnlyRole is true
  * - Followed roles in chan
- * @param interaction {@link CommandInteraction} The interaction to reply to.
- * @param ul
  */
 async function displayFollowed(
 	interaction: Djs.ChatInputCommandInteraction,

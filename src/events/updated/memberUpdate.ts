@@ -22,7 +22,7 @@ export default (client: Client): void => {
 			const updatedRoles = newRoles.filter((role) => !oldRoles.has(role.id));
 			const guildID = newMember.guild.id;
 			await updateCache(newMember.guild);
-			if (getConfig(CommandName.member, guildID) === false) return;
+			if (!getConfig(CommandName.member, guildID)) return;
 			const ul = getTranslation(guildID, { locale: newMember.guild.preferredLocale });
 			if (updatedRoles.size === 0) {
 				await discordLogs(

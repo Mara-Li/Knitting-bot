@@ -278,7 +278,7 @@ async function handleLocaleConfig(
 	const ul = ln(finalLang as Djs.Locale);
 	await interaction.reply({
 		content: `${ul("configuration.language.validate", {
-			lang: (typeof finalLang === "string" ? finalLang : locale).toUpperCase(),
+			lang: finalLang.toUpperCase(),
 		})}`,
 	});
 }
@@ -315,7 +315,6 @@ async function setupMessageCollector(
 
 /**
  * Display Mode menu as an embed
- * @returns {@link EmbedBuilder}
  */
 function displayModeMenu(guildID: string, ul: Translation): Djs.EmbedBuilder {
 	return new Djs.EmbedBuilder()

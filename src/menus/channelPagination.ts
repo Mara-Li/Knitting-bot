@@ -1,15 +1,15 @@
 import * as Djs from "discord.js";
-import type { ChannelType_ } from "src/interface";
-import { TIMEOUT, type Translation, TypeName } from "../interface";
+import type { TChannel } from "src/interface";
+import { TIMEOUT, type Translation } from "../interface";
 import { getMaps } from "../maps";
-import { resolveChannelsByIds } from "../utils";
-import type { CommandMode } from "../utils/itemsManager";
-import { getTrackedItems } from "../utils/itemsManager";
+import type { CommandMode } from "./itemsManager";
+import { getTrackedItems } from "./itemsManager";
 import {
 	createPaginatedChannelModalByType,
 	createPaginationButtons,
 	processChannelTypeChanges,
-} from "../utils/modalHandler";
+} from "./modalHandler";
+import { resolveIds } from "./utils";
 
 type PaginationState = {
 	currentPage: number;
@@ -27,7 +27,7 @@ const paginationStates = new Map<string, PaginationState>();
 export async function channelSelectorsForType(
 	interaction: Djs.ChatInputCommandInteraction,
 	ul: Translation,
-	channelType: ChannelType_,
+	channelType: TChannel,
 	mode: CommandMode
 ) {
 	if (!interaction.guild) return;
@@ -238,7 +238,7 @@ async function handleModalModify(
 	userId: string,
 	page: number,
 	ul: Translation,
-	channelType: ChannelType_,
+	channelType: TChannel,
 	state: PaginationState,
 	mode: CommandMode
 ) {
@@ -279,25 +279,14 @@ async function handleModalModify(
 			throw e;
 		}
 
-		const newSelection =
-			modalSubmit.fields.getSelectedChannels(`select_${channelType}`, false) ?? new Map();
-		const newSelectedIds = Array.from(newSelection.keys());
-
-		// Mettre à jour les items de cette page
-		state.paginatedItems[page] = newSelectedIds;
-
-		// Reconstruire selectedIds à partir de toutes les pages
-		state.selectedIds.clear();
-		for (const pageItems of Object.values(state.paginatedItems)) {
-			for (const id of pageItems) {
-				state.selectedIds.add(id);
-			}
-		}
-
-		// Retour au message avec boutons
-		const pageItemsCount = state.paginatedItems[page]?.length ?? 0;
-		const hasMore = Object.keys(state.paginatedItems).length > page + 1;
-		const buttons = createPaginationButtons(mode, page, hasMore, ul);
+		const { buttons, pageItemsCount } = getPaginationButtons(
+			modalSubmit,
+			page,
+			ul,
+			channelType,
+			state,
+			mode
+		);
 		const summary = `Page ${page + 1} - ${ul(`common.${channelType}`)} : ${pageItemsCount} ${ul("common.elements")}`;
 
 		await modalSubmit.editReply({
@@ -317,7 +306,7 @@ async function showPaginatedMessage(
 	guild: NonNullable<Djs.ChatInputCommandInteraction["guild"]>,
 	page: number,
 	ul: Translation,
-	channelType: ChannelType_,
+	channelType: TChannel,
 	state: PaginationState,
 	mode: CommandMode
 ) {
@@ -345,7 +334,7 @@ async function validateAndSave(
 	interaction: Djs.ButtonInteraction | Djs.ModalSubmitInteraction,
 	userId: string,
 	guildID: string,
-	channelType: ChannelType_,
+	channelType: TChannel,
 	trackedIds: string[],
 	ul: Translation,
 	mode: CommandMode
@@ -362,37 +351,12 @@ async function validateAndSave(
 
 	console.log(`[${mode} ${channelType}] finalIds:`, state.selectedIds);
 
-	// Mapper le type de channel au TypeName
-	let typeName: TypeName;
-	let channelTypeFilter: Djs.ChannelType[];
-
-	switch (channelType) {
-		case "channel":
-			typeName = TypeName.channel;
-			channelTypeFilter = [Djs.ChannelType.GuildText];
-			break;
-		case "thread":
-			typeName = TypeName.thread;
-			channelTypeFilter = [Djs.ChannelType.PublicThread, Djs.ChannelType.PrivateThread];
-			break;
-		case "category":
-			typeName = TypeName.category;
-			channelTypeFilter = [Djs.ChannelType.GuildCategory];
-			break;
-		case "forum":
-			typeName = TypeName.forum;
-			channelTypeFilter = [Djs.ChannelType.GuildForum];
-			break;
-	}
-
-	// Résoudre les IDs en objets Channel
-	const finalChannelsResolved = await resolveChannelsByIds<
-		Djs.CategoryChannel | Djs.TextChannel | Djs.AnyThreadChannel | Djs.ForumChannel
-	>(guild, finalIds, channelTypeFilter);
-
-	const originalChannelsResolved = await resolveChannelsByIds<
-		Djs.CategoryChannel | Djs.TextChannel | Djs.AnyThreadChannel | Djs.ForumChannel
-	>(guild, trackedIds, channelTypeFilter);
+	const { finalChannelsResolved, originalChannelsResolved, typeName } = await resolveIds(
+		channelType,
+		guild,
+		trackedIds,
+		finalIds
+	);
 
 	const mentionFromId = (id: string) => {
 		const channel = finalChannelsResolved.find((ch) => ch.id === id);
@@ -476,4 +440,32 @@ async function validateAndSave(
 	}
 
 	paginationStates.delete(stateKey);
+}
+
+export function getPaginationButtons(
+	modalSubmit: Djs.ModalSubmitInteraction,
+	page: number,
+	ul: Translation,
+	channelType: TChannel,
+	state: PaginationState,
+	mode: CommandMode
+) {
+	const newSelection =
+		modalSubmit.fields.getSelectedChannels(`select_${channelType}`, false) ?? new Map();
+	// Mettre à jour les items de cette page
+	state.paginatedItems[page] = Array.from(newSelection.keys());
+
+	// Reconstruire selectedIds à partir de toutes les pages
+	state.selectedIds.clear();
+	for (const pageItems of Object.values(state.paginatedItems)) {
+		for (const id of pageItems) {
+			state.selectedIds.add(id);
+		}
+	}
+
+	// Retour au message avec boutons
+	const pageItemsCount = state.paginatedItems[page]?.length ?? 0;
+	const hasMore = Object.keys(state.paginatedItems).length > page + 1;
+	const buttons = createPaginationButtons(mode, page, hasMore, ul);
+	return { buttons, hasMore, pageItemsCount };
 }

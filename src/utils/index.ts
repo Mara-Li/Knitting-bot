@@ -41,7 +41,7 @@ export async function discordLogs(guildID: string, bot: Client, ...text: unknown
 	}
 
 	const channelId = getConfig(CommandName.log, guildID, true);
-	if (!channelId || typeof channelId !== "string") {
+	if (!channelId) {
 		return;
 	}
 
@@ -113,6 +113,7 @@ export async function fetchArchived(guild: Guild): Promise<AnyThreadChannel[]> {
 
 	const threads: Map<string, AnyThreadChannel> = new Map();
 
+	// biome-ignore lint/suspicious/noExplicitAny: we want to use any here
 	const collect = (results: PromiseSettledResult<any>[]) => {
 		for (const result of results) {
 			if (result.status === "fulfilled") {
@@ -175,6 +176,7 @@ export async function resolveChannelsByIds<T extends { type: number }>(
 
 		// Pour les threads qui n'ont pas pu être récupérés, chercher dans tous les canaux
 		const stillMissing = toFetch.filter(
+			// biome-ignore lint/suspicious/noExplicitAny: we want to use any here
 			(id) => !resolved.some((ch: any) => ch.id === id)
 		);
 

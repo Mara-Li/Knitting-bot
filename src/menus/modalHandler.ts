@@ -15,7 +15,7 @@ import {
 	type TextChannel,
 	type ThreadChannel,
 } from "discord.js";
-import { type ChannelType_, type Translation, TypeName } from "../interface";
+import type { TChannel, Translation, TypeName } from "../interface";
 import { setRole, setTrackedItem } from "../maps";
 import type { CommandMode, TrackedItems } from "./itemsManager";
 
@@ -96,7 +96,7 @@ export async function createPaginatedChannelModalByType(
 	ul: Translation,
 	_guild: Guild,
 	page: number,
-	channelType: ChannelType_,
+	channelType: TChannel,
 	trackedIds: string[],
 	shortTitle?: string,
 	_showOnlyTracked = true
@@ -356,23 +356,6 @@ export function processChannelTypeChanges(
 	);
 	const oldIds = new Set(oldItems.map((ch) => ch.id));
 	const newIds = new Set(newItems.map((ch) => ch.id));
-
-	// Get the type label for display
-	let typeLabel = ul("common.channel");
-	switch (typeName) {
-		case TypeName.category:
-			typeLabel = ul("common.category");
-			break;
-		case TypeName.thread:
-			typeLabel = ul("common.thread");
-			break;
-		case TypeName.forum:
-			typeLabel = ul("common.forum");
-			break;
-		case TypeName.channel:
-			typeLabel = ul("common.channel");
-			break;
-	}
 
 	const successKey =
 		mode === "follow" ? "follow.thread.success" : "ignore.thread.success";

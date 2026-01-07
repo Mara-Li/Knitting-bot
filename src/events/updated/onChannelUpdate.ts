@@ -27,7 +27,7 @@ export default (client: Client): void => {
 		const ul = getTranslation(guild, {
 			locale: newChannel.guild.preferredLocale,
 		});
-		if (getConfig(CommandName.channel, guild) === false) return;
+		if (!getConfig(CommandName.channel, guild)) return;
 		if (
 			!validateChannelType(oldChannel) ||
 			!validateChannelType(newChannel) ||

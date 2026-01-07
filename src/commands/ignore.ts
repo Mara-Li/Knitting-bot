@@ -1,14 +1,19 @@
+/** biome-ignore-all lint/style/useNamingConvention: Discord API doesn't respect spec */
 import * as Djs from "discord.js";
-import type { ChannelType_ } from "src/interface";
+import type { TChannel } from "src/interface";
 import { cmdLn, getUl, t } from "../i18n";
 import { CommandName, TIMEOUT, type Translation } from "../interface";
 import { getConfig, getRole, getRoleIn } from "../maps";
+import {
+	channelSelectorsForType,
+	createRoleSelectModal,
+	extractAndValidateRoleOption,
+	interactionRoleInChannel,
+	processRoleTypeChanges,
+	roleInSelectorsForType,
+} from "../menus";
 import { getCommandId, toTitle } from "../utils";
-import { createRoleSelectModal, processRoleTypeChanges } from "../utils/modalHandler";
-import { channelSelectorsForType } from "./channelPagination";
 import { mapToStr } from "./index";
-import { roleInSelectorsForType } from "./roleInPagination";
-import { extractAndValidateRoleOption, interactionRoleInChannel } from "./utils";
 import "../discord_ext.js";
 import "uniformize";
 
@@ -104,7 +109,7 @@ export default {
 
 		switch (commands) {
 			case t("common.channel").toLowerCase(): {
-				const channelType = options.getString("type") as ChannelType_;
+				const channelType = options.getString("type") as TChannel;
 				console.log(`[ignore] Received command with type: ${channelType}`);
 				await channelSelectorsForType(interaction, ul, channelType, "ignore");
 				break;
@@ -129,7 +134,7 @@ export default {
 					});
 					return;
 				}
-				const roleId = await extractAndValidateRoleOption(options, ul);
+				const roleId = await extractAndValidateRoleOption(options);
 				if (!roleId) {
 					await interaction.reply({
 						content: ul("ignore.role.error", { role: "Unknown" }),
@@ -137,7 +142,7 @@ export default {
 					});
 					return;
 				}
-				const channelType = options.getString("type") as ChannelType_;
+				const channelType = options.getString("type") as TChannel;
 				if (!channelType) {
 					// Fallback vers l'ancienne interface multi-types
 					await interactionRoleInChannel(interaction, "ignore");
@@ -162,8 +167,6 @@ export default {
 /**
  * Display the list of ignored channels.
  * Display the embed based on the configuration.
- * @param interaction {@link CommandInteraction} The interaction to reply to.
- * @param ul
  */
 async function displayIgnored(
 	interaction: Djs.ChatInputCommandInteraction,

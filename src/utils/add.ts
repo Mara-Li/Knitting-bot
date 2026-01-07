@@ -293,7 +293,11 @@ export async function fetchUntilMessage(
 		iterations++;
 		const lastMessageId = fetchMessage.last()?.id;
 		// Break if no valid message ID or if we're stuck on the same message
-		if (!lastMessageId || lastMessageId === previousLastMessageId) break;
+		if (
+			!lastMessageId ||
+			(previousLastMessageId && lastMessageId === previousLastMessageId)
+		)
+			break;
 		previousLastMessageId = lastMessageId;
 		const moreMessages = await thread.messages.fetch({
 			before: lastMessageId,
@@ -329,7 +333,11 @@ async function fetchAllPinnedMessages(
 		const lastMessageId = pinnedMessage.items[pinnedMessage.items.length - 1]?.message.id;
 
 		// Break if no valid message ID or if we're stuck on the same message
-		if (!lastMessageId || lastMessageId === previousLastMessageId) break;
+		if (
+			!lastMessageId ||
+			(previousLastMessageId && lastMessageId === previousLastMessageId)
+		)
+			break;
 
 		previousLastMessageId = lastMessageId;
 
