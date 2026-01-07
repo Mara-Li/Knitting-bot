@@ -201,7 +201,7 @@
 	},
 	"error": {
 		"deletedBotMessage": "Le *placeholder* de <@{{-bot}}> a été supprimé dans {{- thread}}.",
-		"failedReply": "Error: failed reply",
+		"failedReply": "Erreur: Impossible d'envoyer la réponse",
 		"missingPermission": "Knitting n'a pas les permissions pour écrire dans <#{{-thread}}>."
 	},
 	"follow": {

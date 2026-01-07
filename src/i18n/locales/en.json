@@ -144,7 +144,7 @@
 				"channel": {
 					"desc": "Channel where to send the logs",
 					"disable": "Logs has been disabled.",
-					"error": "You can use this channel to send the logs.",
+					"error": "You can't use this channel to send the logs.",
 					"success": "The logs channel is now {{- channel}}.",
 					"title": "log"
 				},
@@ -202,7 +202,7 @@
 	"error": {
 		"deletedBotMessage": "The bot *placeholder* was deleted in {{- thread}}.",
 		"failedReply": "Error: failed reply",
-		"missingPermission": "Knitting doesn't have the permissions to write in <<#{{-thread}}>."
+		"missingPermission": "Knitting doesn't have the permissions to write in <#{{-thread}}>."
 	},
 	"follow": {
 		"description": "Update only on the followed role/channels",
