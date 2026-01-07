@@ -74,7 +74,7 @@ export function clearGuildMessageCache(guildId: string): void {
  */
 export function getDefaultServerData(): ServerData {
 	return {
-		configuration: DEFAULT_CONFIGURATION,
+		configuration: { ...DEFAULT_CONFIGURATION },
 		follow: { ...DEFAULT_IGNORE_FOLLOW },
 		ignore: { ...DEFAULT_IGNORE_FOLLOW },
 		messageCache: {},
