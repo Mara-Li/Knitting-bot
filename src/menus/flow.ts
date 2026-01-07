@@ -6,6 +6,9 @@ export type PaginatedIdsState = {
 	originalIds: string[];
 	paginatedItems: Record<number, string[]>;
 	selectedIds: Set<string>;
+	// Optional TTL fields managed by the pagination system
+	ttlMs?: number;
+	expiresAt?: number;
 };
 
 export type PaginatedHandlers = {
@@ -16,8 +19,38 @@ export type PaginatedHandlers = {
 	onEnd?: (buttonMessage: Djs.Message) => Promise<void> | void;
 };
 
+// global state maps
 const globalPaginationStates = new Map<string, PaginatedIdsState>();
-const messageToStateKey = new Map<string, string>();
+// message id -> { stateKey, expiresAt }
+const messageToStateKey = new Map<string, { stateKey: string; expiresAt?: number }>();
+
+// TTL defaults and sweep settings
+const DEFAULT_TTL_MS = 15 * 60 * 1000; // 5 minutes
+const SWEEP_INTERVAL_MS = 60 * 1000; // 1 minute
+
+let sweepScheduled = false;
+
+function scheduleSweep() {
+	if (sweepScheduled) return;
+	// eslint-disable-next-line @typescript-eslint/no-misused-promises
+	setInterval(() => {
+		const now = Date.now();
+		for (const [key, state] of globalPaginationStates.entries()) {
+			if (state.expiresAt && state.expiresAt <= now) {
+				// delete state and related message mappings
+				globalPaginationStates.delete(key);
+				for (const [msgId, mapping] of messageToStateKey.entries()) {
+					if (mapping.stateKey === key) messageToStateKey.delete(msgId);
+				}
+			}
+		}
+		// also cleanup any message mappings that expired without a state (defensive)
+		for (const [msgId, mapping] of messageToStateKey.entries()) {
+			if (mapping.expiresAt && mapping.expiresAt <= now) messageToStateKey.delete(msgId);
+		}
+	}, SWEEP_INTERVAL_MS);
+	sweepScheduled = true;
+}
 
 export function paginateIds(ids: string[], pageSize = 25): Record<number, string[]> {
 	const paginated: Record<number, string[]> = {};
@@ -39,22 +72,44 @@ export function createPaginationState(
 	originalIds: string[],
 	paginatedItems: Record<number, string[]>
 ): PaginatedIdsState {
+	const ttl = DEFAULT_TTL_MS;
 	const state: PaginatedIdsState = {
 		currentPage: 0,
+		expiresAt: Date.now() + ttl,
 		originalIds,
 		paginatedItems,
 		selectedIds: new Set(originalIds),
+		ttlMs: ttl,
 	};
 	globalPaginationStates.set(key, state);
+	// ensure sweep runs
+	scheduleSweep();
 	return state;
 }
 
 export function getPaginationState(key: string): PaginatedIdsState | undefined {
-	return globalPaginationStates.get(key);
+	const state = globalPaginationStates.get(key);
+	if (!state) return undefined;
+	const now = Date.now();
+	if (state.expiresAt && state.expiresAt <= now) {
+		// expired
+		globalPaginationStates.delete(key);
+		// cleanup message mappings referencing this state
+		for (const [msgId, mapping] of messageToStateKey.entries()) {
+			if (mapping.stateKey === key) messageToStateKey.delete(msgId);
+		}
+		return undefined;
+	}
+	// sliding expiration: extend on access
+	if (state.ttlMs) state.expiresAt = Date.now() + state.ttlMs;
+	return state;
 }
 
 export function deletePaginationState(key: string): void {
 	globalPaginationStates.delete(key);
+	for (const [msgId, mapping] of messageToStateKey.entries()) {
+		if (mapping.stateKey === key) messageToStateKey.delete(msgId);
+	}
 }
 
 export function hasMorePages(
@@ -98,7 +153,12 @@ export async function startPaginatedButtonsFlow(
 
 	const buttonMessage = await interaction.fetchReply();
 	if (stateKey && (buttonMessage as Djs.Message).id) {
-		messageToStateKey.set((buttonMessage as Djs.Message).id, stateKey);
+		// link the message ID to the state key and mirror the state's expiration if present
+		const state = getPaginationState(stateKey);
+		messageToStateKey.set((buttonMessage as Djs.Message).id, {
+			expiresAt: state?.expiresAt,
+			stateKey,
+		});
 	}
 
 	const collector = (buttonMessage as Djs.Message).createMessageComponentCollector({
@@ -116,10 +176,9 @@ export async function startPaginatedButtonsFlow(
 
 			// try to find linked state
 			const msgId = (buttonInteraction.message as Djs.Message).id;
-			const linkedStateKey = messageToStateKey.get(msgId);
-			const linkedState = linkedStateKey
-				? globalPaginationStates.get(linkedStateKey)
-				: undefined;
+			const linkedStateKey = messageToStateKey.get(msgId)?.stateKey;
+			// use getPaginationState to respect TTL and sliding expiration
+			const linkedState = linkedStateKey ? getPaginationState(linkedStateKey) : undefined;
 
 			if (customId.startsWith("page_modify_") || customId.includes("_page_modify_")) {
 				const page = Number.isFinite(parsed) ? parsed : (linkedState?.currentPage ?? 0);
@@ -242,3 +301,6 @@ export function createPaginationButtons(
 
 	return [new Djs.ActionRowBuilder<Djs.ButtonBuilder>().addComponents(buttons)];
 }
+
+// ensure sweep scheduled when module is loaded
+scheduleSweep();
