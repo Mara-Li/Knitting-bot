@@ -10,7 +10,7 @@ import {
 	deletePaginationState,
 	getPaginationState,
 	hasMorePages,
-	type PaginationState,
+	type PaginatedIdsState,
 	paginateIds,
 	startPaginatedButtonsFlow,
 } from "./flow";
@@ -203,7 +203,7 @@ async function handleRoleInModalModify(
 	page: number,
 	ul: Translation,
 	channelType: TChannel,
-	state: PaginationState,
+	state: PaginatedIdsState,
 	mode: CommandMode
 ) {
 	if (!guild) return;
@@ -272,7 +272,7 @@ async function showRoleInPaginatedMessage(
 	page: number,
 	ul: Translation,
 	channelType: TChannel,
-	state: PaginationState,
+	state: PaginatedIdsState,
 	mode: CommandMode
 ) {
 	if (!guild) return;

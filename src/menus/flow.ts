@@ -1,7 +1,7 @@
 import * as Djs from "discord.js";
 import { TIMEOUT, type Translation } from "../interface";
 
-export type PaginationState = {
+export type PaginatedIdsState = {
 	currentPage: number;
 	originalIds: string[];
 	paginatedItems: Record<number, string[]>;
@@ -17,7 +17,7 @@ export type PaginatedHandlers = {
 };
 
 // Stockage partagé des states de pagination (clé arbitraire fournie par l'appelant)
-const globalPaginationStates = new Map<string, PaginationState>();
+const globalPaginationStates = new Map<string, PaginatedIdsState>();
 const messageToStateKey = new Map<string, string>();
 
 export function paginateIds(ids: string[], pageSize = 25): Record<number, string[]> {
@@ -39,8 +39,8 @@ export function createPaginationState(
 	key: string,
 	originalIds: string[],
 	paginatedItems: Record<number, string[]>
-): PaginationState {
-	const state: PaginationState = {
+): PaginatedIdsState {
+	const state: PaginatedIdsState = {
 		currentPage: 0,
 		originalIds,
 		paginatedItems,
@@ -50,7 +50,7 @@ export function createPaginationState(
 	return state;
 }
 
-export function getPaginationState(key: string): PaginationState | undefined {
+export function getPaginationState(key: string): PaginatedIdsState | undefined {
 	return globalPaginationStates.get(key);
 }
 

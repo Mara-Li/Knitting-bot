@@ -2,7 +2,7 @@
  * Temporary state for paginated channel selection
  * Key: userId_guildId_mode (e.g., "123456789_987654321_follow")
  */
-export interface PaginationState {
+export interface UserGuildPaginationState {
 	userId: string;
 	guildId: string;
 	mode: "follow" | "ignore";
@@ -14,7 +14,7 @@ export interface PaginationState {
 	timestamp: number; // Pour cleanup automatique
 }
 
-const paginationStates = new Map<string, PaginationState>();
+const paginationStates = new Map<string, UserGuildPaginationState>();
 
 // Cleanup automatique après 10 minutes
 const CLEANUP_TIMEOUT = 10 * 60 * 1000;
@@ -26,7 +26,7 @@ export function getPaginationState(
 	userId: string,
 	guildId: string,
 	mode: "follow" | "ignore"
-): PaginationState {
+): UserGuildPaginationState {
 	const key = `${userId}_${guildId}_${mode}`;
 	let state = paginationStates.get(key);
 
@@ -62,9 +62,9 @@ export function initializePaginationState(
 		threads: string[];
 		forums: string[];
 	}
-): PaginationState {
+): UserGuildPaginationState {
 	const key = `${userId}_${guildId}_${mode}`;
-	const state: PaginationState = {
+	const state: UserGuildPaginationState = {
 		currentPage: 0,
 		guildId,
 		mode,
