@@ -242,7 +242,7 @@ function verifyMigration(): void {
 /**
  * Main migration function
  */
-async function runMigration(): Promise<void> {
+export async function runMigration(): Promise<void> {
 	console.log("╔════════════════════════════════════════╗");
 	console.log("║  Knitting-bot Data Migration v1 → v2   ║");
 	console.log("╚════════════════════════════════════════╝\n");
@@ -274,8 +274,4 @@ async function runMigration(): Promise<void> {
 	}
 }
 
-// Run migration
-runMigration().catch((error) => {
-	console.error("Unexpected error:", error);
-	process.exit(1);
-});
+
