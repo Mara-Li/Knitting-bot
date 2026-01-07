@@ -486,8 +486,7 @@ async function validateRoleInAndSave(
 		const updated = allRoleIn.map((r) => (r.roleId === roleId ? newEntry : r));
 		setRoleIn(mode, guildID, updated);
 	} else {
-		allRoleIn.push(newEntry);
-		setRoleIn(mode, guildID, allRoleIn);
+		setRoleIn(mode, guildID, [...allRoleIn, newEntry]);
 	}
 
 	const finalMessage =
