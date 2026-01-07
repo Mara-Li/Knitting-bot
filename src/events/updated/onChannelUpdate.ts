@@ -2,7 +2,7 @@ import { ChannelType, type Client, type Snowflake, type TextChannel } from "disc
 import { getTranslation } from "../../i18n";
 import { CommandName } from "../../interface";
 import { getConfig } from "../../maps";
-import { discordLogs, logInDev, updateCache } from "../../utils";
+import { discordLogs } from "../../utils";
 import { addRoleAndUserToThread } from "../../utils/add";
 import { checkThread, validateChannelType } from "../../utils/data_check";
 
@@ -15,7 +15,7 @@ import { checkThread, validateChannelType } from "../../utils/data_check";
 
 export default (client: Client): void => {
 	client.on("channelUpdate", async (oldChannel, newChannel) => {
-		logInDev(`Channel ${getChannelName(oldChannel.id, client)} has been updated.`);
+		console.info(`Channel ${getChannelName(oldChannel.id, client)} has been updated.`);
 		if (
 			oldChannel.type === ChannelType.DM ||
 			newChannel.type === ChannelType.DM ||
@@ -23,7 +23,7 @@ export default (client: Client): void => {
 		)
 			return;
 		const guild = oldChannel.guild.id;
-		
+
 		const ul = getTranslation(guild, {
 			locale: newChannel.guild.preferredLocale,
 		});

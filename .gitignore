@@ -137,3 +137,5 @@ data
 _migration/bak
 _migration/files
 data_bak
+
+.obsidian

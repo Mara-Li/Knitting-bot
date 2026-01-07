@@ -21,7 +21,7 @@ export default (client: Client): void => {
 			const newRoles = newMember.roles.cache;
 			const updatedRoles = newRoles.filter((role) => !oldRoles.has(role.id));
 			const guildID = newMember.guild.id;
-			
+
 			if (!getConfig(CommandName.member, guildID)) return;
 			const ul = getTranslation(guildID, { locale: newMember.guild.preferredLocale });
 			if (updatedRoles.size === 0) {
@@ -93,6 +93,6 @@ export default (client: Client): void => {
 		} catch (error) {
 			console.error(error);
 		}
-		logInDev(`Member ${newMember.user.username} has been updated.`);
+		console.info(`Member ${newMember.user.username} has been updated.`);
 	});
 };

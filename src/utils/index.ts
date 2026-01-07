@@ -10,26 +10,6 @@ import { CommandName } from "../interface";
 import { getConfig } from "../maps";
 
 /**
- * Log messages in development mode with timestamp and caller information
- * @param text - Messages to log
- */
-export function logInDev(...text: unknown[]) {
-	const time = new Date();
-	const timeString = `${time.getHours()}:${time.getMinutes()}:${time.getSeconds()}`;
-	/** Get the called function name */
-	const stack = new Error().stack;
-	const caller = stack?.split("\n")[2].trim().split(" ")[1];
-
-	if (process.env.NODE_ENV === "development") {
-		if (text.length === 1 && typeof text[0] === "string") {
-			console.log(`${timeString} (${caller}) - ${text}`);
-		} else {
-			console.log(`${timeString} (${caller}`, text);
-		}
-	}
-}
-
-/**
  * Send logs to the configured Discord channel
  * @param guildID - Guild identifier
  * @param bot - Discord client

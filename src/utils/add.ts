@@ -190,7 +190,7 @@ export async function addRoleAndUserToThread(thread: ThreadChannel) {
 	const toPing: GuildMember[] = [];
 	const rolesWithAccess: Role[] = thread.guild.roles.cache.toJSON();
 	if (rolesWithAccess.length > 0) {
-		logInDev("Getting roles to ping");
+		console.info("Getting roles to ping");
 		try {
 			const roles = await getRoleToPing(thread, rolesWithAccess);
 			for (const role of roles) toPing.push(...role.members.toJSON());
@@ -212,7 +212,7 @@ export async function addRoleAndUserToThread(thread: ThreadChannel) {
 		toPing.push(...users);
 	}
 	const emoji = getMessageToSend(thread.guild.id) || EMOJI;
-	logInDev(`Total members to add: ${toPing.length}`);
+	console.info(`Total members to add: ${toPing.length}`);
 	if (toPing.length > 0) {
 		try {
 			const message = await fetchMessage(thread);

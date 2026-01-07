@@ -1,7 +1,6 @@
 import type { Client } from "discord.js";
 import { ALL_COMMANDS } from "../commands";
 import { loadDBFirstTime } from "../maps";
-import { logInDev } from "../utils";
 
 /**
  * When the bot arrive on a server, check all thread and add members that have the permission to view the thread
@@ -19,6 +18,6 @@ export default (client: Client): void => {
 			console.error(error);
 		}
 		loadDBFirstTime(guild.id);
-		logInDev(`Guild ${guild.name} has been added to the database.`);
+		console.info(`Guild ${guild.name} has been added to the database.`);
 	});
 };

@@ -17,7 +17,7 @@ export default (client: Client): void => {
 		const guildID = member.guild.id;
 		if (!getConfig(CommandName.newMember, guildID)) return;
 		if (member.user.bot) return;
-		logInDev(`${member.user.username} joined the server`);
+		console.info(`${member.user.username} joined the server`);
 		const ul = getTranslation(guildID, { locale: member.guild.preferredLocale });
 		await discordLogs(guildID, client, ul("logs.joined", { user: member.user.username }));
 		const guild = member.guild;

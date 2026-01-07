@@ -47,6 +47,7 @@ export interface Configuration {
 	[CommandName.followOnlyChannel]: boolean;
 	[CommandName.followOnlyRole]: boolean;
 	[CommandName.followOnlyRoleIn]: boolean;
+	[CommandName.manualMode]: boolean;
 	language: Locale;
 	pin: boolean;
 	messageToSend: string;
@@ -70,6 +71,7 @@ export const DEFAULT_CONFIGURATION: Configuration = {
 	[CommandName.followOnlyChannel]: false,
 	[CommandName.followOnlyRole]: false,
 	[CommandName.followOnlyRoleIn]: false,
+	[CommandName.manualMode]: false,
 	language: Locale.EnglishUS,
 	messageToSend: "_ _",
 	pin: false,

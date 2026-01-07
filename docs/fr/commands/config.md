@@ -10,7 +10,7 @@ Permet d'afficher la langue actuelle et de la changer.
 Affiche les modes actuels et permet de les changer. Vous pouvez :
 - Suivre uniquement un channel[^1] spécifique.
 - Suivre uniquement un rôle spécifique.
-- Suivre [@role] pour [@channel], mode qui ne peut pas être utilisé avec les autres modes.
+- `Suivre [@role] pour [@channel]`, mode qui ne peut pas être utilisé avec les autres modes.
 
 ## `/config auto`
 

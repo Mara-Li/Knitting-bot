@@ -14,7 +14,6 @@ import * as Djs from "discord.js";
 import { getUl, ln, t } from "../i18n";
 import { CommandName, type Translation } from "../interface";
 import { getConfig, getLanguage, setConfig } from "../maps";
-import { logInDev } from "../utils";
 
 import "../discord_ext.js";
 
@@ -312,7 +311,7 @@ async function setupMessageCollector(
 			// Message was deleted, no need to log error
 			return;
 		}
-		logInDev(error);
+		console.log(error);
 		await interaction.editReply({ components: [] });
 	}
 }
@@ -449,14 +448,35 @@ async function updateConfig(
 			CommandName.newMember,
 		];
 
-		const allnames = names.map((command) => {
-			if (!interaction.guild) return false;
-			return getConfig(command, interaction.guild.id);
-		});
-		const manualMode = allnames.every((value) => value);
-		for (const command of names) {
-			setConfig(command, interaction.guild.id, !manualMode);
+		// Determine current manual mode flag
+		const currentManual = getConfig(
+			CommandName.manualMode,
+			interaction.guild.id
+		) as boolean;
+
+		if (!currentManual) {
+			// Enabling manual mode: set manualMode = true and disable all auto-update flags
+			setConfig(CommandName.manualMode, interaction.guild.id, true);
+			for (const cmd of names) {
+				setConfig(cmd, interaction.guild.id, false);
+			}
+		} else {
+			// Disabling manual mode: set manualMode = false and enable all auto-update flags
+			setConfig(CommandName.manualMode, interaction.guild.id, false);
+			for (const cmd of names) {
+				setConfig(cmd, interaction.guild.id, true);
+			}
 		}
+
+		// Debug: log current values so we can trace why the button styles are wrong
+		try {
+			console.debug(
+				`manualMode toggle: manual=${getConfig(CommandName.manualMode, interaction.guild.id)}, channel=${getConfig(CommandName.channel, interaction.guild.id)}, member=${getConfig(CommandName.member, interaction.guild.id)}, newMember=${getConfig(CommandName.newMember, interaction.guild.id)}, thread=${getConfig(CommandName.thread, interaction.guild.id)}`
+			);
+		} catch (e) {
+			console.error("Error logging manualMode state", e);
+		}
+
 		const embed = autoUpdateMenu(interaction.guild.id, ul);
 		//reload buttons
 		const rows = reloadButtonAuto(interaction.guild.id, ul);
@@ -487,21 +507,37 @@ async function updateConfig(
  */
 
 function createButton(command: CommandName, label: string, guildID: string) {
-	let style = getConfig(command, guildID)
-		? Djs.ButtonStyle.Danger
-		: Djs.ButtonStyle.Success;
-	if (command === CommandName.manualMode) {
-		const truc = [
-			CommandName.channel,
-			CommandName.member,
-			CommandName.thread,
-			CommandName.newMember,
-		];
-		const allTruc = truc.map((command) => getConfig(command, guildID));
-		style = allTruc.some((value) => value)
-			? Djs.ButtonStyle.Danger
-			: Djs.ButtonStyle.Success;
+	const manualModeEnabled = getConfig(CommandName.manualMode, guildID);
+
+	// If manual mode is enabled:
+	// - the manual button is green (Success)
+	// - all other buttons are grey (Secondary)
+	if (manualModeEnabled) {
+		if (command === CommandName.manualMode) {
+			return new Djs.ButtonBuilder()
+				.setCustomId(command)
+				.setStyle(Djs.ButtonStyle.Success)
+				.setLabel(label);
+		}
+		return new Djs.ButtonBuilder()
+			.setCustomId(command)
+			.setStyle(Djs.ButtonStyle.Secondary)
+			.setLabel(label);
 	}
+
+	// If manual mode is disabled:
+	// - the manual button is grey (Secondary)
+	// - other buttons reflect their configuration state: green (Success) when enabled, red (Danger) when disabled
+	if (command === CommandName.manualMode) {
+		return new Djs.ButtonBuilder()
+			.setCustomId(command)
+			.setStyle(Djs.ButtonStyle.Secondary)
+			.setLabel(label);
+	}
+
+	const style = getConfig(command, guildID)
+		? Djs.ButtonStyle.Success
+		: Djs.ButtonStyle.Danger;
 	return new Djs.ButtonBuilder().setCustomId(command).setStyle(style).setLabel(label);
 }
 
@@ -522,6 +558,20 @@ function reloadButtonMode(guildID: string, ul: Translation) {
 			createButton(command, labelButton(command, translation, guildID, ul), guildID)
 		);
 	}
+
+	// If manual mode is enabled, grey and disable all mode buttons
+	if (getConfig(CommandName.manualMode, guildID)) {
+		for (let i = 0; i < buttons.length; i++) {
+			buttons[i] = buttons[i].setStyle(Djs.ButtonStyle.Secondary).setDisabled(true);
+		}
+		return [
+			{
+				components: buttons,
+				type: 1,
+			},
+		];
+	}
+
 	if (getConfig(CommandName.followOnlyRoleIn, guildID)) {
 		/**
 		 * Disable the button if followRoleIn is enable
@@ -562,16 +612,11 @@ function labelButton(
 	const value = Object.values(CommandName)[idIndex];
 	const translated = translation[value];
 	if (id === CommandName.manualMode) {
-		const truc = [
-			CommandName.channel,
-			CommandName.member,
-			CommandName.thread,
-			CommandName.newMember,
-		].map((command) => getConfig(command, guildID));
-		const manualMode = truc.some((value) => value);
-		return manualMode
-			? `${ul("common.enable")} : ${translated}`
-			: `${ul("common.disable")} : ${translated}`;
+		// Use the actual manualMode flag for the label instead of inferring from other flags
+		const manualFlag = getConfig(CommandName.manualMode, guildID) as boolean;
+		return manualFlag
+			? `${ul("common.disable")} : ${translated}`
+			: `${ul("common.enable")} : ${translated}`;
 	}
 	return getConfig(id, guildID)
 		? `${ul("common.disable")} : ${translated}`
@@ -598,6 +643,15 @@ function reloadButtonAuto(guildID: string, ul: Translation) {
 			createButton(command, labelButton(command, translation, guildID, ul), guildID)
 		);
 	}
+
+	// If manual mode is enabled, force other buttons to Secondary and disabled
+	if (getConfig(CommandName.manualMode, guildID)) {
+		buttons[0] = buttons[0].setStyle(Djs.ButtonStyle.Success);
+		for (let i = 1; i < buttons.length; i++) {
+			buttons[i] = buttons[i].setStyle(Djs.ButtonStyle.Secondary).setDisabled(true);
+		}
+	}
+
 	return [
 		{
 			components: [buttons[0]],

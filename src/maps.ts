@@ -1,10 +1,9 @@
 import Enmap from "enmap";
+import type { RoleIn, ServerData } from "./interface";
 import {
-	CommandName,
+	type CommandName,
 	DEFAULT_CONFIGURATION,
 	DEFAULT_IGNORE_FOLLOW,
-	type RoleIn,
-	type ServerData,
 	TypeName,
 } from "./interface";
 import { logInDev } from "./utils";
@@ -96,7 +95,7 @@ export function setConfig(
 	guildID: string,
 	value: string | boolean
 ): void {
-	if (name === CommandName.manualMode) return;
+	// allow manualMode to be stored as well
 	ensureGuild(guildID);
 	serverDataDb.set(guildID, value, `configuration.${name}`);
 }
@@ -300,7 +299,7 @@ export function destroyDB(): void {
  * Export database for backup
  */
 export function exportDB(): string {
-	logInDev("Exporting DB");
+	console.info("Exporting DB");
 	return serverDataDb.export();
 }
 
