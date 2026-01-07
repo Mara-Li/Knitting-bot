@@ -126,7 +126,7 @@ export default {
 				await channelSelectorsForType({ channelType, interaction, mode: "ignore", ul });
 				break;
 			}
-			case t("common.role").toLowerCase():
+			case t("common.role"):
 				if (getConfig(CommandName.followOnlyRole, guild)) {
 					await interaction.reply({
 						content: ul("ignore.error.followRole", {
