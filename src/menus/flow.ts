@@ -25,7 +25,7 @@ const globalPaginationStates = new Map<string, PaginatedIdsState>();
 const messageToStateKey = new Map<string, { stateKey: string; expiresAt?: number }>();
 
 // TTL defaults and sweep settings
-const DEFAULT_TTL_MS = 15 * 60 * 1000; // 5 minutes
+const DEFAULT_TTL_MS = 15 * 60 * 1000; // 15 minutes
 const SWEEP_INTERVAL_MS = 60 * 1000; // 1 minute
 
 let sweepScheduled = false;
