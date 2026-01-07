@@ -56,6 +56,7 @@ export function setCachedMessage(
  * @param threadId The thread ID
  */
 export function deleteCachedMessage(guildId: string, threadId: string): void {
+	ensureGuild(guildId);
 	serverDataDb.delete(guildId, `messageCache.${threadId}`);
 }
 
