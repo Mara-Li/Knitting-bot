@@ -174,11 +174,7 @@ async function handleModalModify(
 	mode: CommandMode
 ) {
 	if (!guild) return;
-
-	// Récupérer les items tracked de cette page
 	const pageTrackedIds = state.paginatedItems[page] ?? [];
-
-	// Le modal affiche les items tracked de cette page
 	const { modal } = await createPaginatedChannelModalByType(
 		mode,
 		ul,
@@ -198,12 +194,10 @@ async function handleModalModify(
 			time: TIMEOUT,
 		});
 
-		// Defer immédiatement pour éviter l'expiration du token
 		try {
 			await modalSubmit.deferUpdate();
 		} catch (e) {
 			if (e instanceof Djs.DiscordAPIError && e.code === 10062) {
-				// Token expiré, on peut pas répondre
 				console.warn(`[${mode} ${channelType}] Token expiré pour ModalSubmit`, e.message);
 				return;
 			}
@@ -226,6 +220,7 @@ async function handleModalModify(
 		});
 	} catch (e) {
 		console.error(e);
+		deletePaginationState(`${userId}_${guild.id}_${mode}_${channelType}`);
 	}
 }
 

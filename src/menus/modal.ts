@@ -89,18 +89,14 @@ export async function createPaginatedChannelModalByType(
 	hasMore: boolean;
 	pageItemIds: string[];
 }> {
-	// Déterminer les types Discord selon le type de channel
-	let djsChannelTypes: Djs.ChannelType[] = [];
+	const channelTypeMap: Record<TChannel, Djs.ChannelType[]> = {
+		category: [Djs.ChannelType.GuildCategory],
+		channel: [Djs.ChannelType.GuildText],
+		forum: [Djs.ChannelType.GuildForum],
+		thread: [Djs.ChannelType.PublicThread, Djs.ChannelType.PrivateThread],
+	};
 
-	if (channelType === "category") {
-		djsChannelTypes = [Djs.ChannelType.GuildCategory];
-	} else if (channelType === "channel") {
-		djsChannelTypes = [Djs.ChannelType.GuildText];
-	} else if (channelType === "thread") {
-		djsChannelTypes = [Djs.ChannelType.PublicThread, Djs.ChannelType.PrivateThread];
-	} else if (channelType === "forum") {
-		djsChannelTypes = [Djs.ChannelType.GuildForum];
-	}
+	const djsChannelTypes = channelTypeMap[channelType];
 
 	const baseTitle = shortTitle ?? `${ul(`common.${channelType}`)}`;
 	const title = `${baseTitle} (P${page + 1})`.slice(0, 45);
@@ -227,7 +223,7 @@ export async function createPaginatedChannelModal(
 	}
 
 	return {
-		hasMore: false, // Calculé en dehors
+		hasMore: false,
 		modal,
 		pageItemIds: selectedIds,
 	};
