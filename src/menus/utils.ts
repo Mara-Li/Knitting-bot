@@ -314,17 +314,15 @@ async function validateRoleInSelection(
 		...Array.from(state.selectedThreads),
 		...Array.from(state.selectedForums),
 	];
-	const channels = await import("../utils/index.js").then(({ resolveChannelsByIds }) =>
-		resolveChannelsByIds<
-			Djs.CategoryChannel | Djs.ForumChannel | Djs.ThreadChannel | Djs.TextChannel
-		>(guild, allIds, [
-			Djs.ChannelType.GuildCategory,
-			Djs.ChannelType.GuildText,
-			Djs.ChannelType.PublicThread,
-			Djs.ChannelType.PrivateThread,
-			Djs.ChannelType.GuildForum,
-		])
-	);
+	const channels = await resolveChannelsByIds<
+		Djs.CategoryChannel | Djs.ForumChannel | Djs.ThreadChannel | Djs.TextChannel
+	>(guild, allIds, [
+		Djs.ChannelType.GuildCategory,
+		Djs.ChannelType.GuildText,
+		Djs.ChannelType.GuildForum,
+		Djs.ChannelType.PublicThread,
+		Djs.ChannelType.PrivateThread,
+	]);
 
 	const allRoleIn = getRoleIn(on, guildID);
 	const existing = allRoleIn.find((r) => r.roleId === roleId);
