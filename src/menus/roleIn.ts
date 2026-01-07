@@ -262,6 +262,7 @@ async function handleRoleInModalModify(
 		});
 	} catch (e) {
 		console.error(e);
+		deletePaginationState(`${userId}_${guild.id}_${mode}_roleIn_${roleId}_${channelType}`);
 	}
 }
 
