@@ -9,7 +9,7 @@ export default (client: Client): void => {
 			const systemMessage = (await channel.messages.fetch()).find((msg) => {
 				return msg.system && msg.createdTimestamp >= timeNb - 5000;
 			});
-			if (systemMessage && systemMessage.author === client.user)
+			if (systemMessage && systemMessage.author.id === client.user?.id)
 				await systemMessage.delete();
 		}
 	);
