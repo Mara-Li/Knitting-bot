@@ -26,7 +26,7 @@ import {
 	checkRoleIn,
 	getMemberPermission,
 } from "./data_check";
-import { discordLogs, logInDev } from "./index";
+import { discordLogs } from "./index";
 
 /**
  * Check if a user should be added to the thread based on guild configuration

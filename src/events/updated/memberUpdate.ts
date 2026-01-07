@@ -2,7 +2,7 @@ import type { Client, ThreadChannel } from "discord.js";
 import { getTranslation } from "../../i18n";
 import { CommandName } from "../../interface";
 import { getConfig } from "../../maps";
-import { discordLogs, logInDev, updateCache } from "../../utils";
+import { discordLogs } from "../../utils";
 import { addUserToThread } from "../../utils/add";
 import {
 	checkMemberRole,

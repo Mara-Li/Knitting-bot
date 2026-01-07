@@ -9,7 +9,7 @@
 		}
 	},
 	"files": {
-		"includes": ["**", "!**/node_modules", "!**/dist"]
+		"includes": ["**", "!**/node_modules", "!**/dist", "!**/docs"]
 	},
 	"formatter": {
 		"enabled": true,

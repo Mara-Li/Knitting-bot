@@ -112,22 +112,50 @@ function backupOldData(): void {
 	const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
 	const backupFile = `${dirname}/bak/backup_${timestamp}.json`;
 
-	// Convert Enmaps to plain objects, removing undefined values
+	if (!existsSync(path.dirname(backupFile))) {
+		mkdirSync(path.dirname(backupFile), { recursive: true });
+	}
+
+	// Helper to collect entries from an Enmap and optionally sanitize values
+	function collectEntries<T>(
+		enmap: Enmap<string, T>,
+		sanitizer?: (v: T) => unknown
+	): Record<string, unknown> {
+		const out: Record<string, unknown> = {};
+		enmap.forEach((value, key) => {
+			try {
+				const sanitized = sanitizer ? sanitizer(value) : value;
+				// Use JSON round-trip to remove non-serializable fields (functions, circular refs, undefined keys)
+				out[key] = JSON.parse(JSON.stringify(sanitized));
+			} catch (e) {
+				// Fallback: store a string representation if serialization fails
+				out[key] = `<<unserializable: ${String(e)}>>`;
+			}
+		});
+		return out;
+	}
+
+	// Sanitizers for specific Enmaps
+	const sanitizeIgnoreFollow = (v: IgnoreFollow) => convertToIds(v);
+	const sanitizeConfiguration = (v: Configuration) => ({ ...v });
+	const sanitizeBotMessageCache = (v: Record<string, string>) => ({ ...v });
+
+	// Build backup object using safe collectors
 	const backup = {
-		botMessageCache: Object.fromEntries(oldBotMessageCache),
-		followOnlyMaps: Object.fromEntries(oldFollowOnlyMaps),
-		ignoreMaps: Object.fromEntries(oldIgnoreMaps),
-		optionMaps: Object.fromEntries(oldOptionMaps),
+		botMessageCache: collectEntries(oldBotMessageCache, sanitizeBotMessageCache),
+		followOnlyMaps: collectEntries(oldFollowOnlyMaps, sanitizeIgnoreFollow),
+		ignoreMaps: collectEntries(oldIgnoreMaps, sanitizeIgnoreFollow),
+		optionMaps: collectEntries(oldOptionMaps, sanitizeConfiguration),
 		timestamp,
 	};
 
-	// Ensure backup directory exists
-	const backupDir = "_migration/bak";
+	// Ensure backup directory exists (use absolute path under dirname)
+	const backupDir = path.join(dirname, "bak");
 	if (!existsSync(backupDir)) {
 		mkdirSync(backupDir, { recursive: true });
 	}
 
-	// Write backup file
+	// Write backup file (pretty-printed)
 	writeFileSync(backupFile, JSON.stringify(backup, null, 2), "utf-8");
 
 	console.log(`✓ Backup created at ${backupFile}`);
@@ -273,5 +301,3 @@ export async function runMigration(): Promise<void> {
 		process.exit(1);
 	}
 }
-
-

@@ -1,5 +1,4 @@
 import {
-	type CategoryChannel,
 	ChannelType,
 	type Client,
 	DMChannel,

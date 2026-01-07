@@ -11,7 +11,3 @@ Ces commandes n'apparaissent pas pour les utilisateurs qui n'ont pas la permissi
 > [!WARNING]
 > Tous les utilisateurs qui quittent le fil seront ré-ajoutés, même s'ils l'ont quitté volontairement.
 
-> [!NOTE] 
-> Il n'y a aucun moyen que je puisse coder quelque chose qui n'ajoute aucune notification (c'est-à-dire la bordure blanche) sur le fil. Vous aurez toujours le fil qui deviendra blanc lorsque le bot s'active.
-
-De plus, vous pouvez configurer le bot et désactiver les événements que vous ne souhaitez pas utiliser. Vous pouvez le faire avec la commande `/config`. Vous pouvez voir la config

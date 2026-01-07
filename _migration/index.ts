@@ -1,9 +1,9 @@
 import fs from "node:fs";
+import { createRequire } from "node:module";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import Enmap from "enmap";
-import {runMigration} from "./migrate_v2";
-import { createRequire } from "node:module";
+import { runMigration } from "./migrate_v2";
 
 const dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -15,6 +15,10 @@ const database = new Enmap({
 });
 
 const exportPath = path.join(dirname, "files", "export_database.json");
+
+if (!fs.existsSync(path.dirname(exportPath))) {
+	fs.mkdirSync(path.dirname(exportPath), { recursive: true });
+}
 
 function exportDatabase() {
 	fs.writeFile(exportPath, database.export(), (err) => {
@@ -47,7 +51,7 @@ function verifyEnmapVersion() {
 	return version;
 }
 
-async function backupDatabaseFolder() {
+function backupDatabaseFolder() {
 	//rename the existing database folder
 	const backupFolder = `${databaseFolder}_backup_${Date.now()}`;
 	fs.renameSync(databaseFolder, backupFolder);
@@ -57,22 +61,32 @@ async function backupDatabaseFolder() {
 async function migrate() {
 	const enmapVersion = verifyEnmapVersion();
 	if (enmapVersion.startsWith("5.")) {
-		console.log("1. Migrating to the new Database system...")
+		console.log("1. Migrating to the new Database system...");
 		await runMigration();
-		console.log("2. Exporting the Database to JSON file...")
+		console.log("2. Exporting the Database to JSON file...");
 		exportDatabase();
-		console.log("3. Backing up the existing database folder...")
-		await backupDatabaseFolder();
+		console.log("3. Backing up the existing database folder...");
+		backupDatabaseFolder();
 		console.warn("Please update Enmap to version 6.x before importing the database.");
 		return;
 	}
 	//verify that the import file exists
 	if (!fs.existsSync(exportPath)) {
-		console.error(`Import file not found at ${exportPath}. Please ensure the export file exists before importing.`);
+		console.error(
+			`Import file not found at ${exportPath}. Please ensure the export file exists before importing.`
+		);
 		return;
 	}
-	console.log("4. Importing the Database from JSON file...")
+	console.log("4. Importing the Database from JSON file...");
 	importDatabase();
 	console.log("Migration completed.");
 }
 
+migrate().then(
+	() => {
+		console.log("Migration process finished.");
+	},
+	(err) => {
+		console.error("Migration process failed:", err);
+	}
+);
