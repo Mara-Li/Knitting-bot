@@ -6,7 +6,6 @@ import {
 	DEFAULT_IGNORE_FOLLOW,
 	TypeName,
 } from "./interface";
-import { logInDev } from "./utils";
 
 /**
  * Unified ServerData Enmap
@@ -75,7 +74,7 @@ export function clearGuildMessageCache(guildId: string): void {
 /**
  * Get default ServerData structure
  */
-function getDefaultServerData(): ServerData {
+export function getDefaultServerData(): ServerData {
 	return {
 		configuration: DEFAULT_CONFIGURATION,
 		follow: { ...DEFAULT_IGNORE_FOLLOW },

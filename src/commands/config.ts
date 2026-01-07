@@ -13,9 +13,16 @@
 import * as Djs from "discord.js";
 import { getUl, ln, t } from "../i18n";
 import { CommandName, type Translation } from "../interface";
-import { getConfig, getLanguage, setConfig } from "../maps";
+import {
+	getConfig,
+	getDefaultServerData,
+	getLanguage,
+	serverDataDb,
+	setConfig,
+} from "../maps";
 
 import "../discord_ext.js";
+import dedent from "dedent";
 
 export default {
 	data: new Djs.SlashCommandBuilder()
@@ -95,13 +102,21 @@ export default {
 						.setNames("configuration.message.option.name")
 						.setDescriptions("configuration.message.option.description")
 				)
+		)
+		.addSubcommand((sub) =>
+			sub
+				.setNames("configuration.display.title")
+				.setDescriptions("configuration.display.description")
 		),
 	async execute(interaction: Djs.ChatInputCommandInteraction) {
 		if (!interaction.guild) return;
 		const options = interaction.options as Djs.CommandInteractionOptionResolver;
 		const ul = getUl(interaction);
 		const commands = options.getSubcommand();
-
+		if (commands === t("configuration.display.title")) {
+			await displayConfig(interaction);
+			return;
+		}
 		if (t("configuration.menu.log.channel.title").toLowerCase() === commands) {
 			await handleLogChannelConfig(interaction, options, ul);
 			return;
@@ -178,14 +193,20 @@ async function handleLogChannelConfig(
 
 	const channel = options.getChannel(t("common.channel").toLowerCase());
 	if (channel) {
-		setConfig(`${CommandName.log}.channel`, interaction.guild.id, channel.id);
+		if (channel.type !== Djs.ChannelType.GuildText) {
+			await interaction.reply({
+				content: ul("configuration.menu.log.channel.error"),
+			});
+			return;
+		}
+		setConfig(`${CommandName.log}`, interaction.guild.id, channel.id);
 		await interaction.reply({
 			content: ul("configuration.menu.log.channel.success", {
 				channel: Djs.channelMention(channel.id),
-			}) as string,
+			}),
 		});
 	} else {
-		setConfig(`${CommandName.log}.channel`, interaction.guild.id, false);
+		setConfig(`${CommandName.log}`, interaction.guild.id, false);
 		await interaction.reply({
 			content: ul("configuration.menu.log.channel.disable"),
 		});
@@ -662,4 +683,87 @@ function reloadButtonAuto(guildID: string, ul: Translation) {
 			type: 1,
 		},
 	];
+}
+
+async function displayConfig(interaction: Djs.ChatInputCommandInteraction) {
+	if (!interaction.guild) return;
+	const ul = getUl(interaction);
+	const db = serverDataDb.get(interaction.guild.id) ?? getDefaultServerData();
+	const config = db.configuration;
+	const mode = {
+		followOnlyChannel: getConfig(CommandName.followOnlyChannel, interaction.guild.id),
+		followOnlyRole: getConfig(CommandName.followOnlyRole, interaction.guild.id),
+		followOnlyRoleIn: getConfig(CommandName.followOnlyRoleIn, interaction.guild.id),
+	};
+	const auto = {
+		channel: getConfig(CommandName.channel, interaction.guild.id),
+		manualMode: getConfig(CommandName.manualMode, interaction.guild.id),
+		member: getConfig(CommandName.member, interaction.guild.id),
+		newMember: getConfig(CommandName.newMember, interaction.guild.id),
+		thread: getConfig(CommandName.thread, interaction.guild.id),
+	};
+
+	const randomHexColor = Math.floor(Math.random() * 0xffffff);
+	const s = ul("common.space");
+
+	const autoStr =
+		dedent(`- __${ul("configuration.channel.name")}__${s}: \`${auto.channel ? "✓" : "✕"}\`
+					- __${ul("configuration.member.name")}__${s}: \`${auto.member ? "✓" : "✕"}\`
+					- __${ul("configuration.newMember.display")}__${s}: \`${auto.newMember ? "✓" : "✕"}\`
+					- __${ul("configuration.thread.display")}__${s}: \`${auto.thread ? "✓" : "✕"}\``);
+
+	const manualStr = `- __${ul("configuration.disable.name")}__${s}: \`${auto.manualMode ? "✓" : "✕"}\``;
+
+	const autoFinal = auto.manualMode ? manualStr : autoStr;
+
+	//use component v2
+	const components = [
+		new Djs.ContainerBuilder()
+			.setAccentColor(randomHexColor)
+			.addSectionComponents(
+				new Djs.SectionBuilder()
+					.setThumbnailAccessory(
+						new Djs.ThumbnailBuilder().setURL(
+							interaction.guild.iconURL() ||
+								interaction.client.user.avatarURL() ||
+								"https://raw.githubusercontent.com/Mara-Li/Knitting-bot/refs/heads/master/docs/_media/logo.png"
+						)
+					)
+					.addTextDisplayComponents(
+						new Djs.TextDisplayBuilder().setContent(
+							dedent(`# ${ul("configuration.display.main.title")}
+                        - __${ul("configuration.pin.name").toTitle()}__${s}: \`${config.pin ? "✓" : "✕"}\`
+                        - __${ul("configuration.message.name").toTitle()}__${s}: \`${config.messageToSend}\`
+                        - __${ul("configuration.language.name").toTitle()}__${s}: \`${config.language.toUpperCase()}\`
+                        - __${ul("configuration.menu.log.channel.title").toTitle()}__${s}: ${config.log ? Djs.channelMention(config.log as string) : "`✕`"}
+                        `)
+						)
+					)
+			)
+			.addSeparatorComponents(
+				new Djs.SeparatorBuilder()
+					.setSpacing(Djs.SeparatorSpacingSize.Small)
+					.setDivider(true)
+			)
+			.addTextDisplayComponents(
+				new Djs.TextDisplayBuilder().setContent(
+					dedent(`# ${ul("configuration.menu.mode.title").toTitle(true)}
+                - __${ul("configuration.follow.role.title")}__${s}: \`${mode.followOnlyRole ? "✓" : "✕"}\`
+								- __${ul("configuration.follow.thread.title")}__${s}: \`${mode.followOnlyChannel ? "✓" : "✕"}\`
+								- __${ul("configuration.roleIn.name")}__${s}: \`${mode.followOnlyRoleIn ? "✓" : "✕"}\``)
+				)
+			)
+			.addSeparatorComponents(
+				new Djs.SeparatorBuilder()
+					.setSpacing(Djs.SeparatorSpacingSize.Small)
+					.setDivider(true)
+			)
+			.addTextDisplayComponents(
+				new Djs.TextDisplayBuilder().setContent(
+					dedent(`# ${ul("configuration.menu.autoUpdate.title").toTitle(true)}
+					${ul(autoFinal)}`)
+				)
+			),
+	];
+	await interaction.reply({ components, flags: Djs.MessageFlags.IsComponentsV2 });
 }

@@ -6,8 +6,7 @@ import {
 	Collection,
 	type Guild,
 } from "discord.js";
-import { CommandName } from "../interface";
-import { getConfig } from "../maps";
+import { serverDataDb } from "../maps";
 
 /**
  * Send logs to the configured Discord channel
@@ -16,14 +15,8 @@ import { getConfig } from "../maps";
  * @param text - Log messages to send
  */
 export async function discordLogs(guildID: string, bot: Client, ...text: unknown[]) {
-	if (!getConfig(CommandName.log, guildID)) {
-		return;
-	}
-
-	const channelId = getConfig(CommandName.log, guildID, true);
-	if (!channelId) {
-		return;
-	}
+	const channelId = serverDataDb.get(guildID, "configuration")?.log;
+	if (!channelId || typeof channelId !== "string") return;
 
 	try {
 		const channel = await bot.channels.fetch(channelId);
