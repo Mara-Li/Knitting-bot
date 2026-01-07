@@ -269,7 +269,7 @@ async function followThisRole(
 			guildID,
 			"follow",
 			followedRoles,
-			Array.from((newRoles ?? new Map()).values()),
+			Array.from((newRoles ?? new Map()).values()) as Djs.Role[],
 			ul,
 			messages
 		);
