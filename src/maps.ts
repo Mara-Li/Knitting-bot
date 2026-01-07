@@ -106,6 +106,7 @@ export function setTrackedItem(
 	guildID: string,
 	value: string[]
 ): void {
+	// OnlyRoleIn has its own setter (setRoleIn) due to different data structure
 	if (name === TypeName.OnlyRoleIn) return;
 	ensureGuild(guildID);
 	serverDataDb.set(guildID, value, `${mode}.${name}`);
