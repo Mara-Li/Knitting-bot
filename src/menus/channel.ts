@@ -165,7 +165,7 @@ export async function channelSelectorsForType({
  */
 async function handleModalModify(
 	interaction: Djs.ButtonInteraction,
-	guild: NonNullable<Djs.ChatInputCommandInteraction["guild"]>,
+	guild: Djs.Guild,
 	userId: string,
 	page: number,
 	ul: Translation,
@@ -173,7 +173,6 @@ async function handleModalModify(
 	state: PaginatedIdsState,
 	mode: CommandMode
 ) {
-	if (!guild) return;
 	const pageTrackedIds = state.paginatedItems[page] ?? [];
 	const { modal } = await createPaginatedChannelModalByType(
 		mode,
@@ -229,14 +228,13 @@ async function handleModalModify(
  */
 async function showPaginatedMessage(
 	interaction: Djs.ButtonInteraction,
-	guild: NonNullable<Djs.ChatInputCommandInteraction["guild"]>,
+	guild: Djs.Guild,
 	page: number,
 	ul: Translation,
 	channelType: TChannel,
 	state: PaginatedIdsState,
 	mode: CommandMode
 ) {
-	if (!guild) return;
 
 	// Clamp page to available pages
 	const totalPages = Object.keys(state.paginatedItems).length;

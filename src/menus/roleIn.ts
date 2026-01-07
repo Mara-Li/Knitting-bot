@@ -202,7 +202,7 @@ export async function roleInSelectorsForType(
  */
 async function handleRoleInModalModify(
 	interaction: Djs.ButtonInteraction,
-	guild: NonNullable<Djs.ChatInputCommandInteraction["guild"]>,
+	guild: Djs.Guild,
 	userId: string,
 	roleId: string,
 	page: number,
@@ -211,8 +211,6 @@ async function handleRoleInModalModify(
 	state: PaginatedIdsState,
 	mode: CommandMode
 ) {
-	if (!guild) return;
-
 	const pageTrackedIds = state.paginatedItems[page] ?? [];
 
 	const { modal } = await createPaginatedChannelModalByType(
@@ -280,7 +278,6 @@ async function showRoleInPaginatedMessage(
 	state: PaginatedIdsState,
 	mode: CommandMode
 ) {
-	if (!guild) return;
 
 	const totalPages = Object.keys(state.paginatedItems).length;
 	const safePage = Math.max(0, Math.min(page, Math.max(0, totalPages - 1)));
