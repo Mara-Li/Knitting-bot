@@ -278,5 +278,5 @@ export function deleteGuild(id: string): void {
  * Initialize a guild with default data
  */
 export function loadDBFirstTime(guild: string): void {
-	serverDataDb.set(guild, getDefaultServerData());
+	ensureGuild(guild)
 }
