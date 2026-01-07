@@ -155,7 +155,9 @@ export default {
 			await interaction.editReply(
 				`Cleared ${type} ${itemType ? `for ${itemType}` : ""}.`
 			);
-		} else if (interaction.options.getSubcommand() === "db_view") {
+			return;
+		}
+		if (interaction.options.getSubcommand() === "db_view") {
 			await interaction.deferReply();
 			const key = interaction.options.getString("key", true);
 			const guildID = interaction.guild.id;
