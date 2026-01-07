@@ -233,8 +233,8 @@
 			}
 		},
 		"thread": {
-			"description": "Manage the following of salons, threads, categories, or forums",
-			"descriptionWithRole": "Manage the followed salons, threads, categories, or forums for {{- role}}.",
+			"description": "Manage the following of channel, threads, categories, or forums",
+			"descriptionWithRole": "Manage the followed channel, threads, categories, or forums for {{- role}}.",
 			"noSelection": "No selection was made.",
 			"option": {
 				"description": "Channel to follow"
@@ -339,6 +339,6 @@
 		"updated": "The role {{- mention}} will be {{- on}} in:{{- channels}}"
 	},
 	"select": {
-		"type": "Type of chat rooms to manage"
+		"type": "Type of channel to manage"
 	}
 }
