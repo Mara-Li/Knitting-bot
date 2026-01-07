@@ -15,7 +15,6 @@ import { checkThread, validateChannelType } from "../../utils/data_check";
 
 export default (client: Client): void => {
 	client.on("channelUpdate", async (oldChannel, newChannel) => {
-		console.info(`Channel ${getChannelName(oldChannel.id, client)} has been updated.`);
 		if (
 			oldChannel.type === ChannelType.DM ||
 			newChannel.type === ChannelType.DM ||

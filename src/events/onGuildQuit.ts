@@ -5,6 +5,5 @@ export default (client: Client): void => {
 	client.on("guildDelete", async (guild) => {
 		deleteGuild(guild.id);
 		clearGuildMessageCache(guild.id);
-		console.info(`Guild ${guild.name} has been removed from the database.`);
 	});
 };

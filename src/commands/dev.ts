@@ -140,7 +140,6 @@ export default {
 			return;
 		}
 		if (interaction.options.getSubcommand() === "clear") {
-			console.log("BEFORE", serverDataDb.get(interaction.guild.id));
 			await interaction.deferReply();
 			const itemType = interaction.options.getString("item_type");
 			const type = interaction.options.getString("type", true);
@@ -158,7 +157,6 @@ export default {
 			await interaction.editReply(
 				`Cleared ${type} ${itemType ? `for ${itemType}` : ""}.`
 			);
-			console.log("Current DB state:", result);
 		} else if (interaction.options.getSubcommand() === "db_view") {
 			await interaction.deferReply();
 			const key = interaction.options.getString("key", true);

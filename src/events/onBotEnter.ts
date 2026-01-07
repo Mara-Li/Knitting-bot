@@ -18,6 +18,5 @@ export default (client: Client): void => {
 			console.error(error);
 		}
 		loadDBFirstTime(guild.id);
-		console.info(`Guild ${guild.name} has been added to the database.`);
 	});
 };

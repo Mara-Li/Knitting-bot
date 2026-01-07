@@ -17,22 +17,16 @@ export default (client: Client): void => {
 
 		const serializedCommands = ALL_COMMANDS.map((command) => command.data.toJSON());
 		const guilds = Array.from(client.guilds.cache.values());
-		if (guilds.length === 0) {
-			console.info("Aucune guilde détectée, rien à enregistrer.");
-			return;
-		}
+		if (guilds.length === 0) return;
 
 		console.info(`Registering commands on ${guilds.length} servers...`);
 		const guildPromises = guilds.map(async (guild) => {
 			try {
-				console.info(`[${guild.name}] Synchronisation des commandes...`);
 				await guild.commands.set(serializedCommands);
-				console.info(`[${guild.name}] OK (${serializedCommands.length} commandes).`);
 			} catch (error) {
 				console.error(`[${guild.name}] Failure on registering commands:`, error);
 			}
 		});
 		await Promise.all(guildPromises);
-		console.info("All commands registered.");
 	});
 };

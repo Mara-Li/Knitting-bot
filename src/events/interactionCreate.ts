@@ -11,7 +11,7 @@ export default (client: Client): void => {
 		try {
 			await command.execute(interaction as ChatInputCommandInteraction);
 		} catch (error) {
-			console.log(error);
+			console.warn(error);
 			if (!interaction.channel || interaction.channel.isDMBased()) return;
 			const ul = getUl(interaction);
 			await interaction.channel.send({

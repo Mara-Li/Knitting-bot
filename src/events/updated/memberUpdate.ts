@@ -93,6 +93,5 @@ export default (client: Client): void => {
 		} catch (error) {
 			console.error(error);
 		}
-		console.info(`Member ${newMember.user.username} has been updated.`);
 	});
 };

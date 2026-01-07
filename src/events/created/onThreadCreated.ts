@@ -18,16 +18,13 @@ export default (client: Client): void => {
 		const guild = thread.guild.id;
 		if (thread.type !== ChannelType.PublicThread) return;
 		if (!getConfig(CommandName.thread, guild)) return;
-		console.info(`Thread ${thread.name} created!`);
 		const ul = getTranslation(thread.guild.id, { locale: thread.guild.preferredLocale });
 		await discordLogs(guild, client, ul("logs.thread.created", { thread: thread.name }));
 		/** automatically add the bot to the thread */
 		await thread.join();
 		if (!getConfig(CommandName.followOnlyChannel, guild)) {
-			console.info("Thread is not follow only", !checkThread(thread, "ignore"));
 			if (!checkThread(thread, "ignore")) await addRoleAndUserToThread(thread);
 		} else {
-			console.info("Thread is follow only", checkThread(thread, "follow"));
 			if (checkThread(thread, "follow")) await addRoleAndUserToThread(thread);
 		}
 	});

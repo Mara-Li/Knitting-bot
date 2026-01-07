@@ -203,18 +203,9 @@ export function getMaps(
 	ensureGuild(guildID);
 	const config = serverDataDb.get(guildID, maps) as ServerData["follow"];
 
-	console.log(`[getMaps] Using config from serverData.${maps}:`, {
-		hasCategory: !!config?.[TypeName.category],
-		hasChannel: !!config?.[TypeName.channel],
-		hasForum: !!config?.[TypeName.forum],
-		hasThread: !!config?.[TypeName.thread],
-	});
-
 	switch (typeName) {
 		case TypeName.thread: {
-			const threads = (config?.[TypeName.thread] as string[]) ?? [];
-			console.log(`[getMaps] Returning ${threads.length} threads for ${maps}`);
-			return threads;
+			return (config?.[TypeName.thread] as string[]) ?? [];
 		}
 		case TypeName.category:
 			return (config?.[TypeName.category] as string[]) ?? [];
@@ -281,22 +272,6 @@ export function getPinSetting(guildID: string): boolean {
 	ensureGuild(guildID);
 	const pin = serverDataDb.get(guildID, "configuration.pin") as boolean | undefined;
 	return pin ?? false;
-}
-
-/**
- * Destroy the entire database
- */
-export function destroyDB(): void {
-	serverDataDb.deleteAll();
-	console.log("Destroyed DB");
-}
-
-/**
- * Export database for backup
- */
-export function exportDB(): string {
-	console.info("Exporting DB");
-	return serverDataDb.export();
 }
 
 /**

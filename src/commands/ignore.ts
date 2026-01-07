@@ -124,7 +124,6 @@ export default {
 					return;
 				}
 				const channelType = options.getString("type", true) as TChannel;
-				console.log(`[ignore] Received command with type: ${channelType}`);
 				await channelSelectorsForType({ channelType, interaction, mode: "ignore", ul });
 				break;
 			}
@@ -167,9 +166,7 @@ export default {
 					await interactionRoleInChannel(interaction, "ignore");
 					return;
 				}
-				console.log(
-					`[ignore roleIn] Received command with type: ${channelType}, roleId: ${roleId}`
-				);
+
 				await roleInSelectorsForType(interaction, ul, channelType, "ignore", roleId);
 				break;
 			}
@@ -311,7 +308,7 @@ async function ignoreThisRole(
 			flags: Djs.MessageFlags.Ephemeral,
 		});
 	} catch (e) {
-		console.error(e);
+		console.warn(e);
 		try {
 			await interaction.reply({
 				content: ul("error.failedReply"),

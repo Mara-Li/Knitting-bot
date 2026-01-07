@@ -43,7 +43,7 @@ export default (client: Client): void => {
 				// Update cache with new message
 				setCachedMessage(guildId, threadId, newMessage.id);
 			} catch (error) {
-				console.error(`Failed to recreate bot message in thread ${threadId}:`, error);
+				console.warn(`Failed to recreate bot message in thread ${threadId}:`, error);
 			}
 		}
 	});

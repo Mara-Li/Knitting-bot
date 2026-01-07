@@ -123,7 +123,6 @@ export default {
 					return;
 				}
 				const channelType = options.getString("type", true) as TChannel;
-				console.log(`[follow] Received command with type: ${channelType}`);
 				await channelSelectorsForType({ channelType, interaction, mode: "follow", ul });
 				break;
 			}
@@ -156,9 +155,6 @@ export default {
 					return;
 				}
 				const channelType = options.getString("type", true) as TChannel;
-				console.log(
-					`[follow roleIn] Received command with type: ${channelType}, roleId: ${roleId}`
-				);
 				await roleInSelectorsForType(interaction, ul, channelType, "follow", roleId);
 				break;
 			}
@@ -288,7 +284,7 @@ async function followThisRole(
 			flags: Djs.MessageFlags.Ephemeral,
 		});
 	} catch (e) {
-		console.error(e);
+		console.warn(e);
 		try {
 			await interaction.reply({
 				content: "error.failedReply",

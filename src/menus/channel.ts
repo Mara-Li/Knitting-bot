@@ -173,7 +173,7 @@ export async function channelSelectorsForType({
 			mode
 		);
 	} catch (e) {
-		console.error(`[${mode} ${channelType}] Error:`, e);
+		console.warn(`[${mode} ${channelType}] Error:`, e);
 	}
 }
 
