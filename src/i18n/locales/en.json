@@ -40,6 +40,7 @@
       "follow": "{{- item}} is already ignored. Remove it from ignored before following it.",
       "ignore": "{{- item}} is already followed. Remove it from followed before ignoring it."
     },
+    "delete": "Delete",
     "disable": "Disable",
     "disabled": "Disabled",
     "elements": "elements",

@@ -3,13 +3,13 @@ import * as Djs from "discord.js";
 import type { TChannel } from "src/interface";
 import { cmdLn, getUl, t } from "../i18n";
 import { CommandName, TIMEOUT, type Translation } from "../interface";
-import { getConfig, getRole } from "../maps";
+import {getConfig, getRole, getRoleIn, serverDataDb, setRoleIn} from "../maps";
 import {
 	channelSelectorsForType,
 	createRoleSelectModal,
 	extractAndValidateRoleOption,
 	interactionRoleInChannel,
-	processRoleTypeChanges,
+	processRoleTypeChanges, removeRoleIn,
 	roleInSelectorsForType,
 } from "../menus";
 import { getCommandId } from "../utils";
@@ -95,6 +95,11 @@ export default {
 								name: t("common.forum"),
 								name_localizations: cmdLn("common.forum"),
 								value: "forum",
+							},
+							{
+								name: t("common.delete"),
+								name_localizations: cmdLn("common.delete"),
+								value: "delete",
 							}
 						)
 						.setRequired(true)
@@ -137,6 +142,17 @@ export default {
 				await displayFollowed(interaction, ul);
 				break;
 			case t("common.roleIn"): {
+				const opt = options.getString("type", true);
+				if (opt === "delete") {
+					await removeRoleIn(
+						options,
+						guild,
+						"follow",
+						interaction,
+						ul
+					)
+					return;
+				}
 				const roleId = await extractAndValidateRoleOption(options);
 				if (!roleId) {
 					await interaction.reply({

@@ -1,7 +1,14 @@
 import type { CommandInteractionOptionResolver } from "discord.js";
 import * as Djs from "discord.js";
 import { getUl, t } from "../i18n";
-import { CommandName, type RoleIn, type TChannel, TIMEOUT, TypeName } from "../interface";
+import {
+	CommandName,
+	type RoleIn,
+	type TChannel,
+	TIMEOUT,
+	type Translation,
+	TypeName,
+} from "../interface";
 import { getConfig, getRoleIn, setRoleIn } from "../maps";
 import { resolveChannelsByIds } from "../utils";
 import { createPaginatedChannelModal } from "./modalHandler";
@@ -555,4 +562,25 @@ export function getChannelType(channelType: TChannel) {
 			break;
 	}
 	return { channelTypeFilter, typeName };
+}
+
+export async function removeRoleIn(
+	options: Djs.CommandInteractionOptionResolver,
+	guild: string,
+	mode: "follow" | "ignore",
+	interaction: Djs.ChatInputCommandInteraction,
+	ul: Translation
+) {
+	const roleId = options.getRole(t("common.role"), true).id;
+	const allRoleIn = getRoleIn(mode, guild);
+	const filtered = allRoleIn.filter((ri) => ri.roleId !== roleId);
+	setRoleIn(mode, guild, filtered);
+	await interaction.reply({
+		content: ul("roleIn.noLonger.any", {
+			on: ul(`roleIn.on.${mode}`),
+			role: Djs.roleMention(roleId),
+		}),
+		flags: Djs.MessageFlags.Ephemeral,
+	});
+	return;
 }
