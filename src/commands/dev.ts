@@ -104,9 +104,8 @@ export default {
 				channel.isVoiceBased() ||
 				channel.isThread()
 			) {
-				await interaction.reply({
+				await interaction.editReply({
 					content: "This command can only be used in a text channel.",
-					flags: Djs.MessageFlags.Ephemeral,
 				});
 				return;
 			}
