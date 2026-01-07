@@ -117,7 +117,7 @@ export default {
 			await displayConfig(interaction);
 			return;
 		}
-		if (t("configuration.menu.log.channel.title").toLowerCase() === commands) {
+		if (t("configuration.menu.log.channel.title") === commands) {
 			await handleLogChannelConfig(interaction, options, ul);
 			return;
 		}
@@ -132,7 +132,7 @@ export default {
 			return;
 		}
 
-		if (t("configuration.menu.autoUpdate.cmd").toLowerCase() === commands) {
+		if (t("configuration.menu.autoUpdate.cmd") === commands) {
 			await handleAutoUpdateConfig(interaction, ul);
 			return;
 		}
@@ -332,7 +332,7 @@ async function setupMessageCollector(
 			// Message was deleted, no need to log error
 			return;
 		}
-		console.log(error);
+		console.warn(error);
 		await interaction.editReply({ components: [] });
 	}
 }
@@ -488,16 +488,6 @@ async function updateConfig(
 				setConfig(cmd, interaction.guild.id, true);
 			}
 		}
-
-		// Debug: log current values so we can trace why the button styles are wrong
-		try {
-			console.debug(
-				`manualMode toggle: manual=${getConfig(CommandName.manualMode, interaction.guild.id)}, channel=${getConfig(CommandName.channel, interaction.guild.id)}, member=${getConfig(CommandName.member, interaction.guild.id)}, newMember=${getConfig(CommandName.newMember, interaction.guild.id)}, thread=${getConfig(CommandName.thread, interaction.guild.id)}`
-			);
-		} catch (e) {
-			console.error("Error logging manualMode state", e);
-		}
-
 		const embed = autoUpdateMenu(interaction.guild.id, ul);
 		//reload buttons
 		const rows = reloadButtonAuto(interaction.guild.id, ul);

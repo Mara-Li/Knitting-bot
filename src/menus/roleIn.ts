@@ -3,23 +3,20 @@ import type { TChannel } from "src/interface";
 import { CommandName, type RoleIn, TIMEOUT, type Translation } from "../interface";
 import { getConfig, getRoleIn, setRoleIn } from "../maps";
 import { resolveChannelsByIds } from "../utils";
-import { getPaginationButtons } from "./channelPagination";
-import type { CommandMode } from "./itemsManager";
+import { getPaginationButtons } from "./channel";
 import {
-	createPaginatedChannelModalByType,
 	createPaginationButtons,
-} from "./modalHandler";
+	createPaginationState,
+	deletePaginationState,
+	getPaginationState,
+	hasMorePages,
+	type PaginationState,
+	paginateIds,
+	startPaginatedButtonsFlow,
+} from "./flow";
+import type { CommandMode } from "./items";
+import { createPaginatedChannelModalByType } from "./modal";
 import { getChannelType, resolveIds } from "./utils";
-
-type PaginationState = {
-	currentPage: number;
-	originalIds: string[];
-	paginatedItems: Record<number, string[]>;
-	selectedIds: Set<string>;
-};
-
-// State management pour pagination roleIn par type
-const roleInPaginationStates = new Map<string, PaginationState>();
 
 /**
  * Handle roleIn channel selectors with pagination for follow/ignore commands
@@ -58,10 +55,6 @@ export async function roleInSelectorsForType(
 		return;
 	}
 
-	console.log(
-		`[roleInSelectorsForType] Called with mode="${mode}", channelType="${channelType}", roleId="${roleId}"`
-	);
-
 	// Récupérer la configuration actuelle de ce rôle
 	const allRoleIn = getRoleIn(mode, guildID);
 	const existingRoleIn = allRoleIn.find((r) => r.roleId === roleId);
@@ -76,123 +69,88 @@ export async function roleInSelectorsForType(
 
 	const trackedIds = allChannels.map((ch) => ch.id);
 
-	console.log(`[${mode} roleIn ${channelType}] trackedIds:`, trackedIds);
-
-	// Découper les trackedIds en pages (25 par page)
-	const paginatedItems: Record<number, string[]> = {};
-	for (let i = 0; i < Math.ceil(trackedIds.length / 25); i++) {
-		const startIndex = i * 25;
-		const endIndex = startIndex + 25;
-		paginatedItems[i] = trackedIds.slice(startIndex, endIndex);
-	}
-
-	console.log(`[${mode} roleIn ${channelType}] paginatedItems:`, paginatedItems);
+	// Découper les trackedIds en pages (25 par page) en utilisant le helper partagé
+	const paginatedItems = paginateIds(trackedIds, 25);
 
 	// Initialiser l'état de pagination avec les éléments paginés
 	const stateKey = `${userId}_${guildID}_${mode}_roleIn_${roleId}_${channelType}`;
-	const state: PaginationState = {
-		currentPage: 0,
-		originalIds: trackedIds,
-		paginatedItems,
-		selectedIds: new Set(trackedIds),
-	};
-	roleInPaginationStates.set(stateKey, state);
+	const state = createPaginationState(stateKey, trackedIds, paginatedItems);
 
 	// Si 25 items ou plus, afficher un message avec boutons
 	if (trackedIds.length >= 25) {
 		const trackedOnFirstPage = paginatedItems[0]?.length ?? 0;
-		const hasMore = Object.keys(paginatedItems).length >= 1;
+		const hasMore = hasMorePages(paginatedItems, 0);
 
 		const buttons = createPaginationButtons(mode, 0, hasMore, ul);
 		const roleLabel = Djs.roleMention(roleId);
 		const summary = `Page 1 - ${ul("common.role")}: ${roleLabel} - ${ul(`common.${channelType}`)} : ${trackedOnFirstPage} ${ul("common.elements")}`;
 
-		await interaction.reply({
-			components: buttons,
-			content: summary,
-			flags: Djs.MessageFlags.Ephemeral,
-		});
-
-		const buttonMessage = await interaction.fetchReply();
-
-		const collector = buttonMessage.createMessageComponentCollector({
-			filter: (i) => i.user.id === userId,
-			time: TIMEOUT,
-		});
-
-		collector.on("collect", async (buttonInteraction: Djs.ButtonInteraction) => {
-			const customId = buttonInteraction.customId;
-
-			if (customId.startsWith(`${mode}_page_modify_`)) {
-				const page = Number.parseInt(customId.split("_").pop() || "0", 10);
-				await handleRoleInModalModify(
-					buttonInteraction,
-					guild,
-					userId,
-					roleId,
-					page,
-					ul,
-					channelType,
-					state,
-					mode
-				);
-			} else if (customId.startsWith(`${mode}_page_prev_`)) {
-				await buttonInteraction.deferUpdate();
-				const currentPage = Number.parseInt(customId.split("_").pop() || "0", 10);
-				const prevPage = Math.max(0, currentPage - 1);
-				await showRoleInPaginatedMessage(
-					buttonInteraction,
-					guild,
-					roleId,
-					prevPage,
-					ul,
-					channelType,
-					state,
-					mode
-				);
-			} else if (customId.startsWith(`${mode}_page_next_`)) {
-				await buttonInteraction.deferUpdate();
-				const currentPage = Number.parseInt(customId.split("_").pop() || "0", 10);
-				const nextPage = currentPage + 1;
-				await showRoleInPaginatedMessage(
-					buttonInteraction,
-					guild,
-					roleId,
-					nextPage,
-					ul,
-					channelType,
-					state,
-					mode
-				);
-			} else if (customId === `${mode}_page_validate`) {
-				await buttonInteraction.deferUpdate();
-				await validateRoleInAndSave(
-					buttonInteraction,
-					userId,
-					guildID,
-					roleId,
-					channelType,
-					state.originalIds,
-					ul,
-					mode
-				);
-				collector.stop();
-			} else if (customId === `${mode}_page_cancel`) {
-				await buttonInteraction.deferUpdate();
-				roleInPaginationStates.delete(stateKey);
-				await buttonInteraction.editReply({
-					components: [],
-					content: ul("common.cancelled"),
-				});
-				collector.stop();
+		// Use generic paginated flow helper
+		await startPaginatedButtonsFlow(
+			{
+				initialComponents: buttons,
+				initialContent: summary,
+				interaction,
+				stateKey,
+				timeout: TIMEOUT,
+				ul,
+				userId,
+			},
+			{
+				onCancel: async (buttonInteraction) => {
+					deletePaginationState(stateKey);
+					await buttonInteraction.editReply({
+						components: [],
+						content: ul("common.cancelled"),
+					});
+				},
+				onEnd: async (buttonMessage) => {
+					deletePaginationState(stateKey);
+					try {
+						await buttonMessage.edit({ components: [] }).catch(() => undefined);
+					} catch (e) {
+						/* noop */
+					}
+				},
+				onModify: async (buttonInteraction, page) => {
+					await handleRoleInModalModify(
+						buttonInteraction,
+						guild,
+						userId,
+						roleId,
+						page,
+						ul,
+						channelType,
+						state,
+						mode
+					);
+				},
+				onShowPage: async (buttonInteraction, page) => {
+					await showRoleInPaginatedMessage(
+						buttonInteraction,
+						guild,
+						roleId,
+						page,
+						ul,
+						channelType,
+						state,
+						mode
+					);
+				},
+				onValidate: async (buttonInteraction) => {
+					await validateRoleInAndSave(
+						buttonInteraction,
+						userId,
+						guildID,
+						roleId,
+						channelType,
+						state.originalIds,
+						ul,
+						mode
+					);
+				},
 			}
-		});
-
-		collector.on("end", () => {
-			if (roleInPaginationStates.has(stateKey)) {
-				roleInPaginationStates.delete(stateKey);
-			}
-		});
+		);
 
 		return;
 	}
@@ -327,14 +285,17 @@ async function showRoleInPaginatedMessage(
 ) {
 	if (!guild) return;
 
-	state.currentPage = page;
+	// Clamp page to available pages
+	const totalPages = Object.keys(state.paginatedItems).length;
+	const safePage = Math.max(0, Math.min(page, Math.max(0, totalPages - 1)));
+	state.currentPage = safePage;
 
-	const trackedOnThisPage = state.paginatedItems[page]?.length ?? 0;
-	const hasMore = Object.keys(state.paginatedItems).length > page + 1;
+	const trackedOnThisPage = state.paginatedItems[safePage]?.length ?? 0;
+	const hasMore = hasMorePages(state.paginatedItems, safePage);
 
-	const buttons = createPaginationButtons(mode, page, hasMore, ul);
+	const buttons = createPaginationButtons(mode, safePage, hasMore, ul);
 	const roleLabel = Djs.roleMention(roleId);
-	const summary = `Page ${page + 1} - ${ul("common.role")}: ${roleLabel} - ${ul(`common.${channelType}`)} : ${trackedOnThisPage} ${ul("common.elements")}`;
+	const summary = `Page ${safePage + 1} - ${ul("common.role")}: ${roleLabel} - ${ul(`common.${channelType}`)} : ${trackedOnThisPage} ${ul("common.elements")}`;
 
 	await interaction.editReply({
 		components: buttons,
@@ -356,7 +317,7 @@ async function validateRoleInAndSave(
 	mode: CommandMode
 ) {
 	const stateKey = `${userId}_${guildID}_${mode}_roleIn_${roleId}_${channelType}`;
-	const state = roleInPaginationStates.get(stateKey);
+	const state = getPaginationState(stateKey);
 	if (!state) return;
 
 	const guild = interaction.guild;
@@ -376,14 +337,13 @@ async function validateRoleInAndSave(
 		} else {
 			await interaction.update({ components: [], content: errorMsg });
 		}
-		roleInPaginationStates.delete(stateKey);
 		return;
 	}
 
 	const finalIds = Array.from(state.selectedIds);
 	const messages: string[] = [];
 
-	console.log(`[${mode} roleIn ${channelType}] finalIds:`, state.selectedIds);
+	// debug logs removed
 
 	const { finalChannelsResolved, originalChannelsResolved, channelTypeFilter } =
 		await resolveIds(channelType, guild, trackedIds, finalIds);
@@ -438,7 +398,7 @@ async function validateRoleInAndSave(
 			await interaction.update({ components: [], content: conflictMessage });
 		}
 
-		roleInPaginationStates.delete(stateKey);
+		deletePaginationState(stateKey);
 		return;
 	}
 
@@ -532,7 +492,7 @@ async function validateRoleInAndSave(
 			await interaction.update({ components: [], content: finalMessage });
 		}
 
-		roleInPaginationStates.delete(stateKey);
+		deletePaginationState(stateKey);
 		return;
 	}
 
@@ -567,5 +527,5 @@ async function validateRoleInAndSave(
 		await interaction.update({ components: [], content: finalMessage });
 	}
 
-	roleInPaginationStates.delete(stateKey);
+	deletePaginationState(stateKey);
 }

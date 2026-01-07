@@ -12,9 +12,6 @@ import {
  * Structure: { guildId: { configuration, ignore, follow, messageCache } }
  */
 export const serverDataDb = new Enmap<string, ServerData>({
-	autoFetch: true,
-	cloneLevel: "deep",
-	fetchAll: false,
 	name: "Database",
 });
 

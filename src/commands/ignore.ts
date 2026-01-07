@@ -125,7 +125,7 @@ export default {
 				}
 				const channelType = options.getString("type", true) as TChannel;
 				console.log(`[ignore] Received command with type: ${channelType}`);
-				await channelSelectorsForType(interaction, ul, channelType, "ignore");
+				await channelSelectorsForType({ channelType, interaction, mode: "ignore", ul });
 				break;
 			}
 			case t("common.role").toLowerCase():

@@ -11,7 +11,7 @@ import {
 } from "../interface";
 import { getConfig, getRoleIn, setRoleIn } from "../maps";
 import { resolveChannelsByIds } from "../utils";
-import { createPaginatedChannelModal } from "./modalHandler";
+import { createPaginatedChannelModal } from "./modal";
 
 /**
  * Extract and validate role option from interaction
@@ -446,8 +446,9 @@ export async function interactionRoleInChannel(
 
 	const collector = interaction.channel?.createMessageComponentCollector({
 		componentType: Djs.ComponentType.Button,
-		filter: (i: Djs.ButtonInteraction) => i.user.id === userId,
-		time: 600_000,
+		filter: (i: Djs.ButtonInteraction) =>
+			i.user.id === userId && i.message.id === interaction.id,
+		time: TIMEOUT,
 	});
 
 	if (!collector) return;

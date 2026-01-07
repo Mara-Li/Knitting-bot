@@ -124,7 +124,7 @@ export default {
 				}
 				const channelType = options.getString("type", true) as TChannel;
 				console.log(`[follow] Received command with type: ${channelType}`);
-				await channelSelectorsForType(interaction, ul, channelType, "follow");
+				await channelSelectorsForType({ channelType, interaction, mode: "follow", ul });
 				break;
 			}
 			case t("common.role").toLowerCase():
@@ -201,7 +201,7 @@ async function displayFollowed(
 				value: followedCategoriesNames || ul("common.none"),
 			})
 			.addFields({
-				name: ul("common.channel"),
+				name: ul("common.thread"),
 				value: followedThreadsNames || ul("common.none"),
 			})
 			.addFields({

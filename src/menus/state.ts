@@ -170,5 +170,5 @@ export function cleanupOldStates(): void {
 	}
 }
 
-// Auto-cleanup toutes les 5 minutes
-setInterval(cleanupOldStates, 5 * 60 * 1000);
+// Auto-cleanup toutes les 15 minutes
+setInterval(cleanupOldStates, 15 * 60 * 1000);
