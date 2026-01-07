@@ -3,7 +3,6 @@ import {
 	CommandName,
 	DEFAULT_CONFIGURATION,
 	DEFAULT_IGNORE_FOLLOW,
-	type IgnoreFollow,
 	type RoleIn,
 	type ServerData,
 	TypeName,
@@ -22,14 +21,23 @@ export const serverDataDb = new Enmap<string, ServerData>({
 });
 
 /**
+ * Ensure a guild entry exists; if absent, initialize defaults.
+ */
+function ensureGuild(guildID: string): void {
+	if (!serverDataDb.has(guildID)) {
+		serverDataDb.set(guildID, getDefaultServerData());
+	}
+}
+
+/**
  * Get cached bot message ID for a thread
  * @param guildId The guild ID
  * @param threadId The thread ID
  * @returns The cached message ID or undefined
  */
 export function getCachedMessage(guildId: string, threadId: string): string | undefined {
-	const serverData = serverDataDb.ensure(guildId, getDefaultServerData());
-	return serverData.messageCache[threadId];
+	ensureGuild(guildId);
+	return serverDataDb.get(guildId, `messageCache.${threadId}`);
 }
 
 /**
@@ -43,9 +51,8 @@ export function setCachedMessage(
 	threadId: string,
 	messageId: string
 ): void {
-	const serverData = serverDataDb.ensure(guildId, getDefaultServerData());
-	serverData.messageCache[threadId] = messageId;
-	serverDataDb.set(guildId, serverData);
+	ensureGuild(guildId);
+	serverDataDb.set(guildId, messageId, `messageCache.${threadId}`);
 }
 
 /**
@@ -54,9 +61,7 @@ export function setCachedMessage(
  * @param threadId The thread ID
  */
 export function deleteCachedMessage(guildId: string, threadId: string): void {
-	const serverData = serverDataDb.ensure(guildId, getDefaultServerData());
-	delete serverData.messageCache[threadId];
-	serverDataDb.set(guildId, serverData);
+	serverDataDb.delete(guildId, `messageCache.${threadId}`);
 }
 
 /**
@@ -64,9 +69,8 @@ export function deleteCachedMessage(guildId: string, threadId: string): void {
  * @param guildId The guild ID
  */
 export function clearGuildMessageCache(guildId: string): void {
-	const serverData = serverDataDb.ensure(guildId, getDefaultServerData());
-	serverData.messageCache = {};
-	serverDataDb.set(guildId, serverData);
+	ensureGuild(guildId);
+	serverDataDb.set(guildId, {}, "messageCache");
 }
 
 /**
@@ -75,8 +79,8 @@ export function clearGuildMessageCache(guildId: string): void {
 function getDefaultServerData(): ServerData {
 	return {
 		configuration: DEFAULT_CONFIGURATION,
-		follow: DEFAULT_IGNORE_FOLLOW,
-		ignore: DEFAULT_IGNORE_FOLLOW,
+		follow: { ...DEFAULT_IGNORE_FOLLOW },
+		ignore: { ...DEFAULT_IGNORE_FOLLOW },
 		messageCache: {},
 	};
 }
@@ -93,50 +97,30 @@ export function setConfig(
 	value: string | boolean
 ): void {
 	if (name === CommandName.manualMode) return;
-	const serverData = serverDataDb.ensure(guildID, getDefaultServerData());
-	(serverData.configuration as Record<string, string | boolean>)[name] = value;
-	serverDataDb.set(guildID, serverData);
+	ensureGuild(guildID);
+	serverDataDb.set(guildID, value, `configuration.${name}`);
 }
 
 /**
- * Set value in ignore configuration
+ * Set value in follow or ignore configuration (unified function)
  */
-export function setIgnore<T extends keyof IgnoreFollow>(
-	name: T,
+export function setTrackedItem(
+	mode: "follow" | "ignore",
+	name: TypeName,
 	guildID: string,
-	value: IgnoreFollow[T]
+	value: string[]
 ): void {
 	if (name === TypeName.OnlyRoleIn) return;
-	const serverData = serverDataDb.ensure(guildID, getDefaultServerData());
-	serverData.ignore[name] = value;
-	serverDataDb.set(guildID, serverData);
-}
-
-/**
- * Set value in follow configuration
- */
-export function setFollow<T extends keyof IgnoreFollow>(
-	name: T,
-	guildID: string,
-	value: IgnoreFollow[T]
-): void {
-	if (name === TypeName.OnlyRoleIn) return;
-	const serverData = serverDataDb.ensure(guildID, getDefaultServerData());
-	serverData.follow[name] = value;
-	serverDataDb.set(guildID, serverData);
+	ensureGuild(guildID);
+	serverDataDb.set(guildID, value, `${mode}.${name}`);
 }
 
 /**
  * Set role list for ignore or follow
  */
 export function setRole(on: "follow" | "ignore", guildID: string, value: string[]): void {
-	const serverData = serverDataDb.ensure(guildID, getDefaultServerData());
-	if (on === "follow") {
-		serverData.follow[TypeName.role] = value;
-	} else {
-		serverData.ignore[TypeName.role] = value;
-	}
-	serverDataDb.set(guildID, serverData);
+	ensureGuild(guildID);
+	serverDataDb.set(guildID, value, `${on}.${TypeName.role}`);
 }
 
 /**
@@ -147,13 +131,8 @@ export function setRoleIn(
 	guildID: string,
 	value: RoleIn[]
 ): void {
-	const serverData = serverDataDb.ensure(guildID, getDefaultServerData());
-	if (on === "follow") {
-		serverData.follow[TypeName.OnlyRoleIn] = value;
-	} else {
-		serverData.ignore[TypeName.OnlyRoleIn] = value;
-	}
-	serverDataDb.set(guildID, serverData);
+	ensureGuild(guildID);
+	serverDataDb.set(guildID, value, `${on}.${TypeName.OnlyRoleIn}`);
 }
 
 /**
@@ -171,21 +150,16 @@ export function getConfig(
 	guildID: string,
 	channel?: boolean
 ): string | boolean {
-	const serverData = serverDataDb.ensure(guildID, getDefaultServerData());
+	ensureGuild(guildID);
 
 	// If looking for a specific channel (e.g., for logs)
 	if (channel) {
-		const channelValue = (serverData.configuration as Record<string, unknown>)[
-			`${name}.channel`
-		];
-		if (channelValue !== undefined && channelValue !== null) {
-			return channelValue as string;
-		}
-		return "";
+		const channelValue = serverDataDb.get(guildID, `configuration.${name}.channel`);
+		return (channelValue as string | undefined) ?? "";
 	}
 
 	// Retrieve the configuration value
-	const value = serverData.configuration[name];
+	const value = serverDataDb.get(guildID, `configuration.${name}`);
 
 	// If the value exists, return it
 	if (value !== undefined && value !== null) {
@@ -209,18 +183,22 @@ export function getConfig(
  * Get RoleIn list for ignore or follow
  */
 export function getRoleIn(ignore: "follow" | "ignore", guildID: string): RoleIn[] {
-	const serverData = serverDataDb.ensure(guildID, getDefaultServerData());
-	const config = ignore === "follow" ? serverData.follow : serverData.ignore;
-	return (config[TypeName.OnlyRoleIn] as RoleIn[]) ?? [];
+	ensureGuild(guildID);
+	const roleIn = serverDataDb.get(guildID, `${ignore}.${TypeName.OnlyRoleIn}`) as
+		| RoleIn[]
+		| undefined;
+	return roleIn ?? [];
 }
 
 /**
  * Get role ID list for ignore or follow
  */
 export function getRole(ignore: "follow" | "ignore", guildID: string): string[] {
-	const serverData = serverDataDb.ensure(guildID, getDefaultServerData());
-	const config = ignore === "follow" ? serverData.follow : serverData.ignore;
-	return (config[TypeName.role] as string[]) ?? [];
+	ensureGuild(guildID);
+	const roles = serverDataDb.get(guildID, `${ignore}.${TypeName.role}`) as
+		| string[]
+		| undefined;
+	return roles ?? [];
 }
 
 /**
@@ -231,18 +209,29 @@ export function getMaps(
 	typeName: TypeName,
 	guildID: string
 ): string[] {
-	const serverData = serverDataDb.ensure(guildID, getDefaultServerData());
-	const config = maps === "follow" ? serverData.follow : serverData.ignore;
+	console.log(`[getMaps] Called with maps="${maps}", typeName="${typeName}"`);
+	ensureGuild(guildID);
+	const config = serverDataDb.get(guildID, maps) as ServerData["follow"];
+
+	console.log(`[getMaps] Using config from serverData.${maps}:`, {
+		hasCategory: !!config?.[TypeName.category],
+		hasChannel: !!config?.[TypeName.channel],
+		hasForum: !!config?.[TypeName.forum],
+		hasThread: !!config?.[TypeName.thread],
+	});
 
 	switch (typeName) {
-		case TypeName.thread:
-			return (config[TypeName.thread] as string[]) ?? [];
+		case TypeName.thread: {
+			const threads = (config?.[TypeName.thread] as string[]) ?? [];
+			console.log(`[getMaps] Returning ${threads.length} threads for ${maps}`);
+			return threads;
+		}
 		case TypeName.category:
-			return (config[TypeName.category] as string[]) ?? [];
+			return (config?.[TypeName.category] as string[]) ?? [];
 		case TypeName.channel:
-			return (config[TypeName.channel] as string[]) ?? [];
+			return (config?.[TypeName.channel] as string[]) ?? [];
 		case TypeName.forum:
-			return (config[TypeName.forum] as string[]) ?? [];
+			return (config?.[TypeName.forum] as string[]) ?? [];
 		default:
 			return [];
 	}
@@ -252,22 +241,35 @@ export function getMaps(
  * Get language for a guild
  */
 export function getLanguage(guildID: string): string {
-	const serverData = serverDataDb.ensure(guildID, getDefaultServerData());
-	return (serverData.configuration.language as string) ?? "en-US";
+	ensureGuild(guildID);
+	const language = serverDataDb.get(guildID, "configuration.language") as
+		| string
+		| undefined;
+	return language ?? "en-US";
 }
 
 /**
  * Get all followed channel IDs (all types combined)
  */
 export function getAllFollowedChannels(guildId: string): string[] {
-	const serverData = serverDataDb.ensure(guildId, getDefaultServerData());
-	const follow = serverData.follow;
-
+	ensureGuild(guildId);
+	const forums = serverDataDb.get(guildId, `follow.${TypeName.forum}`) as
+		| string[]
+		| undefined;
+	const channels = serverDataDb.get(guildId, `follow.${TypeName.channel}`) as
+		| string[]
+		| undefined;
+	const categories = serverDataDb.get(guildId, `follow.${TypeName.category}`) as
+		| string[]
+		| undefined;
+	const threads = serverDataDb.get(guildId, `follow.${TypeName.thread}`) as
+		| string[]
+		| undefined;
 	return [
-		...(follow[TypeName.forum] ?? []),
-		...(follow[TypeName.channel] ?? []),
-		...(follow[TypeName.category] ?? []),
-		...(follow[TypeName.thread] ?? []),
+		...(forums ?? []),
+		...(channels ?? []),
+		...(categories ?? []),
+		...(threads ?? []),
 	];
 }
 
@@ -275,16 +277,20 @@ export function getAllFollowedChannels(guildId: string): string[] {
  * Get message to send for a guild
  */
 export function getMessageToSend(guildID: string): string {
-	const serverData = serverDataDb.ensure(guildID, getDefaultServerData());
-	return (serverData.configuration.messageToSend as string) ?? "_ _";
+	ensureGuild(guildID);
+	const message = serverDataDb.get(guildID, "configuration.messageToSend") as
+		| string
+		| undefined;
+	return message ?? "_ _";
 }
 
 /**
  * Get pin setting for a guild
  */
 export function getPinSetting(guildID: string): boolean {
-	const serverData = serverDataDb.ensure(guildID, getDefaultServerData());
-	return (serverData.configuration.pin as boolean) ?? false;
+	ensureGuild(guildID);
+	const pin = serverDataDb.get(guildID, "configuration.pin") as boolean | undefined;
+	return pin ?? false;
 }
 
 /**

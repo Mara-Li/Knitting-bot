@@ -1,6 +1,7 @@
 import * as Djs from "discord.js";
 import type { ChannelType_ } from "src/interface";
 import { TIMEOUT, type Translation, TypeName } from "../interface";
+import { getMaps } from "../maps";
 import { resolveChannelsByIds } from "../utils";
 import type { CommandMode } from "../utils/itemsManager";
 import { getTrackedItems } from "../utils/itemsManager";
@@ -34,6 +35,10 @@ export async function channelSelectorsForType(
 	const guildID = interaction.guild.id;
 	const guild = interaction.guild;
 	const userId = interaction.user.id;
+
+	console.log(
+		`[channelSelectorsForType] Called with mode="${mode}", channelType="${channelType}"`
+	);
 	const trackedItems = getTrackedItems(mode, guildID);
 
 	console.log(`[${mode} ${channelType}] trackedItems:`, trackedItems);
@@ -83,7 +88,7 @@ export async function channelSelectorsForType(
 		const trackedOnFirstPage = paginatedItems[0]?.length ?? 0;
 
 		// Y a-t-il d'autres pages ?
-		const hasMore = Object.keys(paginatedItems).length > 1;
+		const hasMore = Object.keys(paginatedItems).length >= 1;
 
 		const buttons = createPaginationButtons(mode, 0, hasMore, ul);
 		const summary = `Page 1 - ${ul(`common.${channelType}`)} : ${trackedOnFirstPage} ${ul("common.elements")}`;
@@ -193,7 +198,7 @@ export async function channelSelectorsForType(
 
 		const modalSubmit = await interaction.awaitModalSubmit({
 			filter: (i) => i.user.id === userId,
-			time: 60_000,
+			time: TIMEOUT,
 		});
 
 		const newSelection =
@@ -259,7 +264,7 @@ async function handleModalModify(
 
 		const modalSubmit = await interaction.awaitModalSubmit({
 			filter: (i) => i.user.id === userId,
-			time: 60_000,
+			time: TIMEOUT,
 		});
 
 		// Defer immédiatement pour éviter l'expiration du token
@@ -389,6 +394,47 @@ async function validateAndSave(
 		Djs.CategoryChannel | Djs.TextChannel | Djs.AnyThreadChannel | Djs.ForumChannel
 	>(guild, trackedIds, channelTypeFilter);
 
+	const mentionFromId = (id: string) => {
+		const channel = finalChannelsResolved.find((ch) => ch.id === id);
+		if (!channel) return `<#${id}>`;
+		return channel.type === Djs.ChannelType.GuildCategory ? channel.name : `<#${id}>`;
+	};
+
+	// Vérifier les conflits avec le mode opposé (ex: tenter d'ignorer un salon déjà suivi)
+	const oppositeMode: CommandMode = mode === "follow" ? "ignore" : "follow";
+	const oppositeTrackedIds = new Set(getMaps(oppositeMode, typeName, guildID));
+	const conflictIds = finalIds.filter((id) => oppositeTrackedIds.has(id));
+	if (conflictIds.length > 0) {
+		const conflictKey =
+			mode === "ignore"
+				? "common.conflictTracked.ignore"
+				: "common.conflictTracked.follow";
+		const conflictMessage = ul(conflictKey, {
+			item: conflictIds.map((id) => mentionFromId(id)).join(", "),
+		});
+
+		if (interaction.isModalSubmit()) {
+			await interaction.reply({
+				components: [],
+				content: conflictMessage,
+				flags: Djs.MessageFlags.Ephemeral,
+			});
+		} else if (interaction.deferred) {
+			await interaction.editReply({
+				components: [],
+				content: conflictMessage,
+			});
+		} else {
+			await interaction.update({
+				components: [],
+				content: conflictMessage,
+			});
+		}
+
+		paginationStates.delete(stateKey);
+		return;
+	}
+
 	processChannelTypeChanges(
 		originalChannelsResolved,
 		finalChannelsResolved,
@@ -401,8 +447,8 @@ async function validateAndSave(
 
 	const finalMessage =
 		messages.length > 0
-			? ul("follow.thread.summary", { changes: `\n- ${messages.join("\n- ")}` })
-			: ul("follow.thread.noChanges");
+			? ul("common.summary", { changes: `\n- ${messages.join("\n- ")}` })
+			: ul("common.noChanges");
 
 	// Handle both ButtonInteraction and ModalSubmitInteraction
 	if (interaction.isModalSubmit()) {

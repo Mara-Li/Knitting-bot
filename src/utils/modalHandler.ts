@@ -16,7 +16,7 @@ import {
 	type ThreadChannel,
 } from "discord.js";
 import { type ChannelType_, type Translation, TypeName } from "../interface";
-import { setFollow, setIgnore, setRole } from "../maps";
+import { setRole, setTrackedItem } from "../maps";
 import type { CommandMode, TrackedItems } from "./itemsManager";
 
 /**
@@ -94,12 +94,12 @@ export function createChannelSelectorsModal(
 export async function createPaginatedChannelModalByType(
 	mode: CommandMode,
 	ul: Translation,
-	guild: Guild,
+	_guild: Guild,
 	page: number,
 	channelType: ChannelType_,
 	trackedIds: string[],
 	shortTitle?: string,
-	showOnlyTracked = true
+	_showOnlyTracked = true
 ): Promise<{
 	modal: ModalBuilder;
 	hasMore: boolean;
@@ -156,7 +156,7 @@ export async function createPaginatedChannelModalByType(
 export async function createPaginatedChannelModal(
 	mode: CommandMode,
 	ul: Translation,
-	guild: Guild,
+	_guild: Guild,
 	page: number,
 	selectedIds: {
 		categories: string[];
@@ -351,6 +351,9 @@ export function processChannelTypeChanges(
 	ul: Translation,
 	messages: string[]
 ) {
+	console.log(
+		`[processChannelTypeChanges] Called with mode="${mode}", typeName="${typeName}"`
+	);
 	const oldIds = new Set(oldItems.map((ch) => ch.id));
 	const newIds = new Set(newItems.map((ch) => ch.id));
 
@@ -374,7 +377,6 @@ export function processChannelTypeChanges(
 	const successKey =
 		mode === "follow" ? "follow.thread.success" : "ignore.thread.success";
 	const removeKey = mode === "follow" ? "follow.thread.remove" : "ignore.thread.remove";
-	const setFunc = mode === "follow" ? setFollow : setIgnore;
 
 	// Find removed items (were tracked, now deselected)
 	for (const oldItem of oldItems) {
@@ -403,7 +405,11 @@ export function processChannelTypeChanges(
 	}
 
 	// Save the final list ONCE with all newItems
-	setFunc(
+	console.log(
+		`[processChannelTypeChanges] Saving ${newItems.length} items using setTrackedItem(${mode})`
+	);
+	setTrackedItem(
+		mode,
 		typeName,
 		guildID,
 		newItems.map((item) => item.id)

@@ -12,9 +12,8 @@ import {
 	deleteCachedMessage,
 	getMaps,
 	getRoleIn,
-	setFollow,
-	setIgnore,
 	setRoleIn,
+	setTrackedItem,
 } from "../../maps";
 
 /**
@@ -78,10 +77,10 @@ export default (client: Client): void => {
 			const filteredFollow = allFollow.filter((id) => id !== channel.id);
 
 			if (allIgnore.length !== filteredIgnore.length) {
-				setIgnore(TypeName.channel, guildID, filteredIgnore);
+				setTrackedItem("ignore", TypeName.channel, guildID, filteredIgnore);
 			}
 			if (allFollow.length !== filteredFollow.length) {
-				setFollow(TypeName.channel, guildID, filteredFollow);
+				setTrackedItem("follow", TypeName.channel, guildID, filteredFollow);
 			}
 		} else if (channelType === ChannelType.GuildCategory) {
 			/**
@@ -107,10 +106,10 @@ export default (client: Client): void => {
 			const filteredFollow = allCategoryFollow.filter((id) => id !== channel.id);
 
 			if (allCategoryIgnore.length !== filteredIgnore.length) {
-				setIgnore(TypeName.category, guildID, filteredIgnore);
+				setTrackedItem("ignore", TypeName.category, guildID, filteredIgnore);
 			}
 			if (allCategoryFollow.length !== filteredFollow.length) {
-				setFollow(TypeName.category, guildID, filteredFollow);
+				setTrackedItem("follow", TypeName.category, guildID, filteredFollow);
 			}
 		} else if (channelType === ChannelType.GuildForum) {
 			/**
@@ -131,10 +130,10 @@ export default (client: Client): void => {
 			const filteredFollow = allThreadFollow.filter((id) => id !== channel.id);
 
 			if (allThreadIgnore.length !== filteredIgnore.length) {
-				setIgnore(TypeName.forum, guildID, filteredIgnore);
+				setTrackedItem("ignore", TypeName.forum, guildID, filteredIgnore);
 			}
 			if (allThreadFollow.length !== filteredFollow.length) {
-				setFollow(TypeName.forum, guildID, filteredFollow);
+				setTrackedItem("follow", TypeName.forum, guildID, filteredFollow);
 			}
 		}
 	});

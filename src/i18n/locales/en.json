@@ -35,19 +35,24 @@
     "cancelled": "Cancelled",
     "category": "Category",
     "channel": "Channel",
+    "conflictTracked": {
+      "follow": "{{- item}} is already ignored. Remove it from ignored before following it.",
+      "ignore": "{{- item}} is already followed. Remove it from followed before ignoring it."
+    },
     "confirm": "Confirm",
     "disable": "Disable",
     "disabled": "Disabled",
+    "elements": "elements",
     "enable": "Enable",
     "enabled": "Enabled",
     "error": "An error occurred:\n```\n{{error}}\n```",
     "forum": "Forum",
     "here": "here",
-    "elements": "elements",
     "list": "list",
     "modify": "Modify",
     "next": "Next",
     "no": "No",
+    "noChanges": "No changes were made.",
     "none": "/",
     "page": "Page",
     "previous": "Previous",
@@ -55,6 +60,7 @@
     "roleIn": "specific",
     "selection": "Selection",
     "space": " ",
+    "summary": "✅ Saved changes :{{-changes}}",
     "thread": "Thread",
     "timeOut": "Timed out",
     "validate": "Validate",
@@ -219,7 +225,6 @@
     "thread": {
       "description": "Manage the following of salons, threads, categories, or forums",
       "descriptionWithRole": "Manage the followed salons, threads, categories, or forums for {{-role}}.",
-      "noChanges": "No changes were made.",
       "noSelection": "No selection was made.",
       "option": {
         "description": "Channel to follow"
@@ -232,8 +237,7 @@
         "threadDescription": "Please select the feeds you wish to follow and deselect those you no longer wish to follow."
       },
       "startButton": "Open the management menu",
-      "success": "{{- thread}} is now followed.",
-      "summary": "✅ Saved changes :{{-changes}}"
+      "success": "{{- thread}} is now followed."
     }
   },
   "ignore": {
@@ -319,5 +323,8 @@
       "ignore": "ignored"
     },
     "updated": "The role {{- mention}} will be {{- on}} in:{{- channels}}"
+  },
+  "select": {
+    "type": "Type of chat rooms to manage"
   }
 }

@@ -35,19 +35,24 @@
     "cancelled": "Annulé",
     "category": "Catégorie",
     "channel": "Channel",
+    "conflictTracked": {
+      "follow": "{{- item}} est déjà ignoré. Retirez-le des ignorés avant de le suivre.",
+      "ignore": "{{- item}} est déjà suivi. Retirez-le des suivis avant de l'ignorer."
+    },
     "confirm": "Confirmer",
     "disable": "Désactiver",
     "disabled": "Désactivé",
+    "elements": "éléments",
     "enable": "Activer",
     "enabled": "Activé",
     "error": "Une erreur est apparue :\n```\n{{error}}\n```",
     "forum": "Forum",
     "here": "ici",
-    "elements": "éléments",
     "list": "liste",
     "modify": "Modifier",
     "next": "Suivant",
     "no": "Non",
+    "noChanges": "Aucune modification n'a été faite.",
     "none": "/",
     "page": "Page",
     "previous": "Précédent",
@@ -55,6 +60,7 @@
     "roleIn": "spécifique",
     "selection": "Sélection",
     "space": " ",
+    "summary": "✅ Modifications enregistrées :{{-changes}}",
     "thread": "Thread",
     "timeOut": "Temps écoulé",
     "validate": "Valider",
@@ -219,7 +225,6 @@
     "thread": {
       "description": "Gérer le suivi des salons, fils, catégories, ou forum",
       "descriptionWithRole": "Gérer le suivi des salons, fils, catégories, ou forum pour {{-role}}.",
-      "noChanges": "Aucune modification n'a été faite.",
       "noSelection": "Aucune sélection n'a été faite.",
       "option": {
         "description": "Salon à suivre"
@@ -232,8 +237,7 @@
         "threadDescription": "Veuillez sélectionner les fils à suivre et désélectionner ceux à ne plus suivre."
       },
       "startButton": "Ouvrir le menu de gestion",
-      "success": "{{- thread}} est maintenant suivi.",
-      "summary": "✅ Modifications enregistrées :{{-changes}}"
+      "success": "{{- thread}} est maintenant suivi."
     }
   },
   "ignore": {
@@ -319,5 +323,8 @@
       "ignore": "Ignoré"
     },
     "updated": "Le rôle {{- mention}} sera maintenant {{-on}} dans :{{- channels }}"
+  },
+  "select": {
+    "type": "Type de salons de discussions à gérer"
   }
 }

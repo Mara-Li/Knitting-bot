@@ -1,7 +1,7 @@
 import * as Djs from "discord.js";
 import type { ChannelType_ } from "src/interface";
 import { cmdLn, getUl, t } from "../i18n";
-import { CommandName, type Translation } from "../interface";
+import { CommandName, TIMEOUT, type Translation } from "../interface";
 import { getConfig, getRole, getRoleIn } from "../maps";
 import { getCommandId, toTitle } from "../utils";
 import { createRoleSelectModal, processRoleTypeChanges } from "../utils/modalHandler";
@@ -23,7 +23,7 @@ export default {
 				.addStringOption((option) =>
 					option
 						.setName("type")
-						.setDescription("ignore.select.type")
+						.setDescriptions("select.type")
 						.setChoices(
 							{
 								name: t("common.channel"),
@@ -170,7 +170,7 @@ async function displayIgnored(
 	} else if (getConfig(CommandName.followOnlyRoleIn, guildID)) {
 		embed = new Djs.EmbedBuilder()
 			.setColor("#2f8e7d")
-			.setTitle(ul("ignore.list.roleIn"))
+			.setTitle(ul("ignore.roleIn.title"))
 			.setDescription(ignoredRolesIn || ul("common.none"));
 	} else {
 		embed = new Djs.EmbedBuilder().setColor("#2f8e7d").setTitle(ul("common.disabled"));
@@ -217,7 +217,7 @@ async function ignoreThisRole(
 
 		const selection = await interaction.awaitModalSubmit({
 			filter: collectorFilter,
-			time: 60_000,
+			time: TIMEOUT,
 		});
 
 		const newRoles = selection.fields.getSelectedRoles("select_roles", false);
@@ -245,7 +245,7 @@ async function ignoreThisRole(
 		console.error(e);
 		try {
 			await interaction.reply({
-				content: "error.failedReply",
+				content: ul("error.failedReply"),
 				flags: Djs.MessageFlags.Ephemeral,
 			});
 		} catch {

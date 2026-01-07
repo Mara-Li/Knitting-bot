@@ -4,9 +4,8 @@ import {
 	deleteCachedMessage,
 	getMaps,
 	getRoleIn,
-	setFollow,
-	setIgnore,
 	setRoleIn,
+	setTrackedItem,
 } from "../../maps";
 
 export default (client: Client): void => {
@@ -24,10 +23,10 @@ export default (client: Client): void => {
 		const filteredIgnored = ignoredThreads.filter((id) => id !== thread.id);
 
 		if (followedThreads.length !== filteredFollowed.length) {
-			setFollow(TypeName.thread, guildID, filteredFollowed);
+			setTrackedItem("follow", TypeName.thread, guildID, filteredFollowed);
 		}
 		if (ignoredThreads.length !== filteredIgnored.length) {
-			setIgnore(TypeName.thread, guildID, filteredIgnored);
+			setTrackedItem("ignore", TypeName.thread, guildID, filteredIgnored);
 		}
 
 		// Remove from RoleIn channel ID lists

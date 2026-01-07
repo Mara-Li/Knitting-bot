@@ -2,6 +2,7 @@ import "../discord_ext.js";
 import "uniformize";
 import * as Djs from "discord.js";
 import dotenv from "dotenv";
+import { serverDataDb } from "../maps.js";
 
 dotenv.config();
 
@@ -38,6 +39,32 @@ export default {
 							"Base name for the created items, use i for numbering and type for the type"
 						)
 						.setRequired(false)
+				)
+		)
+		.addSubcommand((group) =>
+			group
+				.setName("clear")
+				.setDescription("Clear the DB")
+				.addStringOption((option) =>
+					option
+						.setName("type")
+						.setDescription("Type of things to clear")
+						.setRequired(true)
+						.addChoices({ name: "all", value: "all" })
+						.addChoices({ name: "follow", value: "follow" })
+						.addChoices({ name: "ignore", value: "ignore" })
+						.addChoices({ name: "messageCache", value: "messageCache" })
+				)
+				.addStringOption((option) =>
+					option
+						.setName("item_type")
+						.setDescription("Item type to clear")
+						.setRequired(false)
+						.addChoices({ name: "channel", value: "channel" })
+						.addChoices({ name: "thread", value: "thread" })
+						.addChoices({ name: "forum", value: "forum" })
+						.addChoices({ name: "category", value: "category" })
+						.addChoices({ name: "role", value: "role" })
 				)
 		),
 	async execute(interaction: Djs.ChatInputCommandInteraction) {
@@ -103,6 +130,27 @@ export default {
 			}
 			await interaction.editReply(`${number} ${type} created.`);
 			return;
+		}
+		if (interaction.options.getSubcommand() === "clear") {
+			console.log("BEFORE", serverDataDb.get(interaction.guild.id));
+			await interaction.deferReply();
+			const itemType = interaction.options.getString("item_type");
+			const type = interaction.options.getString("type", true);
+			const guildID = interaction.guild.id;
+			if (type === "all") serverDataDb.delete(guildID);
+			else if (type === "messageCache") {
+				serverDataDb.set(guildID, {}, "messageCache");
+			} else if (itemType) {
+				if (type === "follow") serverDataDb.set(guildID, [], `follow.${itemType}`);
+				else if (type === "ignore") serverDataDb.set(guildID, [], `ignore.${itemType}`);
+			} else {
+				serverDataDb.delete(guildID, type);
+			}
+			const result = serverDataDb.get(guildID);
+			await interaction.editReply(
+				`Cleared ${type} ${itemType ? `for ${itemType}` : ""}.`
+			);
+			console.log("Current DB state:", result);
 		}
 	},
 };

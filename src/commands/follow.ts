@@ -1,7 +1,7 @@
 import * as Djs from "discord.js";
 import type { ChannelType_ } from "src/interface";
 import { cmdLn, getUl, t } from "../i18n";
-import { CommandName, type Translation } from "../interface";
+import { CommandName, TIMEOUT, type Translation } from "../interface";
 import { getConfig, getRole } from "../maps";
 import { getCommandId, toTitle } from "../utils";
 import { createRoleSelectModal, processRoleTypeChanges } from "../utils/modalHandler";
@@ -23,7 +23,7 @@ export default {
 				.addStringOption((option) =>
 					option
 						.setName("type")
-						.setDescription("follow.select.type")
+						.setDescriptions("select.type")
 						.setChoices(
 							{
 								name: t("common.channel"),
@@ -200,7 +200,7 @@ async function followThisRole(
 
 		const selection = await interaction.awaitModalSubmit({
 			filter: collectorFilter,
-			time: 60_000,
+			time: TIMEOUT,
 		});
 
 		const newRoles = selection.fields.getSelectedRoles("select_roles", false);
