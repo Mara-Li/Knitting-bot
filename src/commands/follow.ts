@@ -12,7 +12,7 @@ import {
 	processRoleTypeChanges,
 	roleInSelectorsForType,
 } from "../menus";
-import { getCommandId, toTitle } from "../utils";
+import { getCommandId } from "../utils";
 import { mapToStr } from "./index";
 import "../discord_ext.js";
 import "uniformize";

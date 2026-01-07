@@ -66,6 +66,14 @@ export default {
 						.addChoices({ name: "category", value: "category" })
 						.addChoices({ name: "role", value: "role" })
 				)
+		)
+		.addSubcommand((sub) =>
+			sub
+				.setName("db_view")
+				.setDescription("View the current server's DB entry")
+				.addStringOption((input) =>
+					input.setName("key").setDescription("Specific key to view").setRequired(true)
+				)
 		),
 	async execute(interaction: Djs.ChatInputCommandInteraction) {
 		if (!interaction.guild) {
@@ -151,6 +159,14 @@ export default {
 				`Cleared ${type} ${itemType ? `for ${itemType}` : ""}.`
 			);
 			console.log("Current DB state:", result);
+		} else if (interaction.options.getSubcommand() === "db_view") {
+			await interaction.deferReply();
+			const key = interaction.options.getString("key", true);
+			const guildID = interaction.guild.id;
+			const data = serverDataDb.get(guildID, key);
+			await interaction.editReply(
+				`DB Entry for key "${key}":\n\`\`\`json\n${JSON.stringify(data, null, 2)}\n\`\`\``
+			);
 		}
 	},
 };

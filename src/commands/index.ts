@@ -29,12 +29,12 @@ function mapRoleIn(followed: RoleIn[]) {
 
 function mapIds(ids: string[]) {
 	if (!ids.length) return "/";
-	return `\n- ${ids.map((id) => `**${djs.channelMention(id)}**`).join("\n- ")}\`;`;
+	return `\n- ${ids.map((id) => `**${djs.channelMention(id)}**`).join("\n- ")}`;
 }
 
 function mapRoleIds(roleIds: string[]) {
 	if (!roleIds.length) return "/";
-	return `\n- ${roleIds.map((id) => `**${djs.roleMention(id)}**`).join("\n- ")}\`;`;
+	return `\n- ${roleIds.map((id) => `**${djs.roleMention(id)}**`).join("\n- ")}`;
 }
 
 export function mapToStr(type: "follow" | "ignore", guildID: string) {
