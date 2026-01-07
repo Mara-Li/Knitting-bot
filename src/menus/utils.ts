@@ -564,9 +564,9 @@ export async function interactionRoleInChannel(
 		}
 	});
 
-	collector.on("end", () => {
+	collector.on("end", (_collected, reason) => {
 		clearRoleInState(userId, guildID, on, roleId);
-		// Remove buttons when the collector times out and update content
+		if (reason === "user") return;
 		void interaction
 			.editReply({ components: [], content: ul("common.timeOut") })
 			.catch(() => undefined);
