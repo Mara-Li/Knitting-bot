@@ -329,7 +329,7 @@
 			"support": "Ce type de salon n'est pas supporté"
 		},
 		"noLonger": {
-			"any": "Le rôle {{- mention}} n'est plus {{- on }} aucun salon.",
+			"any": "Le rôle {{- mention}} n'est plus {{- on }} dans aucun salon.",
 			"chan": "{{- chan}} n'est plus {{- on }} pour {{- mention }}"
 		},
 		"on": {
