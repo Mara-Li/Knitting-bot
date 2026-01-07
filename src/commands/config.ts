@@ -698,6 +698,7 @@ async function displayConfig(interaction: Djs.ChatInputCommandInteraction) {
 
 	const autoFinal = auto.manualMode ? manualStr : autoStr;
 
+	const log = config.log && typeof config.log === "string" ? Djs.channelMention(config.log) : "`✕`";
 	//use component v2
 	const components = [
 		new Djs.ContainerBuilder()
@@ -717,7 +718,7 @@ async function displayConfig(interaction: Djs.ChatInputCommandInteraction) {
                         - __${ul("configuration.pin.name").toTitle()}__${s}: \`${config.pin ? "✓" : "✕"}\`
                         - __${ul("configuration.message.name").toTitle()}__${s}: \`${config.messageToSend}\`
                         - __${ul("configuration.language.name").toTitle()}__${s}: \`${config.language.toUpperCase()}\`
-                        - __${ul("configuration.menu.log.channel.title").toTitle()}__${s}: ${config.log ? Djs.channelMention(config.log as string) : "`✕`"}
+                        - __${ul("configuration.menu.log.channel.title").toTitle()}__${s}: ${log}
                         `)
 						)
 					)
