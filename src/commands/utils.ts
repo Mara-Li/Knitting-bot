@@ -180,10 +180,10 @@ async function showRoleInPaginatedModal(
 	state.currentPage = page;
 
 	const selectedIds = {
-		categories: state.selectedCategories,
-		channels: state.selectedChannels,
-		forums: state.selectedForums,
-		threads: state.selectedThreads,
+		categories: Array.from(state.selectedCategories),
+		channels: Array.from(state.selectedChannels),
+		forums: Array.from(state.selectedForums),
+		threads: Array.from(state.selectedThreads),
 	};
 
 	const shortTitle = `${ul("common.role")}: ${ul("common.roleIn")}`;

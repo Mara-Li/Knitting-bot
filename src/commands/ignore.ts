@@ -1,43 +1,21 @@
-import {
-	type AnyThreadChannel,
-	type ButtonInteraction,
-	type CategoryChannel,
-	ChannelType,
-	type ChatInputCommandInteraction,
-	type CommandInteractionOptionResolver,
-	EmbedBuilder,
-	type ForumChannel,
-	type Message,
-	MessageFlags,
-	type ModalSubmitInteraction,
-	PermissionFlagsBits,
-	type Role,
-	SlashCommandBuilder,
-	type TextChannel,
-} from "discord.js";
+import * as Djs from "discord.js";
 import type { ChannelType_ } from "src/interface";
 import { cmdLn, getUl, t } from "../i18n";
-import { CommandName, type Translation, TypeName } from "../interface";
+import { CommandName, type Translation } from "../interface";
 import { getConfig, getRole, getRoleIn } from "../maps";
 import { getCommandId, toTitle } from "../utils";
-import { getTrackedItems } from "../utils/itemsManager";
-import {
-	createPaginatedChannelModalByType,
-	createPaginationButtons,
-	createRoleSelectModal,
-	processChannelTypeChanges,
-	processRoleTypeChanges,
-} from "../utils/modalHandler";
+import { createRoleSelectModal, processRoleTypeChanges } from "../utils/modalHandler";
+import { channelSelectorsForType } from "./channelPagination";
 import { mapToStr } from "./index";
 import { interactionRoleInChannel } from "./utils";
 import "../discord_ext.js";
 import "uniformize";
 
 export default {
-	data: new SlashCommandBuilder()
+	data: new Djs.SlashCommandBuilder()
 		.setName("ignore")
 		.setDescriptions("ignore.description")
-		.setDefaultMemberPermissions(PermissionFlagsBits.ManageThreads)
+		.setDefaultMemberPermissions(Djs.PermissionFlagsBits.ManageThreads)
 		.addSubcommand((subcommand) =>
 			subcommand
 				.setNames("common.channel")
@@ -88,25 +66,22 @@ export default {
 		.addSubcommand((subcommand) =>
 			subcommand.setNames("common.list").setDescriptions("ignore.list.description")
 		),
-	async execute(interaction: ChatInputCommandInteraction) {
+	async execute(interaction: Djs.ChatInputCommandInteraction) {
 		if (!interaction.guild) return;
-		const guildID = interaction.guild.id;
-		const options = interaction.options as CommandInteractionOptionResolver;
+		const guild = interaction.guild.id;
+		const options = interaction.options as Djs.CommandInteractionOptionResolver;
 		const commands = options.getSubcommand();
 		const ul = getUl(interaction);
-		const followOnlyRoleIn = getConfig(CommandName.followOnlyRoleIn, guildID) as boolean;
 
-		/**
-		 * Verify if the "follow-only" mode is enabled ; return error if it is
-		 */
 		switch (commands) {
 			case t("common.channel").toLowerCase(): {
 				const channelType = options.getString("type") as ChannelType_;
-				await channelSelectorsForType(interaction, ul, channelType);
+				console.log(`[ignore] Received command with type: ${channelType}`);
+				await channelSelectorsForType(interaction, ul, channelType, "ignore");
 				break;
 			}
-			case t("common.role"):
-				if (getConfig(CommandName.followOnlyRole, guildID)) {
+			case t("common.role").toLowerCase():
+				if (getConfig(CommandName.followOnlyRole, guild)) {
 					await interaction.reply({
 						content: ul("ignore.error.followRole", {
 							id: await getCommandId("follow", interaction.guild),
@@ -117,7 +92,7 @@ export default {
 				await ignoreThisRole(interaction, ul);
 				break;
 			case t("common.roleIn"):
-				if (followOnlyRoleIn) {
+				if (getConfig(CommandName.followOnlyRoleIn, guild)) {
 					await interaction.reply({
 						content: ul("ignore.error.followRoleIn", {
 							id: await getCommandId("follow", interaction.guild),
@@ -127,25 +102,30 @@ export default {
 				}
 				await interactionRoleInChannel(interaction, "ignore");
 				break;
-			case "list":
-				await listIgnored(interaction, ul);
+			case t("common.list"):
+				await displayIgnored(interaction, ul);
 				break;
 			default:
-				await listIgnored(interaction, ul);
+				await displayIgnored(interaction, ul);
 				break;
 		}
 	},
 };
 
 /**
- * Display all ignored channels, roles and categories, but also the channels ignored by roles
- * @param interaction {@link CommandInteraction} the interaction to reply to
+ * Display the list of ignored channels.
+ * Display the embed based on the configuration.
+ * @param interaction {@link CommandInteraction} The interaction to reply to.
  * @param ul
  */
-async function listIgnored(interaction: ChatInputCommandInteraction, ul: Translation) {
+async function displayIgnored(
+	interaction: Djs.ChatInputCommandInteraction,
+	ul: Translation
+) {
 	if (!interaction.guild) return;
-	const ignored = mapToStr("ignore", interaction.guild.id);
-	const roleIn = getRoleIn("ignore", interaction.guild.id);
+	const guildID = interaction.guild.id;
+	const ignored = mapToStr("ignore", guildID);
+	const roleIn = getRoleIn("ignore", guildID);
 	const {
 		rolesNames: ignoredRolesNames,
 		categoriesNames: ignoredCategoriesNames,
@@ -154,32 +134,50 @@ async function listIgnored(interaction: ChatInputCommandInteraction, ul: Transla
 		rolesInNames: ignoredRolesIn,
 		forumNames: ignoredForumNames,
 	} = ignored;
-	const embed = new EmbedBuilder()
-		.setColor("#2f8e7d")
-		.setTitle(ul("ignore.list.title"))
-		.addFields({
-			name: ul("common.category"),
-			value: ignoredCategoriesNames || ul("ignore.list.none"),
-		})
-		.addFields({
-			name: ul("common.channel"),
-			value: ignoredThreadsNames || ul("ignore.list.none"),
-		})
-		.addFields({
-			name: ul("common.channel"),
-			value: ignoredChannelsNames || ul("ignore.list.none"),
-		})
-		.addFields({
-			name: ul("common.forum"),
-			value: ignoredForumNames || ul("ignore.list.none"),
-		})
-		.addFields({
-			name: toTitle(ul("common.role")),
-			value: ignoredRolesNames || ul("ignore.list.none"),
-		});
+
+	let embed: Djs.EmbedBuilder;
+	if (getConfig(CommandName.followOnlyChannel, guildID)) {
+		embed = new Djs.EmbedBuilder()
+			.setColor("#2f8e7d")
+			.setTitle(ul("ignore.list.title"))
+			.addFields({
+				name: ul("common.category"),
+				value: ignoredCategoriesNames || ul("common.none"),
+			})
+			.addFields({
+				name: ul("common.channel"),
+				value: ignoredThreadsNames || ul("common.none"),
+			})
+			.addFields({
+				name: ul("common.channel"),
+				value: ignoredChannelsNames || ul("common.none"),
+			})
+			.addFields({
+				name: ul("common.forum"),
+				value: ignoredForumNames || ul("common.none"),
+			});
+		if (getConfig(CommandName.followOnlyRole, guildID)) {
+			embed.addFields({
+				name: toTitle(ul("common.role")),
+				value: ignoredRolesNames || ul("common.none"),
+			});
+		}
+	} else if (getConfig(CommandName.followOnlyRole, guildID)) {
+		embed = new Djs.EmbedBuilder()
+			.setColor("#2f8e7d")
+			.setTitle(ul("ignore.list.title"))
+			.setDescription(ignoredRolesNames || ul("common.none"));
+	} else if (getConfig(CommandName.followOnlyRoleIn, guildID)) {
+		embed = new Djs.EmbedBuilder()
+			.setColor("#2f8e7d")
+			.setTitle(ul("ignore.list.roleIn"))
+			.setDescription(ignoredRolesIn || ul("common.none"));
+	} else {
+		embed = new Djs.EmbedBuilder().setColor("#2f8e7d").setTitle(ul("common.disabled"));
+	}
 
 	if (roleIn.length > 0) {
-		const embed2 = new EmbedBuilder()
+		const embed2 = new Djs.EmbedBuilder()
 			.setTitle(ul("ignore.roleIn.title"))
 			.setColor("#2f8e7d")
 			.setDescription(ignoredRolesIn);
@@ -194,9 +192,12 @@ async function listIgnored(interaction: ChatInputCommandInteraction, ul: Transla
 }
 
 /**
- * Ignore / un-ignore roles via modal
+ * Ignore-unignore a role via modal
  */
-async function ignoreThisRole(interaction: ChatInputCommandInteraction, ul: Translation) {
+async function ignoreThisRole(
+	interaction: Djs.ChatInputCommandInteraction,
+	ul: Translation
+) {
 	if (!interaction.guild) return;
 
 	const guildID = interaction.guild.id;
@@ -204,10 +205,10 @@ async function ignoreThisRole(interaction: ChatInputCommandInteraction, ul: Tran
 	// Résoudre les IDs en objets Role depuis le cache
 	const ignoredRoles = ignoredRoleIds
 		.map((id) => interaction.guild!.roles.cache.get(id))
-		.filter((r): r is Role => r !== undefined);
+		.filter((r): r is Djs.Role => r !== undefined);
 	const modal = createRoleSelectModal("ignore", ul, ignoredRoles);
 
-	const collectorFilter = (i: ModalSubmitInteraction) => {
+	const collectorFilter = (i: Djs.ModalSubmitInteraction) => {
 		return i.user.id === interaction.user.id;
 	};
 
@@ -226,7 +227,7 @@ async function ignoreThisRole(interaction: ChatInputCommandInteraction, ul: Tran
 			guildID,
 			"ignore",
 			ignoredRoles,
-			Array.from((newRoles ?? new Map()).values()) as Role[],
+			Array.from((newRoles ?? new Map()).values()) as Djs.Role[],
 			ul,
 			messages
 		);
@@ -238,468 +239,18 @@ async function ignoreThisRole(interaction: ChatInputCommandInteraction, ul: Tran
 
 		await selection.reply({
 			content: finalMessage,
-			flags: MessageFlags.Ephemeral,
+			flags: Djs.MessageFlags.Ephemeral,
 		});
 	} catch (e) {
 		console.error(e);
 		try {
 			await interaction.reply({
 				content: "error.failedReply",
-				flags: MessageFlags.Ephemeral,
+				flags: Djs.MessageFlags.Ephemeral,
 			});
 		} catch {
 			// Interaction already acknowledged, ignore
 		}
 		return;
 	}
-}
-
-/**
- * Ignore / un-ignore channels via paginated modal selectors by type
- */
-async function channelSelectorsForType(
-	interaction: ChatInputCommandInteraction,
-	ul: Translation,
-	channelType: ChannelType_
-) {
-	if (!interaction.guild) return;
-
-	const guildID = interaction.guild.id;
-	const guild = interaction.guild;
-	const userId = interaction.user.id;
-	const ignoredItems = getTrackedItems("ignore", guildID);
-
-	// Récupérer les items du type demandé
-	let trackedIds: string[] = [];
-	switch (channelType) {
-		case "channel":
-			trackedIds = ignoredItems.channels;
-			break;
-		case "thread":
-			trackedIds = ignoredItems.threads;
-			break;
-		case "category":
-			trackedIds = ignoredItems.categories;
-			break;
-		case "forum":
-			trackedIds = ignoredItems.forums;
-			break;
-	}
-
-	// Découper les trackedIds en pages (25 par page)
-	const paginatedItems: Record<number, string[]> = {};
-	for (let i = 0; i < Math.ceil(trackedIds.length / 25); i++) {
-		const startIndex = i * 25;
-		const endIndex = startIndex + 25;
-		paginatedItems[i] = trackedIds.slice(startIndex, endIndex);
-	}
-
-	// Initialiser l'état de pagination avec les éléments paginés
-	const stateKey = `${userId}_${guildID}_ignore_${channelType}`;
-	const state = {
-		currentPage: 0,
-		originalIds: trackedIds, // Stocker les IDs originaux pour la validation
-		paginatedItems,
-		selectedIds: new Set(trackedIds),
-	};
-	paginationStates.set(stateKey, state);
-
-	// Si 25 items ou plus, afficher un message avec boutons
-	if (trackedIds.length >= 25) {
-		// Nombre d'items sur la première page
-		const trackedOnFirstPage = paginatedItems[0]?.length ?? 0;
-
-		// Y a-t-il d'autres pages ?
-		const hasMore = Object.keys(paginatedItems).length > 1;
-
-		const buttons = createPaginationButtons("ignore", 0, hasMore, ul);
-		const s = ul("common.space");
-		const summary = `Page 1 - ${ul(`common.${channelType}`)}${s}: ${trackedOnFirstPage} ${ul("common.elements")}`;
-
-		await interaction.reply({
-			components: buttons,
-			content: summary,
-			flags: MessageFlags.Ephemeral,
-		});
-
-		const buttonMessage = await interaction.fetchReply();
-
-		// Créer un collector pour les boutons
-		const collector = buttonMessage.createMessageComponentCollector({
-			filter: (i) => i.user.id === userId,
-			time: 600_000,
-		});
-
-		collector.on("collect", async (buttonInteraction: ButtonInteraction) => {
-			const customId = buttonInteraction.customId;
-
-			if (customId.startsWith("ignore_page_modify_")) {
-				const page = Number.parseInt(customId.split("_").pop() || "0", 10);
-				await handleIgnoreModalModify(
-					buttonInteraction,
-					guild,
-					userId,
-					guildID,
-					page,
-					ul,
-					channelType,
-					state,
-					stateKey,
-					buttonMessage
-				);
-			} else if (customId.startsWith("ignore_page_prev_")) {
-				await buttonInteraction.deferUpdate();
-				const currentPage = Number.parseInt(customId.split("_").pop() || "0", 10);
-				const prevPage = Math.max(0, currentPage - 1);
-				await showPaginatedMessageForIgnoreType(
-					buttonInteraction,
-					guild,
-					userId,
-					guildID,
-					prevPage,
-					ul,
-					channelType,
-					state,
-					stateKey,
-					buttonMessage
-				);
-			} else if (customId.startsWith("ignore_page_next_")) {
-				await buttonInteraction.deferUpdate();
-				const currentPage = Number.parseInt(customId.split("_").pop() || "0", 10);
-				const nextPage = currentPage + 1;
-				await showPaginatedMessageForIgnoreType(
-					buttonInteraction,
-					guild,
-					userId,
-					guildID,
-					nextPage,
-					ul,
-					channelType,
-					state,
-					stateKey,
-					buttonMessage
-				);
-			} else if (customId === "ignore_page_validate") {
-				await buttonInteraction.deferUpdate();
-				await validateAndSaveForIgnoreType(
-					buttonInteraction,
-					userId,
-					guildID,
-					channelType,
-					state.originalIds,
-					ul
-				);
-				collector.stop();
-			} else if (customId === "ignore_page_cancel") {
-				await buttonInteraction.deferUpdate();
-				paginationStates.delete(stateKey);
-				await buttonInteraction.update({
-					components: [],
-					content: ul("common.cancelled"),
-				});
-				collector.stop();
-			}
-		});
-
-		collector.on("end", () => {
-			if (paginationStates.has(stateKey)) {
-				paginationStates.delete(stateKey);
-			}
-		});
-
-		return;
-	}
-
-	// Créer le modal pour la page 0 (≤25 items)
-	const { modal, pageItemIds } = await createPaginatedChannelModalByType(
-		"ignore",
-		ul,
-		guild,
-		0,
-		channelType,
-		paginatedItems[0] ?? [],
-		undefined,
-		true
-	);
-
-	if (pageItemIds.length === 0) {
-		await interaction.reply({
-			content: ul("common.noMore"),
-			flags: MessageFlags.Ephemeral,
-		});
-		return;
-	}
-
-	try {
-		// Afficher le modal directement si ≤25 items
-		await interaction.showModal(modal);
-
-		const modalSubmit = await interaction.awaitModalSubmit({
-			filter: (i) => i.user.id === userId,
-			time: 60_000,
-		});
-
-		const newSelection =
-			modalSubmit.fields.getSelectedChannels(`select_${channelType}`, false) ?? new Map();
-		const newSelectedIds = Array.from(newSelection.keys());
-
-		// Mettre à jour les items de la page 0
-		state.paginatedItems[0] = newSelectedIds;
-
-		// Reconstruire selectedIds
-		state.selectedIds.clear();
-		for (const id of newSelectedIds) {
-			state.selectedIds.add(id);
-		}
-
-		// Valider directement
-		await validateAndSaveForIgnoreType(
-			modalSubmit,
-			userId,
-			guildID,
-			channelType,
-			state.originalIds,
-			ul
-		);
-	} catch (e) {
-		console.error(e);
-	}
-}
-
-// State management pour pagination par type
-const paginationStates = new Map<
-	string,
-	{ currentPage: number; selectedIds: Set<string> }
->();
-
-/**
- * Handle modal modification for a specific page (ignore)
- */
-async function handleIgnoreModalModify(
-	interaction: ButtonInteraction,
-	guild: NonNullable<ChatInputCommandInteraction["guild"]>,
-	userId: string,
-	guildID: string,
-	page: number,
-	ul: Translation,
-	channelType: ChannelType_,
-	state: {
-		currentPage: number;
-		paginatedItems: Record<number, string[]>;
-		selectedIds: Set<string>;
-	},
-	stateKey: string,
-	buttonMessage: Message<boolean>
-) {
-	if (!guild) return;
-
-	// Récupérer les items tracked de cette page
-	const pageTrackedIds = state.paginatedItems[page] ?? [];
-
-	// Le modal affiche les items tracked de cette page
-	const { modal, pageItemIds } = await createPaginatedChannelModalByType(
-		"ignore",
-		ul,
-		guild,
-		0, // Toujours page 0 car on passe déjà les items filtrés
-		channelType,
-		pageTrackedIds,
-		undefined,
-		true // Afficher les items de cette page uniquement
-	);
-
-	// Si la page est vide, retourner à la page précédente
-	if (pageItemIds.length === 0) {
-		await interaction.reply({
-			content: ul("common.noMore"),
-			flags: MessageFlags.Ephemeral,
-		});
-		return;
-	}
-
-	try {
-		await interaction.showModal(modal);
-
-		const modalSubmit = await interaction.awaitModalSubmit({
-			filter: (i) => i.user.id === userId,
-			time: 60_000,
-		});
-
-		// Defer immédiatement pour éviter l'expiration du token
-		try {
-			await modalSubmit.deferUpdate();
-		} catch (e: any) {
-			if (e.code === 10062) {
-				// Token expiré, on peut pas répondre
-				console.warn(`[ignore ${channelType}] Token expiré pour ModalSubmit`, e.message);
-				return;
-			}
-			throw e;
-		}
-
-		const newSelection =
-			modalSubmit.fields.getSelectedChannels(`select_${channelType}`, false) ?? new Map();
-		const newSelectedIds = Array.from(newSelection.keys());
-
-		// Mettre à jour les items de cette page
-		state.paginatedItems[page] = newSelectedIds;
-
-		// Reconstruire selectedIds à partir de toutes les pages
-		state.selectedIds.clear();
-		for (const pageItems of Object.values(state.paginatedItems)) {
-			for (const id of pageItems) {
-				state.selectedIds.add(id);
-			}
-		}
-
-		// Retour au message avec boutons
-		const pageItemsCount = state.paginatedItems[page]?.length ?? 0;
-		const hasMore = Object.keys(state.paginatedItems).length > page + 1;
-		const buttons = createPaginationButtons("ignore", page, hasMore, ul);
-		const s = ul("common.space");
-		const summary = `Page ${page + 1} - ${ul(`common.${channelType}`)}${s}: ${pageItemsCount} ${ul("common.elements")}`;
-
-		await modalSubmit.editReply({
-			components: buttons,
-			content: summary,
-		});
-	} catch (e) {
-		console.error(e);
-	}
-}
-
-/**
- * Show paginated message for channel selection by type (ignore)
- */
-async function showPaginatedMessageForIgnoreType(
-	interaction: ButtonInteraction,
-	guild: NonNullable<ChatInputCommandInteraction["guild"]>,
-	userId: string,
-	guildID: string,
-	page: number,
-	ul: Translation,
-	channelType: ChannelType_,
-	state: {
-		currentPage: number;
-		paginatedItems: Record<number, string[]>;
-		selectedIds: Set<string>;
-	},
-	stateKey: string,
-	buttonMessage: Message<boolean>
-) {
-	if (!guild) return;
-
-	state.currentPage = page;
-
-	// Afficher le nombre d'éléments ignorés sur cette page
-	const trackedOnThisPage = state.paginatedItems[page]?.length ?? 0;
-	const hasMore = Object.keys(state.paginatedItems).length > page + 1;
-
-	const buttons = createPaginationButtons("ignore", page, hasMore, ul);
-	const s = ul("common.space");
-	const summary = `Page ${page + 1} - ${ul(`common.${channelType}`)}${s}: ${trackedOnThisPage} ${ul("common.elements")}`;
-
-	await interaction.update({
-		components: buttons,
-		content: summary,
-	});
-}
-
-/**
- * Validate and save selections by type (ignore)
- */
-async function validateAndSaveForIgnoreType(
-	interaction: ButtonInteraction | ModalSubmitInteraction,
-	userId: string,
-	guildID: string,
-	channelType: ChannelType_,
-	trackedIds: string[],
-	ul: Translation
-) {
-	const stateKey = `${userId}_${guildID}_ignore_${channelType}`;
-	const state = paginationStates.get(stateKey);
-	if (!state) return;
-
-	const guild = interaction.guild;
-	if (!guild) return;
-
-	const finalIds = Array.from(state.selectedIds);
-	const messages: string[] = [];
-
-	// Mapper le type de channel au TypeName
-	let typeName: TypeName;
-	let channelTypeFilter: ChannelType[];
-
-	switch (channelType) {
-		case "channel":
-			typeName = TypeName.channel;
-			channelTypeFilter = [ChannelType.GuildText];
-			break;
-		case "thread":
-			typeName = TypeName.thread;
-			channelTypeFilter = [ChannelType.PublicThread, ChannelType.PrivateThread];
-			break;
-		case "category":
-			typeName = TypeName.category;
-			channelTypeFilter = [ChannelType.GuildCategory];
-			break;
-		case "forum":
-			typeName = TypeName.forum;
-			channelTypeFilter = [ChannelType.GuildForum];
-			break;
-	}
-
-	// Résoudre les IDs en objets Channel
-	const finalChannelsResolved = await import("../utils/index.js").then(
-		({ resolveChannelsByIds }) =>
-			resolveChannelsByIds<
-				CategoryChannel | TextChannel | AnyThreadChannel | ForumChannel
-			>(guild, finalIds, channelTypeFilter)
-	);
-
-	const originalChannelsResolved = await import("../utils/index.js").then(
-		({ resolveChannelsByIds }) =>
-			resolveChannelsByIds<
-				CategoryChannel | TextChannel | AnyThreadChannel | ForumChannel
-			>(guild, trackedIds, channelTypeFilter)
-	);
-
-	processChannelTypeChanges(
-		originalChannelsResolved,
-		finalChannelsResolved,
-		typeName,
-		guildID,
-		"ignore",
-		ul,
-		messages
-	);
-
-	const finalMessage =
-		messages.length > 0
-			? ul("follow.thread.summary", { changes: `\n${messages.join("\n")}` })
-			: ul("follow.thread.noChanges");
-
-	// Handle both ButtonInteraction and ModalSubmitInteraction
-	if (interaction.isModalSubmit()) {
-		// For ModalSubmitInteraction, use reply
-		await interaction.reply({
-			components: [],
-			content: finalMessage,
-			flags: MessageFlags.Ephemeral,
-		});
-	} else if (interaction.deferred) {
-		// For deferred ButtonInteraction, use editReply
-		await interaction.editReply({
-			components: [],
-			content: finalMessage,
-		});
-	} else {
-		// For non-deferred ButtonInteraction, use update
-		await interaction.update({
-			components: [],
-			content: finalMessage,
-		});
-	}
-
-	paginationStates.delete(stateKey);
 }
