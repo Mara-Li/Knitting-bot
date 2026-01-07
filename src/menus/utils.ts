@@ -45,9 +45,31 @@ type RoleInPaginationState = {
 	selectedChannels: Set<string>;
 	selectedThreads: Set<string>;
 	selectedForums: Set<string>;
+	// Optional TTL fields managed by the role-in pagination system
+	ttlMs?: number;
+	expiresAt?: number;
 };
 
 const roleInStates = new Map<string, RoleInPaginationState>();
+
+// TTL defaults and sweep settings (mirror pattern from src/menus/flow.ts)
+const DEFAULT_ROLEIN_TTL_MS = 15 * 60 * 1000; // 15 minutes
+const ROLEIN_SWEEP_INTERVAL_MS = 60 * 1000; // 1 minute
+let roleInSweepScheduled = false;
+
+function scheduleRoleInSweep() {
+	if (roleInSweepScheduled) return;
+	// eslint-disable-next-line @typescript-eslint/no-misused-promises
+	setInterval(() => {
+		const now = Date.now();
+		for (const [key, state] of roleInStates.entries()) {
+			if (state.expiresAt && state.expiresAt <= now) {
+				roleInStates.delete(key);
+			}
+		}
+	}, ROLEIN_SWEEP_INTERVAL_MS);
+	roleInSweepScheduled = true;
+}
 
 function roleInKey(userId: string, guildId: string, mode: RoleInMode, roleId: string) {
 	return `${userId}_${guildId}_${mode}_${roleId}`;
@@ -66,8 +88,10 @@ function initRoleInState(
 	)[]
 ): RoleInPaginationState {
 	const key = roleInKey(userId, guildId, mode, roleId);
+	const ttl = DEFAULT_ROLEIN_TTL_MS;
 	const state: RoleInPaginationState = {
 		currentPage: 0,
+		expiresAt: Date.now() + ttl,
 		guildId,
 		mode,
 		roleId,
@@ -93,9 +117,12 @@ function initRoleInState(
 				)
 				.map((c) => c.id)
 		),
+		ttlMs: ttl,
 		userId,
 	};
 	roleInStates.set(key, state);
+	// ensure sweep runs
+	scheduleRoleInSweep();
 	return state;
 }
 
@@ -105,7 +132,18 @@ function getRoleInState(
 	mode: RoleInMode,
 	roleId: string
 ): RoleInPaginationState | undefined {
-	return roleInStates.get(roleInKey(userId, guildId, mode, roleId));
+	const key = roleInKey(userId, guildId, mode, roleId);
+	const state = roleInStates.get(key);
+	if (!state) return undefined;
+	const now = Date.now();
+	if (state.expiresAt && state.expiresAt <= now) {
+		// expired
+		roleInStates.delete(key);
+		return undefined;
+	}
+	// sliding expiration: extend on access
+	if (state.ttlMs) state.expiresAt = Date.now() + state.ttlMs;
+	return state;
 }
 
 function clearRoleInState(
@@ -369,9 +407,7 @@ async function validateRoleInSelection(
 	if (existing) {
 		const updated = allRoleIn.map((r) => (r.roleId === roleId ? newEntry : r));
 		setRoleIn(on, guildID, updated);
-	} else
-		setRoleIn(on, guildID, [...allRoleIn, newEntry]);
-	
+	} else setRoleIn(on, guildID, [...allRoleIn, newEntry]);
 
 	const channelsByType = {
 		categories: channels.filter((c) => c.type === Djs.ChannelType.GuildCategory),
