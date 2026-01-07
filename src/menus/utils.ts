@@ -369,10 +369,9 @@ async function validateRoleInSelection(
 	if (existing) {
 		const updated = allRoleIn.map((r) => (r.roleId === roleId ? newEntry : r));
 		setRoleIn(on, guildID, updated);
-	} else {
-		allRoleIn.push(newEntry);
-		setRoleIn(on, guildID, allRoleIn);
-	}
+	} else
+		setRoleIn(on, guildID, [...allRoleIn, newEntry]);
+	
 
 	const channelsByType = {
 		categories: channels.filter((c) => c.type === Djs.ChannelType.GuildCategory),
