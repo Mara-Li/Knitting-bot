@@ -751,7 +751,7 @@ async function displayConfig(interaction: Djs.ChatInputCommandInteraction) {
 			.addTextDisplayComponents(
 				new Djs.TextDisplayBuilder().setContent(
 					dedent(`# ${ul("configuration.menu.autoUpdate.title").toTitle(true)}
-					${ul(autoFinal)}`)
+					${autoFinal}`)
 				)
 			),
 	];
