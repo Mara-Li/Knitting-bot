@@ -1,7 +1,7 @@
 import * as Djs from "discord.js";
 import { TIMEOUT, type Translation } from "../interface";
 
-export type PaginatedIdsState = {
+export type PaginationState = {
 	currentPage: number;
 	originalIds: string[];
 	paginatedItems: Record<number, string[]>;
@@ -17,7 +17,7 @@ export type PaginatedHandlers = {
 };
 
 // Stockage partagé des states de pagination (clé arbitraire fournie par l'appelant)
-const globalPaginationStates = new Map<string, PaginatedIdsState>();
+const globalPaginationStates = new Map<string, PaginationState>();
 const messageToStateKey = new Map<string, string>();
 
 export function paginateIds(ids: string[], pageSize = 25): Record<number, string[]> {
@@ -39,8 +39,8 @@ export function createPaginationState(
 	key: string,
 	originalIds: string[],
 	paginatedItems: Record<number, string[]>
-): PaginatedIdsState {
-	const state: PaginatedIdsState = {
+): PaginationState {
+	const state: PaginationState = {
 		currentPage: 0,
 		originalIds,
 		paginatedItems,
@@ -50,7 +50,7 @@ export function createPaginationState(
 	return state;
 }
 
-export function getPaginationState(key: string): PaginatedIdsState | undefined {
+export function getPaginationState(key: string): PaginationState | undefined {
 	return globalPaginationStates.get(key);
 }
 
@@ -173,7 +173,9 @@ export async function startPaginatedButtonsFlow(
 		try {
 			if (handlers.onEnd) {
 				// handlers.onEnd may be async; don't await here to avoid blocking the collector end
-				handlers.onEnd(buttonMessage as Djs.Message);
+				Promise.resolve(handlers.onEnd(buttonMessage as Djs.Message)).catch((e) => {
+					console.error("Error in onEnd handler for paginated flow:", e);
+				});
 			} else {
 				// Default: remove components to disable buttons
 				try {
