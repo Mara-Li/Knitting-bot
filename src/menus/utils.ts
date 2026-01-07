@@ -210,6 +210,20 @@ async function showRoleInPaginatedModal(
 		threads: Array.from(state.selectedThreads),
 	};
 
+	const hasSelections =
+		selectedIds.channels.length > 0 ||
+		selectedIds.forums.length > 0 ||
+		selectedIds.threads.length > 0 ||
+		selectedIds.categories.length > 0;
+
+	if (!hasSelections) {
+		await interaction.reply({
+			content: ul("follow.thread.noSelection"),
+			ephemeral: true,
+		});
+		return;
+	}
+
 	const shortTitle = `${ul("common.role")}: ${ul("common.roleIn")}`;
 	const { modal, hasMore, pageItemIds } = await createPaginatedChannelModal(
 		on,
