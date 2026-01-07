@@ -34,7 +34,6 @@ export async function roleInSelectorsForType(
 	const guild = interaction.guild;
 	const userId = interaction.user.id;
 
-	// Vérifications de mode
 	if (
 		mode === "follow" &&
 		(getConfig(CommandName.followOnlyChannel, guildID) ||
@@ -55,28 +54,23 @@ export async function roleInSelectorsForType(
 		return;
 	}
 
-	// Récupérer la configuration actuelle de ce rôle
 	const allRoleIn = getRoleIn(mode, guildID);
 	const existingRoleIn = allRoleIn.find((r) => r.roleId === roleId);
 	const allChannelIds = existingRoleIn?.channelIds ?? [];
 
 	const { channelTypeFilter } = getChannelType(channelType);
 
-	// Résoudre tous les channels pour filtrer par type
 	const allChannels = await resolveChannelsByIds<
 		Djs.CategoryChannel | Djs.TextChannel | Djs.AnyThreadChannel | Djs.ForumChannel
 	>(guild, allChannelIds, channelTypeFilter);
 
 	const trackedIds = allChannels.map((ch) => ch.id);
 
-	// Découper les trackedIds en pages (25 par page) en utilisant le helper partagé
 	const paginatedItems = paginateIds(trackedIds, 25);
 
-	// Initialiser l'état de pagination avec les éléments paginés
 	const stateKey = `${userId}_${guildID}_${mode}_roleIn_${roleId}_${channelType}`;
 	const state = createPaginationState(stateKey, trackedIds, paginatedItems);
 
-	// Si 25 items ou plus, afficher un message avec boutons
 	if (trackedIds.length >= 25) {
 		const trackedOnFirstPage = paginatedItems[0]?.length ?? 0;
 		const hasMore = hasMorePages(paginatedItems, 0);
@@ -85,7 +79,6 @@ export async function roleInSelectorsForType(
 		const roleLabel = Djs.roleMention(roleId);
 		const summary = `Page 1 - ${ul("common.role")}: ${roleLabel} - ${ul(`common.${channelType}`)} : ${trackedOnFirstPage} ${ul("common.elements")}`;
 
-		// Use generic paginated flow helper
 		await startPaginatedButtonsFlow(
 			{
 				initialComponents: buttons,
@@ -155,7 +148,6 @@ export async function roleInSelectorsForType(
 		return;
 	}
 
-	// Créer le modal pour la page 0 (≤25 items)
 	const { modal } = await createPaginatedChannelModalByType(
 		mode,
 		ul,
@@ -285,7 +277,6 @@ async function showRoleInPaginatedMessage(
 ) {
 	if (!guild) return;
 
-	// Clamp page to available pages
 	const totalPages = Object.keys(state.paginatedItems).length;
 	const safePage = Math.max(0, Math.min(page, Math.max(0, totalPages - 1)));
 	state.currentPage = safePage;
@@ -343,8 +334,6 @@ async function validateRoleInAndSave(
 	const finalIds = Array.from(state.selectedIds);
 	const messages: string[] = [];
 
-	// debug logs removed
-
 	const { finalChannelsResolved, originalChannelsResolved, channelTypeFilter } =
 		await resolveIds(channelType, guild, trackedIds, finalIds);
 
@@ -360,13 +349,11 @@ async function validateRoleInAndSave(
 			: `<#${channel.id}>`;
 	};
 
-	// Vérifier les conflits avec le mode opposé
 	const oppositeMode: CommandMode = mode === "follow" ? "ignore" : "follow";
 	const oppositeRoleIn = getRoleIn(oppositeMode, guildID);
 	const oppositeForRole = oppositeRoleIn.find((r) => r.roleId === roleId);
 	const oppositeChannelIds = new Set(oppositeForRole?.channelIds ?? []);
 
-	// Filtrer les IDs par type pour le conflit check
 	const oppositeChannelsByType = await resolveChannelsByIds<
 		Djs.CategoryChannel | Djs.TextChannel | Djs.AnyThreadChannel | Djs.ForumChannel
 	>(guild, Array.from(oppositeChannelIds), channelTypeFilter);
@@ -402,7 +389,6 @@ async function validateRoleInAndSave(
 		return;
 	}
 
-	// Traiter les changements
 	const oldIds = new Set(originalChannelsResolved.map((ch) => ch.id));
 	const newIds = new Set(finalChannelsResolved.map((ch) => ch.id));
 
@@ -410,7 +396,6 @@ async function validateRoleInAndSave(
 		mode === "follow" ? "follow.thread.success" : "ignore.thread.success";
 	const removeKey = mode === "follow" ? "follow.thread.remove" : "ignore.thread.remove";
 
-	// Channels retirés
 	for (const oldChannel of originalChannelsResolved) {
 		if (!newIds.has(oldChannel.id)) {
 			messages.push(
@@ -421,7 +406,6 @@ async function validateRoleInAndSave(
 		}
 	}
 
-	// Channels ajoutés
 	for (const newChannel of finalChannelsResolved) {
 		if (!oldIds.has(newChannel.id)) {
 			messages.push(
@@ -432,15 +416,12 @@ async function validateRoleInAndSave(
 		}
 	}
 
-	// Mettre à jour la configuration globale roleIn
 	const allRoleIn = getRoleIn(mode, guildID);
 	const existingEntry = allRoleIn.find((r) => r.roleId === roleId);
 
-	// Récupérer tous les autres types de channels existants pour ce role
 	const allChannelTypesIds: string[] = [];
 
 	if (existingEntry) {
-		// Résoudre tous les channels existants
 		const allExistingChannels = await resolveChannelsByIds<
 			Djs.CategoryChannel | Djs.TextChannel | Djs.AnyThreadChannel | Djs.ForumChannel
 		>(guild, existingEntry.channelIds, [
@@ -451,7 +432,6 @@ async function validateRoleInAndSave(
 			Djs.ChannelType.GuildForum,
 		]);
 
-		// Filtrer pour garder uniquement les types différents de celui en cours d'édition
 		const otherTypeChannels = allExistingChannels.filter((ch) => {
 			if (channelType === "category") return ch.type !== Djs.ChannelType.GuildCategory;
 			if (channelType === "channel") return ch.type !== Djs.ChannelType.GuildText;
@@ -467,10 +447,8 @@ async function validateRoleInAndSave(
 		allChannelTypesIds.push(...otherTypeChannels.map((ch) => ch.id));
 	}
 
-	// Ajouter les nouveaux channels du type en cours
 	allChannelTypesIds.push(...finalIds);
 
-	// Si aucun channel, supprimer l'entrée
 	if (allChannelTypesIds.length === 0) {
 		const updatedRoleIn = allRoleIn.filter((r) => r.roleId !== roleId);
 		setRoleIn(mode, guildID, updatedRoleIn);
@@ -486,17 +464,14 @@ async function validateRoleInAndSave(
 				content: finalMessage,
 				flags: Djs.MessageFlags.Ephemeral,
 			});
-		} else if (interaction.deferred) {
+		} else if (interaction.deferred)
 			await interaction.editReply({ components: [], content: finalMessage });
-		} else {
-			await interaction.update({ components: [], content: finalMessage });
-		}
+		else await interaction.update({ components: [], content: finalMessage });
 
 		deletePaginationState(stateKey);
 		return;
 	}
 
-	// Mettre à jour ou créer l'entrée
 	const newEntry: RoleIn = {
 		channelIds: allChannelTypesIds,
 		roleId,
@@ -521,11 +496,9 @@ async function validateRoleInAndSave(
 			content: finalMessage,
 			flags: Djs.MessageFlags.Ephemeral,
 		});
-	} else if (interaction.deferred) {
+	} else if (interaction.deferred)
 		await interaction.editReply({ components: [], content: finalMessage });
-	} else {
-		await interaction.update({ components: [], content: finalMessage });
-	}
+	else await interaction.update({ components: [], content: finalMessage });
 
 	deletePaginationState(stateKey);
 }

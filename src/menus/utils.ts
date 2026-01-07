@@ -11,6 +11,7 @@ import {
 } from "../interface";
 import { getConfig, getRoleIn, setRoleIn } from "../maps";
 import { resolveChannelsByIds } from "../utils";
+import type { TrackedItems } from "./items";
 import { createPaginatedChannelModal } from "./modal";
 
 /**
@@ -582,4 +583,22 @@ export async function removeRoleIn(
 		flags: Djs.MessageFlags.Ephemeral,
 	});
 	return;
+}
+
+export function getTrackedIdsByType(
+	trackedItems: TrackedItems,
+	channelType: TChannel
+): string[] {
+	switch (channelType) {
+		case "channel":
+			return trackedItems.channels;
+		case "thread":
+			return trackedItems.threads;
+		case "category":
+			return trackedItems.categories;
+		case "forum":
+			return trackedItems.forums;
+		default:
+			return [];
+	}
 }

@@ -15,7 +15,7 @@ import {
 import type { CommandMode } from "./items";
 import { getTrackedItems } from "./items";
 import { createPaginatedChannelModalByType, processChannelTypeChanges } from "./modal";
-import { resolveIds } from "./utils";
+import { getTrackedIdsByType, resolveIds } from "./utils";
 
 type ChannelSelectorsForTypeOptions = {
 	interaction: Djs.ChatInputCommandInteraction;
@@ -41,26 +41,9 @@ export async function channelSelectorsForType({
 
 	const trackedItems = getTrackedItems(mode, guildID);
 
-	// Récupérer les items du type demandé
-	let trackedIds: string[] = [];
-	switch (channelType) {
-		case "channel":
-			trackedIds = trackedItems.channels;
-			break;
-		case "thread":
-			trackedIds = trackedItems.threads;
-			break;
-		case "category":
-			trackedIds = trackedItems.categories;
-			break;
-		case "forum":
-			trackedIds = trackedItems.forums;
-			break;
-	}
-
-	// Découper les trackedIds en pages (25 par page)
+	const trackedIds = getTrackedIdsByType(trackedItems, channelType);
 	const paginatedItems = paginateIds(trackedIds, 25);
-	// Initialiser l'état de pagination avec les éléments paginés
+
 	const stateKey = `${userId}_${guildID}_${mode}_${channelType}`;
 	const state = createPaginationState(stateKey, trackedIds, paginatedItems);
 	if (trackedIds.length >= 25) {
@@ -173,7 +156,7 @@ export async function channelSelectorsForType({
 			mode
 		);
 	} catch (e) {
-		console.warn(`[${mode} ${channelType}] Error:`, e);
+		deletePaginationState(stateKey);
 	}
 }
 
