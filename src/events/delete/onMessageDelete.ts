@@ -1,14 +1,6 @@
-import { type Client, MessageFlags, type ThreadChannel } from "discord.js";
-import { getTranslation, ln } from "../../i18n";
-import { EMOJI } from "../../index";
-import {
-	deleteCachedMessage,
-	getCachedMessage,
-	getConfig,
-	getMessageToSend,
-	getPinSetting,
-	setCachedMessage,
-} from "../../maps";
+import type { Client } from "discord.js";
+import { getTranslation } from "../../i18n";
+import { deleteCachedMessage, getCachedMessage } from "../../maps";
 import { discordLogs } from "../../utils";
 
 /**

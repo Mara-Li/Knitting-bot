@@ -262,7 +262,9 @@ async function handleRoleInModalModify(
 		});
 	} catch (e) {
 		console.error(e);
-		deletePaginationState(`${userId}_${guild.id}_${mode}_roleIn_${roleId}_${channelType}`);
+		deletePaginationState(
+			`${userId}_${guild.id}_${mode}_roleIn_${roleId}_${channelType}`
+		);
 	}
 }
 
@@ -271,7 +273,7 @@ async function handleRoleInModalModify(
  */
 async function showRoleInPaginatedMessage(
 	interaction: Djs.ButtonInteraction,
-	guild: NonNullable<Djs.ChatInputCommandInteraction["guild"]>,
+	_guild: NonNullable<Djs.ChatInputCommandInteraction["guild"]>,
 	roleId: string,
 	page: number,
 	ul: Translation,
@@ -279,7 +281,6 @@ async function showRoleInPaginatedMessage(
 	state: PaginatedIdsState,
 	mode: CommandMode
 ) {
-
 	const totalPages = Object.keys(state.paginatedItems).length;
 	const safePage = Math.max(0, Math.min(page, Math.max(0, totalPages - 1)));
 	state.currentPage = safePage;

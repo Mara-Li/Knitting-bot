@@ -13,13 +13,7 @@
 import * as Djs from "discord.js";
 import { getUl, ln, t } from "../i18n";
 import { CommandName, type Translation } from "../interface";
-import {
-	getConfig,
-	getDefaultServerData,
-	getLanguage,
-	serverDataDb,
-	setConfig,
-} from "../maps";
+import { getConfig, getDefaultServerData, serverDataDb, setConfig } from "../maps";
 
 import "../discord_ext.js";
 import dedent from "dedent";

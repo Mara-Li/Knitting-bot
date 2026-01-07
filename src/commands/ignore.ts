@@ -8,7 +8,6 @@ import {
 	channelSelectorsForType,
 	createRoleSelectModal,
 	extractAndValidateRoleOption,
-	interactionRoleInChannel,
 	processRoleTypeChanges,
 	removeRoleIn,
 	roleInSelectorsForType,

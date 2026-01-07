@@ -228,14 +228,13 @@ async function handleModalModify(
  */
 async function showPaginatedMessage(
 	interaction: Djs.ButtonInteraction,
-	guild: Djs.Guild,
+	_guild: Djs.Guild,
 	page: number,
 	ul: Translation,
 	channelType: TChannel,
 	state: PaginatedIdsState,
 	mode: CommandMode
 ) {
-
 	// Clamp page to available pages
 	const totalPages = Object.keys(state.paginatedItems).length;
 	const safePage = Math.max(0, Math.min(page, Math.max(0, totalPages - 1)));

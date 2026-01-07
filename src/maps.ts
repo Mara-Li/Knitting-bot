@@ -237,14 +237,13 @@ export function getAllFollowedChannels(guildId: string): string[] {
 	ensureGuild(guildId);
 	const follow = serverDataDb.get(guildId, "follow");
 	if (!follow) return [];
-	
+
 	return [
 		...(follow[TypeName.forum] ?? []),
 		...(follow[TypeName.channel] ?? []),
 		...(follow[TypeName.category] ?? []),
 		...(follow[TypeName.thread] ?? []),
-	]
-
+	];
 }
 
 /**
@@ -278,5 +277,5 @@ export function deleteGuild(id: string): void {
  * Initialize a guild with default data
  */
 export function loadDBFirstTime(guild: string): void {
-	ensureGuild(guild)
+	ensureGuild(guild);
 }
