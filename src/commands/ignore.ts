@@ -526,7 +526,16 @@ async function handleIgnoreModalModify(
 		});
 
 		// Defer immédiatement pour éviter l'expiration du token
-		await modalSubmit.deferUpdate();
+		try {
+			await modalSubmit.deferUpdate();
+		} catch (e: any) {
+			if (e.code === 10062) {
+				// Token expiré, on peut pas répondre
+				console.warn(`[ignore ${channelType}] Token expiré pour ModalSubmit`, e.message);
+				return;
+			}
+			throw e;
+		}
 
 		const newSelection =
 			modalSubmit.fields.getSelectedChannels(`select_${channelType}`, false) ?? new Map();

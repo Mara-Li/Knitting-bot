@@ -203,7 +203,7 @@ export async function createPaginatedChannelModal(
 			.setCustomId("select_channels")
 			.setChannelTypes(ChannelType.GuildText)
 			.setDefaultChannels(selectedIds.channels)
-			.setMaxValues(Math.min(25, selectedIds.channels.length))
+			.setMaxValues(25)
 			.setRequired(false);
 
 		const channelLabel = new LabelBuilder()
@@ -218,7 +218,7 @@ export async function createPaginatedChannelModal(
 			.setCustomId("select_threads")
 			.setChannelTypes(ChannelType.PublicThread, ChannelType.PrivateThread)
 			.setDefaultChannels(selectedIds.threads)
-			.setMaxValues(Math.min(25, selectedIds.threads.length))
+			.setMaxValues(25)
 			.setRequired(false);
 
 		const threadLabel = new LabelBuilder()
@@ -233,7 +233,7 @@ export async function createPaginatedChannelModal(
 			.setCustomId("select_forums")
 			.setChannelTypes(ChannelType.GuildForum)
 			.setDefaultChannels(selectedIds.forums)
-			.setMaxValues(Math.min(25, selectedIds.forums.length))
+			.setMaxValues(25)
 			.setRequired(false);
 
 		const forumLabel = new LabelBuilder()
@@ -379,21 +379,12 @@ export function processChannelTypeChanges(
 	// Find removed items (were tracked, now deselected)
 	for (const oldItem of oldItems) {
 		if (!newIds.has(oldItem.id)) {
-			const newItemsList = oldItems.filter(
-				(item: CategoryChannel | ForumChannel | ThreadChannel | TextChannel) =>
-					item.id !== oldItem.id
-			);
-			setFunc(
-				typeName,
-				guildID,
-				newItemsList.map((item) => item.id)
-			);
 			const mention =
 				oldItem.type === ChannelType.GuildCategory ? oldItem.name : `<#${oldItem.id}>`;
 			messages.push(
-				`[${typeLabel}] ${ul(removeKey, {
+				ul(removeKey, {
 					thread: mention,
-				})}`
+				})
 			);
 		}
 	}
@@ -401,21 +392,22 @@ export function processChannelTypeChanges(
 	// Find added items (weren't tracked, now selected)
 	for (const newItem of newItems) {
 		if (!oldIds.has(newItem.id)) {
-			const updatedItems = [...oldItems, newItem];
-			setFunc(
-				typeName,
-				guildID,
-				updatedItems.map((item) => item.id)
-			);
 			const mention =
 				newItem.type === ChannelType.GuildCategory ? newItem.name : `<#${newItem.id}>`;
 			messages.push(
-				`[${typeLabel}] ${ul(successKey, {
+				ul(successKey, {
 					thread: mention,
-				})}`
+				})
 			);
 		}
 	}
+
+	// Save the final list ONCE with all newItems
+	setFunc(
+		typeName,
+		guildID,
+		newItems.map((item) => item.id)
+	);
 }
 
 /**

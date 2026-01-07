@@ -3,7 +3,7 @@ import type { ChannelType_ } from "src/interface";
 import { cmdLn, getUl, t } from "../i18n";
 import { CommandName, TIMEOUT, type Translation, TypeName } from "../interface";
 import { getConfig, getRole } from "../maps";
-import { getCommandId, toTitle } from "../utils";
+import { getCommandId, resolveChannelsByIds, toTitle } from "../utils";
 import { getTrackedItems } from "../utils/itemsManager";
 import {
 	createPaginatedChannelModalByType,
@@ -374,7 +374,7 @@ async function channelSelectorsForType(
 			} else if (customId === "follow_page_cancel") {
 				await buttonInteraction.deferUpdate();
 				paginationStates.delete(stateKey);
-				await buttonInteraction.update({
+				await buttonInteraction.editReply({
 					components: [],
 					content: ul("common.cancelled"),
 				});
@@ -487,7 +487,16 @@ async function handleFollowModalModify(
 		});
 
 		// Defer immédiatement pour éviter l'expiration du token
-		await modalSubmit.deferUpdate();
+		try {
+			await modalSubmit.deferUpdate();
+		} catch (e) {
+			if (e instanceof Djs.DiscordAPIError && e.code === 10062) {
+				// Token expiré, on peut pas répondre
+				console.warn(`[follow ${channelType}] Token expiré pour ModalSubmit`, e.message);
+				return;
+			}
+			throw e;
+		}
 
 		const newSelection =
 			modalSubmit.fields.getSelectedChannels(`select_${channelType}`, false) ?? new Map();
@@ -572,6 +581,8 @@ async function validateAndSaveForFollowType(
 	const finalIds = Array.from(state.selectedIds);
 	const messages: string[] = [];
 
+	console.log(`[follow ${channelType}] finalIds:`, state.selectedIds);
+
 	// Mapper le type de channel au TypeName
 	let typeName: TypeName;
 	let channelTypeFilter: Djs.ChannelType[];
@@ -596,19 +607,13 @@ async function validateAndSaveForFollowType(
 	}
 
 	// Résoudre les IDs en objets Channel
-	const finalChannelsResolved = await import("../utils/index.js").then(
-		({ resolveChannelsByIds }) =>
-			resolveChannelsByIds<
-				Djs.CategoryChannel | Djs.TextChannel | Djs.AnyThreadChannel | Djs.ForumChannel
-			>(guild, finalIds, channelTypeFilter)
-	);
+	const finalChannelsResolved = await resolveChannelsByIds<
+		Djs.CategoryChannel | Djs.TextChannel | Djs.AnyThreadChannel | Djs.ForumChannel
+	>(guild, finalIds, channelTypeFilter);
 
-	const originalChannelsResolved = await import("../utils/index.js").then(
-		({ resolveChannelsByIds }) =>
-			resolveChannelsByIds<
-				Djs.CategoryChannel | Djs.TextChannel | Djs.AnyThreadChannel | Djs.ForumChannel
-			>(guild, trackedIds, channelTypeFilter)
-	);
+	const originalChannelsResolved = await resolveChannelsByIds<
+		Djs.CategoryChannel | Djs.TextChannel | Djs.AnyThreadChannel | Djs.ForumChannel
+	>(guild, trackedIds, channelTypeFilter);
 
 	processChannelTypeChanges(
 		originalChannelsResolved,
