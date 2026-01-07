@@ -2,6 +2,7 @@ import * as Djs from "discord.js";
 import type { TChannel } from "src/interface";
 import { TIMEOUT, type Translation } from "../interface";
 import { getMaps } from "../maps";
+import { discordLogs } from "../utils";
 import {
 	createPaginationButtons,
 	createPaginationState,
@@ -157,6 +158,11 @@ export async function channelSelectorsForType({
 		);
 	} catch (e) {
 		deletePaginationState(stateKey);
+		await discordLogs(
+			guildID,
+			interaction.client,
+			ul("logs.errors.modalInteractionFailed", { error: String(e) })
+		);
 	}
 }
 
