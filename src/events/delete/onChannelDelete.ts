@@ -84,19 +84,6 @@ export default (client: Client): void => {
 			}
 		} else if (channelType === ChannelType.GuildCategory) {
 			/**
-			 * Clean up message cache for all threads in channels within this category
-			 */
-			const category = channelGuild as CategoryChannel;
-			category.children.cache.forEach((child) => {
-				if (child.type === ChannelType.GuildText) {
-					const textChannel = child as TextChannel;
-					textChannel.threads.cache.forEach((thread) => {
-						deleteCachedMessage(guildID, thread.id);
-					});
-				}
-			});
-
-			/**
 			 * Remove the category ID from the database "follow" and "ignore" maps
 			 */
 			const allCategoryIgnore = getMaps("ignore", TypeName.category, guildID);

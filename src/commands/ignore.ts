@@ -109,7 +109,15 @@ export default {
 
 		switch (commands) {
 			case t("common.channel").toLowerCase(): {
-				const channelType = options.getString("type") as TChannel;
+				if (getConfig(CommandName.followOnlyChannel, guild)) {
+					await interaction.reply({
+						content: ul("ignore.error.followChannel", {
+							id: await getCommandId("follow", interaction.guild),
+						}),
+					});
+					return;
+				}
+				const channelType = options.getString("type", true) as TChannel;
 				console.log(`[ignore] Received command with type: ${channelType}`);
 				await channelSelectorsForType(interaction, ul, channelType, "ignore");
 				break;

@@ -109,7 +109,15 @@ export default {
 
 		switch (commands) {
 			case t("common.channel").toLowerCase(): {
-				const channelType = options.getString("type") as TChannel;
+				if (!getConfig(CommandName.followOnlyChannel, guild)) {
+					await interaction.reply({
+						content: ul("follow.error.followChannel", {
+							id: await getCommandId("ignore", interaction.guild),
+						}),
+					});
+					return;
+				}
+				const channelType = options.getString("type", true) as TChannel;
 				console.log(`[follow] Received command with type: ${channelType}`);
 				await channelSelectorsForType(interaction, ul, channelType, "follow");
 				break;
@@ -137,12 +145,7 @@ export default {
 					});
 					return;
 				}
-				const channelType = options.getString("type") as TChannel;
-				if (!channelType) {
-					// Fallback vers l'ancienne interface multi-types
-					await interactionRoleInChannel(interaction, "follow");
-					return;
-				}
+				const channelType = options.getString("type", true) as TChannel;
 				console.log(
 					`[follow roleIn] Received command with type: ${channelType}, roleId: ${roleId}`
 				);

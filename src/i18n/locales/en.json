@@ -35,11 +35,11 @@
     "cancelled": "Cancelled",
     "category": "Category",
     "channel": "Channel",
+    "confirm": "Confirm",
     "conflictTracked": {
       "follow": "{{- item}} is already ignored. Remove it from ignored before following it.",
       "ignore": "{{- item}} is already followed. Remove it from followed before ignoring it."
     },
-    "confirm": "Confirm",
     "disable": "Disable",
     "disabled": "Disabled",
     "elements": "elements",
@@ -245,7 +245,7 @@
     "error": {
       "followChannel": "This command cannot be activated when **Channel only** mode is enabled.\nTo stop following certain channels, please use the </follow channel:{{-id}}> command.",
       "followRole": "This command cannot be activated when **role only** mode is enabled.\nTo stop following certain roles, please use the </follow role:{{-id}}> command.",
-      "followRoleIn": "This command cannot be activated when the **[@role] mode in [#channel]** is enabled.\nTo stop following certain shows or roles, please use the </follow specific:{{-id}}> command."
+      "followRoleIn": "This command cannot be activated when the **[@role] mode in [#channel]** is enabled.\nTo stop following certain channels or roles, please use the </follow specific:{{-id}}> command."
     },
     "list": {
       "description": "List all ignored channels, threads, categories and role",
