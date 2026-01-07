@@ -239,7 +239,8 @@
       },
       "startButton": "Ouvrir le menu de gestion",
       "success": "{{- thread}} est maintenant suivi."
-    }
+    },
+    "title": "suivre"
   },
   "ignore": {
     "description": "Exclure des channels ou rôle des mises-à-jours",

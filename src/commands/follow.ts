@@ -3,13 +3,13 @@ import * as Djs from "discord.js";
 import type { TChannel } from "src/interface";
 import { cmdLn, getUl, t } from "../i18n";
 import { CommandName, TIMEOUT, type Translation } from "../interface";
-import {getConfig, getRole, getRoleIn, serverDataDb, setRoleIn} from "../maps";
+import { getConfig, getRole } from "../maps";
 import {
 	channelSelectorsForType,
 	createRoleSelectModal,
 	extractAndValidateRoleOption,
-	interactionRoleInChannel,
-	processRoleTypeChanges, removeRoleIn,
+	processRoleTypeChanges,
+	removeRoleIn,
 	roleInSelectorsForType,
 } from "../menus";
 import { getCommandId } from "../utils";
@@ -19,7 +19,7 @@ import "uniformize";
 
 export default {
 	data: new Djs.SlashCommandBuilder()
-		.setName("follow")
+		.setNames("follow.title")
 		.setDescriptions("follow.description")
 		.setDefaultMemberPermissions(Djs.PermissionFlagsBits.ManageThreads)
 		.addSubcommand((subcommand) =>
@@ -144,13 +144,7 @@ export default {
 			case t("common.roleIn"): {
 				const opt = options.getString("type", true);
 				if (opt === "delete") {
-					await removeRoleIn(
-						options,
-						guild,
-						"follow",
-						interaction,
-						ul
-					)
+					await removeRoleIn(options, guild, "follow", interaction, ul);
 					return;
 				}
 				const roleId = await extractAndValidateRoleOption(options);

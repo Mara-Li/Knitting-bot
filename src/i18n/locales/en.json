@@ -239,7 +239,8 @@
       },
       "startButton": "Open the management menu",
       "success": "{{- thread}} is now followed."
-    }
+    },
+    "title": "follow"
   },
   "ignore": {
     "description": "Exclude channel/roles from update.",
