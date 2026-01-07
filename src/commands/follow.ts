@@ -7,6 +7,7 @@ import { getCommandId, toTitle } from "../utils";
 import { createRoleSelectModal, processRoleTypeChanges } from "../utils/modalHandler";
 import { channelSelectorsForType } from "./channelPagination";
 import { mapToStr } from "./index";
+import { roleInSelectorsForType } from "./roleInPagination";
 import { interactionRoleInChannel } from "./utils";
 import "../discord_ext.js";
 import "uniformize";
@@ -65,6 +66,34 @@ export default {
 						.setDescription("follow.roleIn.option.role")
 						.setRequired(true)
 				)
+				.addStringOption((option) =>
+					option
+						.setName("type")
+						.setDescriptions("select.type")
+						.setChoices(
+							{
+								name: t("common.channel"),
+								name_localizations: cmdLn("common.channel"),
+								value: "channel",
+							},
+							{
+								name: t("common.thread"),
+								name_localizations: cmdLn("common.thread"),
+								value: "thread",
+							},
+							{
+								name: t("common.category"),
+								name_localizations: cmdLn("common.category"),
+								value: "category",
+							},
+							{
+								name: t("common.forum"),
+								name_localizations: cmdLn("common.forum"),
+								value: "forum",
+							}
+						)
+						.setRequired(true)
+				)
 		),
 	async execute(interaction: Djs.ChatInputCommandInteraction) {
 		if (!interaction.guild) return;
@@ -94,9 +123,28 @@ export default {
 			case t("common.list"):
 				await displayFollowed(interaction, ul);
 				break;
-			case t("common.roleIn"):
-				await interactionRoleInChannel(interaction, "follow");
+			case t("common.roleIn"): {
+				const roleOpt = options.get(t("common.role").toLowerCase());
+				if (!roleOpt || !roleOpt.role) {
+					await interaction.reply({
+						content: ul("ignore.role.error", { role: roleOpt?.name }),
+						flags: Djs.MessageFlags.Ephemeral,
+					});
+					return;
+				}
+				const roleId = roleOpt.role.id;
+				const channelType = options.getString("type") as ChannelType_;
+				if (!channelType) {
+					// Fallback vers l'ancienne interface multi-types
+					await interactionRoleInChannel(interaction, "follow");
+					return;
+				}
+				console.log(
+					`[follow roleIn] Received command with type: ${channelType}, roleId: ${roleId}`
+				);
+				await roleInSelectorsForType(interaction, ul, channelType, "follow", roleId);
 				break;
+			}
 			default:
 				await displayFollowed(interaction, ul);
 				break;

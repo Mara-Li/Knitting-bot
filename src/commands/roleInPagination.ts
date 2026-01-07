@@ -1,0 +1,633 @@
+import * as Djs from "discord.js";
+import type { ChannelType_ } from "src/interface";
+import {
+	CommandName,
+	type RoleIn,
+	TIMEOUT,
+	type Translation,
+	TypeName,
+} from "../interface";
+import { getConfig, getRoleIn, setRoleIn } from "../maps";
+import { resolveChannelsByIds } from "../utils";
+import type { CommandMode } from "../utils/itemsManager";
+import {
+	createPaginatedChannelModalByType,
+	createPaginationButtons,
+} from "../utils/modalHandler";
+
+type PaginationState = {
+	currentPage: number;
+	originalIds: string[];
+	paginatedItems: Record<number, string[]>;
+	selectedIds: Set<string>;
+};
+
+// State management pour pagination roleIn par type
+const roleInPaginationStates = new Map<string, PaginationState>();
+
+/**
+ * Handle roleIn channel selectors with pagination for follow/ignore commands
+ */
+export async function roleInSelectorsForType(
+	interaction: Djs.ChatInputCommandInteraction,
+	ul: Translation,
+	channelType: ChannelType_,
+	mode: CommandMode,
+	roleId: string
+) {
+	if (!interaction.guild) return;
+
+	const guildID = interaction.guild.id;
+	const guild = interaction.guild;
+	const userId = interaction.user.id;
+
+	// Vérifications de mode
+	if (
+		mode === "follow" &&
+		(getConfig(CommandName.followOnlyChannel, guildID) ||
+			getConfig(CommandName.followOnlyRole, guildID))
+	) {
+		await interaction.reply({
+			content: ul("roleIn.error.otherMode"),
+			flags: Djs.MessageFlags.Ephemeral,
+		});
+		return;
+	}
+
+	if (!getConfig(CommandName.followOnlyRoleIn, guildID) && mode === "follow") {
+		await interaction.reply({
+			content: ul("roleIn.error.need"),
+			flags: Djs.MessageFlags.Ephemeral,
+		});
+		return;
+	}
+
+	console.log(
+		`[roleInSelectorsForType] Called with mode="${mode}", channelType="${channelType}", roleId="${roleId}"`
+	);
+
+	// Récupérer la configuration actuelle de ce rôle
+	const allRoleIn = getRoleIn(mode, guildID);
+	const existingRoleIn = allRoleIn.find((r) => r.roleId === roleId);
+	const allChannelIds = existingRoleIn?.channelIds ?? [];
+
+	// Mapper le type de channel au TypeName
+	let typeName: TypeName;
+	let channelTypeFilter: Djs.ChannelType[];
+
+	switch (channelType) {
+		case "channel":
+			typeName = TypeName.channel;
+			channelTypeFilter = [Djs.ChannelType.GuildText];
+			break;
+		case "thread":
+			typeName = TypeName.thread;
+			channelTypeFilter = [Djs.ChannelType.PublicThread, Djs.ChannelType.PrivateThread];
+			break;
+		case "category":
+			typeName = TypeName.category;
+			channelTypeFilter = [Djs.ChannelType.GuildCategory];
+			break;
+		case "forum":
+			typeName = TypeName.forum;
+			channelTypeFilter = [Djs.ChannelType.GuildForum];
+			break;
+	}
+
+	// Résoudre tous les channels pour filtrer par type
+	const allChannels = await resolveChannelsByIds<
+		Djs.CategoryChannel | Djs.TextChannel | Djs.AnyThreadChannel | Djs.ForumChannel
+	>(guild, allChannelIds, channelTypeFilter);
+
+	const trackedIds = allChannels.map((ch) => ch.id);
+
+	console.log(`[${mode} roleIn ${channelType}] trackedIds:`, trackedIds);
+
+	// Découper les trackedIds en pages (25 par page)
+	const paginatedItems: Record<number, string[]> = {};
+	for (let i = 0; i < Math.ceil(trackedIds.length / 25); i++) {
+		const startIndex = i * 25;
+		const endIndex = startIndex + 25;
+		paginatedItems[i] = trackedIds.slice(startIndex, endIndex);
+	}
+
+	console.log(`[${mode} roleIn ${channelType}] paginatedItems:`, paginatedItems);
+
+	// Initialiser l'état de pagination avec les éléments paginés
+	const stateKey = `${userId}_${guildID}_${mode}_roleIn_${roleId}_${channelType}`;
+	const state: PaginationState = {
+		currentPage: 0,
+		originalIds: trackedIds,
+		paginatedItems,
+		selectedIds: new Set(trackedIds),
+	};
+	roleInPaginationStates.set(stateKey, state);
+
+	// Si 25 items ou plus, afficher un message avec boutons
+	if (trackedIds.length >= 25) {
+		const trackedOnFirstPage = paginatedItems[0]?.length ?? 0;
+		const hasMore = Object.keys(paginatedItems).length >= 1;
+
+		const buttons = createPaginationButtons(mode, 0, hasMore, ul);
+		const roleLabel = Djs.roleMention(roleId);
+		const summary = `Page 1 - ${ul("common.role")}: ${roleLabel} - ${ul(`common.${channelType}`)} : ${trackedOnFirstPage} ${ul("common.elements")}`;
+
+		await interaction.reply({
+			components: buttons,
+			content: summary,
+			flags: Djs.MessageFlags.Ephemeral,
+		});
+
+		const buttonMessage = await interaction.fetchReply();
+
+		const collector = buttonMessage.createMessageComponentCollector({
+			filter: (i) => i.user.id === userId,
+			time: TIMEOUT,
+		});
+
+		collector.on("collect", async (buttonInteraction: Djs.ButtonInteraction) => {
+			const customId = buttonInteraction.customId;
+
+			if (customId.startsWith(`${mode}_page_modify_`)) {
+				const page = Number.parseInt(customId.split("_").pop() || "0", 10);
+				await handleRoleInModalModify(
+					buttonInteraction,
+					guild,
+					userId,
+					roleId,
+					page,
+					ul,
+					channelType,
+					state,
+					mode
+				);
+			} else if (customId.startsWith(`${mode}_page_prev_`)) {
+				await buttonInteraction.deferUpdate();
+				const currentPage = Number.parseInt(customId.split("_").pop() || "0", 10);
+				const prevPage = Math.max(0, currentPage - 1);
+				await showRoleInPaginatedMessage(
+					buttonInteraction,
+					guild,
+					roleId,
+					prevPage,
+					ul,
+					channelType,
+					state,
+					mode
+				);
+			} else if (customId.startsWith(`${mode}_page_next_`)) {
+				await buttonInteraction.deferUpdate();
+				const currentPage = Number.parseInt(customId.split("_").pop() || "0", 10);
+				const nextPage = currentPage + 1;
+				await showRoleInPaginatedMessage(
+					buttonInteraction,
+					guild,
+					roleId,
+					nextPage,
+					ul,
+					channelType,
+					state,
+					mode
+				);
+			} else if (customId === `${mode}_page_validate`) {
+				await buttonInteraction.deferUpdate();
+				await validateRoleInAndSave(
+					buttonInteraction,
+					userId,
+					guildID,
+					roleId,
+					channelType,
+					state.originalIds,
+					ul,
+					mode
+				);
+				collector.stop();
+			} else if (customId === `${mode}_page_cancel`) {
+				await buttonInteraction.deferUpdate();
+				roleInPaginationStates.delete(stateKey);
+				await buttonInteraction.editReply({
+					components: [],
+					content: ul("common.cancelled"),
+				});
+				collector.stop();
+			}
+		});
+
+		collector.on("end", () => {
+			if (roleInPaginationStates.has(stateKey)) {
+				roleInPaginationStates.delete(stateKey);
+			}
+		});
+
+		return;
+	}
+
+	// Créer le modal pour la page 0 (≤25 items)
+	const { modal } = await createPaginatedChannelModalByType(
+		mode,
+		ul,
+		guild,
+		0,
+		channelType,
+		paginatedItems[0] ?? [],
+		`${ul("common.role")}: ${ul("common.roleIn")}`,
+		true
+	);
+
+	try {
+		await interaction.showModal(modal);
+
+		const modalSubmit = await interaction.awaitModalSubmit({
+			filter: (i) => i.user.id === userId,
+			time: TIMEOUT,
+		});
+
+		const newSelection =
+			modalSubmit.fields.getSelectedChannels(`select_${channelType}`, false) ?? new Map();
+		const newSelectedIds = Array.from(newSelection.keys());
+
+		state.paginatedItems[0] = newSelectedIds;
+		state.selectedIds.clear();
+		for (const id of newSelectedIds) {
+			state.selectedIds.add(id);
+		}
+
+		await validateRoleInAndSave(
+			modalSubmit,
+			userId,
+			guildID,
+			roleId,
+			channelType,
+			state.originalIds,
+			ul,
+			mode
+		);
+	} catch (e) {
+		console.error(`[${mode} roleIn ${channelType}] Error:`, e);
+	}
+}
+
+/**
+ * Handle modal modification for a specific page
+ */
+async function handleRoleInModalModify(
+	interaction: Djs.ButtonInteraction,
+	guild: NonNullable<Djs.ChatInputCommandInteraction["guild"]>,
+	userId: string,
+	roleId: string,
+	page: number,
+	ul: Translation,
+	channelType: ChannelType_,
+	state: PaginationState,
+	mode: CommandMode
+) {
+	if (!guild) return;
+
+	const pageTrackedIds = state.paginatedItems[page] ?? [];
+
+	const { modal } = await createPaginatedChannelModalByType(
+		mode,
+		ul,
+		guild,
+		0,
+		channelType,
+		pageTrackedIds,
+		`${ul("common.role")}: ${ul("common.roleIn")}`,
+		true
+	);
+
+	try {
+		await interaction.showModal(modal);
+
+		const modalSubmit = await interaction.awaitModalSubmit({
+			filter: (i) => i.user.id === userId,
+			time: TIMEOUT,
+		});
+
+		try {
+			await modalSubmit.deferUpdate();
+		} catch (e) {
+			if (e instanceof Djs.DiscordAPIError && e.code === 10062) {
+				console.warn(
+					`[${mode} roleIn ${channelType}] Token expiré pour ModalSubmit`,
+					e.message
+				);
+				return;
+			}
+			throw e;
+		}
+
+		const newSelection =
+			modalSubmit.fields.getSelectedChannels(`select_${channelType}`, false) ?? new Map();
+		const newSelectedIds = Array.from(newSelection.keys());
+
+		state.paginatedItems[page] = newSelectedIds;
+
+		state.selectedIds.clear();
+		for (const pageItems of Object.values(state.paginatedItems)) {
+			for (const id of pageItems) {
+				state.selectedIds.add(id);
+			}
+		}
+
+		const pageItemsCount = state.paginatedItems[page]?.length ?? 0;
+		const hasMore = Object.keys(state.paginatedItems).length > page + 1;
+		const buttons = createPaginationButtons(mode, page, hasMore, ul);
+		const roleLabel = Djs.roleMention(roleId);
+		const summary = `Page ${page + 1} - ${ul("common.role")}: ${roleLabel} - ${ul(`common.${channelType}`)} : ${pageItemsCount} ${ul("common.elements")}`;
+
+		await modalSubmit.editReply({
+			components: buttons,
+			content: summary,
+		});
+	} catch (e) {
+		console.error(e);
+	}
+}
+
+/**
+ * Show paginated message for roleIn channel selection by type
+ */
+async function showRoleInPaginatedMessage(
+	interaction: Djs.ButtonInteraction,
+	guild: NonNullable<Djs.ChatInputCommandInteraction["guild"]>,
+	roleId: string,
+	page: number,
+	ul: Translation,
+	channelType: ChannelType_,
+	state: PaginationState,
+	mode: CommandMode
+) {
+	if (!guild) return;
+
+	state.currentPage = page;
+
+	const trackedOnThisPage = state.paginatedItems[page]?.length ?? 0;
+	const hasMore = Object.keys(state.paginatedItems).length > page + 1;
+
+	const buttons = createPaginationButtons(mode, page, hasMore, ul);
+	const roleLabel = Djs.roleMention(roleId);
+	const summary = `Page ${page + 1} - ${ul("common.role")}: ${roleLabel} - ${ul(`common.${channelType}`)} : ${trackedOnThisPage} ${ul("common.elements")}`;
+
+	await interaction.editReply({
+		components: buttons,
+		content: summary,
+	});
+}
+
+/**
+ * Validate and save roleIn selections by type
+ */
+async function validateRoleInAndSave(
+	interaction: Djs.ButtonInteraction | Djs.ModalSubmitInteraction,
+	userId: string,
+	guildID: string,
+	roleId: string,
+	channelType: ChannelType_,
+	trackedIds: string[],
+	ul: Translation,
+	mode: CommandMode
+) {
+	const stateKey = `${userId}_${guildID}_${mode}_roleIn_${roleId}_${channelType}`;
+	const state = roleInPaginationStates.get(stateKey);
+	if (!state) return;
+
+	const guild = interaction.guild;
+	if (!guild) return;
+
+	const role = guild.roles.cache.get(roleId);
+	if (!role) {
+		const errorMsg = ul("ignore.role.error", { role: roleId });
+		if (interaction.isModalSubmit()) {
+			await interaction.reply({
+				components: [],
+				content: errorMsg,
+				flags: Djs.MessageFlags.Ephemeral,
+			});
+		} else if (interaction.deferred) {
+			await interaction.editReply({ components: [], content: errorMsg });
+		} else {
+			await interaction.update({ components: [], content: errorMsg });
+		}
+		roleInPaginationStates.delete(stateKey);
+		return;
+	}
+
+	const finalIds = Array.from(state.selectedIds);
+	const messages: string[] = [];
+
+	console.log(`[${mode} roleIn ${channelType}] finalIds:`, state.selectedIds);
+
+	// Mapper le type de channel au TypeName
+	let typeName: TypeName;
+	let channelTypeFilter: Djs.ChannelType[];
+
+	switch (channelType) {
+		case "channel":
+			typeName = TypeName.channel;
+			channelTypeFilter = [Djs.ChannelType.GuildText];
+			break;
+		case "thread":
+			typeName = TypeName.thread;
+			channelTypeFilter = [Djs.ChannelType.PublicThread, Djs.ChannelType.PrivateThread];
+			break;
+		case "category":
+			typeName = TypeName.category;
+			channelTypeFilter = [Djs.ChannelType.GuildCategory];
+			break;
+		case "forum":
+			typeName = TypeName.forum;
+			channelTypeFilter = [Djs.ChannelType.GuildForum];
+			break;
+	}
+
+	// Résoudre les IDs en objets Channel
+	const finalChannelsResolved = await resolveChannelsByIds<
+		Djs.CategoryChannel | Djs.TextChannel | Djs.AnyThreadChannel | Djs.ForumChannel
+	>(guild, finalIds, channelTypeFilter);
+
+	const originalChannelsResolved = await resolveChannelsByIds<
+		Djs.CategoryChannel | Djs.TextChannel | Djs.AnyThreadChannel | Djs.ForumChannel
+	>(guild, trackedIds, channelTypeFilter);
+
+	const mentionFromChannel = (
+		channel:
+			| Djs.CategoryChannel
+			| Djs.TextChannel
+			| Djs.AnyThreadChannel
+			| Djs.ForumChannel
+	) => {
+		return channel.type === Djs.ChannelType.GuildCategory
+			? channel.name
+			: `<#${channel.id}>`;
+	};
+
+	// Vérifier les conflits avec le mode opposé
+	const oppositeMode: CommandMode = mode === "follow" ? "ignore" : "follow";
+	const oppositeRoleIn = getRoleIn(oppositeMode, guildID);
+	const oppositeForRole = oppositeRoleIn.find((r) => r.roleId === roleId);
+	const oppositeChannelIds = new Set(oppositeForRole?.channelIds ?? []);
+
+	// Filtrer les IDs par type pour le conflit check
+	const oppositeChannelsByType = await resolveChannelsByIds<
+		Djs.CategoryChannel | Djs.TextChannel | Djs.AnyThreadChannel | Djs.ForumChannel
+	>(guild, Array.from(oppositeChannelIds), channelTypeFilter);
+	const oppositeTypeIds = new Set(oppositeChannelsByType.map((ch) => ch.id));
+
+	const conflictIds = finalIds.filter((id) => oppositeTypeIds.has(id));
+
+	if (conflictIds.length > 0) {
+		const conflictChannels = finalChannelsResolved.filter((ch) =>
+			conflictIds.includes(ch.id)
+		);
+		const conflictKey =
+			mode === "ignore"
+				? "common.conflictTracked.ignore"
+				: "common.conflictTracked.follow";
+		const conflictMessage = ul(conflictKey, {
+			item: conflictChannels.map((ch) => mentionFromChannel(ch)).join(", "),
+		});
+
+		if (interaction.isModalSubmit()) {
+			await interaction.reply({
+				components: [],
+				content: conflictMessage,
+				flags: Djs.MessageFlags.Ephemeral,
+			});
+		} else if (interaction.deferred) {
+			await interaction.editReply({ components: [], content: conflictMessage });
+		} else {
+			await interaction.update({ components: [], content: conflictMessage });
+		}
+
+		roleInPaginationStates.delete(stateKey);
+		return;
+	}
+
+	// Traiter les changements
+	const oldIds = new Set(originalChannelsResolved.map((ch) => ch.id));
+	const newIds = new Set(finalChannelsResolved.map((ch) => ch.id));
+
+	const successKey =
+		mode === "follow" ? "follow.thread.success" : "ignore.thread.success";
+	const removeKey = mode === "follow" ? "follow.thread.remove" : "ignore.thread.remove";
+
+	// Channels retirés
+	for (const oldChannel of originalChannelsResolved) {
+		if (!newIds.has(oldChannel.id)) {
+			messages.push(
+				ul(removeKey, {
+					thread: mentionFromChannel(oldChannel),
+				})
+			);
+		}
+	}
+
+	// Channels ajoutés
+	for (const newChannel of finalChannelsResolved) {
+		if (!oldIds.has(newChannel.id)) {
+			messages.push(
+				ul(successKey, {
+					thread: mentionFromChannel(newChannel),
+				})
+			);
+		}
+	}
+
+	// Mettre à jour la configuration globale roleIn
+	const allRoleIn = getRoleIn(mode, guildID);
+	const existingEntry = allRoleIn.find((r) => r.roleId === roleId);
+
+	// Récupérer tous les autres types de channels existants pour ce role
+	const allChannelTypesIds: string[] = [];
+
+	if (existingEntry) {
+		// Résoudre tous les channels existants
+		const allExistingChannels = await resolveChannelsByIds<
+			Djs.CategoryChannel | Djs.TextChannel | Djs.AnyThreadChannel | Djs.ForumChannel
+		>(guild, existingEntry.channelIds, [
+			Djs.ChannelType.GuildCategory,
+			Djs.ChannelType.GuildText,
+			Djs.ChannelType.PublicThread,
+			Djs.ChannelType.PrivateThread,
+			Djs.ChannelType.GuildForum,
+		]);
+
+		// Filtrer pour garder uniquement les types différents de celui en cours d'édition
+		const otherTypeChannels = allExistingChannels.filter((ch) => {
+			if (channelType === "category") return ch.type !== Djs.ChannelType.GuildCategory;
+			if (channelType === "channel") return ch.type !== Djs.ChannelType.GuildText;
+			if (channelType === "forum") return ch.type !== Djs.ChannelType.GuildForum;
+			if (channelType === "thread")
+				return (
+					ch.type !== Djs.ChannelType.PublicThread &&
+					ch.type !== Djs.ChannelType.PrivateThread
+				);
+			return true;
+		});
+
+		allChannelTypesIds.push(...otherTypeChannels.map((ch) => ch.id));
+	}
+
+	// Ajouter les nouveaux channels du type en cours
+	allChannelTypesIds.push(...finalIds);
+
+	// Si aucun channel, supprimer l'entrée
+	if (allChannelTypesIds.length === 0) {
+		const updatedRoleIn = allRoleIn.filter((r) => r.roleId !== roleId);
+		setRoleIn(mode, guildID, updatedRoleIn);
+
+		const finalMessage = ul("roleIn.noLonger.any", {
+			mention: Djs.roleMention(roleId),
+			on: ul(`roleIn.on.${mode}`),
+		});
+
+		if (interaction.isModalSubmit()) {
+			await interaction.reply({
+				components: [],
+				content: finalMessage,
+				flags: Djs.MessageFlags.Ephemeral,
+			});
+		} else if (interaction.deferred) {
+			await interaction.editReply({ components: [], content: finalMessage });
+		} else {
+			await interaction.update({ components: [], content: finalMessage });
+		}
+
+		roleInPaginationStates.delete(stateKey);
+		return;
+	}
+
+	// Mettre à jour ou créer l'entrée
+	const newEntry: RoleIn = {
+		channelIds: allChannelTypesIds,
+		roleId,
+	};
+
+	if (existingEntry) {
+		const updated = allRoleIn.map((r) => (r.roleId === roleId ? newEntry : r));
+		setRoleIn(mode, guildID, updated);
+	} else {
+		allRoleIn.push(newEntry);
+		setRoleIn(mode, guildID, allRoleIn);
+	}
+
+	const finalMessage =
+		messages.length > 0
+			? ul("common.summary", { changes: `\n- ${messages.join("\n- ")}` })
+			: ul("common.noChanges");
+
+	if (interaction.isModalSubmit()) {
+		await interaction.reply({
+			components: [],
+			content: finalMessage,
+			flags: Djs.MessageFlags.Ephemeral,
+		});
+	} else if (interaction.deferred) {
+		await interaction.editReply({ components: [], content: finalMessage });
+	} else {
+		await interaction.update({ components: [], content: finalMessage });
+	}
+
+	roleInPaginationStates.delete(stateKey);
+}
