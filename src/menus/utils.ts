@@ -221,11 +221,16 @@ async function showRoleInPaginatedModal(
 	);
 
 	await interaction.showModal(modal);
-	const modalSubmit = await interaction.awaitModalSubmit({
-		filter: (i) => i.user.id === userId,
-		time: TIMEOUT,
-	});
-
+	let modalSubmit: Djs.ModalSubmitInteraction;
+	try {
+		modalSubmit = await interaction.awaitModalSubmit({
+			filter: (i) => i.user.id === userId,
+			time: TIMEOUT,
+		});
+	} catch {
+		// Timeout
+		return;
+	}
 	const newCategories =
 		modalSubmit.fields.getSelectedChannels("select_categories", false, [
 			Djs.ChannelType.GuildCategory,
@@ -444,11 +449,11 @@ export async function interactionRoleInChannel(
 		embeds: [embed],
 		flags: Djs.MessageFlags.Ephemeral,
 	});
-
+	const reply = await interaction.fetchReply();
 	const collector = interaction.channel?.createMessageComponentCollector({
 		componentType: Djs.ComponentType.Button,
 		filter: (i: Djs.ButtonInteraction) =>
-			i.user.id === userId && i.message.id === interaction.id,
+			i.user.id === userId && i.message.id === reply.id,
 		time: TIMEOUT,
 	});
 
