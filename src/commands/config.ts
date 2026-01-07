@@ -187,7 +187,13 @@ async function handleLogChannelConfig(
 
 	const channel = options.getChannel(t("common.channel").toLowerCase());
 	if (channel) {
-		if (channel.type !== Djs.ChannelType.GuildText ) {
+		if (
+			channel.type !== Djs.ChannelType.GuildText &&
+			channel.type !== Djs.ChannelType.GuildAnnouncement &&
+			channel.type !== Djs.ChannelType.AnnouncementThread &&
+			channel.type !== Djs.ChannelType.PublicThread &&
+			channel.type !== Djs.ChannelType.PrivateThread
+		) {
 			await interaction.reply({
 				content: ul("configuration.menu.log.channel.error"),
 			});
@@ -698,7 +704,8 @@ async function displayConfig(interaction: Djs.ChatInputCommandInteraction) {
 
 	const autoFinal = auto.manualMode ? manualStr : autoStr;
 
-	const log = config.log && typeof config.log === "string" ? Djs.channelMention(config.log) : "`✕`";
+	const log =
+		config.log && typeof config.log === "string" ? Djs.channelMention(config.log) : "`✕`";
 	//use component v2
 	const components = [
 		new Djs.ContainerBuilder()
