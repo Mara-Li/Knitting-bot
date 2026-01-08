@@ -144,6 +144,7 @@ export async function channelSelectorsForType({
 			ul,
 			mode
 		);
+		deletePaginationState(stateKey);
 	} catch (e) {
 		deletePaginationState(stateKey);
 		await discordLogs(
