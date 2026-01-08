@@ -28,18 +28,21 @@ export default (client: Client): void => {
 		const channelGuild = channel as NonThreadGuildBasedChannel;
 		const channelType = channelGuild.type;
 
-		// Check if channel is in any RoleIn configuration
-		const ignoredRoleIn = getRoleIn("ignore", guildID).some((ignored) => {
+		// Précharger les configurations RoleIn pour éviter des lectures redondantes
+		const ignoredRoleIns = getRoleIn("ignore", guildID);
+		const followedRoleIns = getRoleIn("follow", guildID);
+
+		// Vérifier si le canal est présent dans une configuration RoleIn
+		const ignoredRoleIn = ignoredRoleIns.some((ignored) => {
 			return ignored.channelIds.includes(channel.id);
 		});
-		const followedRoleIn = getRoleIn("follow", guildID).some((followed) => {
+		const followedRoleIn = followedRoleIns.some((followed) => {
 			return followed.channelIds.includes(channel.id);
 		});
 
-		// Remove channel from RoleIn configurations
+		// Retirer le canal des configurations RoleIn
 		if (ignoredRoleIn) {
-			const ignored = getRoleIn("ignore", guildID);
-			const updated = ignored.map((roleIn) => ({
+			const updated = ignoredRoleIns.map((roleIn) => ({
 				...roleIn,
 				channelIds: roleIn.channelIds.filter((id) => id !== channel.id),
 			}));
@@ -47,8 +50,7 @@ export default (client: Client): void => {
 		}
 
 		if (followedRoleIn) {
-			const followed = getRoleIn("follow", guildID);
-			const updated = followed.map((roleIn) => ({
+			const updated = followedRoleIns.map((roleIn) => ({
 				...roleIn,
 				channelIds: roleIn.channelIds.filter((id) => id !== channel.id),
 			}));
