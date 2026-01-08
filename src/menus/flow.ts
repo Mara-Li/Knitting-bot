@@ -1,7 +1,7 @@
 import * as Djs from "discord.js";
 import { TIMEOUT, type Translation } from "../interface";
 import { messageToStateKey, type PaginatedHandlers } from "./interfaces";
-import { deletePaginationState, getPaginationState } from "./state";
+import { deletePaginationState } from "./state";
 
 export function hasMorePages(
 	paginatedItems: Record<number, string[]>,
@@ -61,26 +61,17 @@ export async function startPaginatedButtonsFlow(
 			const match = customId.match(/(\d+)$/);
 			const parsed = match ? Number.parseInt(match[1], 10) : Number.NaN;
 
-			// try to find linked state
-			const msgId = (buttonInteraction.message as Djs.Message).id;
-			const linkedStateKey = messageToStateKey.get(msgId);
-			const linkedState = linkedStateKey ? getPaginationState(linkedStateKey) : undefined;
-
 			if (customId.startsWith("page_modify_") || customId.includes("_page_modify_")) {
-				const page = Number.isFinite(parsed) ? parsed : (linkedState?.currentPage ?? 0);
+				const page = Number.isFinite(parsed) ? parsed : 0;
 				await handlers.onModify(buttonInteraction, page);
 			} else if (customId.startsWith("page_prev_") || customId.includes("_page_prev_")) {
 				await buttonInteraction.deferUpdate();
-				// use linked state's currentPage for navigation if available to avoid parsing mismatch
-				const current =
-					linkedState?.currentPage ?? (Number.isFinite(parsed) ? parsed : 0);
+				const current = Number.isFinite(parsed) ? parsed : 0;
 				const prevPage = Math.max(0, current - 1);
 				await handlers.onShowPage(buttonInteraction, prevPage);
 			} else if (customId.startsWith("page_next_") || customId.includes("_page_next_")) {
 				await buttonInteraction.deferUpdate();
-				// use linked state's currentPage for navigation if available to avoid parsing mismatch
-				const current =
-					linkedState?.currentPage ?? (Number.isFinite(parsed) ? parsed : 0);
+				const current = Number.isFinite(parsed) ? parsed : 0;
 				const nextPage = current + 1;
 				await handlers.onShowPage(buttonInteraction, nextPage);
 			} else if (customId.endsWith("_page_validate") || customId === "page_validate") {

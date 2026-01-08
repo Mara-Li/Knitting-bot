@@ -136,7 +136,6 @@ export async function showPaginatedMessageGeneric(options: {
 
 	const totalPages = Object.keys(state.paginatedItems).length;
 	const safePage = Math.max(0, Math.min(page, Math.max(0, totalPages - 1)));
-	state.currentPage = safePage;
 
 	const trackedOnThisPage = state.paginatedItems[safePage]?.length ?? 0;
 	const hasMore = hasMorePages(state.paginatedItems, safePage);

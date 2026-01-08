@@ -34,7 +34,6 @@ export type ChannelSelectorsForTypeOptions = {
  *   paginated list is homogeneous — e.g. a list of channel ids or thread ids).
  */
 export type PaginatedIdsState = {
-	currentPage: number;
 	originalIds: string[];
 	paginatedItems: Record<number, string[]>;
 	selectedIds: Set<string>;

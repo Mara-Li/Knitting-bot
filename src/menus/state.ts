@@ -25,7 +25,6 @@ export function createPaginationState(
 	paginatedItems: Record<number, string[]>
 ): PaginatedIdsState {
 	const state: PaginatedIdsState = {
-		currentPage: 0,
 		originalIds,
 		paginatedItems,
 		selectedIds: new Set(originalIds),
