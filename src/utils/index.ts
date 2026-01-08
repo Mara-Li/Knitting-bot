@@ -20,14 +20,16 @@ import { checkThread } from "./data_check";
 export async function discordLogs(guildID: string, bot: Client, ...text: unknown[]) {
 	const channelId = serverDataDb.get(guildID, "configuration")?.log;
 	if (!channelId || typeof channelId !== "string") return;
-
 	try {
 		const channel = await bot.channels.fetch(channelId);
 		if (channel && "send" in channel && typeof channel.send === "function") {
-			await channel.send(`\`\`\`\n${text.join(" ")}\n\`\`\``);
+			const formatted = text
+				.map((t) => (typeof t === "string" ? t : JSON.stringify(t)))
+				.join(" ");
+			await channel.send(`\`\`\`\n${formatted}\n\`\`\``);
 		}
 	} catch (error) {
-		console.error("Failed to send log message:", error);
+		console.warn("Failed to send log message:", error);
 	}
 }
 
