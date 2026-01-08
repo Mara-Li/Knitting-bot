@@ -1,18 +1,12 @@
 import { TIMEOUT } from "../interface";
 import { discordLogs } from "../utils";
-import {
-	createPaginationButtons,
-	createPaginationState,
-	deletePaginationState,
-	hasMorePages,
-	paginateIds,
-	startPaginatedButtonsFlow,
-} from "./flow";
+import { createPaginationButtons, hasMorePages, startPaginatedButtonsFlow } from "./flow";
 import { validateAndSave } from "./handlers";
 import type { ChannelSelectorsForTypeOptions } from "./interfaces";
 import { getTrackedItems } from "./items";
 import { createFirstPageChannelModalByType } from "./modal";
 import { handleModalModifyGeneric, showPaginatedMessageGeneric } from "./paginated";
+import { createPaginationState, deletePaginationState, paginateIds } from "./state";
 import { getTrackedIdsByType } from "./utils";
 
 /**
@@ -27,7 +21,6 @@ export async function channelSelectorsForType({
 	if (!interaction.guild) return;
 
 	const guildID = interaction.guild.id;
-	const guild = interaction.guild;
 	const userId = interaction.user.id;
 
 	const trackedItems = getTrackedItems(mode, guildID);
@@ -62,7 +55,7 @@ export async function channelSelectorsForType({
 				},
 				onEnd: async (buttonMessage) => {
 					deletePaginationState(stateKey);
-					await buttonMessage.edit({ components: [] }).catch(() => undefined);
+					await buttonMessage.edit({ components: [] });
 				},
 				onModify: async (buttonInteraction, page) => {
 					await handleModalModifyGeneric({

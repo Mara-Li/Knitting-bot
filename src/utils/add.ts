@@ -279,7 +279,6 @@ export async function fetchUntilMessage(
 ): Promise<Message | undefined | null> {
 	const fetchMessage = await thread.messages.fetch({ limit: 100 });
 	let find = fetchMessage.filter((m) => m.author.id === thread.client.user.id).first();
-	console.log("Initial fetch size:", fetchMessage.size, "Found:", !!find);
 	// Return early if found
 	if (find) return find;
 

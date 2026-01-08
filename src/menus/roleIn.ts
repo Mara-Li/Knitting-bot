@@ -3,18 +3,12 @@ import type { TChannel } from "src/interface";
 import { TIMEOUT, type Translation } from "../interface";
 import { getRoleIn } from "../maps";
 import { discordLogs } from "../utils";
-import {
-	createPaginationButtons,
-	createPaginationState,
-	deletePaginationState,
-	hasMorePages,
-	paginateIds,
-	startPaginatedButtonsFlow,
-} from "./flow";
+import { createPaginationButtons, hasMorePages, startPaginatedButtonsFlow } from "./flow";
 import { checkRoleInConstraints, validateRoleInAndSave } from "./handlers";
 import type { CommandMode } from "./interfaces";
 import { createFirstPageChannelModalByType } from "./modal";
 import { handleModalModifyGeneric, showPaginatedMessageGeneric } from "./paginated";
+import { createPaginationState, deletePaginationState, paginateIds } from "./state";
 
 /**
  * Handle roleIn channel selectors with pagination for follow/ignore commands

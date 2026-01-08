@@ -1,139 +1,64 @@
-import { paginationStates, type UserGuildPaginationState } from "./interfaces";
+import {
+	DEFAULT_TTL_MS,
+	globalPaginationStates,
+	messageToStateKey,
+	type PaginatedIdsState,
+} from "./interfaces";
 
-/**
- * Create or get pagination state
- */
-export function getPaginationState(
-	userId: string,
-	guildId: string,
-	mode: "follow" | "ignore"
-): UserGuildPaginationState {
-	const key = `${userId}_${guildId}_${mode}`;
-	let state = paginationStates.get(key);
-
-	if (!state) {
-		state = {
-			currentPage: 0,
-			guildId,
-			mode,
-			selectedCategories: new Set(),
-			selectedChannels: new Set(),
-			selectedForums: new Set(),
-			selectedThreads: new Set(),
-			timestamp: Date.now(),
-			userId,
-		};
-		paginationStates.set(key, state);
+export function paginateIds(ids: string[], pageSize = 25): Record<number, string[]> {
+	const paginated: Record<number, string[]> = {};
+	if (ids.length === 0) return paginated;
+	// If the total is a multiple of pageSize, create an extra empty page so the UI
+	// can display a "next" page after a full page (user requirement).
+	let pages = Math.ceil(ids.length / pageSize);
+	if (ids.length % pageSize === 0) pages = pages + 1; // add empty trailing page
+	for (let i = 0; i < pages; i++) {
+		const startIndex = i * pageSize;
+		const endIndex = startIndex + pageSize;
+		paginated[i] = ids.slice(startIndex, endIndex);
 	}
-
-	state.timestamp = Date.now();
-	return state;
+	return paginated;
 }
 
-/**
- * Initialize pagination state with current tracked items
- */
-export function initializePaginationState(
-	userId: string,
-	guildId: string,
-	mode: "follow" | "ignore",
-	currentItems: {
-		categories: string[];
-		channels: string[];
-		threads: string[];
-		forums: string[];
-	}
-): UserGuildPaginationState {
-	const key = `${userId}_${guildId}_${mode}`;
-	const state: UserGuildPaginationState = {
+export function createPaginationState(
+	key: string,
+	originalIds: string[],
+	paginatedItems: Record<number, string[]>
+): PaginatedIdsState {
+	const ttl = DEFAULT_TTL_MS;
+	const state: PaginatedIdsState = {
 		currentPage: 0,
-		guildId,
-		mode,
-		selectedCategories: new Set(currentItems.categories),
-		selectedChannels: new Set(currentItems.channels),
-		selectedForums: new Set(currentItems.forums),
-		selectedThreads: new Set(currentItems.threads),
-		timestamp: Date.now(),
-		userId,
+		expiresAt: Date.now() + ttl,
+		originalIds,
+		paginatedItems,
+		selectedIds: new Set(originalIds),
+		ttlMs: ttl,
 	};
-	paginationStates.set(key, state);
+	globalPaginationStates.set(key, state);
 	return state;
 }
 
-/**
- * Update pagination state with new selections from a page
- */
-export function updatePaginationState(
-	userId: string,
-	guildId: string,
-	mode: "follow" | "ignore",
-	page: number,
-	newSelections: {
-		categories: string[];
-		channels: string[];
-		threads: string[];
-		forums: string[];
+export function getPaginationState(key: string): PaginatedIdsState | undefined {
+	const state = globalPaginationStates.get(key);
+	if (!state) return undefined;
+	const now = Date.now();
+	if (state.expiresAt && state.expiresAt <= now) {
+		// expired
+		globalPaginationStates.delete(key);
+		// cleanup message mappings referencing this state
+		for (const [msgId, mapping] of messageToStateKey.entries()) {
+			if (mapping.stateKey === key) messageToStateKey.delete(msgId);
+		}
+		return undefined;
 	}
-): void {
-	const state = getPaginationState(userId, guildId, mode);
-	state.currentPage = page;
-
-	for (const id of newSelections.categories) {
-		state.selectedCategories.add(id);
-	}
-	for (const id of newSelections.channels) {
-		state.selectedChannels.add(id);
-	}
-	for (const id of newSelections.threads) {
-		state.selectedThreads.add(id);
-	}
-	for (const id of newSelections.forums) {
-		state.selectedForums.add(id);
-	}
-
-	state.timestamp = Date.now();
+	// sliding expiration: extend on access
+	if (state.ttlMs) state.expiresAt = Date.now() + state.ttlMs;
+	globalPaginationStates.set(key, state);
+	return state;
 }
 
-/**
- * Remove selections from state (when user deselects)
- */
-export function removeFromPaginationState(
-	userId: string,
-	guildId: string,
-	mode: "follow" | "ignore",
-	removedSelections: {
-		categories: string[];
-		channels: string[];
-		threads: string[];
-		forums: string[];
-	}
-): void {
-	const state = getPaginationState(userId, guildId, mode);
-
-	for (const id of removedSelections.categories) {
-		state.selectedCategories.delete(id);
-	}
-	for (const id of removedSelections.channels) {
-		state.selectedChannels.delete(id);
-	}
-	for (const id of removedSelections.threads) {
-		state.selectedThreads.delete(id);
-	}
-	for (const id of removedSelections.forums) {
-		state.selectedForums.delete(id);
-	}
-
-	state.timestamp = Date.now();
-}
-
-/**
- * Clear pagination state
- */
-export function clearPaginationState(
-	userId: string,
-	guildId: string,
-	mode: "follow" | "ignore"
-): void {
-	const key = `${userId}_${guildId}_${mode}`;
-	paginationStates.delete(key);
+export function deletePaginationState(key: string): void {
+	globalPaginationStates.delete(key);
+	for (const [msgId, mapping] of messageToStateKey.entries())
+		if (mapping.stateKey === key) messageToStateKey.delete(msgId);
 }

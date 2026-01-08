@@ -1,9 +1,10 @@
 import * as Djs from "discord.js";
 import type { TChannel } from "src/interface";
 import { TIMEOUT, type Translation } from "../interface";
-import { createPaginationButtons, deletePaginationState, hasMorePages } from "./flow";
+import { createPaginationButtons, hasMorePages } from "./flow";
 import type { CommandMode, PaginatedIdsState } from "./interfaces";
 import { createFirstPageChannelModalByType } from "./modal";
+import { deletePaginationState } from "./state";
 
 export function getPaginationButtons(
 	modalSubmit: Djs.ModalSubmitInteraction,

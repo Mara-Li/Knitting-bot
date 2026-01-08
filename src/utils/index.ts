@@ -170,7 +170,10 @@ export async function resolveChannelsByIds<T extends { type: number }>(
 		}
 
 		// If still missing and we need threads, fetch from archived
-		if (idSet.size > 0 && allowedTypes.includes(ChannelType.PublicThread)) {
+		if (
+			(idSet.size > 0 && allowedTypes.includes(ChannelType.PublicThread)) ||
+			allowedTypes.includes(ChannelType.PrivateThread)
+		) {
 			try {
 				const archivedThreads = await fetchArchived(guild);
 				for (const thread of archivedThreads) {

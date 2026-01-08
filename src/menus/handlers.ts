@@ -9,9 +9,9 @@ import {
 	setTrackedItem,
 } from "../maps";
 import { resolveChannelsByIds } from "../utils";
-import { deletePaginationState, getPaginationState } from "./flow";
 import type { CommandMode, PaginatedIdsState } from "./interfaces";
 import { respondInteraction } from "./paginated";
+import { deletePaginationState, getPaginationState } from "./state";
 import { resolveIds } from "./utils";
 
 /**

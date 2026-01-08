@@ -193,6 +193,7 @@ function loadOrCreateRoleInState(
 	}
 
 	state.currentPage = page;
+	roleInStates.set(roleInKey(userId, guildID, on, roleId), state);
 	return state;
 }
 
