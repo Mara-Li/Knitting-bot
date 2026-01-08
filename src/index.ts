@@ -18,7 +18,7 @@ import {
 	onThreadDeleted,
 	ready,
 } from "./events";
-import { cleanupRoleInScheduler, stopCleanupInterval } from "./menus";
+import { cleanupRoleInSweep, stopCleanupInterval } from "./menus";
 
 let config = dotenv.config({ path: ".env", quiet: true });
 if (process.env.ENV === "production") {
@@ -73,7 +73,7 @@ client.login(config.parsed?.DISCORD_TOKEN).then(() => {
  */
 function cleanup() {
 	console.log("Cleaning up intervals...");
-	cleanupRoleInScheduler();
+	cleanupRoleInSweep();
 	stopCleanupInterval();
 }
 

@@ -11,7 +11,7 @@ import {
 import { createSweepScheduler } from "./utils";
 
 // Create a sweep scheduler instance for pagination states with cleanup of related message mappings
-const schedulePaginationSweep =
+const { scheduleSweep: schedulePaginationSweep } =
 	createSweepScheduler<PaginatedIdsState>(SWEEP_INTERVAL_MS);
 
 export function paginateIds(ids: string[], pageSize = 25): Record<number, string[]> {
