@@ -266,7 +266,6 @@ async function showRoleInPaginatedModal(
 	const { modal, hasMore, pageItemIds } = await createPaginatedChannelModal(
 		on,
 		ul,
-		guild,
 		page,
 		selectedIds,
 		shortTitle

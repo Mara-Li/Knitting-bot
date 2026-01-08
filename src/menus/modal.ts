@@ -1,3 +1,4 @@
+import type { ModalBuilder } from "discord.js";
 import * as Djs from "discord.js";
 import type { TChannel, Translation, TypeName } from "../interface";
 import { setRole, setTrackedItem } from "../maps";
@@ -78,11 +79,11 @@ export function createChannelSelectorsModal(
 export async function createPaginatedChannelModalByType(
 	mode: CommandMode,
 	ul: Translation,
-	page: number,
 	channelType: TChannel,
 	trackedIds: string[],
 	shortTitle?: string
-): Promise<{ modal: Djs.ModalBuilder; hasMore: boolean; pageItemIds: string[] }> {
+): Promise<{ modal: ModalBuilder; hasMore: boolean; pageItemIds: string[] }> {
+	const page = 0;
 	const channelTypeMap: Record<TChannel, Djs.ChannelType[]> = {
 		category: [Djs.ChannelType.GuildCategory],
 		channel: [Djs.ChannelType.GuildText],
@@ -99,14 +100,12 @@ export async function createPaginatedChannelModalByType(
 		.setCustomId(`${mode}_${channelType}_page_${page}`)
 		.setTitle(title);
 
-	// Toujours créer le select, avec defaultChannels si items existent
 	const select = new Djs.ChannelSelectMenuBuilder()
 		.setCustomId(`select_${channelType}`)
 		.setChannelTypes(...djsChannelTypes)
 		.setMaxValues(25)
 		.setRequired(false);
 
-	// Ajouter les defaultChannels si il y a des items tracked
 	if (trackedIds.length > 0) {
 		select.setDefaultChannels(trackedIds);
 	}
@@ -118,7 +117,7 @@ export async function createPaginatedChannelModalByType(
 	modal.addLabelComponents(label);
 
 	return {
-		hasMore: false, // Calculé en dehors maintenant
+		hasMore: false,
 		modal,
 		pageItemIds: trackedIds,
 	};
@@ -130,7 +129,6 @@ export async function createPaginatedChannelModalByType(
 export async function createPaginatedChannelModal(
 	mode: CommandMode,
 	ul: Translation,
-	_guild: Djs.Guild,
 	page: number,
 	selectedIds: {
 		categories: string[];
@@ -156,7 +154,6 @@ export async function createPaginatedChannelModal(
 		.setCustomId(`${mode}_channels_page_${page}`)
 		.setTitle(title);
 
-	// Categories
 	if (selectedIds.categories.length > 0) {
 		const categorySelect = new Djs.ChannelSelectMenuBuilder()
 			.setCustomId("select_categories")
@@ -171,7 +168,6 @@ export async function createPaginatedChannelModal(
 		modal.addLabelComponents(categoryLabel);
 	}
 
-	// Channels
 	if (selectedIds.channels.length > 0) {
 		const channelSelect = new Djs.ChannelSelectMenuBuilder()
 			.setCustomId("select_channels")
@@ -186,7 +182,6 @@ export async function createPaginatedChannelModal(
 		modal.addLabelComponents(channelLabel);
 	}
 
-	// Threads
 	if (selectedIds.threads.length > 0) {
 		const threadSelect = new Djs.ChannelSelectMenuBuilder()
 			.setCustomId("select_threads")
@@ -201,7 +196,6 @@ export async function createPaginatedChannelModal(
 		modal.addLabelComponents(threadLabel);
 	}
 
-	// Forums
 	if (selectedIds.forums.length > 0) {
 		const forumSelect = new Djs.ChannelSelectMenuBuilder()
 			.setCustomId("select_forums")

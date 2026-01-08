@@ -151,7 +151,6 @@ export async function roleInSelectorsForType(
 	const { modal } = await createPaginatedChannelModalByType(
 		mode,
 		ul,
-		0,
 		channelType,
 		paginatedItems[0] ?? [],
 		`${ul("common.role")}: ${ul("common.roleIn")}`
@@ -216,7 +215,6 @@ async function handleRoleInModalModify(
 	const { modal } = await createPaginatedChannelModalByType(
 		mode,
 		ul,
-		0,
 		channelType,
 		pageTrackedIds,
 		`${ul("common.role")}: ${ul("common.roleIn")}`

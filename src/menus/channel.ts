@@ -119,7 +119,6 @@ export async function channelSelectorsForType({
 	const { modal } = await createPaginatedChannelModalByType(
 		mode,
 		ul,
-		0,
 		channelType,
 		paginatedItems[0] ?? [],
 		undefined
@@ -181,7 +180,6 @@ async function handleModalModify(
 	const { modal } = await createPaginatedChannelModalByType(
 		mode,
 		ul,
-		0,
 		channelType,
 		pageTrackedIds,
 		undefined
