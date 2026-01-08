@@ -410,7 +410,6 @@ async function fetchMessage(thread: ThreadChannel): Promise<Message> {
 			//only pin error can allow to continue, other should delete the cached message
 			if (e instanceof DiscordAPIError && e.code !== 30003)
 				deleteCachedMessage(guildId, thread.id);
-			
 		}
 	}
 
