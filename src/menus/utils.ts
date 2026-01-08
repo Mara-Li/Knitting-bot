@@ -50,19 +50,21 @@ const ROLEIN_SWEEP_INTERVAL_MS = 60 * 1000; // 1 minute
  * Generic sweep scheduler factory for Maps with items that have expiresAt property
  * Can be used by multiple modules with different state maps
  * @param intervalMs Interval in milliseconds for the sweep
- * @returns A scheduler function that can be called with a state map
+ * @returns A scheduler function that can be called with a state map, and a cleanup function
  */
 export function createSweepScheduler<T extends { expiresAt?: number }>(
 	intervalMs = SWEEP_INTERVAL_MS
 ) {
 	let scheduled = false;
-	return function scheduleSweep(
+	let intervalId: NodeJS.Timeout | null = null;
+
+	const scheduleSweep = (
 		stateMap: Map<string, T>,
 		onExpire?: (key: string, state: T) => void
-	) {
+	) => {
 		if (scheduled) return;
 		// eslint-disable-next-line @typescript-eslint/no-misused-promises
-		setInterval(() => {
+		intervalId = setInterval(() => {
 			const now = Date.now();
 			for (const [key, state] of stateMap.entries()) {
 				if (state.expiresAt && state.expiresAt <= now) {
@@ -73,12 +75,29 @@ export function createSweepScheduler<T extends { expiresAt?: number }>(
 		}, intervalMs);
 		scheduled = true;
 	};
+
+	const cleanup = () => {
+		if (intervalId !== null) {
+			clearInterval(intervalId);
+			intervalId = null;
+			scheduled = false;
+		}
+	};
+
+	return { cleanup, scheduleSweep };
 }
 
 // Create a sweep scheduler instance for roleIn states
-const scheduleRoleInSweep = createSweepScheduler<RoleInPaginationState>(
-	ROLEIN_SWEEP_INTERVAL_MS
-);
+const { scheduleSweep: scheduleRoleInSweep, cleanup: cleanupRoleInSweep } =
+	createSweepScheduler<RoleInPaginationState>(ROLEIN_SWEEP_INTERVAL_MS);
+
+/**
+ * Cleanup function to clear the roleIn sweep interval
+ * Call this when shutting down or reloading the module
+ */
+export function cleanupRoleInScheduler() {
+	cleanupRoleInSweep();
+}
 
 function roleInKey(userId: string, guildId: string, mode: RoleInMode, roleId: string) {
 	return `${userId}_${guildId}_${mode}_${roleId}`;

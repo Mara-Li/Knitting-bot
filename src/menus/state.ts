@@ -1,4 +1,8 @@
-import {CLEANUP_TIMEOUT, paginationStates, UserGuildPaginationState} from "./interfaces";
+import {
+	CLEANUP_TIMEOUT,
+	paginationStates,
+	type UserGuildPaginationState,
+} from "./interfaces";
 
 /**
  * Create or get pagination state
@@ -152,4 +156,18 @@ export function cleanupOldStates(): void {
 }
 
 // Auto-cleanup toutes les 15 minutes
-setInterval(cleanupOldStates, 15 * 60 * 1000);
+let cleanupIntervalId: NodeJS.Timeout | null = setInterval(
+	cleanupOldStates,
+	15 * 60 * 1000
+);
+
+/**
+ * Stop the automatic cleanup interval
+ * Call this when shutting down or reloading the module to prevent memory leaks
+ */
+export function stopCleanupInterval(): void {
+	if (cleanupIntervalId !== null) {
+		clearInterval(cleanupIntervalId);
+		cleanupIntervalId = null;
+	}
+}
