@@ -416,7 +416,13 @@ async function fetchMessage(thread: ThreadChannel): Promise<Message> {
 	// Fallback to fetching
 	const firstMessage = await fetchFirstMessage(thread);
 	const shouldBePinned = getPinSetting(guildId);
-	if (shouldBePinned && firstMessage && !firstMessage.pinned) await firstMessage.pin();
+	if (shouldBePinned && firstMessage && !firstMessage.pinned) {
+		try {
+			await firstMessage.pin();
+		} catch {
+			//continue we should be able to continue even if pin fails as it is not critical
+		}
+	}
 
 	const message = firstMessage ?? (await sendAndPin(thread));
 
