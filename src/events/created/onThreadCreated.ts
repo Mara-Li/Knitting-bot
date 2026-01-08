@@ -1,7 +1,7 @@
 import { ChannelType, type Client, type ThreadChannel } from "discord.js";
 import { getTranslation } from "../../i18n";
 import { getConfig } from "../../maps";
-import { discordLogs } from "../../utils";
+import {discordLogs, updateCache} from "../../utils";
 import { addRoleAndUserToThread } from "../../utils/add";
 import { checkThread } from "../../utils/data_check";
 
@@ -21,6 +21,10 @@ export default (client: Client): void => {
 		await discordLogs(guild, client, ul("logs.thread.created", { thread: thread.name }));
 		/** automatically add the bot to the thread */
 		await thread.join();
+		/**
+		 * Update the cache
+		 */
+		await updateCache(thread.guild);
 		if (!getConfig("followOnlyChannel", guild)) {
 			if (!checkThread(thread, "ignore")) await addRoleAndUserToThread(thread);
 		} else {

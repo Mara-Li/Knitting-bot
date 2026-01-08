@@ -1,7 +1,7 @@
 import { ChannelType, type Client, type TextChannel } from "discord.js";
 import { getTranslation } from "../../i18n";
 import { getConfig } from "../../maps";
-import {discordLogs, updateThread} from "../../utils";
+import {discordLogs, updateCache, updateThread} from "../../utils";
 import { validateChannelType } from "../../utils/data_check";
 
 /**
@@ -19,12 +19,12 @@ export default (client: Client): void => {
 			!oldChannel.guild
 		)
 			return;
-		const guild = oldChannel.guild.id;
+		const guildId = oldChannel.guild.id;
 
-		const ul = getTranslation(guild, {
+		const ul = getTranslation(guildId, {
 			locale: newChannel.guild.preferredLocale,
 		});
-		if (!getConfig("onChannelUpdate", guild)) return;
+		if (!getConfig("onChannelUpdate", guildId)) return;
 		if (
 			!validateChannelType(oldChannel) ||
 			!validateChannelType(newChannel) ||
@@ -32,8 +32,8 @@ export default (client: Client): void => {
 		) {
 			return;
 		}
-
-		const followOnlyChannelEnabled = getConfig("followOnlyChannel", guild);
+		await updateCache(newChannel.guild);
+		const followOnlyChannelEnabled = getConfig("followOnlyChannel", guildId);
 		const isCategory = newChannel.type === ChannelType.GuildCategory;
 
 		if (isCategory) {
@@ -57,7 +57,7 @@ export default (client: Client): void => {
 				}
 			}
 			if (totalThreads > 0) {
-				await discordLogs(guild, client, ul("logs.channelUpdate.category", {
+				await discordLogs(guildId, client, ul("logs.channelUpdate.category", {
 					nb: totalThreads,
 					nbChan: childrenWithThreads.length,
 					channelList: `\n- ${childrenWithThreads.join("\n- ")}`,

@@ -148,12 +148,14 @@ export async function getUsersToPing(thread: ThreadChannel, members: GuildMember
 export async function getRoleToPing(thread: ThreadChannel, roles: Role[]) {
 	const guild = thread.guild.id;
 	const roleToBeAdded: Role[] = [];
+
 	for (const role of roles) {
 		//check if all members of the role are in the thread
 		const membersInTheThread = thread.members.cache;
 		const membersOfTheRoleNotInTheThread = role.members.filter(
 			(member) => !membersInTheThread.has(member.id)
 		);
+
 		if (
 			role.name !== "@everyone" &&
 			thread.permissionsFor(role).has("ViewChannel", true) &&
@@ -176,6 +178,7 @@ export async function getRoleToPing(thread: ThreadChannel, roles: Role[]) {
 			}
 		}
 	}
+	
 	return roleToBeAdded;
 }
 

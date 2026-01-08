@@ -31,12 +31,32 @@ export async function discordLogs(guildID: string, bot: Client, ...text: unknown
 }
 
 /**
+ * Map to track last cache update time per guild
+ */
+const cacheUpdateTimestamps = new Map<string, number>();
+
+/**
+ * Cooldown period in milliseconds to prevent duplicate cache updates
+ */
+const CACHE_UPDATE_COOLDOWN = 5000; // 5 seconds
+
+/**
  * Update guild cache by fetching members and roles
  * @param guild - Guild to update
+ * @param force - Force update even if within cooldown period
  */
-export async function updateCache(guild: Guild) {
+export async function updateCache(guild: Guild, force = false) {
+	const now = Date.now();
+	const lastUpdate = cacheUpdateTimestamps.get(guild.id);
+
+	// Skip if recently updated (within cooldown period) and not forced
+	if (!force && lastUpdate && now - lastUpdate < CACHE_UPDATE_COOLDOWN) {
+		return;
+	}
+
 	try {
 		await Promise.all([guild.members.fetch(), guild.roles.fetch()]);
+		cacheUpdateTimestamps.set(guild.id, now);
 	} catch (e) {
 		console.log(e);
 		// Ignore error

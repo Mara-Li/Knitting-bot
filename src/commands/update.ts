@@ -112,7 +112,7 @@ async function updateThread(
 	ul: Translation
 ) {
 	if (!interaction.guild) return;
-	await updateCache(interaction.guild);
+	await updateCache(interaction.guild, true);
 	const guild = interaction.guild.id;
 	const threadOption =
 		interaction.options.get(ul("common.thread").toLowerCase()) ?? interaction;
