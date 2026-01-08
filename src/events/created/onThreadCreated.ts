@@ -1,7 +1,7 @@
 import { ChannelType, type Client, type ThreadChannel } from "discord.js";
 import { getTranslation } from "../../i18n";
 import { getConfig } from "../../maps";
-import {discordLogs, updateCache} from "../../utils";
+import { discordLogs, updateCache } from "../../utils";
 import { addRoleAndUserToThread } from "../../utils/add";
 import { checkThread } from "../../utils/data_check";
 

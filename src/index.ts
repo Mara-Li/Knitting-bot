@@ -71,5 +71,3 @@ try {
 client.login(config.parsed?.DISCORD_TOKEN).then(() => {
 	console.log("Bot logged in successfully.");
 });
-
-

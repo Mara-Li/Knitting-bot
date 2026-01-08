@@ -1,7 +1,4 @@
-import {
-	paginationStates,
-	type UserGuildPaginationState,
-} from "./interfaces";
+import { paginationStates, type UserGuildPaginationState } from "./interfaces";
 
 /**
  * Create or get pagination state
@@ -15,7 +12,6 @@ export function getPaginationState(
 	let state = paginationStates.get(key);
 
 	if (!state) {
-
 		state = {
 			currentPage: 0,
 			guildId,
@@ -141,4 +137,3 @@ export function clearPaginationState(
 	const key = `${userId}_${guildId}_${mode}`;
 	paginationStates.delete(key);
 }
-

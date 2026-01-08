@@ -1,11 +1,16 @@
-import type {CommandInteractionOptionResolver} from "discord.js";
+import type { CommandInteractionOptionResolver } from "discord.js";
 import * as Djs from "discord.js";
-import {getUl, t} from "../i18n";
-import {type RoleIn, type TChannel, TIMEOUT, type Translation} from "../interface";
-import {getConfig, getRoleIn, setRoleIn} from "../maps";
-import {resolveChannelsByIds} from "../utils";
-import {RoleInMode, RoleInPaginationState, roleInStates, type TrackedItems} from "./interfaces";
-import {createPaginatedChannelModal} from "./modal";
+import { getUl, t } from "../i18n";
+import { type RoleIn, type TChannel, TIMEOUT, type Translation } from "../interface";
+import { getConfig, getRoleIn, setRoleIn } from "../maps";
+import { resolveChannelsByIds } from "../utils";
+import {
+	type RoleInMode,
+	type RoleInPaginationState,
+	roleInStates,
+	type TrackedItems,
+} from "./interfaces";
+import { createPaginatedChannelModal } from "./modal";
 
 /**
  * Extract and validate role option from interaction

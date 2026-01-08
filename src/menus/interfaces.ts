@@ -1,6 +1,6 @@
 import type * as Djs from "discord.js";
-import type {TChannel, Translation} from "../interface";
 import Enmap from "enmap";
+import type { TChannel, Translation } from "../interface";
 
 export type CommandMode = "follow" | "ignore";
 
@@ -95,7 +95,6 @@ export interface UserGuildPaginationState {
 }
 
 export const paginationStates = new Enmap<string, UserGuildPaginationState>();
-
 
 /**
  * Follow or ignore roles in specific channels using a modal

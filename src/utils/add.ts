@@ -75,13 +75,9 @@ export async function addUserToThread(thread: ThreadChannel, user: GuildMember) 
 	const hasPermission = thread.permissionsFor(user).has("ViewChannel", true);
 	const isNotInThread = await checkIfUserNotInTheThread(thread, user);
 
-	if (!hasPermission || !isNotInThread) 
-		return;
-	
+	if (!hasPermission || !isNotInThread) return;
 
-	if (!shouldAddUserToThread(user, thread, guild))
-		return;
-	
+	if (!shouldAddUserToThread(user, thread, guild)) return;
 
 	try {
 		const message = await fetchMessage(thread);
