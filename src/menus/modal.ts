@@ -158,7 +158,7 @@ export function createPaginatedChannelModal(
 			.setCustomId("select_categories")
 			.setChannelTypes(Djs.ChannelType.GuildCategory)
 			.setDefaultChannels(selectedIds.categories)
-			.setMaxValues(Math.min(25, selectedIds.categories.length))
+			.setMaxValues(25)
 			.setRequired(false);
 
 		const categoryLabel = new Djs.LabelBuilder()

@@ -119,7 +119,7 @@ export async function handleModalModifyGeneric(options: {
 			content: summary,
 		});
 	} catch (e) {
-		console.error(e);
+		console.warn(e);
 		deletePaginationState(stateKey);
 	}
 }
