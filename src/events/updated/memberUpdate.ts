@@ -12,7 +12,6 @@ import {
 
 export default (client: Client): void => {
 	client.on("guildMemberUpdate", async (oldMember, newMember) => {
-		console.log("Member updated:", oldMember.user.username);
 		//trigger only on role change
 		try {
 			if (oldMember.roles.cache.size === newMember.roles.cache.size) return;

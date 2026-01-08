@@ -1,6 +1,4 @@
 import {
-	CLEANUP_TIMEOUT,
-	DEFAULT_TTL_MS,
 	paginationStates,
 	type UserGuildPaginationState,
 } from "./interfaces";
@@ -17,8 +15,6 @@ export function getPaginationState(
 	let state = paginationStates.get(key);
 
 	if (!state) {
-		// Lazily start the cleanup interval on first state creation
-		startCleanupIntervalIfNeeded();
 
 		state = {
 			currentPage: 0,
@@ -52,9 +48,6 @@ export function initializePaginationState(
 		forums: string[];
 	}
 ): UserGuildPaginationState {
-	// Lazily start the cleanup interval on first state creation
-	startCleanupIntervalIfNeeded();
-
 	const key = `${userId}_${guildId}_${mode}`;
 	const state: UserGuildPaginationState = {
 		currentPage: 0,
@@ -149,38 +142,3 @@ export function clearPaginationState(
 	paginationStates.delete(key);
 }
 
-/**
- * Cleanup old states (called periodically)
- */
-export function cleanupOldStates(): void {
-	const now = Date.now();
-	for (const [key, state] of paginationStates.entries()) {
-		if (now - state.timestamp > CLEANUP_TIMEOUT) {
-			paginationStates.delete(key);
-		}
-	}
-}
-
-// Cleanup interval ID - starts lazily on first state creation
-let cleanupIntervalId: NodeJS.Timeout | null = null;
-
-/**
- * Start the cleanup interval lazily on first pagination state creation
- * This avoids running cleanup when no states are ever created
- */
-function startCleanupIntervalIfNeeded(): void {
-	if (cleanupIntervalId === null) {
-		cleanupIntervalId = setInterval(cleanupOldStates, DEFAULT_TTL_MS);
-	}
-}
-
-/**
- * Stop the automatic cleanup interval
- * Call this when shutting down or reloading the module to prevent memory leaks
- */
-export function stopCleanupInterval(): void {
-	if (cleanupIntervalId !== null) {
-		clearInterval(cleanupIntervalId);
-		cleanupIntervalId = null;
-	}
-}

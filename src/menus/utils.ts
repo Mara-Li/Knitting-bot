@@ -1,11 +1,11 @@
-import type { CommandInteractionOptionResolver } from "discord.js";
+import type {CommandInteractionOptionResolver} from "discord.js";
 import * as Djs from "discord.js";
-import { getUl, t } from "../i18n";
-import { type RoleIn, type TChannel, TIMEOUT, type Translation } from "../interface";
-import { getConfig, getRoleIn, setRoleIn } from "../maps";
-import { resolveChannelsByIds } from "../utils";
-import { SWEEP_INTERVAL_MS, type TrackedItems } from "./interfaces";
-import { createPaginatedChannelModal } from "./modal";
+import {getUl, t} from "../i18n";
+import {type RoleIn, type TChannel, TIMEOUT, type Translation} from "../interface";
+import {getConfig, getRoleIn, setRoleIn} from "../maps";
+import {resolveChannelsByIds} from "../utils";
+import {RoleInMode, RoleInPaginationState, roleInStates, type TrackedItems} from "./interfaces";
+import {createPaginatedChannelModal} from "./modal";
 
 /**
  * Extract and validate role option from interaction
@@ -19,79 +19,8 @@ export function extractAndValidateRoleOption(options: CommandInteractionOptionRe
 	return roleOpt.role.id;
 }
 
-/**
- * Follow or ignore roles in specific channels using a modal
- * @param on {"follow" | "ignore"} The mode to use
- */
-type RoleInMode = "follow" | "ignore";
-
-type RoleInPaginationState = {
-	userId: string;
-	guildId: string;
-	mode: RoleInMode;
-	roleId: string;
-	currentPage: number;
-	selectedCategories: Set<string>;
-	selectedChannels: Set<string>;
-	selectedThreads: Set<string>;
-	selectedForums: Set<string>;
-	// Optional TTL fields managed by the role-in pagination system
-	ttlMs?: number;
-	expiresAt?: number;
-};
-
-const roleInStates = new Map<string, RoleInPaginationState>();
-
-// TTL defaults using the generic sweep scheduler from flow.ts
+// TTL defaults
 const DEFAULT_ROLEIN_TTL_MS = 15 * 60 * 1000; // 15 minutes
-const ROLEIN_SWEEP_INTERVAL_MS = 60 * 1000; // 1 minute
-
-/**
- * Generic sweep scheduler factory for Maps with items that have expiresAt property
- * Can be used by multiple modules with different state maps
- * @param intervalMs Interval in milliseconds for the sweep
- * @returns A scheduler function that can be called with a state map, and a cleanup function
- */
-export function createSweepScheduler<T extends { expiresAt?: number }>(
-	intervalMs = SWEEP_INTERVAL_MS
-) {
-	let scheduled = false;
-	let intervalId: NodeJS.Timeout | null = null;
-
-	const scheduleSweep = (
-		stateMap: Map<string, T>,
-		onExpire?: (key: string, state: T) => void
-	) => {
-		if (scheduled) return;
-		// eslint-disable-next-line @typescript-eslint/no-misused-promises
-		intervalId = setInterval(() => {
-			const now = Date.now();
-			for (const [key, state] of stateMap.entries()) {
-				if (state.expiresAt && state.expiresAt <= now) {
-					stateMap.delete(key);
-					if (onExpire) onExpire(key, state);
-				}
-			}
-		}, intervalMs);
-		scheduled = true;
-	};
-
-	const cleanup = () => {
-		if (intervalId !== null) {
-			clearInterval(intervalId);
-			intervalId = null;
-			scheduled = false;
-		}
-	};
-
-	return { cleanup, scheduleSweep };
-}
-
-// Create a sweep scheduler instance for roleIn states
-const { scheduleSweep: scheduleRoleInSweep, cleanup: cleanupRoleInSweep } =
-	createSweepScheduler<RoleInPaginationState>(ROLEIN_SWEEP_INTERVAL_MS);
-
-export { cleanupRoleInSweep };
 
 function roleInKey(userId: string, guildId: string, mode: RoleInMode, roleId: string) {
 	return `${userId}_${guildId}_${mode}_${roleId}`;
@@ -143,8 +72,6 @@ function initRoleInState(
 		userId,
 	};
 	roleInStates.set(key, state);
-	// ensure sweep runs (pass the state map to the generic scheduler)
-	scheduleRoleInSweep(roleInStates);
 	return state;
 }
 

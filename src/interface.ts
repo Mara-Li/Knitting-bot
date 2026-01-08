@@ -60,6 +60,8 @@ export const DEFAULT_IGNORE_FOLLOW: IgnoreFollow = {
 	thread: [],
 };
 
+
+
 /**
  * Interface for unified ServerData Enmap
  * Stores all server configuration data in a single Enmap

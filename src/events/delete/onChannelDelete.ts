@@ -59,6 +59,7 @@ export default (client: Client): void => {
 			 * Clean up message cache for all threads in this text channel
 			 */
 			const textChannel = channelGuild as TextChannel;
+			//use cache as fetchActive can't works for deleted channels
 			const threads = textChannel.threads.cache;
 			threads.forEach((thread) => {
 				deleteCachedMessage(guildID, thread.id);
@@ -107,16 +108,16 @@ export default (client: Client): void => {
 			/**
 			 * Remove the forum ID from the database "follow" and "ignore" maps
 			 */
-			const allThreadIgnore = getMaps("ignore", "forum", guildID);
-			const allThreadFollow = getMaps("follow", "forum", guildID);
+			const allForumIgnore = getMaps("ignore", "forum", guildID);
+			const allForumFollow = getMaps("follow", "forum", guildID);
 
-			const filteredIgnore = allThreadIgnore.filter((id) => id !== channel.id);
-			const filteredFollow = allThreadFollow.filter((id) => id !== channel.id);
+			const filteredIgnore = allForumIgnore.filter((id) => id !== channel.id);
+			const filteredFollow = allForumFollow.filter((id) => id !== channel.id);
 
-			if (allThreadIgnore.length !== filteredIgnore.length) {
+			if (allForumIgnore.length !== filteredIgnore.length) {
 				setTrackedItem("ignore", "forum", guildID, filteredIgnore);
 			}
-			if (allThreadFollow.length !== filteredFollow.length) {
+			if (allForumFollow.length !== filteredFollow.length) {
 				setTrackedItem("follow", "forum", guildID, filteredFollow);
 			}
 		}

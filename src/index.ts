@@ -18,7 +18,6 @@ import {
 	onThreadDeleted,
 	ready,
 } from "./events";
-import { cleanupRoleInSweep, stopCleanupInterval } from "./menus";
 
 let config = dotenv.config({ path: ".env", quiet: true });
 if (process.env.ENV === "production") {
@@ -73,30 +72,4 @@ client.login(config.parsed?.DISCORD_TOKEN).then(() => {
 	console.log("Bot logged in successfully.");
 });
 
-/**
- * Cleanup function to stop all intervals and prevent memory leaks
- */
-function cleanup() {
-	console.log("Cleaning up intervals...");
-	cleanupRoleInSweep();
-	stopCleanupInterval();
-}
 
-// Handle graceful shutdown
-process.on("SIGTERM", () => {
-	console.log("SIGTERM received, shutting down gracefully...");
-	cleanup();
-	client
-		.destroy()
-		.catch((err) => console.error("Error destroying client:", err))
-		.finally(() => process.exit(0));
-});
-
-process.on("SIGINT", () => {
-	console.log("SIGINT received, shutting down gracefully...");
-	cleanup();
-	client
-		.destroy()
-		.catch((err) => console.error("Error destroying client:", err))
-		.finally(() => process.exit(0));
-});

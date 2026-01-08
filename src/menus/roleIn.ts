@@ -77,7 +77,7 @@ export async function roleInSelectorsForType(
 				onEnd: async (buttonMessage) => {
 					deletePaginationState(stateKey);
 					try {
-						await buttonMessage.edit({ components: [] }).catch(() => undefined);
+						await buttonMessage.edit({ components: [] });
 					} catch (e) {
 						//safe to ignore
 					}
@@ -85,7 +85,6 @@ export async function roleInSelectorsForType(
 				onModify: async (buttonInteraction, page) => {
 					await handleModalModifyGeneric({
 						channelType,
-						guild,
 						interaction: buttonInteraction,
 						modalLabel: `${ul("common.role")}: ${ul("common.roleIn")}`,
 						mode,
@@ -172,6 +171,7 @@ export async function roleInSelectorsForType(
 			ul,
 			mode
 		);
+		deletePaginationState(stateKey);
 	} catch (e) {
 		console.warn(`[${mode} roleIn ${channelType}] Error:`, e);
 		await discordLogs(

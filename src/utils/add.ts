@@ -75,13 +75,13 @@ export async function addUserToThread(thread: ThreadChannel, user: GuildMember) 
 	const hasPermission = thread.permissionsFor(user).has("ViewChannel", true);
 	const isNotInThread = await checkIfUserNotInTheThread(thread, user);
 
-	if (!hasPermission || !isNotInThread) {
+	if (!hasPermission || !isNotInThread) 
 		return;
-	}
+	
 
-	if (!shouldAddUserToThread(user, thread, guild)) {
+	if (!shouldAddUserToThread(user, thread, guild))
 		return;
-	}
+	
 
 	try {
 		const message = await fetchMessage(thread);
@@ -116,28 +116,41 @@ export async function getUsersToPing(thread: ThreadChannel, members: GuildMember
 			thread.permissionsFor(member).has("ViewChannel", true) &&
 			(await checkIfUserNotInTheThread(thread, member))
 		) {
-			if (
-				getConfig("followOnlyRoleIn", guild) &&
-				checkMemberRoleIn("follow", member.roles, thread)
-			) {
-				usersToBeAdded.push(member);
-			} else if (
-				getConfig("followOnlyRole", guild) &&
-				checkMemberRole(member.roles, "follow") &&
-				!getConfig("followOnlyRoleIn", guild)
-			) {
-				usersToBeAdded.push(member);
-			} else if (
-				!getConfig("followOnlyRole", guild) &&
-				!checkMemberRole(member.roles, "ignore") &&
-				!checkMemberRoleIn("ignore", member.roles, thread) &&
-				!getConfig("followOnlyRoleIn", guild)
-			) {
+			// Use centralised decision helper to avoid duplicated logic
+			if (shouldAddUserToThread(member, thread, guild)) {
 				usersToBeAdded.push(member);
 			}
 		}
 	}
 	return usersToBeAdded;
+}
+
+/**
+ * Check if a role should be added to the thread based on guild configuration
+ * @param role - Role to check
+ * @param thread - Thread channel
+ * @param guild - Guild ID
+ * @returns true if role should be added
+ */
+function shouldAddRoleToThread(
+	role: Role,
+	thread: ThreadChannel,
+	guild: string
+): boolean {
+	// Exclude @everyone explicitly
+	if (role.name === "@everyone") return false;
+
+	// If role is explicitly set to follow in this thread, allow
+	if (checkRoleIn("follow", role, thread)) return true;
+
+	// If followOnlyRoleIn is enabled, only roles marked in-thread as follow are allowed
+	if (getConfig("followOnlyRoleIn", guild)) return false;
+
+	// If followOnlyRole is enabled, only roles marked as follow are allowed
+	if (getConfig("followOnlyRole", guild)) return checkRole(role, "follow");
+
+	// Default: add role unless it's ignored globally or in-thread
+	return !checkRole(role, "ignore") && !checkRoleIn("ignore", role, thread);
 }
 
 /**
@@ -157,28 +170,16 @@ export async function getRoleToPing(thread: ThreadChannel, roles: Role[]) {
 		);
 
 		if (
-			role.name !== "@everyone" &&
-			thread.permissionsFor(role).has("ViewChannel", true) &&
 			role.members.size > 0 &&
-			membersOfTheRoleNotInTheThread.size > 0
+			membersOfTheRoleNotInTheThread.size > 0 &&
+			thread.permissionsFor(role).has("ViewChannel", true)
 		) {
-			if (checkRoleIn("follow", role, thread)) {
+			if (shouldAddRoleToThread(role, thread, guild)) {
 				roleToBeAdded.push(role);
-			} else if (!getConfig("followOnlyRoleIn", guild)) {
-				if (getConfig("followOnlyRole", guild) && checkRole(role, "follow")) {
-					roleToBeAdded.push(role);
-				} else if (
-					!getConfig("followOnlyRoleIn", guild) &&
-					!getConfig("followOnlyRole", guild) &&
-					!checkRole(role, "ignore") &&
-					!checkRoleIn("ignore", role, thread)
-				) {
-					roleToBeAdded.push(role);
-				}
 			}
 		}
 	}
-	
+
 	return roleToBeAdded;
 }
 

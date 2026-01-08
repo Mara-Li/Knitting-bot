@@ -42,6 +42,7 @@ export default (client: Client): void => {
 			if (children.size === 0) return;
 			let totalThreads = 0;
 			const childrenWithThreads: string[] = [];
+			const threadUpdatePromises: Promise<unknown>[] = [];
 			for (const child of children.values()) {
 				if (child.type === ChannelType.GuildText) {
 					const threads = (child as TextChannel).threads.cache;
@@ -49,12 +50,14 @@ export default (client: Client): void => {
 						totalThreads += threads.size;
 						childrenWithThreads.push(`<#${child.id}>`);
 					}
-					await Promise.allSettled(
-						threads.map(async (thread) => {
-							await updateThread(followOnlyChannelEnabled, thread);
-						})
-					);
+					// Collect promises instead of awaiting per child
+					for (const thread of threads.values()) {
+						threadUpdatePromises.push(updateThread(followOnlyChannelEnabled, thread));
+					}
 				}
+			}
+			if (threadUpdatePromises.length > 0) {
+				await Promise.allSettled(threadUpdatePromises);
 			}
 			if (totalThreads > 0) {
 				await discordLogs(

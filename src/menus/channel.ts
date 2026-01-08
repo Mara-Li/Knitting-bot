@@ -67,7 +67,6 @@ export async function channelSelectorsForType({
 				onModify: async (buttonInteraction, page) => {
 					await handleModalModifyGeneric({
 						channelType,
-						guild,
 						interaction: buttonInteraction,
 						modalLabel: undefined,
 						mode,

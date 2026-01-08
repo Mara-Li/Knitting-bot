@@ -1,5 +1,6 @@
 import type * as Djs from "discord.js";
-import type { TChannel, Translation } from "../interface";
+import type {TChannel, Translation} from "../interface";
+import Enmap from "enmap";
 
 export type CommandMode = "follow" | "ignore";
 
@@ -50,15 +51,17 @@ export type PaginatedHandlers = {
 	onCancel?: (buttonInteraction: Djs.ButtonInteraction) => Promise<void>;
 	onEnd?: (buttonMessage: Djs.Message) => Promise<void> | void;
 };
-// global state maps
-export const globalPaginationStates = new Map<string, PaginatedIdsState>();
-// message id -> { stateKey, expiresAt }
-export const messageToStateKey = new Map<
+
+// Global state storage using in-memory Enmap (no name = no persistence)
+export const globalPaginationStates = new Enmap<string, PaginatedIdsState>();
+
+// Message ID -> state key mapping
+export const messageToStateKey = new Enmap<
 	string,
 	{ stateKey: string; expiresAt?: number }
 >();
+
 export const DEFAULT_TTL_MS = 15 * 60 * 1000; // 15 minutes
-export const SWEEP_INTERVAL_MS = 60 * 1000; // 1 minute
 /**
  * Persistent per-user-per-guild selection state.
  *
@@ -91,6 +94,27 @@ export interface UserGuildPaginationState {
 	timestamp: number; // Automatic cleanup
 }
 
-export const paginationStates = new Map<string, UserGuildPaginationState>();
-// Cleanup automatique après 10 minutes
-export const CLEANUP_TIMEOUT = 10 * 60 * 1000;
+export const paginationStates = new Enmap<string, UserGuildPaginationState>();
+
+
+/**
+ * Follow or ignore roles in specific channels using a modal
+ * @param on {"follow" | "ignore"} The mode to use
+ */
+export type RoleInMode = "follow" | "ignore";
+export type RoleInPaginationState = {
+	userId: string;
+	guildId: string;
+	mode: RoleInMode;
+	roleId: string;
+	currentPage: number;
+	selectedCategories: Set<string>;
+	selectedChannels: Set<string>;
+	selectedThreads: Set<string>;
+	selectedForums: Set<string>;
+	// Optional TTL fields managed by the role-in pagination system
+	ttlMs?: number;
+	expiresAt?: number;
+};
+// Use an in-memory Enmap for roleIn pagination states (no name = no persistence)
+export const roleInStates = new Enmap<string, RoleInPaginationState>();

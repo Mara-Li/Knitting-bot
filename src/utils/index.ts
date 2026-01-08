@@ -6,6 +6,7 @@ import {
 	type Guild,
 	type TextThreadChannel,
 } from "discord.js";
+import Enmap from "enmap";
 import { serverDataDb } from "../maps";
 import { addRoleAndUserToThread } from "./add";
 import { checkThread } from "./data_check";
@@ -31,14 +32,21 @@ export async function discordLogs(guildID: string, bot: Client, ...text: unknown
 }
 
 /**
- * Map to track last cache update time per guild
- */
-const cacheUpdateTimestamps = new Map<string, number>();
-
-/**
  * Cooldown period in milliseconds to prevent duplicate cache updates
  */
 const CACHE_UPDATE_COOLDOWN = 5000; // 5 seconds
+
+type CacheEntry = { lastUpdate: number };
+
+// Use an in-memory Enmap for cache timestamps (no name = no persistence)
+const cacheUpdateTimestamps = new Enmap<string, CacheEntry>();
+
+/**
+ * Remove a specific guild from the cache. Intended to be called from a guildDelete handler.
+ */
+export function removeCacheForGuild(guildId: string) {
+	cacheUpdateTimestamps.delete(guildId);
+}
 
 /**
  * Update guild cache by fetching members and roles
@@ -47,16 +55,16 @@ const CACHE_UPDATE_COOLDOWN = 5000; // 5 seconds
  */
 export async function updateCache(guild: Guild, force = false) {
 	const now = Date.now();
-	const lastUpdate = cacheUpdateTimestamps.get(guild.id);
+	const last = cacheUpdateTimestamps.get(guild.id)?.lastUpdate;
 
 	// Skip if recently updated (within cooldown period) and not forced
-	if (!force && lastUpdate && now - lastUpdate < CACHE_UPDATE_COOLDOWN) {
+	if (!force && last && now - last < CACHE_UPDATE_COOLDOWN) {
 		return;
 	}
 
 	try {
 		await Promise.all([guild.members.fetch(), guild.roles.fetch()]);
-		cacheUpdateTimestamps.set(guild.id, now);
+		cacheUpdateTimestamps.set(guild.id, { lastUpdate: now });
 	} catch (e) {
 		console.log(e);
 		// Ignore error

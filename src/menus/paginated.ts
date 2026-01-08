@@ -1,5 +1,4 @@
 import * as Djs from "discord.js";
-import { DiscordAPIError } from "discord.js";
 import type { TChannel } from "src/interface";
 import { TIMEOUT, type Translation } from "../interface";
 import { createPaginationButtons, deletePaginationState, hasMorePages } from "./flow";
@@ -55,7 +54,6 @@ export async function respondInteraction(
 
 export async function handleModalModifyGeneric(options: {
 	interaction: Djs.ButtonInteraction;
-	guild: Djs.Guild;
 	userId: string;
 	page: number;
 	ul: Translation;
@@ -68,7 +66,6 @@ export async function handleModalModifyGeneric(options: {
 }) {
 	const {
 		interaction,
-		// guild not used currently, but kept in options for parity with callers
 		userId,
 		page,
 		ul,
