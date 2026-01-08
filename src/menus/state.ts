@@ -1,23 +1,4 @@
-/**
- * Temporary state for paginated channel selection
- * Key: userId_guildId_mode (e.g., "123456789_987654321_follow")
- */
-export interface UserGuildPaginationState {
-	userId: string;
-	guildId: string;
-	mode: "follow" | "ignore";
-	currentPage: number;
-	selectedCategories: Set<string>;
-	selectedChannels: Set<string>;
-	selectedThreads: Set<string>;
-	selectedForums: Set<string>;
-	timestamp: number; // Pour cleanup automatique
-}
-
-const paginationStates = new Map<string, UserGuildPaginationState>();
-
-// Cleanup automatique après 10 minutes
-const CLEANUP_TIMEOUT = 10 * 60 * 1000;
+import {CLEANUP_TIMEOUT, paginationStates, UserGuildPaginationState} from "./interfaces";
 
 /**
  * Create or get pagination state

@@ -2,9 +2,8 @@ import { ChannelType, type Client, type TextChannel } from "discord.js";
 import { getTranslation } from "../../i18n";
 import { CommandName } from "../../interface";
 import { getConfig } from "../../maps";
-import { discordLogs } from "../../utils";
-import { addRoleAndUserToThread } from "../../utils/add";
-import { checkThread, validateChannelType } from "../../utils/data_check";
+import { discordLogs, updateThread } from "../../utils";
+import {  validateChannelType } from "../../utils/data_check";
 
 /**
  * @param {Client} client - Discord.js Client
@@ -55,18 +54,12 @@ export default (client: Client): void => {
 								number: threads.size,
 							})
 						);
-
-					for (const thread of threads.values()) {
-						const shouldUpdate = followOnlyChannelEnabled
-							? checkThread(thread, "follow")
-							: !checkThread(thread, "ignore");
-
-						if (shouldUpdate) {
-							await addRoleAndUserToThread(thread);
-							// Add delay between requests to avoid gateway rate limit
-							await new Promise((resolve) => setTimeout(resolve, 250));
-						}
-					}
+					
+					await Promise.all(
+						threads.map(async (thread) => {
+							await updateThread(followOnlyChannelEnabled, thread);
+						})
+					);
 				}
 			}
 		} else {
@@ -82,18 +75,12 @@ export default (client: Client): void => {
 					number: threads.size,
 				})
 			);
-
-			for (const thread of threads.values()) {
-				const shouldUpdate = followOnlyChannelEnabled
-					? checkThread(thread, "follow")
-					: !checkThread(thread, "ignore");
-
-				if (shouldUpdate) {
-					await addRoleAndUserToThread(thread);
-					// Add delay between requests to avoid gateway rate limit
-					await new Promise((resolve) => setTimeout(resolve, 250));
-				}
-			}
+			
+			await Promise.all(
+				threads.map(async (thread) => {
+					await updateThread(followOnlyChannelEnabled, thread);
+				})
+			);
 		}
 	});
 };

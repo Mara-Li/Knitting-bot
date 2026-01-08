@@ -11,7 +11,8 @@ import {
 } from "../interface";
 import { getConfig, getRoleIn, setRoleIn } from "../maps";
 import { resolveChannelsByIds } from "../utils";
-import type { TrackedItems } from "./items";
+import { createSweepScheduler } from "./flow";
+import type { TrackedItems } from "./interfaces";
 import { createPaginatedChannelModal } from "./modal";
 
 /**
@@ -19,13 +20,10 @@ import { createPaginatedChannelModal } from "./modal";
  * @param options The command options
  * @returns The role ID or null if invalid
  */
-export async function extractAndValidateRoleOption(
-	options: CommandInteractionOptionResolver
-): Promise<string | null> {
+export function extractAndValidateRoleOption(options: CommandInteractionOptionResolver) {
 	const roleOpt = options.get(t("common.role").toLowerCase());
-	if (!roleOpt || !roleOpt.role) {
-		return null;
-	}
+	if (!roleOpt || !roleOpt.role) return null;
+
 	return roleOpt.role.id;
 }
 
@@ -52,24 +50,14 @@ type RoleInPaginationState = {
 
 const roleInStates = new Map<string, RoleInPaginationState>();
 
-// TTL defaults and sweep settings (mirror pattern from src/menus/flow.ts)
+// TTL defaults using the generic sweep scheduler from flow.ts
 const DEFAULT_ROLEIN_TTL_MS = 15 * 60 * 1000; // 15 minutes
 const ROLEIN_SWEEP_INTERVAL_MS = 60 * 1000; // 1 minute
-let roleInSweepScheduled = false;
 
-function scheduleRoleInSweep() {
-	if (roleInSweepScheduled) return;
-	// eslint-disable-next-line @typescript-eslint/no-misused-promises
-	setInterval(() => {
-		const now = Date.now();
-		for (const [key, state] of roleInStates.entries()) {
-			if (state.expiresAt && state.expiresAt <= now) {
-				roleInStates.delete(key);
-			}
-		}
-	}, ROLEIN_SWEEP_INTERVAL_MS);
-	roleInSweepScheduled = true;
-}
+// Create a sweep scheduler instance for roleIn states
+const scheduleRoleInSweep = createSweepScheduler<RoleInPaginationState>(
+	ROLEIN_SWEEP_INTERVAL_MS
+);
 
 function roleInKey(userId: string, guildId: string, mode: RoleInMode, roleId: string) {
 	return `${userId}_${guildId}_${mode}_${roleId}`;
@@ -121,8 +109,8 @@ function initRoleInState(
 		userId,
 	};
 	roleInStates.set(key, state);
-	// ensure sweep runs
-	scheduleRoleInSweep();
+	// ensure sweep runs (pass the state map to the generic scheduler)
+	scheduleRoleInSweep(roleInStates);
 	return state;
 }
 

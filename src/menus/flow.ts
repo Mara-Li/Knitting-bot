@@ -1,35 +1,44 @@
 import * as Djs from "discord.js";
 import { TIMEOUT, type Translation } from "../interface";
+import {
+	DEFAULT_TTL_MS,
+	globalPaginationStates,
+	messageToStateKey,
+	type PaginatedHandlers,
+	type PaginatedIdsState,
+	SWEEP_INTERVAL_MS,
+} from "./interfaces";
 
-export type PaginatedIdsState = {
-	currentPage: number;
-	originalIds: string[];
-	paginatedItems: Record<number, string[]>;
-	selectedIds: Set<string>;
-	// Optional TTL fields managed by the pagination system
-	ttlMs?: number;
-	expiresAt?: number;
-};
-
-export type PaginatedHandlers = {
-	onModify: (buttonInteraction: Djs.ButtonInteraction, page: number) => Promise<void>;
-	onShowPage: (buttonInteraction: Djs.ButtonInteraction, page: number) => Promise<void>;
-	onValidate: (buttonInteraction: Djs.ButtonInteraction) => Promise<void>;
-	onCancel?: (buttonInteraction: Djs.ButtonInteraction) => Promise<void>;
-	onEnd?: (buttonMessage: Djs.Message) => Promise<void> | void;
-};
-
-// global state maps
-const globalPaginationStates = new Map<string, PaginatedIdsState>();
-// message id -> { stateKey, expiresAt }
-const messageToStateKey = new Map<string, { stateKey: string; expiresAt?: number }>();
-
-// TTL defaults and sweep settings
-const DEFAULT_TTL_MS = 15 * 60 * 1000; // 15 minutes
-const SWEEP_INTERVAL_MS = 60 * 1000; // 1 minute
+/**
+ * Generic sweep scheduler factory for Maps with items that have expiresAt property
+ * Can be used by multiple modules with different state maps
+ * @param intervalMs Interval in milliseconds for the sweep
+ * @returns A scheduler function that can be called with a state map
+ */
+export function createSweepScheduler<T extends { expiresAt?: number }>(
+	intervalMs = SWEEP_INTERVAL_MS
+) {
+	let scheduled = false;
+	return function scheduleSweep(
+		stateMap: Map<string, T>,
+		onExpire?: (key: string, state: T) => void
+	) {
+		if (scheduled) return;
+		// eslint-disable-next-line @typescript-eslint/no-misused-promises
+		setInterval(() => {
+			const now = Date.now();
+			for (const [key, state] of stateMap.entries()) {
+				if (state.expiresAt && state.expiresAt <= now) {
+					stateMap.delete(key);
+					if (onExpire) onExpire(key, state);
+				}
+			}
+		}, intervalMs);
+		scheduled = true;
+	};
+}
 
 let sweepScheduled = false;
-
 function scheduleSweep() {
 	if (sweepScheduled) return;
 	// eslint-disable-next-line @typescript-eslint/no-misused-promises
@@ -161,11 +170,12 @@ export async function startPaginatedButtonsFlow(
 	}
 
 	const collector = buttonMessage.createMessageComponentCollector({
+		componentType: Djs.ComponentType.Button,
 		filter: (i: Djs.Interaction) => i.user.id === userId,
 		time: t,
 	});
 
-	collector.on("collect", async (buttonInteraction: Djs.ButtonInteraction) => {
+	collector.on("collect", async (buttonInteraction) => {
 		const customId = buttonInteraction.customId;
 
 		try {
@@ -229,9 +239,11 @@ export async function startPaginatedButtonsFlow(
 		// Call onEnd if provided so caller can cleanup state and remove components
 		try {
 			if (handlers.onEnd) {
-				Promise.resolve(handlers.onEnd(buttonMessage as Djs.Message)).catch((e) => {
+				try {
+					await handlers.onEnd(buttonMessage);
+				} catch (e) {
 					console.warn("Error in onEnd handler for paginated flow:", e);
-				});
+				}
 			} else {
 				// Default: remove components to disable buttons
 				try {
@@ -301,5 +313,8 @@ export function createPaginationButtons(
 	return [new Djs.ActionRowBuilder<Djs.ButtonBuilder>().addComponents(buttons)];
 }
 
+// ensure sweep scheduled when module is loaded
+// Side effect: Start the background sweep timer when this module is imported.
+// This ensures expired pagination states are cleaned up even if no flows are active.
 // ensure sweep scheduled when module is loaded
 scheduleSweep();

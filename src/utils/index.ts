@@ -4,8 +4,11 @@ import {
 	type Client,
 	Collection,
 	type Guild,
+	type TextThreadChannel,
 } from "discord.js";
 import { serverDataDb } from "../maps";
+import { addRoleAndUserToThread } from "./add";
+import { checkThread } from "./data_check";
 
 /**
  * Send logs to the configured Discord channel
@@ -170,4 +173,23 @@ export async function resolveChannelsByIds<T extends { type: number }>(
 	}
 
 	return resolved;
+}
+
+export async function updateThread(
+	followOnlyChannelEnabled: boolean,
+	thread: TextThreadChannel
+) {
+	const shouldUpdate = followOnlyChannelEnabled
+		? checkThread(thread, "follow")
+		: !checkThread(thread, "ignore");
+
+	if (shouldUpdate) {
+		try {
+			await addRoleAndUserToThread(thread);
+			// Add delay between requests to avoid gateway rate limit
+			await new Promise((resolve) => setTimeout(resolve, 1000));
+		} catch (error) {
+			console.warn(`[Channel Update] Failed to update thread ${thread.id}`, error);
+		}
+	}
 }

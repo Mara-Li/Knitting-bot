@@ -1,15 +1,6 @@
-import { TypeName } from "../interface";
-import { getMaps, getRole } from "../maps";
-
-export type CommandMode = "follow" | "ignore";
-
-export interface TrackedItems {
-	categories: string[];
-	channels: string[];
-	forums: string[];
-	roles: string[];
-	threads: string[];
-}
+import {TypeName} from "../interface";
+import {getMaps, getRole} from "../maps";
+import {CommandMode, TrackedItems} from "./interfaces";
 
 /**
  * Get all tracked items (followed or ignored) for a guild

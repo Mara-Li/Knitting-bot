@@ -146,7 +146,7 @@ export default {
 					await removeRoleIn(options, guild, "follow", interaction, ul);
 					return;
 				}
-				const roleId = await extractAndValidateRoleOption(options);
+				const roleId = extractAndValidateRoleOption(options);
 				if (!roleId) {
 					await interaction.reply({
 						content: ul("ignore.role.error", { role: "Unknown" }),
