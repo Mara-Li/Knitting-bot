@@ -148,21 +148,20 @@ export async function startPaginatedButtonsFlow(
 	await interaction.reply({
 		components: initialComponents,
 		content: initialContent,
-		flags: Djs.MessageFlags.Ephemeral,
 	});
 
 	const buttonMessage = await interaction.fetchReply();
-	if (stateKey && (buttonMessage as Djs.Message).id) {
+	if (stateKey && buttonMessage.id) {
 		// link the message ID to the state key and mirror the state's expiration if present
 		const state = getPaginationState(stateKey);
-		messageToStateKey.set((buttonMessage as Djs.Message).id, {
+		messageToStateKey.set(buttonMessage.id, {
 			expiresAt: state?.expiresAt,
 			stateKey,
 		});
 	}
 
-	const collector = (buttonMessage as Djs.Message).createMessageComponentCollector({
-		filter: (i: Djs.Interaction) => (i.user as Djs.User).id === userId,
+	const collector = buttonMessage.createMessageComponentCollector({
+		filter: (i: Djs.Interaction) => i.user.id === userId,
 		time: t,
 	});
 

@@ -1,4 +1,4 @@
-import { ChannelType, type Client, type Snowflake, type TextChannel } from "discord.js";
+import { ChannelType, type Client, type TextChannel } from "discord.js";
 import { getTranslation } from "../../i18n";
 import { CommandName } from "../../interface";
 import { getConfig } from "../../maps";
@@ -97,15 +97,3 @@ export default (client: Client): void => {
 		}
 	});
 };
-
-/**
- * @description Get the name of a channel
- * @param channelID {Snowflake} - The ID of the channel
- * @param Client {Client} - The Discord.js Client
- */
-function getChannelName(channelID: Snowflake, Client: Client) {
-	const channel = Client.channels.cache.get(channelID);
-	//check if the channel is a text channel
-	if (!channel || channel.type !== ChannelType.GuildText) return channelID;
-	return (channel as TextChannel).name;
-}

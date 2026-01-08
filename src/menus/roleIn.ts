@@ -16,7 +16,7 @@ import {
 } from "./flow";
 import type { CommandMode } from "./items";
 import { createPaginatedChannelModalByType } from "./modal";
-import { getChannelType, resolveIds } from "./utils";
+import { resolveIds } from "./utils";
 
 /**
  * Handle roleIn channel selectors with pagination for follow/ignore commands
@@ -56,15 +56,8 @@ export async function roleInSelectorsForType(
 
 	const allRoleIn = getRoleIn(mode, guildID);
 	const existingRoleIn = allRoleIn.find((r) => r.roleId === roleId);
-	const allChannelIds = existingRoleIn?.channelIds ?? [];
 
-	const { channelTypeFilter } = getChannelType(channelType);
-
-	const allChannels = await resolveChannelsByIds<
-		Djs.CategoryChannel | Djs.TextChannel | Djs.AnyThreadChannel | Djs.ForumChannel
-	>(guild, allChannelIds, channelTypeFilter);
-
-	const trackedIds = allChannels.map((ch) => ch.id);
+	const trackedIds = existingRoleIn?.channelIds ?? [];
 
 	const paginatedItems = paginateIds(trackedIds, 25);
 
@@ -77,7 +70,9 @@ export async function roleInSelectorsForType(
 
 		const buttons = createPaginationButtons(mode, 0, hasMore, ul);
 		const roleLabel = Djs.roleMention(roleId);
-		const summary = `Page 1 - ${ul("common.role")}: ${roleLabel} - ${ul(`common.${channelType}`)} : ${trackedOnFirstPage} ${ul("common.elements")}`;
+		const summary = `Page 1 - ${ul("common.role")}: ${roleLabel} - ${ul(
+			`common.${channelType}`
+		)} : ${trackedOnFirstPage} ${ul("common.elements")}`;
 
 		await startPaginatedButtonsFlow(
 			{
@@ -250,7 +245,9 @@ async function handleRoleInModalModify(
 			mode
 		);
 		const roleLabel = Djs.roleMention(roleId);
-		const summary = `Page ${page + 1} - ${ul("common.role")}: ${roleLabel} - ${ul(`common.${channelType}`)} : ${pageItemsCount} ${ul("common.elements")}`;
+		const summary = `Page ${page + 1} - ${ul("common.role")}: ${roleLabel} - ${ul(
+			`common.${channelType}`
+		)} : ${pageItemsCount} ${ul("common.elements")}`;
 
 		await modalSubmit.editReply({
 			components: buttons,
@@ -286,7 +283,9 @@ async function showRoleInPaginatedMessage(
 
 	const buttons = createPaginationButtons(mode, safePage, hasMore, ul);
 	const roleLabel = Djs.roleMention(roleId);
-	const summary = `Page ${safePage + 1} - ${ul("common.role")}: ${roleLabel} - ${ul(`common.${channelType}`)} : ${trackedOnThisPage} ${ul("common.elements")}`;
+	const summary = `Page ${safePage + 1} - ${ul("common.role")}: ${roleLabel} - ${ul(
+		`common.${channelType}`
+	)} : ${trackedOnThisPage} ${ul("common.elements")}`;
 
 	await interaction.editReply({
 		components: buttons,
@@ -334,8 +333,12 @@ async function validateRoleInAndSave(
 	const finalIds = Array.from(state.selectedIds);
 	const messages: string[] = [];
 
-	const { finalChannelsResolved, originalChannelsResolved, channelTypeFilter } =
-		await resolveIds(channelType, guild, trackedIds, finalIds);
+	const { finalChannelsResolved, originalChannelsResolved } = await resolveIds(
+		channelType,
+		guild,
+		trackedIds,
+		finalIds
+	);
 
 	const mentionFromChannel = (
 		channel:
@@ -354,10 +357,13 @@ async function validateRoleInAndSave(
 	const oppositeForRole = oppositeRoleIn.find((r) => r.roleId === roleId);
 	const oppositeChannelIds = new Set(oppositeForRole?.channelIds ?? []);
 
-	const oppositeChannelsByType = await resolveChannelsByIds<
-		Djs.CategoryChannel | Djs.TextChannel | Djs.AnyThreadChannel | Djs.ForumChannel
-	>(guild, Array.from(oppositeChannelIds), channelTypeFilter);
-	const oppositeTypeIds = new Set(oppositeChannelsByType.map((ch) => ch.id));
+	const { finalChannelsResolved: oppositeByType } = await resolveIds(
+		channelType,
+		guild,
+		[],
+		Array.from(oppositeChannelIds)
+	);
+	const oppositeTypeIds = new Set(oppositeByType.map((ch) => ch.id));
 
 	const conflictIds = finalIds.filter((id) => oppositeTypeIds.has(id));
 
