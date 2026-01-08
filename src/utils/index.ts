@@ -191,8 +191,6 @@ export async function updateThread(
 	if (shouldUpdate) {
 		try {
 			await addRoleAndUserToThread(thread);
-			// Add delay between requests to avoid gateway rate limit
-			await new Promise((resolve) => setTimeout(resolve, 1000));
 		} catch (error) {
 			console.warn(`[Channel Update] Failed to update thread ${thread.id}`, error);
 		}

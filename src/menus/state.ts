@@ -1,5 +1,6 @@
 import {
 	CLEANUP_TIMEOUT,
+	DEFAULT_TTL_MS,
 	paginationStates,
 	type UserGuildPaginationState,
 } from "./interfaces";
@@ -88,7 +89,6 @@ export function updatePaginationState(
 	const state = getPaginationState(userId, guildId, mode);
 	state.currentPage = page;
 
-	// Merge les nouvelles sélections avec l'état existant
 	for (const id of newSelections.categories) {
 		state.selectedCategories.add(id);
 	}
@@ -170,7 +170,7 @@ let cleanupIntervalId: NodeJS.Timeout | null = null;
  */
 function startCleanupIntervalIfNeeded(): void {
 	if (cleanupIntervalId === null) {
-		cleanupIntervalId = setInterval(cleanupOldStates, 15 * 60 * 1000);
+		cleanupIntervalId = setInterval(cleanupOldStates, DEFAULT_TTL_MS);
 	}
 }
 

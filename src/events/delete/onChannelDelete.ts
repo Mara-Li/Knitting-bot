@@ -28,11 +28,9 @@ export default (client: Client): void => {
 		const channelGuild = channel as NonThreadGuildBasedChannel;
 		const channelType = channelGuild.type;
 
-		// Précharger les configurations RoleIn pour éviter des lectures redondantes
 		const ignoredRoleIns = getRoleIn("ignore", guildID);
 		const followedRoleIns = getRoleIn("follow", guildID);
 
-		// Vérifier si le canal est présent dans une configuration RoleIn
 		const ignoredRoleIn = ignoredRoleIns.some((ignored) => {
 			return ignored.channelIds.includes(channel.id);
 		});
@@ -40,7 +38,6 @@ export default (client: Client): void => {
 			return followed.channelIds.includes(channel.id);
 		});
 
-		// Retirer le canal des configurations RoleIn
 		if (ignoredRoleIn) {
 			const updated = ignoredRoleIns.map((roleIn) => ({
 				...roleIn,

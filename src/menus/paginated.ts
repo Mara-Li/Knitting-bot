@@ -1,4 +1,5 @@
 import * as Djs from "discord.js";
+import { DiscordAPIError } from "discord.js";
 import type { TChannel } from "src/interface";
 import { TIMEOUT, type Translation } from "../interface";
 import { createPaginationButtons, deletePaginationState, hasMorePages } from "./flow";

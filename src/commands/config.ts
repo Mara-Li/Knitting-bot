@@ -386,7 +386,7 @@ function autoUpdateMenu(guildID: string, ul: Translation): Djs.EmbedBuilder {
 			{
 				inline: true,
 				name: ul("configuration.newMember.display"),
-				value: enabledOrDisabled(getConfig("onNewMember", guildID) as boolean, ul),
+				value: enabledOrDisabled(getConfig("onMemberUpdate", guildID) as boolean, ul),
 			},
 			{
 				inline: true,
@@ -416,7 +416,6 @@ async function updateConfig(
 	if (!interaction.guild) return;
 	let newConfig: string | boolean;
 	const commandType = {
-		AutoUpdate: ["channel", "member", "newMember", "thread", "manualMode"],
 		Mode: ["followOnlyRole", "followOnlyChannel", "followOnlyRoleIn"],
 	};
 	const followOnlyRole = getConfig("followOnlyRole", interaction.guild.id);
