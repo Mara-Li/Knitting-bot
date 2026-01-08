@@ -48,10 +48,16 @@ export type PaginatedHandlers = {
 };
 
 // Global state storage using in-memory Enmap (no name = no persistence)
-export const globalPaginationStates = new Enmap<string, PaginatedIdsState>();
+export const globalPaginationStates = new Enmap<string, PaginatedIdsState>({
+	//@ts-expect-error except inMemory is valid
+	inMemory: true,
+});
 
 // Message ID -> state key mapping
-export const messageToStateKey = new Enmap<string, string>();
+export const messageToStateKey = new Enmap<string, string>({
+	//@ts-expect-error except inMemory is valid
+	inMemory: true,
+});
 
 /**
  * Follow or ignore roles in specific channels using a modal
@@ -69,7 +75,10 @@ export type RoleInPaginationState = {
 	selectedForums: Set<string>;
 };
 // Use an in-memory Enmap for roleIn pagination states (no name = no persistence)
-export const roleInStates = new Enmap<string, RoleInPaginationState>();
+export const roleInStates = new Enmap<string, RoleInPaginationState>({
+	//@ts-expect-error except inMemory is valid
+	inMemory: true,
+});
 
 export interface PaginatedChannelSelectorsOptions {
 	interaction: Djs.ChatInputCommandInteraction;

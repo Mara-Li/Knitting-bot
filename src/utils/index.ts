@@ -39,7 +39,10 @@ const CACHE_UPDATE_COOLDOWN = 5000; // 5 seconds
 type CacheEntry = { lastUpdate: number };
 
 // Use an in-memory Enmap for cache timestamps (no name = no persistence)
-const cacheUpdateTimestamps = new Enmap<string, CacheEntry>();
+const cacheUpdateTimestamps = new Enmap<string, CacheEntry>({
+	//@ts-expect-error except inMemory is valid
+	inMemory: true,
+});
 
 /**
  * Remove a specific guild from the cache. Intended to be called from a guildDelete handler.
