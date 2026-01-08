@@ -28,5 +28,6 @@ export default (client: Client): void => {
 			}
 		});
 		await Promise.all(guildPromises);
+		console.info("Done registering commands.");
 	});
 };
