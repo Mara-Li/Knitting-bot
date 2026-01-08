@@ -1,13 +1,6 @@
-import process from "node:process";
 import type { Client } from "discord.js";
-import dotenv from "dotenv";
 import { ALL_COMMANDS } from "../commands";
 import { VERSION } from "../index";
-
-let config = dotenv.config({ path: ".env", quiet: true }).parsed;
-if (process.env.ENV === "production") {
-	config = dotenv.config({ path: ".env.prod", quiet: true }).parsed;
-}
 
 export default (client: Client): void => {
 	client.on("clientReady", async () => {
