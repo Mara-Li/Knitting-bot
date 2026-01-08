@@ -151,12 +151,10 @@ export async function roleInSelectorsForType(
 	const { modal } = await createPaginatedChannelModalByType(
 		mode,
 		ul,
-		guild,
 		0,
 		channelType,
 		paginatedItems[0] ?? [],
-		`${ul("common.role")}: ${ul("common.roleIn")}`,
-		true
+		`${ul("common.role")}: ${ul("common.roleIn")}`
 	);
 
 	try {
@@ -188,12 +186,14 @@ export async function roleInSelectorsForType(
 			mode
 		);
 	} catch (e) {
-		console.error(`[${mode} roleIn ${channelType}] Error:`, e);
+		console.warn(`[${mode} roleIn ${channelType}] Error:`, e);
 		await discordLogs(
 			guildID,
 			interaction.client,
-			`[${mode} roleIn ${channelType}] Error: ${e}`
+			`${ul("common.error", { error: String(e) })}`
 		);
+		deletePaginationState(stateKey);
+		return;
 	}
 }
 
@@ -216,12 +216,10 @@ async function handleRoleInModalModify(
 	const { modal } = await createPaginatedChannelModalByType(
 		mode,
 		ul,
-		guild,
 		0,
 		channelType,
 		pageTrackedIds,
-		`${ul("common.role")}: ${ul("common.roleIn")}`,
-		true
+		`${ul("common.role")}: ${ul("common.roleIn")}`
 	);
 
 	try {

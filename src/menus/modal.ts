@@ -78,17 +78,11 @@ export function createChannelSelectorsModal(
 export async function createPaginatedChannelModalByType(
 	mode: CommandMode,
 	ul: Translation,
-	_guild: Djs.Guild,
 	page: number,
 	channelType: TChannel,
 	trackedIds: string[],
-	shortTitle?: string,
-	_showOnlyTracked = true
-): Promise<{
-	modal: Djs.ModalBuilder;
-	hasMore: boolean;
-	pageItemIds: string[];
-}> {
+	shortTitle?: string
+): Promise<{ modal: Djs.ModalBuilder; hasMore: boolean; pageItemIds: string[] }> {
 	const channelTypeMap: Record<TChannel, Djs.ChannelType[]> = {
 		category: [Djs.ChannelType.GuildCategory],
 		channel: [Djs.ChannelType.GuildText],
