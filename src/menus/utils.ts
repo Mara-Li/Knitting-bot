@@ -263,7 +263,7 @@ async function showRoleInPaginatedModal(
 	}
 
 	const shortTitle = `${ul("common.role")}: ${ul("common.roleIn")}`;
-	const { modal, hasMore, pageItemIds } = await createPaginatedChannelModal(
+	const { modal, hasMore, pageItemIds } = createPaginatedChannelModal(
 		on,
 		ul,
 		page,

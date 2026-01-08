@@ -116,7 +116,7 @@ export async function channelSelectorsForType({
 
 		return;
 	}
-	const { modal } = await createPaginatedChannelModalByType(
+	const { modal } = createPaginatedChannelModalByType(
 		mode,
 		ul,
 		channelType,
@@ -177,7 +177,7 @@ async function handleModalModify(
 	mode: CommandMode
 ) {
 	const pageTrackedIds = state.paginatedItems[page] ?? [];
-	const { modal } = await createPaginatedChannelModalByType(
+	const { modal } = createPaginatedChannelModalByType(
 		mode,
 		ul,
 		channelType,

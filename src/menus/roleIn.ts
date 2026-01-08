@@ -1,5 +1,5 @@
 import * as Djs from "discord.js";
-import type { TChannel } from "src/interface";
+import type { ArrayChannel, TChannel } from "src/interface";
 import { CommandName, type RoleIn, TIMEOUT, type Translation } from "../interface";
 import { getConfig, getRoleIn, setRoleIn } from "../maps";
 import { discordLogs, resolveChannelsByIds } from "../utils";
@@ -143,7 +143,7 @@ export async function roleInSelectorsForType(
 		return;
 	}
 
-	const { modal } = await createPaginatedChannelModalByType(
+	const { modal } = createPaginatedChannelModalByType(
 		mode,
 		ul,
 		channelType,
@@ -207,7 +207,7 @@ async function handleRoleInModalModify(
 ) {
 	const pageTrackedIds = state.paginatedItems[page] ?? [];
 
-	const { modal } = await createPaginatedChannelModalByType(
+	const { modal } = createPaginatedChannelModalByType(
 		mode,
 		ul,
 		channelType,
@@ -307,6 +307,58 @@ async function validateRoleInAndSave(
 	mode: CommandMode
 ) {
 	const stateKey = `${userId}_${guildID}_${mode}_roleIn_${roleId}_${channelType}`;
+	const context = await ensureRoleInContext(interaction, stateKey, roleId, ul);
+	if (!context) return;
+
+	const { guild, state } = context;
+	const finalIds = Array.from(state.selectedIds);
+
+	const { finalChannelsResolved, originalChannelsResolved, mentionFromChannel } =
+		await resolveRoleInChannels(channelType, guild, trackedIds, finalIds);
+
+	const hasConflict = await handleRoleInConflicts({
+		channelType,
+		finalChannelsResolved,
+		finalIds,
+		guild,
+		guildID,
+		interaction,
+		mentionFromChannel,
+		mode,
+		roleId,
+		stateKey,
+		ul,
+	});
+	if (hasConflict) return;
+
+	const messages = buildRoleInChangeMessages(
+		finalChannelsResolved,
+		originalChannelsResolved,
+		mentionFromChannel,
+		mode,
+		ul
+	);
+
+	await persistRoleInSelection({
+		channelType,
+		finalIds,
+		guild,
+		guildID,
+		interaction,
+		messages,
+		mode,
+		roleId,
+		stateKey,
+		ul,
+	});
+}
+
+async function ensureRoleInContext(
+	interaction: Djs.ButtonInteraction | Djs.ModalSubmitInteraction,
+	stateKey: string,
+	roleId: string,
+	ul: Translation
+): Promise<{ state: PaginatedIdsState; guild: Djs.Guild; role: Djs.Role } | undefined> {
 	const state = getPaginationState(stateKey);
 	if (!state) return;
 
@@ -316,23 +368,19 @@ async function validateRoleInAndSave(
 	const role = guild.roles.cache.get(roleId);
 	if (!role) {
 		const errorMsg = ul("ignore.role.error", { role: roleId });
-		if (interaction.isModalSubmit()) {
-			await interaction.reply({
-				components: [],
-				content: errorMsg,
-				flags: Djs.MessageFlags.Ephemeral,
-			});
-		} else if (interaction.deferred) {
-			await interaction.editReply({ components: [], content: errorMsg });
-		} else {
-			await interaction.update({ components: [], content: errorMsg });
-		}
+		await respondRoleInInteraction(interaction, errorMsg, true);
 		return;
 	}
 
-	const finalIds = Array.from(state.selectedIds);
-	const messages: string[] = [];
+	return { guild, role, state };
+}
 
+async function resolveRoleInChannels(
+	channelType: TChannel,
+	guild: Djs.Guild,
+	trackedIds: string[],
+	finalIds: string[]
+) {
 	const { finalChannelsResolved, originalChannelsResolved } = await resolveIds(
 		channelType,
 		guild,
@@ -352,6 +400,42 @@ async function validateRoleInAndSave(
 			: `<#${channel.id}>`;
 	};
 
+	return { finalChannelsResolved, mentionFromChannel, originalChannelsResolved };
+}
+
+async function handleRoleInConflicts({
+	interaction,
+	stateKey,
+	guild,
+	guildID,
+	roleId,
+	channelType,
+	mode,
+	ul,
+	finalIds,
+	finalChannelsResolved,
+	mentionFromChannel,
+}: {
+	interaction: Djs.ButtonInteraction | Djs.ModalSubmitInteraction;
+	stateKey: string;
+	guild: Djs.Guild;
+	guildID: string;
+	roleId: string;
+	channelType: TChannel;
+	mode: CommandMode;
+	ul: Translation;
+	finalIds: string[];
+	finalChannelsResolved: Array<
+		Djs.CategoryChannel | Djs.TextChannel | Djs.AnyThreadChannel | Djs.ForumChannel
+	>;
+	mentionFromChannel: (
+		channel:
+			| Djs.CategoryChannel
+			| Djs.TextChannel
+			| Djs.AnyThreadChannel
+			| Djs.ForumChannel
+	) => string;
+}) {
 	const oppositeMode: CommandMode = mode === "follow" ? "ignore" : "follow";
 	const oppositeRoleIn = getRoleIn(oppositeMode, guildID);
 	const oppositeForRole = oppositeRoleIn.find((r) => r.roleId === roleId);
@@ -366,33 +450,36 @@ async function validateRoleInAndSave(
 	const oppositeTypeIds = new Set(oppositeByType.map((ch) => ch.id));
 
 	const conflictIds = finalIds.filter((id) => oppositeTypeIds.has(id));
+	if (conflictIds.length === 0) return false;
 
-	if (conflictIds.length > 0) {
-		const conflictChannels = finalChannelsResolved.filter((ch) =>
-			conflictIds.includes(ch.id)
-		);
-		const conflictKey =
-			mode === "ignore" ? "ignore.error.conflictTracked" : "follow.error.conflictTracked";
-		const conflictMessage = ul(conflictKey, {
-			item: conflictChannels.map((ch) => mentionFromChannel(ch)).join(", "),
-		});
+	const conflictChannels = finalChannelsResolved.filter((ch) =>
+		conflictIds.includes(ch.id)
+	);
+	const conflictKey =
+		mode === "ignore" ? "ignore.error.conflictTracked" : "follow.error.conflictTracked";
+	const conflictMessage = ul(conflictKey, {
+		item: conflictChannels.map((ch) => mentionFromChannel(ch)).join(", "),
+	});
 
-		if (interaction.isModalSubmit()) {
-			await interaction.reply({
-				components: [],
-				content: conflictMessage,
-				flags: Djs.MessageFlags.Ephemeral,
-			});
-		} else if (interaction.deferred) {
-			await interaction.editReply({ components: [], content: conflictMessage });
-		} else {
-			await interaction.update({ components: [], content: conflictMessage });
-		}
+	await respondRoleInInteraction(interaction, conflictMessage, true);
+	deletePaginationState(stateKey);
+	return true;
+}
 
-		deletePaginationState(stateKey);
-		return;
-	}
-
+function buildRoleInChangeMessages(
+	finalChannelsResolved: ArrayChannel,
+	originalChannelsResolved: ArrayChannel,
+	mentionFromChannel: (
+		channel:
+			| Djs.CategoryChannel
+			| Djs.TextChannel
+			| Djs.AnyThreadChannel
+			| Djs.ForumChannel
+	) => string,
+	mode: CommandMode,
+	ul: Translation
+) {
+	const messages: string[] = [];
 	const oldIds = new Set(originalChannelsResolved.map((ch) => ch.id));
 	const newIds = new Set(finalChannelsResolved.map((ch) => ch.id));
 
@@ -420,6 +507,32 @@ async function validateRoleInAndSave(
 		}
 	}
 
+	return messages;
+}
+
+async function persistRoleInSelection({
+	interaction,
+	stateKey,
+	guild,
+	guildID,
+	roleId,
+	channelType,
+	finalIds,
+	messages,
+	ul,
+	mode,
+}: {
+	interaction: Djs.ButtonInteraction | Djs.ModalSubmitInteraction;
+	stateKey: string;
+	guild: Djs.Guild;
+	guildID: string;
+	roleId: string;
+	channelType: TChannel;
+	finalIds: string[];
+	messages: string[];
+	ul: Translation;
+	mode: CommandMode;
+}) {
 	const allRoleIn = getRoleIn(mode, guildID);
 	const existingEntry = allRoleIn.find((r) => r.roleId === roleId);
 
@@ -462,16 +575,7 @@ async function validateRoleInAndSave(
 			on: ul(`roleIn.on.${mode}`),
 		});
 
-		if (interaction.isModalSubmit()) {
-			await interaction.reply({
-				components: [],
-				content: finalMessage,
-				flags: Djs.MessageFlags.Ephemeral,
-			});
-		} else if (interaction.deferred)
-			await interaction.editReply({ components: [], content: finalMessage });
-		else await interaction.update({ components: [], content: finalMessage });
-
+		await respondRoleInInteraction(interaction, finalMessage, true);
 		deletePaginationState(stateKey);
 		return;
 	}
@@ -493,15 +597,28 @@ async function validateRoleInAndSave(
 			? ul("common.summary", { changes: `\n- ${messages.join("\n- ")}` })
 			: ul("common.noChanges");
 
+	await respondRoleInInteraction(interaction, finalMessage, true);
+	deletePaginationState(stateKey);
+}
+
+async function respondRoleInInteraction(
+	interaction: Djs.ButtonInteraction | Djs.ModalSubmitInteraction,
+	content: string,
+	ephemeralForModal: boolean
+) {
 	if (interaction.isModalSubmit()) {
 		await interaction.reply({
 			components: [],
-			content: finalMessage,
-			flags: Djs.MessageFlags.Ephemeral,
+			content,
+			flags: ephemeralForModal ? Djs.MessageFlags.Ephemeral : undefined,
 		});
-	} else if (interaction.deferred)
-		await interaction.editReply({ components: [], content: finalMessage });
-	else await interaction.update({ components: [], content: finalMessage });
+		return;
+	}
 
-	deletePaginationState(stateKey);
+	if (interaction.deferred) {
+		await interaction.editReply({ components: [], content });
+		return;
+	}
+
+	await interaction.update({ components: [], content });
 }

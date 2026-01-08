@@ -1,3 +1,4 @@
+import type * as Djs from "discord.js";
 import { Locale } from "discord.js";
 import type { TFunction } from "i18next";
 
@@ -104,3 +105,6 @@ export interface ServerData {
 export type Translation = TFunction<"translation", undefined>;
 export const TIMEOUT = 600000; // 10 minutes
 export type TChannel = "channel" | "thread" | "category" | "forum";
+export type ArrayChannel = Array<
+	Djs.CategoryChannel | Djs.TextChannel | Djs.AnyThreadChannel | Djs.ForumChannel
+>;

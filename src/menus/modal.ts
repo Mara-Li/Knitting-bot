@@ -76,13 +76,13 @@ export function createChannelSelectorsModal(
 /**
  * Create a paginated modal for a specific channel type
  */
-export async function createPaginatedChannelModalByType(
+export function createPaginatedChannelModalByType(
 	mode: CommandMode,
 	ul: Translation,
 	channelType: TChannel,
 	trackedIds: string[],
 	shortTitle?: string
-): Promise<{ modal: ModalBuilder; hasMore: boolean; pageItemIds: string[] }> {
+): { modal: ModalBuilder; hasMore: boolean; pageItemIds: string[] } {
 	const page = 0;
 	const channelTypeMap: Record<TChannel, Djs.ChannelType[]> = {
 		category: [Djs.ChannelType.GuildCategory],
@@ -126,7 +126,7 @@ export async function createPaginatedChannelModalByType(
 /**
  * Create a paginated modal with channel selectors
  */
-export async function createPaginatedChannelModal(
+export function createPaginatedChannelModal(
 	mode: CommandMode,
 	ul: Translation,
 	page: number,
@@ -137,7 +137,7 @@ export async function createPaginatedChannelModal(
 		forums: string[];
 	},
 	shortTitle?: string
-): Promise<{
+): {
 	modal: Djs.ModalBuilder;
 	hasMore: boolean;
 	pageItemIds: {
@@ -146,7 +146,7 @@ export async function createPaginatedChannelModal(
 		threads: string[];
 		forums: string[];
 	};
-}> {
+} {
 	const baseTitle = shortTitle ?? `${ul("common.channel")}/${ul("common.thread")}`;
 	const title = `${baseTitle} (P${page + 1})`.slice(0, 45);
 
