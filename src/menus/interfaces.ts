@@ -104,3 +104,23 @@ export type RoleInPaginationState = {
 };
 // Use an in-memory Enmap for roleIn pagination states (no name = no persistence)
 export const roleInStates = new Enmap<string, RoleInPaginationState>();
+
+export interface PaginatedChannelSelectorsOptions {
+	interaction: Djs.ChatInputCommandInteraction;
+	ul: Translation;
+	channelType: TChannel;
+	mode: CommandMode;
+	trackedIds: string[];
+	stateKeyPrefix: string;
+	modalLabel: string | undefined;
+	summaryPrefix: string;
+	onValidateCallback: (
+		buttonInteraction: Djs.ButtonInteraction | Djs.ModalSubmitInteraction,
+		userId: string,
+		guildID: string,
+		channelType: TChannel,
+		trackedIds: string[],
+		ul: Translation,
+		mode: CommandMode
+	) => Promise<void>;
+}

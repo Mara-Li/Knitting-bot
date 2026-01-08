@@ -2,7 +2,10 @@ import { TIMEOUT } from "../interface";
 import { discordLogs } from "../utils";
 import { createPaginationButtons, hasMorePages, startPaginatedButtonsFlow } from "./flow";
 import { validateAndSave } from "./handlers";
-import type { ChannelSelectorsForTypeOptions } from "./interfaces";
+import type {
+	ChannelSelectorsForTypeOptions,
+	PaginatedChannelSelectorsOptions,
+} from "./interfaces";
 import { getTrackedItems } from "./items";
 import { createFirstPageChannelModalByType } from "./modal";
 import { handleModalModifyGeneric, showPaginatedMessageGeneric } from "./paginated";
@@ -10,31 +13,35 @@ import { createPaginationState, deletePaginationState, paginateIds } from "./sta
 import { getTrackedIdsByType } from "./utils";
 
 /**
- * Handle channel selectors with pagination for follow/ignore commands
+ * Generic handler for paginated channel selectors
  */
-export async function channelSelectorsForType({
+export async function startPaginatedChannelSelectorsFlow({
 	interaction,
 	ul,
 	channelType,
 	mode,
-}: ChannelSelectorsForTypeOptions) {
+	trackedIds,
+	stateKeyPrefix,
+	modalLabel,
+	summaryPrefix,
+	onValidateCallback,
+}: PaginatedChannelSelectorsOptions) {
 	if (!interaction.guild) return;
 
 	const guildID = interaction.guild.id;
 	const userId = interaction.user.id;
 
-	const trackedItems = getTrackedItems(mode, guildID);
-
-	const trackedIds = getTrackedIdsByType(trackedItems, channelType);
 	const paginatedItems = paginateIds(trackedIds, 25);
 
-	const stateKey = `${userId}_${guildID}_${mode}_${channelType}`;
+	const stateKey = `${userId}_${guildID}_${stateKeyPrefix}`;
 	const state = createPaginationState(stateKey, trackedIds, paginatedItems);
+
 	if (trackedIds.length >= 25) {
 		const trackedOnFirstPage = paginatedItems[0]?.length ?? 0;
 		const hasMore = hasMorePages(paginatedItems, 0);
 		const buttons = createPaginationButtons(mode, 0, hasMore, ul);
-		const summary = `Page 1 - ${ul(`common.${channelType}`)} : ${trackedOnFirstPage} ${ul("common.elements")}`;
+		const summary = `Page 1 - ${summaryPrefix} : ${trackedOnFirstPage} ${ul("common.elements")}`;
+
 		await startPaginatedButtonsFlow(
 			{
 				initialComponents: buttons,
@@ -55,19 +62,23 @@ export async function channelSelectorsForType({
 				},
 				onEnd: async (buttonMessage) => {
 					deletePaginationState(stateKey);
-					await buttonMessage.edit({ components: [] });
+					try {
+						await buttonMessage.edit({ components: [] });
+					} catch (e) {
+						//safe to ignore
+					}
 				},
 				onModify: async (buttonInteraction, page) => {
 					await handleModalModifyGeneric({
 						channelType,
 						interaction: buttonInteraction,
-						modalLabel: undefined,
+						modalLabel,
 						mode,
 						page,
 						state,
 						stateKey,
 						summaryBuilder: (p, pageItemsCount) =>
-							`Page ${p + 1} - ${ul(`common.${channelType}`)} : ${pageItemsCount} ${ul("common.elements")}`,
+							`Page ${p + 1} - ${summaryPrefix} : ${pageItemsCount} ${ul("common.elements")}`,
 						ul,
 						userId,
 					});
@@ -80,12 +91,12 @@ export async function channelSelectorsForType({
 						page,
 						state,
 						summaryBuilder: (safePage, trackedOnThisPage) =>
-							`Page ${safePage + 1} - ${ul(`common.${channelType}`)} : ${trackedOnThisPage} ${ul("common.elements")}`,
+							`Page ${safePage + 1} - ${summaryPrefix} : ${trackedOnThisPage} ${ul("common.elements")}`,
 						ul,
 					});
 				},
 				onValidate: async (buttonInteraction) => {
-					await validateAndSave(
+					await onValidateCallback(
 						buttonInteraction,
 						userId,
 						guildID,
@@ -100,12 +111,13 @@ export async function channelSelectorsForType({
 
 		return;
 	}
+
 	const { modal } = createFirstPageChannelModalByType(
 		mode,
 		ul,
 		channelType,
 		paginatedItems[0] ?? [],
-		undefined
+		modalLabel
 	);
 
 	try {
@@ -127,7 +139,7 @@ export async function channelSelectorsForType({
 			state.selectedIds.add(id);
 		}
 
-		await validateAndSave(
+		await onValidateCallback(
 			modalSubmit,
 			userId,
 			guildID,
@@ -146,4 +158,33 @@ export async function channelSelectorsForType({
 		);
 		return;
 	}
+}
+
+/**
+ * Handle channel selectors with pagination for follow/ignore commands
+ */
+export async function channelSelectorsForType({
+	interaction,
+	ul,
+	channelType,
+	mode,
+}: ChannelSelectorsForTypeOptions) {
+	if (!interaction.guild) return;
+
+	const guildID = interaction.guild.id;
+
+	const trackedItems = getTrackedItems(mode, guildID);
+	const trackedIds = getTrackedIdsByType(trackedItems, channelType);
+
+	await startPaginatedChannelSelectorsFlow({
+		channelType,
+		interaction,
+		modalLabel: undefined,
+		mode,
+		onValidateCallback: validateAndSave,
+		stateKeyPrefix: `${mode}_${channelType}`,
+		summaryPrefix: ul(`common.${channelType}`),
+		trackedIds,
+		ul,
+	});
 }
