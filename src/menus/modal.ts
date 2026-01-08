@@ -237,7 +237,7 @@ export function createRoleSelectModal(
 		.setRequired(false);
 
 	const roleLabel = new Djs.LabelBuilder()
-		.setLabel(ul("common.role").toTitle?.() ?? ul("common.role"))
+		.setLabel(ul("common.role").toTitle())
 		.setRoleSelectMenuComponent(roleSelect);
 
 	modal.addLabelComponents(roleLabel);
