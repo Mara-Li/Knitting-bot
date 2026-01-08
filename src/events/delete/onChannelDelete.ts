@@ -6,6 +6,7 @@ import {
 	type NonThreadGuildBasedChannel,
 	type TextChannel,
 } from "discord.js";
+import type { RoleIn } from "../../interface";
 import {
 	deleteCachedMessage,
 	getMaps,
@@ -14,13 +15,42 @@ import {
 	setTrackedItem,
 } from "../../maps";
 
+function filterRoleInsByChannel(roleIns: RoleIn[], channelId: string) {
+	return roleIns
+		.map((roleIn) =>
+			roleIn.channelIds.includes(channelId)
+				? {
+						...roleIn,
+						channelIds: roleIn.channelIds.filter((id) => id !== channelId),
+					}
+				: roleIn
+		)
+		.filter((roleIn) => roleIn.channelIds.length > 0);
+}
+
+function cleanupChannelFromMaps(
+	channelId: string,
+	typeName: "channel" | "category" | "forum",
+	guildID: string
+) {
+	const allIgnore = getMaps("ignore", typeName, guildID);
+	const allFollow = getMaps("follow", typeName, guildID);
+
+	const filteredIgnore = allIgnore.filter((id) => id !== channelId);
+	const filteredFollow = allFollow.filter((id) => id !== channelId);
+
+	if (allIgnore.length !== filteredIgnore.length) {
+		setTrackedItem("ignore", typeName, guildID, filteredIgnore);
+	}
+	if (allFollow.length !== filteredFollow.length) {
+		setTrackedItem("follow", typeName, guildID, filteredFollow);
+	}
+}
 /**
- * @param {Client} client - Discord.js Client
  * @returns {void}
  * @description This is a listener for channel delete event.
  * It will delete the channel from the database.
  */
-
 export default (client: Client): void => {
 	client.on("channelDelete", async (channel) => {
 		if (channel instanceof DMChannel) return;
@@ -39,18 +69,12 @@ export default (client: Client): void => {
 		});
 
 		if (ignoredRoleIn) {
-			const updated = ignoredRoleIns.map((roleIn) => ({
-				...roleIn,
-				channelIds: roleIn.channelIds.filter((id) => id !== channel.id),
-			}));
+			const updated = filterRoleInsByChannel(ignoredRoleIns, channel.id);
 			setRoleIn("ignore", guildID, updated);
 		}
 
 		if (followedRoleIn) {
-			const updated = followedRoleIns.map((roleIn) => ({
-				...roleIn,
-				channelIds: roleIn.channelIds.filter((id) => id !== channel.id),
-			}));
+			const updated = filterRoleInsByChannel(followedRoleIns, channel.id);
 			setRoleIn("follow", guildID, updated);
 		}
 
@@ -68,34 +92,12 @@ export default (client: Client): void => {
 			/**
 			 * Remove the channel ID from the database "follow" and "ignore" maps
 			 */
-			const allIgnore = getMaps("ignore", "channel", guildID);
-			const allFollow = getMaps("follow", "channel", guildID);
-
-			const filteredIgnore = allIgnore.filter((id) => id !== channel.id);
-			const filteredFollow = allFollow.filter((id) => id !== channel.id);
-
-			if (allIgnore.length !== filteredIgnore.length) {
-				setTrackedItem("ignore", "channel", guildID, filteredIgnore);
-			}
-			if (allFollow.length !== filteredFollow.length) {
-				setTrackedItem("follow", "channel", guildID, filteredFollow);
-			}
+			cleanupChannelFromMaps(channel.id, "channel", guildID);
 		} else if (channelType === ChannelType.GuildCategory) {
 			/**
 			 * Remove the category ID from the database "follow" and "ignore" maps
 			 */
-			const allCategoryIgnore = getMaps("ignore", "category", guildID);
-			const allCategoryFollow = getMaps("follow", "category", guildID);
-
-			const filteredIgnore = allCategoryIgnore.filter((id) => id !== channel.id);
-			const filteredFollow = allCategoryFollow.filter((id) => id !== channel.id);
-
-			if (allCategoryIgnore.length !== filteredIgnore.length) {
-				setTrackedItem("ignore", "category", guildID, filteredIgnore);
-			}
-			if (allCategoryFollow.length !== filteredFollow.length) {
-				setTrackedItem("follow", "category", guildID, filteredFollow);
-			}
+			cleanupChannelFromMaps(channel.id, "category", guildID);
 		} else if (channelType === ChannelType.GuildForum) {
 			/**
 			 * Clean up message cache for all threads in this forum
@@ -108,18 +110,7 @@ export default (client: Client): void => {
 			/**
 			 * Remove the forum ID from the database "follow" and "ignore" maps
 			 */
-			const allForumIgnore = getMaps("ignore", "forum", guildID);
-			const allForumFollow = getMaps("follow", "forum", guildID);
-
-			const filteredIgnore = allForumIgnore.filter((id) => id !== channel.id);
-			const filteredFollow = allForumFollow.filter((id) => id !== channel.id);
-
-			if (allForumIgnore.length !== filteredIgnore.length) {
-				setTrackedItem("ignore", "forum", guildID, filteredIgnore);
-			}
-			if (allForumFollow.length !== filteredFollow.length) {
-				setTrackedItem("follow", "forum", guildID, filteredFollow);
-			}
+			cleanupChannelFromMaps(channel.id, "forum", guildID);
 		}
 	});
 };

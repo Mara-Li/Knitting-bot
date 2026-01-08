@@ -34,7 +34,6 @@ export async function validateAndSave(
 	if (!guild) return;
 
 	const finalIds = Array.from(state.selectedIds);
-	const messages: string[] = [];
 
 	const { finalChannelsResolved, originalChannelsResolved, typeName } = await resolveIds(
 		channelType,
@@ -64,12 +63,11 @@ export async function validateAndSave(
 		return;
 	}
 
-	buildChangeMessages(
+	const changeMessages = buildChangeMessages(
 		originalChannelsResolved,
 		finalChannelsResolved,
 		mode,
-		ul,
-		messages
+		ul
 	);
 
 	// Save the changes
@@ -81,8 +79,8 @@ export async function validateAndSave(
 	);
 
 	const finalMessage =
-		messages.length > 0
-			? ul("common.summary", { changes: `\n- ${messages.join("\n- ")}` })
+		changeMessages.length > 0
+			? ul("common.summary", { changes: `\n- ${changeMessages.join("\n- ")}` })
 			: ul("common.noChanges");
 
 	await respondInteraction(interaction, finalMessage, interaction.isModalSubmit());
@@ -166,9 +164,9 @@ function buildChangeMessages(
 		| Djs.ForumChannel
 	)[],
 	mode: CommandMode,
-	ul: Translation,
-	messages: string[]
-) {
+	ul: Translation
+): string[] {
+	const messages: string[] = [];
 	const oldIds = new Set(oldItems.map((ch) => ch.id));
 	const newIds = new Set(newItems.map((ch) => ch.id));
 
@@ -205,6 +203,8 @@ function buildChangeMessages(
 			);
 		}
 	}
+
+	return messages;
 }
 
 /**

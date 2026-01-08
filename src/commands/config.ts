@@ -12,7 +12,7 @@
  */
 import * as Djs from "discord.js";
 import { getUl, ln, t } from "../i18n";
-import {ConfigurationKey, ConfigurationKeys, Translation} from "../interface";
+import { type ConfigurationKey, ConfigurationKeys, type Translation } from "../interface";
 import { getConfig, getDefaultServerData, serverDataDb, setConfig } from "../maps";
 
 import "../discord_ext.js";
@@ -321,7 +321,11 @@ async function setupMessageCollector(
 			?.on("collect", async (i) => {
 				await i.deferUpdate();
 				if (ConfigurationKeys.includes(i.customId))
-					await updateConfig(i.customId as ConfigurationKey, i as Djs.ButtonInteraction, ul);
+					await updateConfig(
+						i.customId as ConfigurationKey,
+						i as Djs.ButtonInteraction,
+						ul
+					);
 			})
 			?.on("end", async () => {
 				await interaction.editReply({ components: [] });

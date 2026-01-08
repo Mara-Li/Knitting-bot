@@ -1,6 +1,5 @@
 import * as Djs from "discord.js";
-import type { TChannel } from "src/interface";
-import { TIMEOUT, type Translation } from "../interface";
+import { type TChannel, TIMEOUT, type Translation } from "../interface";
 import { createPaginationButtons, hasMorePages } from "./flow";
 import type { CommandMode, PaginatedIdsState } from "./interfaces";
 import { createFirstPageChannelModalByType } from "./modal";

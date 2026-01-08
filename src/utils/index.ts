@@ -7,7 +7,6 @@ import {
 	type TextThreadChannel,
 } from "discord.js";
 import Enmap from "enmap";
-import type {Configuration, ConfigurationKey} from "../interface";
 import { serverDataDb } from "../maps";
 import { addRoleAndUserToThread } from "./add";
 import { checkThread } from "./data_check";
@@ -172,8 +171,9 @@ export async function resolveChannelsByIds<T extends { type: number }>(
 
 		// If still missing and we need threads, fetch from archived
 		if (
-			(idSet.size > 0 && allowedTypes.includes(ChannelType.PublicThread)) ||
-			allowedTypes.includes(ChannelType.PrivateThread)
+			idSet.size > 0 &&
+			(allowedTypes.includes(ChannelType.PublicThread) ||
+				allowedTypes.includes(ChannelType.PrivateThread))
 		) {
 			try {
 				const archivedThreads = await fetchArchived(guild);
@@ -207,11 +207,4 @@ export async function updateThread(
 			console.warn(`[Channel Update] Failed to update thread ${thread.id}`, error);
 		}
 	}
-}
-
-function isKeyOf<T extends object>(
-  key: string,
-  keys: readonly (ConfigurationKey)[]
-): key is keyof Configuration {
-  return keys.includes(key as ConfigurationKey)
 }

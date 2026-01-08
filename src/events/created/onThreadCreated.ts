@@ -20,7 +20,16 @@ export default (client: Client): void => {
 		const ul = getTranslation(thread.guild.id, { locale: thread.guild.preferredLocale });
 		await discordLogs(guild, client, ul("logs.thread.created", { thread: thread.name }));
 		/** automatically add the bot to the thread */
-		await thread.join();
+		try {
+			await thread.join();
+		} catch (error) {
+			await discordLogs(
+				guild,
+				client,
+				ul("logs.thread.join_error", { error: String(error), thread: thread.name })
+			);
+			return;
+		}
 		/**
 		 * Update the cache
 		 */

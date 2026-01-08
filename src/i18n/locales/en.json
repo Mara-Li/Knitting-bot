@@ -127,7 +127,7 @@
 			"response": {
 				"custom": "The message `{{- message}}` will be sent as a placeholder.",
 				"default": "The message `_ _` will be used.",
-				"error": "Empty string are not supported."
+				"error": "Empty strings are not supported."
 			}
 		},
 		"newMember": {
@@ -245,7 +245,8 @@
 			}
 		},
 		"thread": {
-			"created": "Thread {{- thread}} created!"
+			"created": "Thread {{- thread}} created!",
+			"join_error": "The bot can't join <#{{- id}}>:\n```\n{{- error}}\n```"
 		},
 		"updated": {
 			"channel": "Updating {{- number}} threads of {{- child}}"

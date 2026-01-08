@@ -2,8 +2,9 @@ import type { CommandInteractionOptionResolver } from "discord.js";
 import * as Djs from "discord.js";
 import { getUl, t } from "../i18n";
 import { type RoleIn, type TChannel, TIMEOUT, type Translation } from "../interface";
-import { getConfig, getRoleIn, setRoleIn } from "../maps";
+import { getRoleIn, setRoleIn } from "../maps";
 import { resolveChannelsByIds } from "../utils";
+import { checkRoleInConstraints } from "./handlers";
 import {
 	type CommandMode,
 	type RoleInPaginationState,
@@ -411,10 +412,9 @@ async function validateRoleInSelection(
 	ul: ReturnType<typeof getUl>
 ) {
 	const userId = interaction.user.id;
-	const guildID = interaction.guild?.id;
-	if (!guildID) return;
 	const guild = interaction.guild;
 	if (!guild) return;
+	const guildID = guild.id;
 
 	const state = getRoleInState(userId, guildID, on, roleId);
 	if (!state) {
@@ -513,18 +513,8 @@ export async function interactionRoleInChannel(
 	const guildID = interaction.guild.id;
 	const ul = getUl(interaction);
 
-	if (
-		on === "follow" &&
-		(getConfig("followOnlyChannel", guildID) || getConfig("followOnlyRole", guildID))
-	) {
-		await interaction.reply({ content: ul("roleIn.error.otherMode") as string });
-		return;
-	}
-
-	if (!getConfig("followOnlyRoleIn", guildID) && on === "follow") {
-		await interaction.reply({ content: ul("roleIn.error.need") as string });
-		return;
-	}
+	const isAllowed = await checkRoleInConstraints(interaction, guildID, on, ul);
+	if (!isAllowed) return;
 
 	const roleOpt = interaction.options.get(t("common.role").toLowerCase());
 	if (!roleOpt || !roleOpt.role) {

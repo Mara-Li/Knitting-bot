@@ -232,7 +232,7 @@
 	},
 	"logs": {
 		"channelUpdate": {
-			"category": "Mise-à-jour {{- nb}} fils à travers {{- length}} channels :"
+			"category": "Mise-à-jour {{- nb}} fils à travers {{- nbChan}} channels :"
 		},
 		"errors": {
 			"modalInteractionFailed": "Erreur lors de la validation du modal :\n{{- error}}"
@@ -245,7 +245,8 @@
 			}
 		},
 		"thread": {
-			"created": "Le thread {{- thread}} a été créé !"
+			"created": "Le thread {{- thread}} a été créé !",
+			"join_error": "Le bot ne peut pas rejoindre <#{{- id}}> : \n```\n{{- error}}\n```"
 		},
 		"updated": {
 			"channel": "Mise à jour de {{- number}} threads de {{- child}}"

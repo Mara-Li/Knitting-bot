@@ -24,8 +24,6 @@ export interface Configuration {
 
 export type ConfigurationKey = keyof Configuration;
 
-
-
 export interface IgnoreFollow {
 	thread: string[];
 	role: string[];
@@ -50,7 +48,7 @@ export const DEFAULT_CONFIGURATION: Configuration = {
 	onNewMember: false,
 	onThreadCreated: false,
 	pin: false,
-}
+};
 
 export const ConfigurationKeys = Object.keys(DEFAULT_CONFIGURATION);
 

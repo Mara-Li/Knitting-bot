@@ -81,8 +81,7 @@ export async function addUserToThread(thread: ThreadChannel, user: GuildMember) 
 
 	try {
 		const message = await fetchMessage(thread);
-		await message.edit(userMention(user.id));
-		await message.edit(emoji);
+		await message.edit(`${userMention(user.id)} ${emoji}`);
 		await discordLogs(
 			guild,
 			thread.client,
@@ -363,7 +362,6 @@ async function fetchFirstMessage(
 	thread: ThreadChannel
 ): Promise<Message | undefined | null> {
 	const pin = getPinSetting(thread.guild.id);
-	console.log("Pin is:", pin);
 	if (pin) {
 		//fetch pinned messages
 		const pinnedMessages = thread.messages.cache.filter((m) => m.pinned);
@@ -386,7 +384,13 @@ async function sendAndPin(thread: ThreadChannel): Promise<Message> {
 		content: messageToSend,
 		flags: MessageFlags.SuppressNotifications,
 	});
-	if (toPin) await message.pin();
+	if (toPin) {
+		try {
+			await message.pin();
+		} catch {
+			//continue we should be able to continue even if pin fails as it is not critical
+		}
+	}
 
 	return message;
 }
@@ -402,9 +406,11 @@ async function fetchMessage(thread: ThreadChannel): Promise<Message> {
 			const shouldBePinned = getPinSetting(guildId);
 			if (shouldBePinned && !message.pinned) await message.pin();
 			return message;
-		} catch {
-			// Message deleted, clear cache
-			deleteCachedMessage(guildId, thread.id);
+		} catch (e) {
+			//only pin error can allow to continue, other should delete the cached message
+			if (e instanceof DiscordAPIError && e.code !== 30003)
+				deleteCachedMessage(guildId, thread.id);
+			
 		}
 	}
 
