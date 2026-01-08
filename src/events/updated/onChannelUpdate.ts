@@ -45,15 +45,6 @@ export default (client: Client): void => {
 				if (child.type === ChannelType.GuildText) {
 					const threads = (child as TextChannel).threads.cache;
 					if (threads.size > 0)
-						await discordLogs(
-							guild,
-							client,
-							ul("logs.updated.channel", {
-								child: child.name,
-								number: threads.size,
-							})
-						);
-
 					await Promise.all(
 						threads.map(async (thread) => {
 							await updateThread(followOnlyChannelEnabled, thread);
@@ -65,16 +56,6 @@ export default (client: Client): void => {
 			const newTextChannel = newChannel as TextChannel;
 			const threads = newTextChannel.threads.cache;
 			if (threads.size === 0) return;
-
-			await discordLogs(
-				guild,
-				client,
-				ul("logs.updated.channel", {
-					child: newTextChannel.name,
-					number: threads.size,
-				})
-			);
-
 			await Promise.all(
 				threads.map(async (thread) => {
 					await updateThread(followOnlyChannelEnabled, thread);
