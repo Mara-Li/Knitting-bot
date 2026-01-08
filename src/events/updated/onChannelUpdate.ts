@@ -1,7 +1,7 @@
 import { ChannelType, type Client, type TextChannel } from "discord.js";
 import { getTranslation } from "../../i18n";
 import { getConfig } from "../../maps";
-import { discordLogs, updateThread } from "../../utils";
+import {discordLogs, updateThread} from "../../utils";
 import { validateChannelType } from "../../utils/data_check";
 
 /**
@@ -40,17 +40,28 @@ export default (client: Client): void => {
 			//get all threads of the channels in the category
 			const children = newChannel.children.cache;
 			if (children.size === 0) return;
-
+			let totalThreads = 0;
+			const childrenWithThreads: string[] = [];
 			for (const child of children.values()) {
 				if (child.type === ChannelType.GuildText) {
 					const threads = (child as TextChannel).threads.cache;
-					if (threads.size > 0)
+					if (threads.size > 0) {
+						totalThreads += threads.size;
+						childrenWithThreads.push(`<#${child.id}>`);
+					}
 					await Promise.all(
 						threads.map(async (thread) => {
 							await updateThread(followOnlyChannelEnabled, thread);
 						})
 					);
 				}
+			}
+			if (totalThreads > 0) {
+				await discordLogs(guild, client, ul("logs.channelUpdate.category", {
+					nb: totalThreads,
+					nbChan: childrenWithThreads.length,
+					channelList: `\n- ${childrenWithThreads.join("\n- ")}`,
+				}));
 			}
 		} else {
 			const newTextChannel = newChannel as TextChannel;

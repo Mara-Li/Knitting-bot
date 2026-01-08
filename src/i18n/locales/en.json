@@ -231,6 +231,9 @@
     "title": "Information"
   },
   "logs": {
+    "channelUpdate": {
+      "category": "Updated {{- nb}} threads accross {{- nbChan}} channels:"
+    },
     "errors": {
       "modalInteractionFailed": "Error during modal submission:\n{{- error}}"
     },

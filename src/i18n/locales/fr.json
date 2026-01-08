@@ -231,6 +231,9 @@
     "title": "Information"
   },
   "logs": {
+    "channelUpdate": {
+      "category": "Mise-à-jour {{- nb}} fils à travers {{- length}} channels :"
+    },
     "errors": {
       "modalInteractionFailed": "Erreur lors de la validation du modal :\n{{- error}}"
     },
