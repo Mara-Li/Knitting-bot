@@ -40,7 +40,6 @@
 		"i18next": "^25.7.3",
 		"load-tsconfig": "^0.2.5",
 		"readline-sync": "^1.4.10",
-		"ts-dedent": "^2.2.0",
 		"uniformize": "^2.5.0"
 	},
 	"devDependencies": {
