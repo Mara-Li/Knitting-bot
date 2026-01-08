@@ -16,6 +16,9 @@ export function getPaginationState(
 	let state = paginationStates.get(key);
 
 	if (!state) {
+		// Lazily start the cleanup interval on first state creation
+		startCleanupIntervalIfNeeded();
+
 		state = {
 			currentPage: 0,
 			guildId,
@@ -48,6 +51,9 @@ export function initializePaginationState(
 		forums: string[];
 	}
 ): UserGuildPaginationState {
+	// Lazily start the cleanup interval on first state creation
+	startCleanupIntervalIfNeeded();
+
 	const key = `${userId}_${guildId}_${mode}`;
 	const state: UserGuildPaginationState = {
 		currentPage: 0,
@@ -155,11 +161,18 @@ export function cleanupOldStates(): void {
 	}
 }
 
-// Auto-cleanup toutes les 15 minutes
-let cleanupIntervalId: NodeJS.Timeout | null = setInterval(
-	cleanupOldStates,
-	15 * 60 * 1000
-);
+// Cleanup interval ID - starts lazily on first state creation
+let cleanupIntervalId: NodeJS.Timeout | null = null;
+
+/**
+ * Start the cleanup interval lazily on first pagination state creation
+ * This avoids running cleanup when no states are ever created
+ */
+function startCleanupIntervalIfNeeded(): void {
+	if (cleanupIntervalId === null) {
+		cleanupIntervalId = setInterval(cleanupOldStates, 15 * 60 * 1000);
+	}
+}
 
 /**
  * Stop the automatic cleanup interval
