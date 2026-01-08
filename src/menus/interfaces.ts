@@ -54,40 +54,6 @@ export const globalPaginationStates = new Enmap<string, PaginatedIdsState>();
 export const messageToStateKey = new Enmap<string, string>();
 
 /**
- * Persistent per-user-per-guild selection state.
- *
- * Lifecycle & usage:
- * - Intended to persist a user's multi-step selection within a guild across
- *   multiple paginated interactions. Keyed by `userId_guildId_mode` and stored in
- *   `paginationStates` so the selection can survive opening/closing of paginated
- *   messages within the same logical flow.
- * - Cleanup is performed based on `timestamp` (see `CLEANUP_TIMEOUT`). This state
- *   is not meant to be long-term storage, but rather a short-lived session store
- *   scoped to a user + guild + command mode.
- *
- * Data shape notes:
- * - Uses typed Sets (`selectedCategories`, `selectedChannels`, etc.) when the
- *   flow needs to distinguish types of selections. This prevents id collisions
- *   and makes intent explicit (e.g., a category id vs a channel id).
- * - Use `UserGuildPaginationState` when a flow requires preserving typed
- *   selections across interactions. Use `PaginatedIdsState.selectedIds` when the
- *   paginated content is homogeneous and a single Set of ids is sufficient.
- */
-export interface UserGuildPaginationState {
-	userId: string;
-	guildId: string;
-	mode: "follow" | "ignore";
-	currentPage: number;
-	selectedCategories: Set<string>;
-	selectedChannels: Set<string>;
-	selectedThreads: Set<string>;
-	selectedForums: Set<string>;
-	timestamp: number; // Automatic cleanup
-}
-
-export const paginationStates = new Enmap<string, UserGuildPaginationState>();
-
-/**
  * Follow or ignore roles in specific channels using a modal
  * @param on {"follow" | "ignore"} The mode to use
  */

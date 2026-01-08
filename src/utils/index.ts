@@ -7,6 +7,7 @@ import {
 	type TextThreadChannel,
 } from "discord.js";
 import Enmap from "enmap";
+import type {Configuration, ConfigurationKey} from "../interface";
 import { serverDataDb } from "../maps";
 import { addRoleAndUserToThread } from "./add";
 import { checkThread } from "./data_check";
@@ -206,4 +207,11 @@ export async function updateThread(
 			console.warn(`[Channel Update] Failed to update thread ${thread.id}`, error);
 		}
 	}
+}
+
+function isKeyOf<T extends object>(
+  key: string,
+  keys: readonly (ConfigurationKey)[]
+): key is keyof Configuration {
+  return keys.includes(key as ConfigurationKey)
 }

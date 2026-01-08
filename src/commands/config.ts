@@ -12,7 +12,7 @@
  */
 import * as Djs from "discord.js";
 import { getUl, ln, t } from "../i18n";
-import type { ConfigurationKey, Translation } from "../interface";
+import {ConfigurationKey, ConfigurationKeys, Translation} from "../interface";
 import { getConfig, getDefaultServerData, serverDataDb, setConfig } from "../maps";
 
 import "../discord_ext.js";
@@ -320,7 +320,8 @@ async function setupMessageCollector(
 			.createMessageComponentCollector({ filter, time: 60000 })
 			?.on("collect", async (i) => {
 				await i.deferUpdate();
-				await updateConfig(i.customId, i as Djs.ButtonInteraction, ul);
+				if (ConfigurationKeys.includes(i.customId))
+					await updateConfig(i.customId as ConfigurationKey, i as Djs.ButtonInteraction, ul);
 			})
 			?.on("end", async () => {
 				await interaction.editReply({ components: [] });
@@ -520,11 +521,7 @@ function reloadButtonMode(guildID: string, ul: Translation) {
 	};
 
 	const buttons: Djs.ButtonBuilder[] = [];
-	for (const command of [
-		"followOnlyRoleIn",
-		"followOnlyRole",
-		"followOnlyChannel",
-	].values()) {
+	for (const command of ConfigurationKeys as ConfigurationKey[]) {
 		buttons.push(
 			createButton(command, labelButton(command, translation, guildID, ul), guildID)
 		);
@@ -600,13 +597,7 @@ function reloadButtonAuto(guildID: string, ul: Translation) {
 		thread: ul("configuration.thread.name"),
 	};
 	const buttons: Djs.ButtonBuilder[] = [];
-	for (const command of [
-		"manualMode",
-		"channel",
-		"member",
-		"newMember",
-		"thread",
-	].values()) {
+	for (const command of ConfigurationKeys as ConfigurationKey[]) {
 		buttons.push(
 			createButton(command, labelButton(command, translation, guildID, ul), guildID)
 		);

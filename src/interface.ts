@@ -19,11 +19,12 @@ export interface Configuration {
 	language: Locale;
 	pin: boolean;
 	messageToSend: string;
-	[key: string]: boolean | string;
 	log: boolean | string;
 }
 
 export type ConfigurationKey = keyof Configuration;
+
+
 
 export interface IgnoreFollow {
 	thread: string[];
@@ -49,7 +50,9 @@ export const DEFAULT_CONFIGURATION: Configuration = {
 	onNewMember: false,
 	onThreadCreated: false,
 	pin: false,
-};
+}
+
+export const ConfigurationKeys = Object.keys(DEFAULT_CONFIGURATION);
 
 export const DEFAULT_IGNORE_FOLLOW: IgnoreFollow = {
 	category: [],

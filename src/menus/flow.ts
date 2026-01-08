@@ -108,22 +108,8 @@ export async function startPaginatedButtonsFlow(
 
 		// Call onEnd if provided so caller can cleanup state and remove components
 		try {
-			if (handlers.onEnd) {
-				try {
-					await handlers.onEnd(buttonMessage);
-				} catch (e) {
-					console.warn("Error in onEnd handler for paginated flow:", e);
-				}
-			} else {
-				// Default: remove components to disable buttons
-				try {
-					await (buttonMessage as Djs.Message)
-						.edit({ components: [] })
-						.catch(() => undefined);
-				} catch (e) {
-					/* noop */
-				}
-			}
+			if (handlers.onEnd) await handlers.onEnd(buttonMessage);
+			else await buttonMessage.edit({ components: [] });
 		} catch (e) {
 			console.error("Error in onEnd handler for paginated flow:", e);
 		}

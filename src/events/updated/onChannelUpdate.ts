@@ -75,9 +75,7 @@ export default (client: Client): void => {
 			const threads = newTextChannel.threads.cache;
 			if (threads.size === 0) return;
 			await Promise.allSettled(
-				threads.map(async (thread) => {
-					await updateThread(followOnlyChannelEnabled, thread);
-				})
+				threads.map((thread) => updateThread(followOnlyChannelEnabled, thread))
 			);
 		}
 	});
