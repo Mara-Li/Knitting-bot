@@ -1,4 +1,4 @@
-import * as process from "node:process";
+import process from "node:process";
 import { Client, GatewayIntentBits, Partials } from "discord.js";
 import dotenv from "dotenv";
 import * as pkg from "../package.json" with { type: "json" };
@@ -81,7 +81,8 @@ function cleanup() {
 process.on("SIGTERM", () => {
 	console.log("SIGTERM received, shutting down gracefully...");
 	cleanup();
-	client.destroy()
+	client
+		.destroy()
 		.catch((err) => console.error("Error destroying client:", err))
 		.finally(() => process.exit(0));
 });
@@ -89,7 +90,8 @@ process.on("SIGTERM", () => {
 process.on("SIGINT", () => {
 	console.log("SIGINT received, shutting down gracefully...");
 	cleanup();
-	client.destroy()
+	client
+		.destroy()
 		.catch((err) => console.error("Error destroying client:", err))
 		.finally(() => process.exit(0));
 });
