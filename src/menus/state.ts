@@ -1,5 +1,4 @@
 import {
-	DEFAULT_TTL_MS,
 	globalPaginationStates,
 	messageToStateKey,
 	type PaginatedIdsState,
@@ -25,40 +24,22 @@ export function createPaginationState(
 	originalIds: string[],
 	paginatedItems: Record<number, string[]>
 ): PaginatedIdsState {
-	const ttl = DEFAULT_TTL_MS;
 	const state: PaginatedIdsState = {
 		currentPage: 0,
-		expiresAt: Date.now() + ttl,
 		originalIds,
 		paginatedItems,
 		selectedIds: new Set(originalIds),
-		ttlMs: ttl,
 	};
 	globalPaginationStates.set(key, state);
 	return state;
 }
 
 export function getPaginationState(key: string): PaginatedIdsState | undefined {
-	const state = globalPaginationStates.get(key);
-	if (!state) return undefined;
-	const now = Date.now();
-	if (state.expiresAt && state.expiresAt <= now) {
-		// expired
-		globalPaginationStates.delete(key);
-		// cleanup message mappings referencing this state
-		for (const [msgId, mapping] of messageToStateKey.entries()) {
-			if (mapping.stateKey === key) messageToStateKey.delete(msgId);
-		}
-		return undefined;
-	}
-	// sliding expiration: extend on access
-	if (state.ttlMs) state.expiresAt = Date.now() + state.ttlMs;
-	globalPaginationStates.set(key, state);
-	return state;
+	return globalPaginationStates.get(key);
 }
 
 export function deletePaginationState(key: string): void {
 	globalPaginationStates.delete(key);
-	for (const [msgId, mapping] of messageToStateKey.entries())
-		if (mapping.stateKey === key) messageToStateKey.delete(msgId);
+	for (const [msgId, stateKey] of messageToStateKey.entries())
+		if (stateKey === key) messageToStateKey.delete(msgId);
 }

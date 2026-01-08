@@ -25,8 +25,7 @@ export type ChannelSelectorsForTypeOptions = {
  * - Created for a single interactive pagination session (usually tied to a message
  *   or interaction). Stored in `globalPaginationStates` and referenced from
  *   `messageToStateKey` so message button interactions can resolve the state.
- * - TTL fields (`ttlMs` / `expiresAt`) are managed by the pagination system and
- *   the state is expected to be swept/removed when expired.
+ * - Cleaned up automatically when the message collector ends (timeout or stop).
  *
  * Data shape notes:
  * - `originalIds` keeps the canonical ordered list of ids used to build pages.
@@ -39,9 +38,6 @@ export type PaginatedIdsState = {
 	originalIds: string[];
 	paginatedItems: Record<number, string[]>;
 	selectedIds: Set<string>;
-	// Optional TTL fields managed by the pagination system
-	ttlMs?: number;
-	expiresAt?: number;
 };
 
 export type PaginatedHandlers = {
@@ -56,12 +52,8 @@ export type PaginatedHandlers = {
 export const globalPaginationStates = new Enmap<string, PaginatedIdsState>();
 
 // Message ID -> state key mapping
-export const messageToStateKey = new Enmap<
-	string,
-	{ stateKey: string; expiresAt?: number }
->();
+export const messageToStateKey = new Enmap<string, string>();
 
-export const DEFAULT_TTL_MS = 15 * 60 * 1000; // 15 minutes
 /**
  * Persistent per-user-per-guild selection state.
  *
@@ -95,7 +87,6 @@ export interface UserGuildPaginationState {
 }
 
 export const paginationStates = new Enmap<string, UserGuildPaginationState>();
-
 
 /**
  * Follow or ignore roles in specific channels using a modal

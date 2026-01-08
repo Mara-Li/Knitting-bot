@@ -43,12 +43,8 @@ export async function startPaginatedButtonsFlow(
 
 	const buttonMessage = await interaction.fetchReply();
 	if (stateKey && buttonMessage.id) {
-		// link the message ID to the state key and mirror the state's expiration if present
-		const state = getPaginationState(stateKey);
-		messageToStateKey.set(buttonMessage.id, {
-			expiresAt: state?.expiresAt,
-			stateKey,
-		});
+		// link the message ID to the state key
+		messageToStateKey.set(buttonMessage.id, stateKey);
 	}
 
 	const collector = buttonMessage.createMessageComponentCollector({
@@ -67,8 +63,7 @@ export async function startPaginatedButtonsFlow(
 
 			// try to find linked state
 			const msgId = (buttonInteraction.message as Djs.Message).id;
-			const linkedStateKey = messageToStateKey.get(msgId)?.stateKey;
-			// use getPaginationState to respect TTL and sliding expiration
+			const linkedStateKey = messageToStateKey.get(msgId);
 			const linkedState = linkedStateKey ? getPaginationState(linkedStateKey) : undefined;
 
 			if (customId.startsWith("page_modify_") || customId.includes("_page_modify_")) {
