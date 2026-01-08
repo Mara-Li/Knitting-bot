@@ -81,13 +81,15 @@ function cleanup() {
 process.on("SIGTERM", () => {
 	console.log("SIGTERM received, shutting down gracefully...");
 	cleanup();
-	client.destroy().then();
-	process.exit(0);
+	client.destroy()
+		.catch((err) => console.error("Error destroying client:", err))
+		.finally(() => process.exit(0));
 });
 
 process.on("SIGINT", () => {
 	console.log("SIGINT received, shutting down gracefully...");
 	cleanup();
-	client.destroy().then();
-	process.exit(0);
+	client.destroy()
+		.catch((err) => console.error("Error destroying client:", err))
+		.finally(() => process.exit(0));
 });
