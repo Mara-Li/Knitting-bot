@@ -5,7 +5,7 @@ import { type RoleIn, type TChannel, TIMEOUT, type Translation } from "../interf
 import { getConfig, getRoleIn, setRoleIn } from "../maps";
 import { resolveChannelsByIds } from "../utils";
 import {
-	type RoleInMode,
+	type CommandMode,
 	type RoleInPaginationState,
 	roleInStates,
 	type TrackedItems,
@@ -24,17 +24,14 @@ export function extractAndValidateRoleOption(options: CommandInteractionOptionRe
 	return roleOpt.role.id;
 }
 
-// TTL defaults
-const DEFAULT_ROLEIN_TTL_MS = 15 * 60 * 1000; // 15 minutes
-
-function roleInKey(userId: string, guildId: string, mode: RoleInMode, roleId: string) {
+function roleInKey(userId: string, guildId: string, mode: CommandMode, roleId: string) {
 	return `${userId}_${guildId}_${mode}_${roleId}`;
 }
 
 function initRoleInState(
 	userId: string,
 	guildId: string,
-	mode: RoleInMode,
+	mode: CommandMode,
 	roleId: string,
 	initialChannels: (
 		| Djs.CategoryChannel
@@ -44,10 +41,8 @@ function initRoleInState(
 	)[]
 ): RoleInPaginationState {
 	const key = roleInKey(userId, guildId, mode, roleId);
-	const ttl = DEFAULT_ROLEIN_TTL_MS;
 	const state: RoleInPaginationState = {
 		currentPage: 0,
-		expiresAt: Date.now() + ttl,
 		guildId,
 		mode,
 		roleId,
@@ -73,7 +68,6 @@ function initRoleInState(
 				)
 				.map((c) => c.id)
 		),
-		ttlMs: ttl,
 		userId,
 	};
 	roleInStates.set(key, state);
@@ -83,34 +77,24 @@ function initRoleInState(
 function getRoleInState(
 	userId: string,
 	guildId: string,
-	mode: RoleInMode,
+	mode: CommandMode,
 	roleId: string
 ): RoleInPaginationState | undefined {
 	const key = roleInKey(userId, guildId, mode, roleId);
-	const state = roleInStates.get(key);
-	if (!state) return undefined;
-	const now = Date.now();
-	if (state.expiresAt && state.expiresAt <= now) {
-		// expired
-		roleInStates.delete(key);
-		return undefined;
-	}
-	// sliding expiration: extend on access
-	if (state.ttlMs) state.expiresAt = Date.now() + state.ttlMs;
-	return state;
+	return roleInStates.get(key);
 }
 
 function clearRoleInState(
 	userId: string,
 	guildId: string,
-	mode: RoleInMode,
+	mode: CommandMode,
 	roleId: string
 ) {
 	roleInStates.delete(roleInKey(userId, guildId, mode, roleId));
 }
 
 function buildRoleInButtons(
-	on: RoleInMode,
+	on: CommandMode,
 	page: number,
 	hasMore: boolean,
 	roleId: string,
@@ -191,7 +175,7 @@ function resolveInitialChannels(
 function loadOrCreateRoleInState(
 	userId: string,
 	guildID: string,
-	on: RoleInMode,
+	on: CommandMode,
 	roleId: string,
 	guild: NonNullable<Djs.ChatInputCommandInteraction["guild"]>,
 	page: number
@@ -377,7 +361,7 @@ async function showRoleInPaginatedModal(
 	roleId: string,
 	page: number,
 	ul: ReturnType<typeof getUl>,
-	on: RoleInMode
+	on: CommandMode
 ) {
 	const state = loadOrCreateRoleInState(userId, guildID, on, roleId, guild, page);
 	const selectedIds = collectCurrentSelections(state);
@@ -421,7 +405,7 @@ async function showRoleInPaginatedModal(
 
 async function validateRoleInSelection(
 	interaction: Djs.ButtonInteraction,
-	on: RoleInMode,
+	on: CommandMode,
 	roleId: string,
 	ul: ReturnType<typeof getUl>
 ) {
@@ -522,7 +506,7 @@ async function validateRoleInSelection(
 
 export async function interactionRoleInChannel(
 	interaction: Djs.ChatInputCommandInteraction,
-	on: RoleInMode
+	on: CommandMode
 ) {
 	if (!interaction.guild) return;
 	const guildID = interaction.guild.id;

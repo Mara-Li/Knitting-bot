@@ -96,24 +96,21 @@ export interface UserGuildPaginationState {
 
 export const paginationStates = new Enmap<string, UserGuildPaginationState>();
 
+
 /**
  * Follow or ignore roles in specific channels using a modal
  * @param on {"follow" | "ignore"} The mode to use
  */
-export type RoleInMode = "follow" | "ignore";
 export type RoleInPaginationState = {
 	userId: string;
 	guildId: string;
-	mode: RoleInMode;
+	mode: CommandMode;
 	roleId: string;
 	currentPage: number;
 	selectedCategories: Set<string>;
 	selectedChannels: Set<string>;
 	selectedThreads: Set<string>;
 	selectedForums: Set<string>;
-	// Optional TTL fields managed by the role-in pagination system
-	ttlMs?: number;
-	expiresAt?: number;
 };
 // Use an in-memory Enmap for roleIn pagination states (no name = no persistence)
 export const roleInStates = new Enmap<string, RoleInPaginationState>();

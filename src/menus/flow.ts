@@ -56,6 +56,7 @@ export function getPaginationState(key: string): PaginatedIdsState | undefined {
 	}
 	// sliding expiration: extend on access
 	if (state.ttlMs) state.expiresAt = Date.now() + state.ttlMs;
+	globalPaginationStates.set(key, state);
 	return state;
 }
 
@@ -173,10 +174,12 @@ export async function startPaginatedButtonsFlow(
 	});
 
 	collector.on("end", async () => {
-		// cleanup mapping
+		// cleanup mapping and state
 		try {
 			const id = (buttonMessage as Djs.Message).id;
 			if (messageToStateKey.has(id)) messageToStateKey.delete(id);
+			// Auto-cleanup the state when collector ends (timeout or stop)
+			if (stateKey) deletePaginationState(stateKey);
 		} catch (e) {
 			/* noop */
 		}
