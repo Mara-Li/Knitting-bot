@@ -9,6 +9,7 @@ import {
 
 export default (client: Client): void => {
 	client.on("threadDelete", async (thread) => {
+		console.info(`Thread deleted: ${thread.id}`);
 		const guildID = thread.guild.id;
 
 		// Clean up message cache for this thread
