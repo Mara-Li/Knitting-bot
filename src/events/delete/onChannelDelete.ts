@@ -17,14 +17,13 @@ import {
 
 function filterRoleInsByChannel(roleIns: RoleIn[], channelId: string) {
 	return roleIns
-		.map((roleIn) =>
-			roleIn.channelIds.includes(channelId)
-				? {
-						...roleIn,
-						channelIds: roleIn.channelIds.filter((id) => id !== channelId),
-					}
-				: roleIn
-		)
+		.map((roleIn) => {
+			if (!roleIn.channelIds.includes(channelId)) return roleIn;
+			return {
+				...roleIn,
+				channelIds: roleIn.channelIds.filter((id) => id !== channelId),
+			};
+		})
 		.filter((roleIn) => roleIn.channelIds.length > 0);
 }
 
@@ -61,19 +60,19 @@ export default (client: Client): void => {
 		const ignoredRoleIns = getRoleIn("ignore", guildID);
 		const followedRoleIns = getRoleIn("follow", guildID);
 
-		const ignoredRoleIn = ignoredRoleIns.some((ignored) => {
+		const hasIgnoredRoleIn = ignoredRoleIns.some((ignored) => {
 			return ignored.channelIds.includes(channel.id);
 		});
-		const followedRoleIn = followedRoleIns.some((followed) => {
+		const hasFollowedRoleIn = followedRoleIns.some((followed) => {
 			return followed.channelIds.includes(channel.id);
 		});
 
-		if (ignoredRoleIn) {
+		if (hasIgnoredRoleIn) {
 			const updated = filterRoleInsByChannel(ignoredRoleIns, channel.id);
 			setRoleIn("ignore", guildID, updated);
 		}
 
-		if (followedRoleIn) {
+		if (hasFollowedRoleIn) {
 			const updated = filterRoleInsByChannel(followedRoleIns, channel.id);
 			setRoleIn("follow", guildID, updated);
 		}
