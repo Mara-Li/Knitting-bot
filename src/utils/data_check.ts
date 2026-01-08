@@ -7,7 +7,6 @@ import {
 	type Role,
 	type TextChannel,
 	type ThreadChannel,
-	type ThreadMember,
 } from "discord.js";
 import { getConfig, getMaps, getRole, getRoleIn } from "../maps";
 
@@ -32,21 +31,27 @@ export function validateChannelType(channel: GuildBasedChannel): boolean {
 }
 
 /**
- * Check if a user is not in the thread
- * Return true if the user is not in the thread
+ * Check if a user is in the thread
+ * Return true if the user is in the thread
  * @param {ThreadChannel} thread - The thread to check
  * @param {GuildMember} memberToCheck - The member to check
  */
-export async function checkIfUserNotInTheThread(
+export async function isUserInThread(
 	thread: ThreadChannel,
 	memberToCheck: GuildMember
-) {
-	const members = thread.members.cache;
-	const threadMemberArray: ThreadMember[] = [];
-	members.forEach((member) => {
-		threadMemberArray.push(member);
-	});
-	return !threadMemberArray.some((member) => member.id === memberToCheck.id);
+): Promise<boolean> {
+	// Fast path: if the thread member is cached, we know they're in the thread
+	if (thread.members.cache.has(memberToCheck.id)) return true;
+
+	// If not cached, try to fetch the member from the thread. If fetch succeeds,
+	// the user is in the thread; if it rejects, the user is not in it.
+	try {
+		await thread.members.fetch(memberToCheck.id);
+		return true;
+	} catch (err) {
+		// fetch throws when the member isn't part of the thread or on other errors
+		return false;
+	}
 }
 
 /**

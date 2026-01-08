@@ -1,12 +1,4 @@
-import {
-	DiscordAPIError,
-	type GuildMember,
-	type Message,
-	MessageFlags,
-	type Role,
-	type ThreadChannel,
-	userMention,
-} from "discord.js";
+import * as Djs from "discord.js";
 import { getTranslation } from "../i18n";
 import { EMOJI } from "../index";
 import {
@@ -18,12 +10,12 @@ import {
 	setCachedMessage,
 } from "../maps";
 import {
-	checkIfUserNotInTheThread,
 	checkMemberRole,
 	checkMemberRoleIn,
 	checkRole,
 	checkRoleIn,
 	getMemberPermission,
+	isUserInThread,
 } from "./data_check";
 import { discordLogs } from "./index";
 
@@ -35,17 +27,15 @@ import { discordLogs } from "./index";
  * @returns true if user should be added
  */
 function shouldAddUserToThread(
-	user: GuildMember,
-	thread: ThreadChannel,
+	user: Djs.GuildMember,
+	thread: Djs.ThreadChannel,
 	guild: string
 ): boolean {
 	const followOnlyRoleIn = getConfig("followOnlyRoleIn", guild);
 	const followOnlyRole = getConfig("followOnlyRole", guild);
 
 	// Early return for followOnlyRoleIn mode
-	if (followOnlyRoleIn) {
-		return checkMemberRoleIn("follow", user.roles, thread);
-	}
+	if (followOnlyRoleIn) return checkMemberRoleIn("follow", user.roles, thread);
 
 	// Check if user is ignored
 	if (checkMemberRole(user.roles, "ignore")) {
@@ -53,9 +43,7 @@ function shouldAddUserToThread(
 	}
 
 	// followOnlyRole mode
-	if (followOnlyRole) {
-		return checkMemberRole(user.roles, "follow");
-	}
+	if (followOnlyRole) return checkMemberRole(user.roles, "follow");
 
 	// Default: add user if not ignored
 	return true;
@@ -64,24 +52,24 @@ function shouldAddUserToThread(
 /**
  * Add a user to a thread, with verification the permission.
  * Check if the role is allowed by the settings for the thread.
- * @param thread {@link ThreadChannel} The thread to add the user
- * @param user {@link GuildMember} The user to add
+ * @param thread {@link  Djs.ThreadChannel} The thread to add the user
+ * @param user {@link  Djs.GuildMember} The user to add
  */
-export async function addUserToThread(thread: ThreadChannel, user: GuildMember) {
+export async function addUserToThread(thread: Djs.ThreadChannel, user: Djs.GuildMember) {
 	const guild = thread.guild.id;
 	const ul = getTranslation(guild, { locale: thread.guild.preferredLocale });
 	const emoji = getMessageToSend(guild) || EMOJI;
 
 	const hasPermission = thread.permissionsFor(user).has("ViewChannel", true);
-	const isNotInThread = await checkIfUserNotInTheThread(thread, user);
+	const isInThread = await isUserInThread(thread, user);
 
-	if (!hasPermission || !isNotInThread) return;
+	if (!hasPermission || isInThread) return;
 
 	if (!shouldAddUserToThread(user, thread, guild)) return;
 
 	try {
 		const message = await fetchMessage(thread);
-		await message.edit(`${userMention(user.id)} ${emoji}`);
+		await message.edit(`${Djs.userMention(user.id)} ${emoji}`);
 		await discordLogs(
 			guild,
 			thread.client,
@@ -89,7 +77,7 @@ export async function addUserToThread(thread: ThreadChannel, user: GuildMember) 
 		);
 	} catch (error) {
 		console.error(error);
-		if (error instanceof DiscordAPIError && error.code === 50001)
+		if (error instanceof Djs.DiscordAPIError && error.code === 50001)
 			await discordLogs(
 				guild,
 				thread.client,
@@ -103,13 +91,16 @@ export async function addUserToThread(thread: ThreadChannel, user: GuildMember) 
  * @param thread
  * @param members
  */
-export async function getUsersToPing(thread: ThreadChannel, members: GuildMember[]) {
+export async function getUsersToPing(
+	thread: Djs.ThreadChannel,
+	members: Djs.GuildMember[]
+) {
 	const guild = thread.guild.id;
-	const usersToBeAdded: GuildMember[] = [];
+	const usersToBeAdded: Djs.GuildMember[] = [];
 	for (const member of members) {
 		if (
 			thread.permissionsFor(member).has("ViewChannel", true) &&
-			(await checkIfUserNotInTheThread(thread, member))
+			!(await isUserInThread(thread, member))
 		) {
 			// Use centralised decision helper to avoid duplicated logic
 			if (shouldAddUserToThread(member, thread, guild)) {
@@ -128,8 +119,8 @@ export async function getUsersToPing(thread: ThreadChannel, members: GuildMember
  * @returns true if role should be added
  */
 function shouldAddRoleToThread(
-	role: Role,
-	thread: ThreadChannel,
+	role: Djs.Role,
+	thread: Djs.ThreadChannel,
 	guild: string
 ): boolean {
 	// Exclude @everyone explicitly
@@ -153,9 +144,9 @@ function shouldAddRoleToThread(
  * @param thread
  * @param roles
  */
-export async function getRoleToPing(thread: ThreadChannel, roles: Role[]) {
+export async function getRoleToPing(thread: Djs.ThreadChannel, roles: Djs.Role[]) {
 	const guild = thread.guild.id;
-	const roleToBeAdded: Role[] = [];
+	const roleToBeAdded: Djs.Role[] = [];
 
 	for (const role of roles) {
 		//check if all members of the role are in the thread
@@ -181,12 +172,16 @@ export async function getRoleToPing(thread: ThreadChannel, roles: Role[]) {
 /**
  * Add all members that have the permission to view the thread, first check by their role and after add the member that have overwrite permission
  * if there is no role in the server, check all members directly
- * @param thread {@link ThreadChannel} The thread to add the user
+ * @param thread {@link Djs.ThreadChannel} The thread to add the user
+ * @param includeArchived
  */
-export async function addRoleAndUserToThread(thread: ThreadChannel) {
+export async function addRoleAndUserToThread(
+	thread: Djs.ThreadChannel,
+	includeArchived?: boolean
+) {
 	const members = thread.guild.members.cache;
-	const toPing: GuildMember[] = [];
-	const rolesWithAccess: Role[] = thread.guild.roles.cache.toJSON();
+	const toPing: Djs.GuildMember[] = [];
+	const rolesWithAccess: Djs.Role[] = thread.guild.roles.cache.toJSON();
 	if (rolesWithAccess.length > 0) {
 		console.info("Getting roles to ping");
 		try {
@@ -196,7 +191,7 @@ export async function addRoleAndUserToThread(thread: ThreadChannel) {
 			console.error(error);
 		}
 	} else {
-		const guildMembers: GuildMember[] = members.toJSON();
+		const guildMembers: Djs.GuildMember[] = members.toJSON();
 		const users = await getUsersToPing(thread, guildMembers);
 		toPing.push(...users);
 	}
@@ -205,25 +200,33 @@ export async function addRoleAndUserToThread(thread: ThreadChannel) {
 	const reloadMembers = thread.guild.members.cache;
 	const memberWithAccess = getMemberPermission(reloadMembers, thread);
 	if (memberWithAccess) {
-		const memberWithAccessArray: GuildMember[] = memberWithAccess.toJSON();
+		const memberWithAccessArray: Djs.GuildMember[] = memberWithAccess.toJSON();
 		const users = await getUsersToPing(thread, memberWithAccessArray);
 		toPing.push(...users);
 	}
 	const emoji = getMessageToSend(thread.guild.id) || EMOJI;
-	console.info(`Total members to add: ${toPing.length}`);
-	if (toPing.length > 0) {
+	//remove duplicates
+	const uniqueToPingMap = new Map<string, Djs.GuildMember>();
+	for (const member of toPing) uniqueToPingMap.set(member.id, member);
+
+	const uniqueToPing = Array.from(uniqueToPingMap.values());
+	console.info(`Total members to add: ${uniqueToPing.length}`);
+	if (uniqueToPing.length > 0) {
+		if (includeArchived && thread.archived)
+			await thread.setArchived(false, "Adding members to thread");
+
 		try {
 			const message = await fetchMessage(thread);
-			await splitAndSend(toPing, message);
+			await splitAndSend(uniqueToPing, message);
 			await message.edit(emoji);
 			await discordLogs(
 				thread.guild.id,
 				thread.client,
-				`Add ${toPing.length} members to #${thread.name}:\n- ${toPing.map((member) => member.user.username).join("\n- ")}`
+				`Add ${uniqueToPing.length} members to #${thread.name}:\n- ${uniqueToPing.map((member) => member.user.username).join("\n- ")}`
 			);
 		} catch (error) {
 			console.error(error);
-			if (error instanceof DiscordAPIError && error.code === 50001) {
+			if (error instanceof Djs.DiscordAPIError && error.code === 50001) {
 				await discordLogs(
 					thread.guild.id,
 					thread.client,
@@ -249,7 +252,7 @@ export async function addRoleAndUserToThread(thread: ThreadChannel) {
  * @param toPing - Array of guild members to mention
  * @param message - Message to edit with mentions
  */
-async function splitAndSend(toPing: GuildMember[], message: Message) {
+async function splitAndSend(toPing: Djs.GuildMember[], message: Djs.Message) {
 	const maxMentions = 90;
 	let currentMessage = "";
 	for (let i = 0; i < toPing.length; i++) {
@@ -274,8 +277,8 @@ async function splitAndSend(toPing: GuildMember[], message: Message) {
 }
 
 export async function fetchUntilMessage(
-	thread: ThreadChannel
-): Promise<Message | undefined | null> {
+	thread: Djs.ThreadChannel
+): Promise<Djs.Message | undefined | null> {
 	const fetchMessage = await thread.messages.fetch({ limit: 100 });
 	let find = fetchMessage.filter((m) => m.author.id === thread.client.user.id).first();
 	// Return early if found
@@ -310,8 +313,8 @@ export async function fetchUntilMessage(
 }
 
 async function fetchAllPinnedMessages(
-	thread: ThreadChannel
-): Promise<Message | undefined> {
+	thread: Djs.ThreadChannel
+): Promise<Djs.Message | undefined> {
 	const pinnedMessage = await thread.messages.fetchPins({ limit: 50 });
 	let find = pinnedMessage.items.find(
 		(m) => m.message.author.id === thread.client.user.id
@@ -359,8 +362,8 @@ async function fetchAllPinnedMessages(
 }
 
 async function fetchFirstMessage(
-	thread: ThreadChannel
-): Promise<Message | undefined | null> {
+	thread: Djs.ThreadChannel
+): Promise<Djs.Message | undefined | null> {
 	const pin = getPinSetting(thread.guild.id);
 	if (pin) {
 		//fetch pinned messages
@@ -377,12 +380,12 @@ async function fetchFirstMessage(
 	if (!firstMessage) return await fetchUntilMessage(thread);
 }
 
-async function sendAndPin(thread: ThreadChannel): Promise<Message> {
+async function sendAndPin(thread: Djs.ThreadChannel): Promise<Djs.Message> {
 	const toPin = getPinSetting(thread.guild.id);
 	const messageToSend = getMessageToSend(thread.guild.id) || EMOJI;
 	const message = await thread.send({
 		content: messageToSend,
-		flags: MessageFlags.SuppressNotifications,
+		flags: Djs.MessageFlags.SuppressNotifications,
 	});
 	if (toPin) {
 		try {
@@ -395,7 +398,7 @@ async function sendAndPin(thread: ThreadChannel): Promise<Message> {
 	return message;
 }
 
-async function fetchMessage(thread: ThreadChannel): Promise<Message> {
+async function fetchMessage(thread: Djs.ThreadChannel): Promise<Djs.Message> {
 	const guildId = thread.guild.id;
 	// Try cache first
 	const cachedId = getCachedMessage(guildId, thread.id);
@@ -408,7 +411,7 @@ async function fetchMessage(thread: ThreadChannel): Promise<Message> {
 			return message;
 		} catch (e) {
 			//only pin error can allow to continue, other should delete the cached message
-			if (e instanceof DiscordAPIError && e.code !== 30003)
+			if (e instanceof Djs.DiscordAPIError && e.code !== 30003)
 				deleteCachedMessage(guildId, thread.id);
 		}
 	}

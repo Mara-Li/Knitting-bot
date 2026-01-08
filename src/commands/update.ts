@@ -84,21 +84,16 @@ async function updateAllThreads(
 		for (const thread of archived) toUpdate.add(thread);
 	}
 	//merge both collections
-	for (const thread of threads.threads.values()) {
+	for (const thread of threads.threads.values())
 		toUpdate.add(thread);
-	}
-
+	
 	const count = threads.threads.size;
-	await updateCache(interaction.guild);
+	await updateCache(interaction.guild, true);
 	for (const thread of toUpdate) {
 		if (thread.locked) continue;
-		if (includeArchived && thread.archived) {
-			//unarchive the thread first
-			await thread.setArchived(false, "Invoked by update all threads command");
-		}
 		if (!getConfig("followOnlyChannel", guild) && !checkThread(thread, "ignore"))
-			await addRoleAndUserToThread(thread);
-		else if (checkThread(thread, "follow")) await addRoleAndUserToThread(thread);
+			await addRoleAndUserToThread(thread, includeArchived);
+		else if (checkThread(thread, "follow")) await addRoleAndUserToThread(thread, includeArchived);
 	}
 	await interaction.editReply({
 		content: ul("commands.updateAllThreads.success", {
@@ -128,6 +123,10 @@ async function updateThread(
 			content: ul("commands.error"),
 		});
 		return;
+	}
+	if (channel.archived) {
+		//unarchive
+		await channel.setArchived(false, "Manual update of thread");
 	}
 	await fetchUntilMessage(threadOption!.channel as Djs.ThreadChannel);
 

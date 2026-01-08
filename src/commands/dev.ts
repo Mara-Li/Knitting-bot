@@ -4,7 +4,7 @@ import * as Djs from "discord.js";
 import dotenv from "dotenv";
 import { serverDataDb } from "../maps.js";
 
-dotenv.config();
+dotenv.config({ quiet: true });
 
 export default {
 	data: new Djs.SlashCommandBuilder()
