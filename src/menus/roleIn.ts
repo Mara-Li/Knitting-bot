@@ -13,7 +13,7 @@ import {
 } from "./flow";
 import { checkRoleInConstraints, validateRoleInAndSave } from "./handlers";
 import type { CommandMode } from "./interfaces";
-import { createPaginatedChannelModalByType } from "./modal";
+import { createFirstPageChannelModalByType } from "./modal";
 import { handleModalModifyGeneric, showPaginatedMessageGeneric } from "./paginated";
 
 /**
@@ -136,7 +136,7 @@ export async function roleInSelectorsForType(
 		return;
 	}
 
-	const { modal } = createPaginatedChannelModalByType(
+	const { modal } = createFirstPageChannelModalByType(
 		mode,
 		ul,
 		channelType,

@@ -11,7 +11,7 @@ import {
 import { validateAndSave } from "./handlers";
 import type { ChannelSelectorsForTypeOptions } from "./interfaces";
 import { getTrackedItems } from "./items";
-import { createPaginatedChannelModalByType } from "./modal";
+import { createFirstPageChannelModalByType } from "./modal";
 import { handleModalModifyGeneric, showPaginatedMessageGeneric } from "./paginated";
 import { getTrackedIdsByType } from "./utils";
 
@@ -108,7 +108,7 @@ export async function channelSelectorsForType({
 
 		return;
 	}
-	const { modal } = createPaginatedChannelModalByType(
+	const { modal } = createFirstPageChannelModalByType(
 		mode,
 		ul,
 		channelType,

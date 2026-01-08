@@ -1,7 +1,7 @@
 import { ChannelType, type Client, type TextChannel } from "discord.js";
 import { getTranslation } from "../../i18n";
 import { getConfig } from "../../maps";
-import {discordLogs, updateCache, updateThread} from "../../utils";
+import { discordLogs, updateCache, updateThread } from "../../utils";
 import { validateChannelType } from "../../utils/data_check";
 
 /**
@@ -49,7 +49,7 @@ export default (client: Client): void => {
 						totalThreads += threads.size;
 						childrenWithThreads.push(`<#${child.id}>`);
 					}
-					await Promise.all(
+					await Promise.allSettled(
 						threads.map(async (thread) => {
 							await updateThread(followOnlyChannelEnabled, thread);
 						})
@@ -57,17 +57,21 @@ export default (client: Client): void => {
 				}
 			}
 			if (totalThreads > 0) {
-				await discordLogs(guildId, client, ul("logs.channelUpdate.category", {
-					nb: totalThreads,
-					nbChan: childrenWithThreads.length,
-					channelList: `\n- ${childrenWithThreads.join("\n- ")}`,
-				}));
+				await discordLogs(
+					guildId,
+					client,
+					ul("logs.channelUpdate.category", {
+						channelList: `\n- ${childrenWithThreads.join("\n- ")}`,
+						nb: totalThreads,
+						nbChan: childrenWithThreads.length,
+					})
+				);
 			}
 		} else {
 			const newTextChannel = newChannel as TextChannel;
 			const threads = newTextChannel.threads.cache;
 			if (threads.size === 0) return;
-			await Promise.all(
+			await Promise.allSettled(
 				threads.map(async (thread) => {
 					await updateThread(followOnlyChannelEnabled, thread);
 				})

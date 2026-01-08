@@ -3,7 +3,7 @@ import type { TChannel } from "src/interface";
 import { TIMEOUT, type Translation } from "../interface";
 import { createPaginationButtons, deletePaginationState, hasMorePages } from "./flow";
 import type { CommandMode, PaginatedIdsState } from "./interfaces";
-import { createPaginatedChannelModalByType } from "./modal";
+import { createFirstPageChannelModalByType } from "./modal";
 
 export function getPaginationButtons(
 	modalSubmit: Djs.ModalSubmitInteraction,
@@ -80,7 +80,7 @@ export async function handleModalModifyGeneric(options: {
 	} = options;
 
 	const pageTrackedIds = state.paginatedItems[page] ?? [];
-	const { modal } = createPaginatedChannelModalByType(
+	const { modal } = createFirstPageChannelModalByType(
 		mode,
 		ul,
 		channelType,

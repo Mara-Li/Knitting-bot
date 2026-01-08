@@ -75,7 +75,7 @@ export function createChannelSelectorsModal(
 /**
  * Create a paginated modal for a specific channel type
  */
-export function createPaginatedChannelModalByType(
+export function createFirstPageChannelModalByType(
 	mode: CommandMode,
 	ul: Translation,
 	channelType: TChannel,
