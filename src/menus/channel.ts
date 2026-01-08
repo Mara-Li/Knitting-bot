@@ -162,10 +162,6 @@ export async function channelSelectorsForType({
 			interaction.client,
 			ul("logs.errors.modalInteractionFailed", { error: String(e) })
 		);
-		await interaction.reply({
-			content: ul("error.failedReply"),
-			flags: Djs.MessageFlags.Ephemeral,
-		});
 		return;
 	}
 }

@@ -1,13 +1,13 @@
 {
 	"commands": {
-		"description": "Update the threads manually with adding missing users",
+		"description": "Update the threads manually by adding missing users",
 		"error": "This command can only be used in or for a thread.",
 		"help": {
 			"all": "- `/update all`: to add on all threads of the guild.\n",
 			"desc": "Update the threads manually with adding missing users, using these commands:\n",
 			"description": "Show the help of the command",
 			"name": "help",
-			"thread": "- `/update thread <thread>`: to update a specific thread (select it from the list). If no channel is selected, use where the command is used.\n",
+			"thread": "- `/update thread <thread>`: to update a specific thread (select it from the list). If no channel is selected, uses the current channel.\n",
 			"title": "Manual commands help"
 		},
 		"name": "update",
@@ -69,11 +69,11 @@
 	},
 	"configuration": {
 		"archived": {
-			"disable": "Archived thread won't be updated.",
-			"enable": "Archived thread are now included in the update."
+			"disable": "Archived threads won't be updated.",
+			"enable": "Archived threads are now included in the update."
 		},
 		"channel": {
-			"description": "Enable or disable the adding of members when channel, forum, or category permission are changed.",
+			"description": "Enable or disable the adding members when channel, forum, or category permission are changed.",
 			"name": "On channel, forum or category update",
 			"title": "Channel, category, forum"
 		},
@@ -200,7 +200,7 @@
 		}
 	},
 	"error": {
-		"deletedBotMessage": "The bot *placeholder* from <@{{- bot}}> was deleted in {{- thread}}.",
+		"deletedBotMessage": "The message *placeholder* from <@{{- bot}}> was deleted in {{- thread}}.",
 		"failedReply": "Error: failed reply",
 		"missingPermission": "Knitting doesn't have the permissions to write in <#{{- thread}}>."
 	},
@@ -268,7 +268,7 @@
 		"role": {
 			"added": "Role {{- role}} ignored.",
 			"description": "Exclude role from update",
-			"error": "{{- role }} is not found",
+			"error": "{{- role}} is not found",
 			"option": "Select role to exclude/include",
 			"removed": "Role {{- role}} un-ignored!"
 		},
@@ -294,7 +294,7 @@
 	},
 	"info": {
 		"cmds": "Get some information about the bot",
-		"desc": "A little discord bot write in TypeScript that automatically add / remove member in thread, without pinging them!",
+		"desc": "A little discord bot written in TypeScript that automatically add / remove member in thread, without pinging them!",
 		"footer": "Made with 💖 by Mara__Li",
 		"readMe": "https://github.com/Mara-Li/Knitting-bot",
 		"title": "Information"
@@ -311,7 +311,7 @@
 			}
 		},
 		"thread": {
-			"created": "Thread {{- thread }} created!"
+			"created": "Thread {{- thread}} created!"
 		},
 		"updated": {
 			"channel": "Updating {{- number}} threads of {{- child}}"
