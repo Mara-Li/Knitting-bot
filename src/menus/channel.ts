@@ -184,11 +184,11 @@ async function handleModalModify(
 		mode,
 		ul,
 		guild,
-		0, // Toujours page 0 car on passe déjà les items filtrés
+		0,
 		channelType,
 		pageTrackedIds,
 		undefined,
-		true // Afficher les items de cette page uniquement
+		true
 	);
 
 	try {
@@ -202,10 +202,7 @@ async function handleModalModify(
 		try {
 			await modalSubmit.deferUpdate();
 		} catch (e) {
-			if (e instanceof Djs.DiscordAPIError && e.code === 10062) {
-				console.warn(`[${mode} ${channelType}] Token expiré pour ModalSubmit`, e.message);
-				return;
-			}
+			if (e instanceof Djs.DiscordAPIError && e.code === 10062) return;
 			throw e;
 		}
 
@@ -240,12 +237,10 @@ async function showPaginatedMessage(
 	state: PaginatedIdsState,
 	mode: CommandMode
 ) {
-	// Clamp page to available pages
 	const totalPages = Object.keys(state.paginatedItems).length;
 	const safePage = Math.max(0, Math.min(page, Math.max(0, totalPages - 1)));
 	state.currentPage = safePage;
 
-	// Afficher le nombre d'éléments suivis sur cette page
 	const trackedOnThisPage = state.paginatedItems[safePage]?.length ?? 0;
 	const hasMore = hasMorePages(state.paginatedItems, safePage);
 
@@ -293,15 +288,12 @@ async function validateAndSave(
 		return channel.type === Djs.ChannelType.GuildCategory ? channel.name : `<#${id}>`;
 	};
 
-	// Vérifier les conflits avec le mode opposé (ex: tenter d'ignorer un salon déjà suivi)
 	const oppositeMode: CommandMode = mode === "follow" ? "ignore" : "follow";
 	const oppositeTrackedIds = new Set(getMaps(oppositeMode, typeName, guildID));
 	const conflictIds = finalIds.filter((id) => oppositeTrackedIds.has(id));
 	if (conflictIds.length > 0) {
 		const conflictKey =
-			mode === "ignore"
-				? "common.conflictTracked.ignore"
-				: "common.conflictTracked.follow";
+			mode === "ignore" ? "ignore.error.conflictTracked" : "follow.error.conflictTracked";
 		const conflictMessage = ul(conflictKey, {
 			item: conflictIds.map((id) => mentionFromId(id)).join(", "),
 		});
@@ -343,24 +335,19 @@ async function validateAndSave(
 			? ul("common.summary", { changes: `\n- ${messages.join("\n- ")}` })
 			: ul("common.noChanges");
 
-	// Handle both ButtonInteraction and ModalSubmitInteraction
 	if (interaction.isModalSubmit()) {
-		// For ModalSubmitInteraction, use reply
 		await interaction.reply({
 			components: [],
 			content: finalMessage,
 			flags: Djs.MessageFlags.Ephemeral,
 		});
 	} else {
-		// For ButtonInteraction
 		if (interaction.deferred) {
-			// If already deferred, use editReply
 			await interaction.editReply({
 				components: [],
 				content: finalMessage,
 			});
 		} else {
-			// If not deferred, use update
 			await interaction.update({
 				components: [],
 				content: finalMessage,
@@ -381,10 +368,8 @@ export function getPaginationButtons(
 ) {
 	const newSelection =
 		modalSubmit.fields.getSelectedChannels(`select_${channelType}`, false) ?? new Map();
-	// Mettre à jour les items de cette page
 	state.paginatedItems[page] = Array.from(newSelection.keys());
 
-	// Reconstruire selectedIds à partir de toutes les pages
 	state.selectedIds.clear();
 	for (const pageItems of Object.values(state.paginatedItems)) {
 		for (const id of pageItems) {
@@ -392,7 +377,6 @@ export function getPaginationButtons(
 		}
 	}
 
-	// Retour au message avec boutons
 	const pageItemsCount = state.paginatedItems[page]?.length ?? 0;
 	const hasMore = hasMorePages(state.paginatedItems, page);
 	const buttons = createPaginationButtons(mode, page, hasMore, ul);

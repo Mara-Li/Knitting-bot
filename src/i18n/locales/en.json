@@ -1,285 +1,262 @@
 {
-  "commands": {
-    "description": "Update the threads manually by adding missing users",
-    "error": "This command can only be used in or for a thread.",
-    "help": {
-      "all": "- `/update all`: to add on all threads of the guild.\n",
-      "desc": "Update the threads manually with adding missing users, using these commands:\n",
-      "description": "Show the help of the command",
-      "name": "help",
-      "thread": "- `/update thread <thread>`: to update a specific thread (select it from the list). If no channel is selected, uses the current channel.\n",
-      "title": "Manual commands help"
-    },
-    "name": "update",
-    "success": "Updating thread: {{- channel}}",
-    "updateAllThreads": {
-      "description": "Update all threads with adding missing users",
-      "name": "all",
-      "option": "Include archived threads",
-      "success": "Updating success of {{- count}} threads"
-    },
-    "updateSpecificThread": {
-      "description": "Update a specific thread with adding missing users",
-      "option": {
-        "description": "Select the thread to update"
-      }
-    },
-    "updateThread": {
-    }
-  },
-  "common": {
-    "archived": "archived",
-    "cancel": "Cancel",
-    "cancelled": "Cancelled",
-    "category": "Category",
-    "channel": "Channel",
-    "conflictTracked": {
-    },
-    "delete": "Delete",
-    "disable": "Disable",
-    "disabled": "Disabled",
-    "elements": "elements",
-    "enable": "Enable",
-    "enabled": "Enabled",
-    "error": "An error occurred:\n```\n{{error}}\n```",
-    "forum": "Forum",
-    "list": "list",
-    "modify": "Modify",
-    "next": "Next",
-    "noChanges": "No changes were made.",
-    "none": "/",
-    "previous": "Previous",
-    "role": "role",
-    "roleIn": "specific",
-    "space": " ",
-    "summary": "✅ Saved changes :{{- changes}}",
-    "thread": "Thread",
-    "timeOut": "Timed out",
-    "validate": "Validate"
-  },
-  "configuration": {
-    "archived": {
-    },
-    "channel": {
-      "name": "On channel, forum or category update",
-      "title": "Channel, category, forum"
-    },
-    "disable": {
-      "name": "Manual mode"
-    },
-    "display": {
-      "description": "Display the server configuration",
-      "main": {
-        "title": "Main configuration"
-      },
-      "title": "display"
-    },
-    "follow": {
-      "role": {
-        "name": "Follow some roles",
-        "title": "Role only"
-      },
-      "roleIn": "[@role] in [#channel]",
-      "thread": {
-        "name": "Follow some channels",
-        "title": "Channel only"
-      }
-    },
-    "language": {
-      "desc": "Change the server language (for logs)",
-      "name": "Language",
-      "options": "language to change",
-      "validate": "Server language changed to `{{- lang}}`"
-    },
-    "log": {
-      "name": "Bot logs"
-    },
-    "main": {
-      "description": "Edit the server configuration. Allow to disable / enable some events",
-      "name": "config"
-    },
-    "member": {
-      "name": "On member update",
-      "title": "Member"
-    },
-    "menu": {
-      "autoUpdate": {
-        "cmd": "auto",
-        "desc": "Auto-update channel configuration",
-        "title": "AUTO-UPDATE"
-      },
-      "general": {
-        "display": {
-        },
-        "lang": {
-        }
-      },
-      "help": {
-      },
-      "log": {
-        "channel": {
-          "desc": "Channel where to send the logs",
-          "disable": "Logs has been disabled.",
-          "error": "You can't use this channel to send the logs.",
-          "success": "The logs channel is now {{- channel}}.",
-          "title": "log"
-        },
-        "desc": "Choose the channel to send the logs"
-      },
-      "mode": {
-        "desc": "Configuration's follow's mode",
-        "title": "MODE"
-      }
-    },
-    "message": {
-      "description": "Message sent by the bot as a placeholder to avoid ghost pings.",
-      "name": "placeholder",
-      "option": {
-        "description": "Content of the message sent. Does not support emojis from other servers!",
-        "name": "message"
-      },
-      "response": {
-        "custom": "The message `{{- message}}` will be sent as a placeholder.",
-        "default": "The message `_ _` will be used.",
-        "error": "Empty string are not supported."
-      }
-    },
-    "newMember": {
-      "display": "New member",
-      "name": "On new member"
-    },
-    "pin": {
-      "description": "Pin the message send by the bot in the thread",
-      "name": "pin",
-      "option": {
-        "description": "Toggle the option",
-        "name": "toggle"
-      },
-      "response": {
-        "disabled": "Messages will not be pinned. The bot will try to find the previously sent message to use it, or will send a new one if it cannot find it.\n\n:warning: **Although the message may seem easy to find, Discord caches messages and only allows a certain number of messages to be retrieved. This makes it difficult to find in some cases.**",
-        "enabled": "The message sent by the bot in the threads will be pinned, which will prevent the bot from always finding it and thus avoid any pings.\n\n:warning: **Although pinning the message makes it easier to find, it does not guarantee that it will be found. It is therefore still (unfortunately) possible that the bot will send a message to add members.**"
-      }
-    },
-    "roleIn": {
-      "name": "Follow [@role] in [#channel]"
-    },
-    "show": {
-      "menu": {
-        "description": "The bot can be activated on:\n- Changing the permission of a member, a channel, a category or forum\n- When a thread is created,\n- When a new member arrives.\n\nYou can also disable all update, and follow only some channel or roles.\n\n The configuration commands are:"
-      }
-    },
-    "thread": {
-      "display": "Thread creation",
-      "name": "On thread created"
-    }
-  },
-  "error": {
-    "deletedBotMessage": "The message *placeholder* from <@{{- bot}}> was deleted in {{- thread}}.",
-    "failedReply": "Error: failed reply",
-    "missingPermission": "Knitting doesn't have the permissions to write in <#{{- thread}}>."
-  },
-  "follow": {
-    "description": "Update only on the followed role/channels",
-    "error": {
-      "followChannel": "This command can only be used when **Channel only** mode is activated.\nTo stop following certain channels, please use the command </ignore channel:{{- id}}>.",
-      "role": "This command can only be used when **role only** mode is enabled.\nTo stop tracking certain roles, please use the command </ignore role:{{- id}}>."
-    },
-    "list": {
-      "description": "Display the followed channels or roles",
-      "roleIn": "Roles followed in specifics channels",
-      "title": "Follow"
-    },
-    "role": {
-      "description": "Role to follow/unfollow",
-      "select": {
-      }
-    },
-    "roleIn": {
-      "description": "Follow a role for a channel",
-      "option": {
-      }
-    },
-    "thread": {
-      "description": "Manage the following of channel, threads, categories, or forums",
-      "descriptionWithRole": "Manage the followed channel, threads, categories, or forums for {{- role}}.",
-      "noSelection": "No selection was made.",
-      "option": {
-      },
-      "select": {
-      }
-    },
-    "title": "follow"
-  },
-  "ignore": {
-    "description": "Exclude channel/roles from update.",
-    "error": {
-      "followChannel": "This command cannot be activated when **Channel only** mode is enabled.\nTo stop following certain channels, please use the </follow channel:{{- id}}> command.",
-      "followRole": "This command cannot be activated when **role only** mode is enabled.\nTo stop following certain roles, please use the </follow role:{{- id}}> command.",
-      "followRoleIn": "This command cannot be activated when the **[@role] mode in [#channel]** is enabled.\nTo stop following certain channels or roles, please use the </follow specific:{{- id}}> command."
-    },
-    "list": {
-      "description": "List all ignored channels, threads, categories and role",
-      "title": "List of ignored channels, categories, threads and roles"
-    },
-    "message": "{{- thread}} is ignored in parameters!",
-    "role": {
-      "description": "Exclude role from update",
-      "error": "{{- role}} is not found"
-    },
-    "roleIn": {
-      "description": "Ignore a channel for a specific role",
-      "option": {
-      },
-      "title": "Roles ignored in specifics channels"
-    },
-    "thread": {
-      "description": "Manage ignored threads, channel, forums or categories",
-      "descriptionWithRole": "Manage ignored threads, channels, forums or categories for {{- role}}.",
-      "option": {
-      }
-    }
-  },
-  "info": {
-    "cmds": "Get some information about the bot",
-    "desc": "A little discord bot written in TypeScript that automatically add / remove member in thread, without pinging them!",
-    "footer": "Made with 💖 by Mara__Li",
-    "readMe": "https://github.com/Mara-Li/Knitting-bot",
-    "title": "Information"
-  },
-  "logs": {
-    "errors": {
-      "modalInteractionFailed": "Error during modal submission:\n{{- error}}"
-    },
-    "joined": "{{- user}} joined the server",
-    "member": {
-      "updated": {
-        "noRole": "{{- user}} has been updated but no role has been added.",
-        "roleList": "{{- user}} has been updated with roles: {{- role}}"
-      }
-    },
-    "thread": {
-      "created": "Thread {{- thread}} created!"
-    },
-    "updated": {
-      "channel": "Updating {{- number}} threads of {{- child}}"
-    }
-  },
-  "roleIn": {
-    "button": "Open the menu",
-    "enabled": {
-    },
-    "error": {
-      "need": "You must first activate the \"follow [@role] in [#channel]\" mode.",
-      "otherMode": "You can't use this command with the other follow-only mode."
-    },
-    "noLonger": {
-      "any": "The role {{- mention}} is no longer {{- on}} in any channel."
-    },
-    "on": {
-    },
-    "updated": "The role {{- mention}} will be {{- on}} in:{{- channels}}"
-  },
-  "select": {
-    "type": "Type of channel to manage"
-  }
+	"commands": {
+		"description": "Update the threads manually by adding missing users",
+		"error": "This command can only be used in or for a thread.",
+		"help": {
+			"all": "- `/update all`: to add on all threads of the guild.\n",
+			"desc": "Update the threads manually with adding missing users, using these commands:\n",
+			"description": "Show the help of the command",
+			"name": "help",
+			"thread": "- `/update thread <thread>`: to update a specific thread (select it from the list). If no channel is selected, uses the current channel.\n",
+			"title": "Manual commands help"
+		},
+		"name": "update",
+		"success": "Updating thread: {{- channel}}",
+		"updateAllThreads": {
+			"description": "Update all threads with adding missing users",
+			"name": "all",
+			"option": "Include archived threads",
+			"success": "Updating success of {{- count}} threads"
+		},
+		"updateSpecificThread": {
+			"description": "Update a specific thread with adding missing users",
+			"option": {
+				"description": "Select the thread to update"
+			}
+		}
+	},
+	"common": {
+		"archived": "archived",
+		"cancel": "Cancel",
+		"cancelled": "Cancelled",
+		"category": "Category",
+		"channel": "Channel",
+		"delete": "Delete",
+		"disable": "Disable",
+		"disabled": "Disabled",
+		"elements": "elements",
+		"enable": "Enable",
+		"enabled": "Enabled",
+		"error": "An error occurred:\n```\n{{error}}\n```",
+		"forum": "Forum",
+		"list": "list",
+		"modify": "Modify",
+		"next": "Next",
+		"noChanges": "No changes were made.",
+		"none": "/",
+		"previous": "Previous",
+		"role": "role",
+		"roleIn": "specific",
+		"space": " ",
+		"summary": "✅ Saved changes :{{- changes}}",
+		"thread": "Thread",
+		"timeOut": "Timed out",
+		"validate": "Validate"
+	},
+	"configuration": {
+		"channel": {
+			"name": "On channel, forum or category update",
+			"title": "Channel, category, forum"
+		},
+		"disable": {
+			"name": "Manual mode"
+		},
+		"display": {
+			"description": "Display the server configuration",
+			"main": {
+				"title": "Main configuration"
+			},
+			"title": "display"
+		},
+		"follow": {
+			"role": {
+				"name": "Follow some roles",
+				"title": "Role only"
+			},
+			"roleIn": "[@role] in [#channel]",
+			"thread": {
+				"name": "Follow some channels",
+				"title": "Channel only"
+			}
+		},
+		"language": {
+			"desc": "Change the server language (for logs)",
+			"name": "Language",
+			"options": "language to change",
+			"validate": "Server language changed to `{{- lang}}`"
+		},
+		"log": {
+			"name": "Bot logs"
+		},
+		"main": {
+			"description": "Edit the server configuration. Allow to disable / enable some events",
+			"name": "config"
+		},
+		"member": {
+			"name": "On member update",
+			"title": "Member"
+		},
+		"menu": {
+			"autoUpdate": {
+				"cmd": "auto",
+				"desc": "Auto-update channel configuration",
+				"title": "AUTO-UPDATE"
+			},
+			"log": {
+				"channel": {
+					"desc": "Channel where to send the logs",
+					"disable": "Logs has been disabled.",
+					"error": "You can't use this channel to send the logs.",
+					"success": "The logs channel is now {{- channel}}.",
+					"title": "log"
+				},
+				"desc": "Choose the channel to send the logs"
+			},
+			"mode": {
+				"desc": "Configuration's follow's mode",
+				"title": "MODE"
+			}
+		},
+		"message": {
+			"description": "Message sent by the bot as a placeholder to avoid ghost pings.",
+			"name": "placeholder",
+			"option": {
+				"description": "Content of the message sent. Does not support emojis from other servers!",
+				"name": "message"
+			},
+			"response": {
+				"custom": "The message `{{- message}}` will be sent as a placeholder.",
+				"default": "The message `_ _` will be used.",
+				"error": "Empty string are not supported."
+			}
+		},
+		"newMember": {
+			"display": "New member",
+			"name": "On new member"
+		},
+		"pin": {
+			"description": "Pin the message send by the bot in the thread",
+			"name": "pin",
+			"option": {
+				"description": "Toggle the option",
+				"name": "toggle"
+			},
+			"response": {
+				"disabled": "Messages will not be pinned. The bot will try to find the previously sent message to use it, or will send a new one if it cannot find it.\n\n:warning: **Although the message may seem easy to find, Discord caches messages and only allows a certain number of messages to be retrieved. This makes it difficult to find in some cases.**",
+				"enabled": "The message sent by the bot in the threads will be pinned, which will prevent the bot from always finding it and thus avoid any pings.\n\n:warning: **Although pinning the message makes it easier to find, it does not guarantee that it will be found. It is therefore still (unfortunately) possible that the bot will send a message to add members.**"
+			}
+		},
+		"roleIn": {
+			"name": "Follow [@role] in [#channel]"
+		},
+		"show": {
+			"menu": {
+				"description": "The bot can be activated on:\n- Changing the permission of a member, a channel, a category or forum\n- When a thread is created,\n- When a new member arrives.\n\nYou can also disable all update, and follow only some channel or roles.\n\n The configuration commands are:"
+			}
+		},
+		"thread": {
+			"display": "Thread creation",
+			"name": "On thread created"
+		}
+	},
+	"error": {
+		"deletedBotMessage": "The message *placeholder* from <@{{- bot}}> was deleted in {{- thread}}.",
+		"failedReply": "Error: Unable to send the reply. Please try again or check your permissions.",
+		"missingPermission": "Knitting doesn't have the permissions to write in <#{{- thread}}>."
+	},
+	"follow": {
+		"description": "Update only on the followed role/channels",
+		"error": {
+			"conflictTracked": "{{- item}} is already ignored. Remove it from ignored before following it.",
+			"followChannel": "This command can only be used when **Channel only** mode is activated.\nTo stop following certain channels, please use the command </ignore channel:{{- id}}>.",
+			"role": "This command can only be used when **role only** mode is enabled.\nTo stop tracking certain roles, please use the command </ignore role:{{- id}}>."
+		},
+		"list": {
+			"description": "Display the followed channels or roles",
+			"roleIn": "Roles followed in specifics channels",
+			"title": "Follow"
+		},
+		"role": {
+			"description": "Role to follow/unfollow"
+		},
+		"roleIn": {
+			"description": "Follow a role for a channel"
+		},
+		"thread": {
+			"description": "Manage the following of channel, threads, categories, or forums",
+			"descriptionWithRole": "Manage the followed channel, threads, categories, or forums for {{- role}}.",
+			"noSelection": "No selection was made."
+		},
+		"title": "follow"
+	},
+	"ignore": {
+		"description": "Exclude channel/roles from update.",
+		"error": {
+			"conflictTracked": "{{- item}} is already followed. Remove it from followed before ignoring it.",
+			"followChannel": "This command cannot be activated when **Channel only** mode is enabled.\nTo stop following certain channels, please use the </follow channel:{{- id}}> command.",
+			"followRole": "This command cannot be activated when **role only** mode is enabled.\nTo stop following certain roles, please use the </follow role:{{- id}}> command.",
+			"followRoleIn": "This command cannot be activated when the **[@role] mode in [#channel]** is enabled.\nTo stop following certain channels or roles, please use the </follow specific:{{- id}}> command."
+		},
+		"list": {
+			"description": "List all ignored channels, threads, categories and role",
+			"title": "List of ignored channels, categories, threads and roles"
+		},
+		"message": "{{- thread}} is ignored in parameters!",
+		"role": {
+			"description": "Exclude role from update",
+			"error": "{{- role}} is not found"
+		},
+		"roleIn": {
+			"description": "Ignore a channel for a specific role",
+			"title": "Roles ignored in specifics channels"
+		},
+		"thread": {
+			"description": "Manage ignored threads, channel, forums or categories",
+			"descriptionWithRole": "Manage ignored threads, channels, forums or categories for {{- role}}."
+		}
+	},
+	"info": {
+		"cmds": "Get some information about the bot",
+		"desc": "A little Discord bot written in TypeScript that automatically add / remove member in thread, without pinging them!",
+		"footer": "Made with 💖 by Mara__Li",
+		"readMe": "https://github.com/Mara-Li/Knitting-bot",
+		"title": "Information"
+	},
+	"logs": {
+		"errors": {
+			"modalInteractionFailed": "Error during modal submission:\n{{- error}}"
+		},
+		"joined": "{{- user}} joined the server",
+		"member": {
+			"updated": {
+				"noRole": "{{- user}} has been updated but no roles were added.",
+				"roleList": "{{- user}} has been updated with roles: {{- role}}"
+			}
+		},
+		"thread": {
+			"created": "Thread {{- thread}} created!"
+		},
+		"updated": {
+			"channel": "Updating {{- number}} threads of {{- child}}"
+		}
+	},
+	"roleIn": {
+		"button": "Open the menu",
+		"error": {
+			"need": "You must first activate the \"follow [@role] in [#channel]\" mode.",
+			"otherMode": "You can't use this command with the other follow-only mode."
+		},
+		"noLonger": {
+			"any": "The role {{- mention}} is no longer {{- on}} in any channel."
+		},
+
+		"on": {
+			"follow": "followed",
+			"ignore": "ignored"
+		},
+		"updated": "The role {{- mention}} will be {{- on}} in:{{- channels}}"
+	},
+	"select": {
+		"type": "Type of channel to manage"
+	}
 }

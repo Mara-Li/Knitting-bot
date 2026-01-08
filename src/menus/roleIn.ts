@@ -370,9 +370,7 @@ async function validateRoleInAndSave(
 			conflictIds.includes(ch.id)
 		);
 		const conflictKey =
-			mode === "ignore"
-				? "common.conflictTracked.ignore"
-				: "common.conflictTracked.follow";
+			mode === "ignore" ? "ignore.error.conflictTracked" : "follow.error.conflictTracked";
 		const conflictMessage = ul(conflictKey, {
 			item: conflictChannels.map((ch) => mentionFromChannel(ch)).join(", "),
 		});
