@@ -16,10 +16,6 @@ const database = new Enmap({
 
 const exportPath = path.join(dirname, "files", "export_database.json");
 
-if (!fs.existsSync(path.dirname(exportPath))) {
-	fs.mkdirSync(path.dirname(exportPath), { recursive: true });
-}
-
 function exportDatabase() {
 	fs.writeFileSync(exportPath, database.export(), "utf-8");
 	console.log(`Database exported to ${exportPath}`);
