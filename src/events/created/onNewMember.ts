@@ -21,21 +21,22 @@ export default (client: Client): void => {
 		const guild = member.guild;
 		const channels = guild.channels.cache.filter((channel) => channel.isThread());
 
-		// Process threads with a delay to avoid rate limiting
-		for (const channel of channels.values()) {
+		// Process threads in parallel with Promise.allSettled
+		const threadPromises = Array.from(channels.values()).map((channel) => {
 			const threadChannel = channel as ThreadChannel;
 			const roleIsAllowed =
 				!checkMemberRole(member.roles, "follow") &&
 				!checkMemberRole(member.roles, "ignore");
 			if (!getConfig("followOnlyChannel", guildID)) {
 				if (!checkThread(threadChannel, "ignore") && roleIsAllowed)
-					await addUserToThread(threadChannel, member);
+					return addUserToThread(threadChannel, member);
 			} else {
 				if (roleIsAllowed && checkThread(threadChannel, "follow"))
-					await addUserToThread(threadChannel, member);
+					return addUserToThread(threadChannel, member);
 			}
-			// Add delay between requests to avoid gateway rate limit
-			await new Promise((resolve) => setTimeout(resolve, 250));
-		}
+			return Promise.resolve();
+		});
+
+		await Promise.allSettled(threadPromises);
 	});
 };
