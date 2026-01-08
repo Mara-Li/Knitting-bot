@@ -92,6 +92,10 @@ async function updateAllThreads(
 	await updateCache(interaction.guild);
 	for (const thread of toUpdate) {
 		if (thread.locked) continue;
+		if (includeArchived && thread.archived) {
+			//unarchive the thread first
+			await thread.setArchived(false, "Invoked by update all threads command");
+		}
 		if (!getConfig("followOnlyChannel", guild) && !checkThread(thread, "ignore"))
 			await addRoleAndUserToThread(thread);
 		else if (checkThread(thread, "follow")) await addRoleAndUserToThread(thread);
