@@ -116,58 +116,43 @@ export async function resolveChannelsByIds<T extends { type: number }>(
 	allowedTypes: number[]
 ): Promise<T[]> {
 	const resolved: T[] = [];
-	const toFetch: string[] = [];
+	const idSet = new Set(ids);
 
+	// First, try to get from cache and direct fetch
 	for (const id of ids) {
 		const ch = guild.channels.cache.get(id) as unknown as T | undefined;
 		if (ch && allowedTypes.includes((ch as unknown as { type: number }).type)) {
 			resolved.push(ch);
-		} else {
-			toFetch.push(id);
+			idSet.delete(id);
 		}
 	}
 
-	if (toFetch.length > 0) {
+	if (idSet.size > 0) {
 		const results = await Promise.allSettled(
-			toFetch.map((id) => guild.channels.fetch(id).catch(() => null))
+			Array.from(idSet).map((id) => guild.channels.fetch(id).catch(() => null))
 		);
 		for (const r of results) {
 			if (r.status === "fulfilled" && r.value) {
 				const ch = r.value as unknown as T;
 				if (allowedTypes.includes((ch as unknown as { type: number }).type)) {
 					resolved.push(ch);
+					idSet.delete((ch as unknown as { id: string }).id);
 				}
 			}
 		}
 
-		// Pour les threads qui n'ont pas pu être récupérés, chercher dans tous les canaux
-		const stillMissing = toFetch.filter(
-			// biome-ignore lint/suspicious/noExplicitAny: we want to use any here
-			(id) => !resolved.some((ch: any) => ch.id === id)
-		);
-
-		if (stillMissing.length > 0 && allowedTypes.includes(ChannelType.PublicThread)) {
-			for (const channel of guild.channels.cache.values()) {
-				if (
-					channel.type === ChannelType.GuildText ||
-					channel.type === ChannelType.GuildForum
-				) {
-					try {
-						const threads = await channel.threads.fetchArchived({
-							limit: 100,
-						});
-						for (const thread of threads.threads.values()) {
-							const idx = stillMissing.indexOf(thread.id);
-							if (idx !== -1) {
-								resolved.push(thread as unknown as T);
-								stillMissing.splice(idx, 1);
-							}
-						}
-						if (stillMissing.length === 0) break;
-					} catch (e) {
-						// Continuer si l'accès aux threads archivés échoue
+		// If still missing and we need threads, fetch from archived
+		if (idSet.size > 0 && allowedTypes.includes(ChannelType.PublicThread)) {
+			try {
+				const archivedThreads = await fetchArchived(guild);
+				for (const thread of archivedThreads) {
+					if (idSet.has(thread.id)) {
+						resolved.push(thread as unknown as T);
+						idSet.delete(thread.id);
 					}
 				}
+			} catch (e) {
+				// Skip & continue
 			}
 		}
 	}

@@ -165,8 +165,9 @@ export function getMemberPermission(
 ) {
 	if (allow) {
 		return members.filter((member) => {
-			if (!thread.parent) return false;
-			const memberPermissions = thread.parent.permissionsFor(member);
+			const channelToCheck = thread.isThread() ? thread.parent : thread;
+			if (!channelToCheck) return false;
+			const memberPermissions = channelToCheck.permissionsFor(member);
 			return (
 				memberPermissions.has("ViewChannel") &&
 				memberPermissions.has("ReadMessageHistory")
