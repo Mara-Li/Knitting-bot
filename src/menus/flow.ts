@@ -8,58 +8,11 @@ import {
 	type PaginatedIdsState,
 	SWEEP_INTERVAL_MS,
 } from "./interfaces";
+import { createSweepScheduler } from "./utils";
 
-/**
- * Generic sweep scheduler factory for Maps with items that have expiresAt property
- * Can be used by multiple modules with different state maps
- * @param intervalMs Interval in milliseconds for the sweep
- * @returns A scheduler function that can be called with a state map
- */
-export function createSweepScheduler<T extends { expiresAt?: number }>(
-	intervalMs = SWEEP_INTERVAL_MS
-) {
-	let scheduled = false;
-	return function scheduleSweep(
-		stateMap: Map<string, T>,
-		onExpire?: (key: string, state: T) => void
-	) {
-		if (scheduled) return;
-		// eslint-disable-next-line @typescript-eslint/no-misused-promises
-		setInterval(() => {
-			const now = Date.now();
-			for (const [key, state] of stateMap.entries()) {
-				if (state.expiresAt && state.expiresAt <= now) {
-					stateMap.delete(key);
-					if (onExpire) onExpire(key, state);
-				}
-			}
-		}, intervalMs);
-		scheduled = true;
-	};
-}
-
-let sweepScheduled = false;
-function scheduleSweep() {
-	if (sweepScheduled) return;
-	// eslint-disable-next-line @typescript-eslint/no-misused-promises
-	setInterval(() => {
-		const now = Date.now();
-		for (const [key, state] of globalPaginationStates.entries()) {
-			if (state.expiresAt && state.expiresAt <= now) {
-				// delete state and related message mappings
-				globalPaginationStates.delete(key);
-				for (const [msgId, mapping] of messageToStateKey.entries()) {
-					if (mapping.stateKey === key) messageToStateKey.delete(msgId);
-				}
-			}
-		}
-		// also cleanup any message mappings that expired without a state (defensive)
-		for (const [msgId, mapping] of messageToStateKey.entries()) {
-			if (mapping.expiresAt && mapping.expiresAt <= now) messageToStateKey.delete(msgId);
-		}
-	}, SWEEP_INTERVAL_MS);
-	sweepScheduled = true;
-}
+// Create a sweep scheduler instance for pagination states with cleanup of related message mappings
+const schedulePaginationSweep =
+	createSweepScheduler<PaginatedIdsState>(SWEEP_INTERVAL_MS);
 
 export function paginateIds(ids: string[], pageSize = 25): Record<number, string[]> {
 	const paginated: Record<number, string[]> = {};
@@ -91,8 +44,13 @@ export function createPaginationState(
 		ttlMs: ttl,
 	};
 	globalPaginationStates.set(key, state);
-	// ensure sweep runs
-	scheduleSweep();
+	// ensure sweep runs with cleanup of related message mappings
+	schedulePaginationSweep(globalPaginationStates, (expiredKey) => {
+		// cleanup message mappings referencing this expired state
+		for (const [msgId, mapping] of messageToStateKey.entries()) {
+			if (mapping.stateKey === expiredKey) messageToStateKey.delete(msgId);
+		}
+	});
 	return state;
 }
 
@@ -313,8 +271,5 @@ export function createPaginationButtons(
 	return [new Djs.ActionRowBuilder<Djs.ButtonBuilder>().addComponents(buttons)];
 }
 
-// ensure sweep scheduled when module is loaded
-// Side effect: Start the background sweep timer when this module is imported.
-// This ensures expired pagination states are cleaned up even if no flows are active.
-// ensure sweep scheduled when module is loaded
-scheduleSweep();
+// Note: The background sweep timer starts automatically on the first call to createPaginationState()
+// This ensures expired pagination states and their related message mappings are cleaned up.

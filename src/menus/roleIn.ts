@@ -79,7 +79,7 @@ export async function roleInSelectorsForType(
 					try {
 						await buttonMessage.edit({ components: [] }).catch(() => undefined);
 					} catch (e) {
-						/* noop */
+						//safe to ignore
 					}
 				},
 				onModify: async (buttonInteraction, page) => {

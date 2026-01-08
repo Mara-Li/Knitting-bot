@@ -1,6 +1,11 @@
 import * as Djs from "discord.js";
-import type { ArrayChannel, TChannel } from "src/interface";
-import { CommandName, type RoleIn, type Translation } from "../interface";
+import {
+	type ArrayChannel,
+	CommandName,
+	type RoleIn,
+	type TChannel,
+	type Translation,
+} from "../interface";
 import {
 	getConfig,
 	getMaps,
@@ -548,11 +553,11 @@ export function processRoleTypeChanges(
 		}
 	}
 
-	// Calculate final roles list and save once
-	let finalRoles = oldRoles.filter(
-		(r) => !removedRoles.some((removed) => removed.id === r.id)
-	);
-	finalRoles = [...finalRoles, ...addedRoles];
+	const removedIds = new Set(removedRoles.map((r) => r.id));
+	const finalRoles = [
+		...oldRoles.filter((r) => !removedIds.has(r.id)),
+		...addedRoles,
+	];
 	setRole(
 		mode,
 		guildID,

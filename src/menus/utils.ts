@@ -11,8 +11,7 @@ import {
 } from "../interface";
 import { getConfig, getRoleIn, setRoleIn } from "../maps";
 import { resolveChannelsByIds } from "../utils";
-import { createSweepScheduler } from "./flow";
-import type { TrackedItems } from "./interfaces";
+import { SWEEP_INTERVAL_MS, type TrackedItems } from "./interfaces";
 import { createPaginatedChannelModal } from "./modal";
 
 /**
@@ -53,6 +52,35 @@ const roleInStates = new Map<string, RoleInPaginationState>();
 // TTL defaults using the generic sweep scheduler from flow.ts
 const DEFAULT_ROLEIN_TTL_MS = 15 * 60 * 1000; // 15 minutes
 const ROLEIN_SWEEP_INTERVAL_MS = 60 * 1000; // 1 minute
+
+/**
+ * Generic sweep scheduler factory for Maps with items that have expiresAt property
+ * Can be used by multiple modules with different state maps
+ * @param intervalMs Interval in milliseconds for the sweep
+ * @returns A scheduler function that can be called with a state map
+ */
+export function createSweepScheduler<T extends { expiresAt?: number }>(
+	intervalMs = SWEEP_INTERVAL_MS
+) {
+	let scheduled = false;
+	return function scheduleSweep(
+		stateMap: Map<string, T>,
+		onExpire?: (key: string, state: T) => void
+	) {
+		if (scheduled) return;
+		// eslint-disable-next-line @typescript-eslint/no-misused-promises
+		setInterval(() => {
+			const now = Date.now();
+			for (const [key, state] of stateMap.entries()) {
+				if (state.expiresAt && state.expiresAt <= now) {
+					stateMap.delete(key);
+					if (onExpire) onExpire(key, state);
+				}
+			}
+		}, intervalMs);
+		scheduled = true;
+	};
+}
 
 // Create a sweep scheduler instance for roleIn states
 const scheduleRoleInSweep = createSweepScheduler<RoleInPaginationState>(
