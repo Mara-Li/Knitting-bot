@@ -1,5 +1,5 @@
-import * as Djs from "discord.js";
-import type {TChannel, Translation} from "../interface";
+import type * as Djs from "discord.js";
+import type { TChannel, Translation } from "../interface";
 
 export type CommandMode = "follow" | "ignore";
 
@@ -16,7 +16,7 @@ export type ChannelSelectorsForTypeOptions = {
 	ul: Translation;
 	channelType: TChannel;
 	mode: CommandMode;
-}; // TTL defaults and sweep settings
+};
 export type PaginatedIdsState = {
 	currentPage: number;
 	originalIds: string[];
@@ -36,7 +36,10 @@ export type PaginatedHandlers = {
 // global state maps
 export const globalPaginationStates = new Map<string, PaginatedIdsState>();
 // message id -> { stateKey, expiresAt }
-export const messageToStateKey = new Map<string, { stateKey: string; expiresAt?: number }>();
+export const messageToStateKey = new Map<
+	string,
+	{ stateKey: string; expiresAt?: number }
+>();
 export const DEFAULT_TTL_MS = 15 * 60 * 1000; // 15 minutes
 export const SWEEP_INTERVAL_MS = 60 * 1000; // 1 minute
 /**

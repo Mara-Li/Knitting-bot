@@ -431,7 +431,7 @@ async function updateConfig(
 		const rows = reloadButtonMode(interaction.guild.id, ul);
 		await interaction.editReply({ components: rows, embeds: [embed] });
 	} else if (command === "manualMode") {
-		const names = ["channel", "member", "thread", "newMember"];
+		const names = ["onChannelUpdate", "onMemberUpdate", "onThreadCreated", "onNewMember"];
 
 		// Determine current manual mode flag
 		const currentManual = getConfig("manualMode", interaction.guild.id) as boolean;
