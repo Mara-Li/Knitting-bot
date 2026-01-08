@@ -559,7 +559,7 @@ export async function interactionRoleInChannel(
 		}
 		if (i.customId === `${on}_roleIn_cancel_${roleId}`) {
 			clearRoleInState(userId, guildID, on, roleId);
-			await i.update({ components: [], content: ul("common.cancel") });
+			await i.update({ components: [], content: ul("common.cancelled") });
 			collector.stop();
 		}
 	});
@@ -631,8 +631,8 @@ export async function removeRoleIn(
 	setRoleIn(mode, guild, filtered);
 	await interaction.reply({
 		content: ul("roleIn.noLonger.any", {
+			mention: Djs.roleMention(roleId),
 			on: ul(`roleIn.on.${mode}`),
-			role: Djs.roleMention(roleId),
 		}),
 		flags: Djs.MessageFlags.Ephemeral,
 	});

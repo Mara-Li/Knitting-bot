@@ -244,7 +244,7 @@
 				"channelDescription": "Please select the channels to follow and deselect those you no longer wish to follow.",
 				"forumDescription": "Please select the forums you wish to follow and deselect those you no longer wish to follow.",
 				"label": "Channels",
-				"threadDescription": "Please select the feeds you wish to follow and deselect those you no longer wish to follow."
+				"threadDescription": "Please select the thread you wish to follow and deselect those you no longer wish to follow."
 			},
 			"startButton": "Open the management menu",
 			"success": "{{- thread}} is now followed."
