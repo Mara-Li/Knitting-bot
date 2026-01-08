@@ -31,7 +31,12 @@ const client = new Client({
 		GatewayIntentBits.GuildMessages,
 		GatewayIntentBits.GuildMembers,
 	],
-	partials: [Partials.Channel],
+	partials: [
+		Partials.Channel,
+		Partials.GuildMember,
+		Partials.ThreadMember,
+		Partials.User,
+	],
 });
 
 export const EMOJI =

@@ -12,6 +12,7 @@ import {
 
 export default (client: Client): void => {
 	client.on("guildMemberUpdate", async (oldMember, newMember) => {
+		console.log("Member updated:", oldMember.user.username);
 		//trigger only on role change
 		try {
 			if (oldMember.roles.cache.size === newMember.roles.cache.size) return;
@@ -45,6 +46,8 @@ export default (client: Client): void => {
 			const channels = guild.channels.cache.filter((channel) => channel.isThread());
 			const followOnlyChannelEnabled = getConfig("followOnlyChannel", guildID);
 
+			// Collect promises to add users to threads so we can run them in parallel
+			const addPromises: Promise<unknown>[] = [];
 			for (const channel of channels.values()) {
 				const threadChannel = channel as ThreadChannel;
 				const updatedRoleAllowed = updatedRoles.filter((role) => {
@@ -84,9 +87,17 @@ export default (client: Client): void => {
 				}
 
 				if (shouldAddUser) {
-					await addUserToThread(threadChannel, newMember);
-					// Add delay between requests to avoid gateway rate limit
-					await new Promise((resolve) => setTimeout(resolve, 250));
+					addPromises.push(addUserToThread(threadChannel, newMember));
+				}
+			}
+
+			// Await all add operations and log any failures without failing the whole handler
+			if (addPromises.length > 0) {
+				const results = await Promise.allSettled(addPromises);
+				for (const r of results) {
+					if (r.status === "rejected") {
+						console.error("addUserToThread failed:", r.reason);
+					}
 				}
 			}
 		} catch (error) {
