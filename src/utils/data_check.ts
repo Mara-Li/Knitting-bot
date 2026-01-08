@@ -9,7 +9,6 @@ import {
 	type ThreadChannel,
 	type ThreadMember,
 } from "discord.js";
-import { CommandName, TypeName } from "../interface";
 import { getConfig, getMaps, getRole, getRoleIn } from "../maps";
 
 /**
@@ -59,7 +58,7 @@ export async function checkIfUserNotInTheThread(
  */
 export function checkMemberRole(role: GuildMemberRoleManager, on: "ignore" | "follow") {
 	const guild = role.guild.id;
-	if (on === "follow" && !getConfig(CommandName.followOnlyRole, guild)) return true;
+	if (on === "follow" && !getConfig("followOnlyRole", guild)) return true;
 	const roleIds = getRole(on, guild);
 	const allMemberRoles = role.cache;
 	return allMemberRoles.some((memberRole) => roleIds.includes(memberRole.id));
@@ -74,7 +73,7 @@ export function checkMemberRole(role: GuildMemberRoleManager, on: "ignore" | "fo
  */
 export function checkRole(role: Role, on: "ignore" | "follow") {
 	const guild = role.guild.id;
-	if (on === "follow" && !getConfig(CommandName.followOnlyRole, guild)) return true;
+	if (on === "follow" && !getConfig("followOnlyRole", guild)) return true;
 	const roleIds = getRole(on, guild);
 	return roleIds.includes(role.id);
 }
@@ -93,7 +92,7 @@ export function checkMemberRoleIn(
 	thread: ThreadChannel
 ) {
 	const guild = thread.guild.id;
-	if (on === "follow" && !getConfig(CommandName.followOnlyRoleIn, guild)) return true;
+	if (on === "follow" && !getConfig("followOnlyRoleIn", guild)) return true;
 	const roles = roleManager.cache;
 	const parentChannel = thread.parent;
 	const categoryOfParent = parentChannel?.parent;
@@ -119,7 +118,7 @@ export function checkMemberRoleIn(
  */
 export function checkRoleIn(on: "follow" | "ignore", role: Role, thread: ThreadChannel) {
 	const guild = thread.guild.id;
-	if (on === "follow" && !getConfig(CommandName.followOnlyRoleIn, guild)) return true;
+	if (on === "follow" && !getConfig("followOnlyRoleIn", guild)) return true;
 	const parentChannel = thread.parent;
 	const categoryOfParent = parentChannel?.parent;
 	const roleIns = getRoleIn(on, guild);
@@ -144,10 +143,10 @@ export function checkThread(channel: ThreadChannel, on: "ignore" | "follow") {
 	const guild = channel.guild.id;
 	const parentChannels = channel.parent;
 	const categoryOfParent = parentChannels?.parent;
-	const threadIds = getMaps(on, TypeName.thread, guild);
-	const channelIds = getMaps(on, TypeName.channel, guild);
-	const categoryIds = getMaps(on, TypeName.category, guild);
-	const forumIds = getMaps(on, TypeName.forum, guild);
+	const threadIds = getMaps(on, "thread", guild);
+	const channelIds = getMaps(on, "channel", guild);
+	const categoryIds = getMaps(on, "category", guild);
+	const forumIds = getMaps(on, "forum", guild);
 	return (
 		channelIds.includes(channel.id) ||
 		forumIds.includes(channel.id) ||
@@ -158,9 +157,6 @@ export function checkThread(channel: ThreadChannel, on: "ignore" | "follow") {
 
 /**
  * Get all members that have the permission to view the thread
- * @param members
- * @param thread
- * @param {boolean} allow If true, getConfig all members that have the permission to view the thread, else getConfig all members that don't have the permission to view the thread
  */
 export function getMemberPermission(
 	members: Collection<string, GuildMember>,

@@ -2,7 +2,7 @@
 import * as Djs from "discord.js";
 import type { TChannel } from "src/interface";
 import { cmdLn, getUl, t } from "../i18n";
-import { CommandName, TIMEOUT, type Translation } from "../interface";
+import { TIMEOUT, type Translation } from "../interface";
 import { getConfig, getRole, getRoleIn } from "../maps";
 import {
 	channelSelectorsForType,
@@ -114,7 +114,7 @@ export default {
 
 		switch (commands) {
 			case t("common.channel").toLowerCase(): {
-				if (getConfig(CommandName.followOnlyChannel, guild)) {
+				if (getConfig("followOnlyChannel", guild)) {
 					await interaction.reply({
 						content: ul("ignore.error.followChannel", {
 							id: await getCommandId("follow", interaction.guild),
@@ -127,7 +127,7 @@ export default {
 				break;
 			}
 			case t("common.role"):
-				if (getConfig(CommandName.followOnlyRole, guild)) {
+				if (getConfig("followOnlyRole", guild)) {
 					await interaction.reply({
 						content: ul("ignore.error.followRole", {
 							id: await getCommandId("follow", interaction.guild),
@@ -138,7 +138,7 @@ export default {
 				await ignoreThisRole(interaction, ul);
 				break;
 			case t("common.roleIn"): {
-				if (getConfig(CommandName.followOnlyRoleIn, guild)) {
+				if (getConfig("followOnlyRoleIn", guild)) {
 					await interaction.reply({
 						content: ul("ignore.error.followRoleIn", {
 							id: await getCommandId("follow", interaction.guild),
@@ -195,7 +195,7 @@ async function displayIgnored(
 	} = ignored;
 
 	let embed: Djs.EmbedBuilder;
-	if (getConfig(CommandName.followOnlyChannel, guildID)) {
+	if (getConfig("followOnlyChannel", guildID)) {
 		embed = new Djs.EmbedBuilder()
 			.setColor("#2f8e7d")
 			.setTitle(ul("ignore.list.title"))
@@ -215,18 +215,18 @@ async function displayIgnored(
 				name: ul("common.forum"),
 				value: ignoredForumNames || ul("common.none"),
 			});
-		if (getConfig(CommandName.followOnlyRole, guildID)) {
+		if (getConfig("followOnlyRole", guildID)) {
 			embed.addFields({
 				name: ul("common.role").toTitle(),
 				value: ignoredRolesNames || ul("common.none"),
 			});
 		}
-	} else if (getConfig(CommandName.followOnlyRole, guildID)) {
+	} else if (getConfig("followOnlyRole", guildID)) {
 		embed = new Djs.EmbedBuilder()
 			.setColor("#2f8e7d")
 			.setTitle(ul("ignore.list.title"))
 			.setDescription(ignoredRolesNames || ul("common.none"));
-	} else if (getConfig(CommandName.followOnlyRoleIn, guildID)) {
+	} else if (getConfig("followOnlyRoleIn", guildID)) {
 		embed = new Djs.EmbedBuilder()
 			.setColor("#2f8e7d")
 			.setTitle(ul("ignore.roleIn.title"))

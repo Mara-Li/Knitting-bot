@@ -1,9 +1,8 @@
 import { ChannelType, type Client, type TextChannel } from "discord.js";
 import { getTranslation } from "../../i18n";
-import { CommandName } from "../../interface";
 import { getConfig } from "../../maps";
 import { discordLogs, updateThread } from "../../utils";
-import {  validateChannelType } from "../../utils/data_check";
+import { validateChannelType } from "../../utils/data_check";
 
 /**
  * @param {Client} client - Discord.js Client
@@ -25,7 +24,7 @@ export default (client: Client): void => {
 		const ul = getTranslation(guild, {
 			locale: newChannel.guild.preferredLocale,
 		});
-		if (!getConfig(CommandName.channel, guild)) return;
+		if (!getConfig("onChannelUpdate", guild)) return;
 		if (
 			!validateChannelType(oldChannel) ||
 			!validateChannelType(newChannel) ||
@@ -34,7 +33,7 @@ export default (client: Client): void => {
 			return;
 		}
 
-		const followOnlyChannelEnabled = getConfig(CommandName.followOnlyChannel, guild);
+		const followOnlyChannelEnabled = getConfig("followOnlyChannel", guild);
 		const isCategory = newChannel.type === ChannelType.GuildCategory;
 
 		if (isCategory) {
@@ -54,7 +53,7 @@ export default (client: Client): void => {
 								number: threads.size,
 							})
 						);
-					
+
 					await Promise.all(
 						threads.map(async (thread) => {
 							await updateThread(followOnlyChannelEnabled, thread);
@@ -75,7 +74,7 @@ export default (client: Client): void => {
 					number: threads.size,
 				})
 			);
-			
+
 			await Promise.all(
 				threads.map(async (thread) => {
 					await updateThread(followOnlyChannelEnabled, thread);

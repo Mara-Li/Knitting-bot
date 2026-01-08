@@ -1,10 +1,11 @@
 import Enmap from "enmap";
-import type { RoleIn, ServerData } from "./interface";
 import {
-	type CommandName,
+	type ConfigurationKey,
 	DEFAULT_CONFIGURATION,
 	DEFAULT_IGNORE_FOLLOW,
-	TypeName,
+	type IgnoreFollowKey,
+	type RoleIn,
+	type ServerData,
 } from "./interface";
 
 /**
@@ -88,7 +89,7 @@ export function getDefaultServerData(): ServerData {
  * @param value Configuration value
  */
 export function setConfig(
-	name: CommandName | string,
+	name: ConfigurationKey | string,
 	guildID: string,
 	value: string | boolean
 ): void {
@@ -102,12 +103,12 @@ export function setConfig(
  */
 export function setTrackedItem(
 	mode: "follow" | "ignore",
-	name: TypeName,
+	name: IgnoreFollowKey,
 	guildID: string,
 	value: string[]
 ): void {
 	// OnlyRoleIn has its own setter (setRoleIn) due to different data structure
-	if (name === TypeName.OnlyRoleIn) return;
+	if (name === "OnlyRoleIn") return;
 	ensureGuild(guildID);
 	serverDataDb.set(guildID, value, `${mode}.${name}`);
 }
@@ -117,7 +118,7 @@ export function setTrackedItem(
  */
 export function setRole(on: "follow" | "ignore", guildID: string, value: string[]): void {
 	ensureGuild(guildID);
-	serverDataDb.set(guildID, value, `${on}.${TypeName.role}`);
+	serverDataDb.set(guildID, value, `${on}.role`);
 }
 
 /**
@@ -129,7 +130,7 @@ export function setRoleIn(
 	value: RoleIn[]
 ): void {
 	ensureGuild(guildID);
-	serverDataDb.set(guildID, value, `${on}.${TypeName.OnlyRoleIn}`);
+	serverDataDb.set(guildID, value, `${on}.OnlyRoleIn`);
 }
 
 /**
@@ -140,10 +141,14 @@ export function setRoleIn(
  * @param guildID Guild ID
  * @param channel - If true, get channel configuration
  */
-export function getConfig(name: CommandName, guildID: string, channel?: false): boolean;
-export function getConfig(name: CommandName, guildID: string, channel: true): string;
 export function getConfig(
-	name: CommandName,
+	name: ConfigurationKey,
+	guildID: string,
+	channel?: false
+): boolean;
+export function getConfig(name: ConfigurationKey, guildID: string, channel: true): string;
+export function getConfig(
+	name: ConfigurationKey,
 	guildID: string,
 	channel?: boolean
 ): string | boolean {
@@ -176,7 +181,7 @@ export function getConfig(
  */
 export function getRoleIn(ignore: "follow" | "ignore", guildID: string): RoleIn[] {
 	ensureGuild(guildID);
-	const roleIn = serverDataDb.get(guildID, `${ignore}.${TypeName.OnlyRoleIn}`) as
+	const roleIn = serverDataDb.get(guildID, `${ignore}.OnlyRoleIn`) as
 		| RoleIn[]
 		| undefined;
 	return roleIn ?? [];
@@ -187,9 +192,7 @@ export function getRoleIn(ignore: "follow" | "ignore", guildID: string): RoleIn[
  */
 export function getRole(ignore: "follow" | "ignore", guildID: string): string[] {
 	ensureGuild(guildID);
-	const roles = serverDataDb.get(guildID, `${ignore}.${TypeName.role}`) as
-		| string[]
-		| undefined;
+	const roles = serverDataDb.get(guildID, `${ignore}.role`) as string[] | undefined;
 	return roles ?? [];
 }
 
@@ -198,22 +201,22 @@ export function getRole(ignore: "follow" | "ignore", guildID: string): string[] 
  */
 export function getMaps(
 	maps: "follow" | "ignore",
-	typeName: TypeName,
+	typeName: IgnoreFollowKey,
 	guildID: string
 ): string[] {
 	ensureGuild(guildID);
 	const config = serverDataDb.get(guildID, maps) as ServerData["follow"];
 
 	switch (typeName) {
-		case TypeName.thread: {
-			return (config?.[TypeName.thread] as string[]) ?? [];
+		case "thread": {
+			return (config?.thread as string[]) ?? [];
 		}
-		case TypeName.category:
-			return (config?.[TypeName.category] as string[]) ?? [];
-		case TypeName.channel:
-			return (config?.[TypeName.channel] as string[]) ?? [];
-		case TypeName.forum:
-			return (config?.[TypeName.forum] as string[]) ?? [];
+		case "category":
+			return (config?.category as string[]) ?? [];
+		case "channel":
+			return (config?.channel as string[]) ?? [];
+		case "forum":
+			return (config?.forum as string[]) ?? [];
 		default:
 			return [];
 	}
@@ -239,10 +242,10 @@ export function getAllFollowedChannels(guildId: string): string[] {
 	if (!follow) return [];
 
 	return [
-		...(follow[TypeName.forum] ?? []),
-		...(follow[TypeName.channel] ?? []),
-		...(follow[TypeName.category] ?? []),
-		...(follow[TypeName.thread] ?? []),
+		...(follow.forum ?? []),
+		...(follow.channel ?? []),
+		...(follow.category ?? []),
+		...(follow.thread ?? []),
 	];
 }
 

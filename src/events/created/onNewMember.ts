@@ -1,6 +1,5 @@
 import type { Client, ThreadChannel } from "discord.js";
 import { getTranslation } from "../../i18n";
-import { CommandName } from "../../interface";
 import { getConfig } from "../../maps";
 import { discordLogs } from "../../utils";
 import { addUserToThread } from "../../utils/add";
@@ -15,7 +14,7 @@ import { checkMemberRole, checkThread } from "../../utils/data_check";
 export default (client: Client): void => {
 	client.on("guildMemberAdd", async (member) => {
 		const guildID = member.guild.id;
-		if (!getConfig(CommandName.newMember, guildID)) return;
+		if (!getConfig("onNewMember", guildID)) return;
 		if (member.user.bot) return;
 		const ul = getTranslation(guildID, { locale: member.guild.preferredLocale });
 		await discordLogs(guildID, client, ul("logs.joined", { user: member.user.username }));
@@ -28,7 +27,7 @@ export default (client: Client): void => {
 			const roleIsAllowed =
 				!checkMemberRole(member.roles, "follow") &&
 				!checkMemberRole(member.roles, "ignore");
-			if (!getConfig(CommandName.followOnlyChannel, guildID)) {
+			if (!getConfig("followOnlyChannel", guildID)) {
 				if (!checkThread(threadChannel, "ignore") && roleIsAllowed)
 					await addUserToThread(threadChannel, member);
 			} else {

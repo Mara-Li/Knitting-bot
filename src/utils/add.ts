@@ -9,7 +9,6 @@ import {
 } from "discord.js";
 import { getTranslation } from "../i18n";
 import { EMOJI } from "../index";
-import { CommandName } from "../interface";
 import {
 	deleteCachedMessage,
 	getCachedMessage,
@@ -40,8 +39,8 @@ function shouldAddUserToThread(
 	thread: ThreadChannel,
 	guild: string
 ): boolean {
-	const followOnlyRoleIn = getConfig(CommandName.followOnlyRoleIn, guild);
-	const followOnlyRole = getConfig(CommandName.followOnlyRole, guild);
+	const followOnlyRoleIn = getConfig("followOnlyRoleIn", guild);
+	const followOnlyRole = getConfig("followOnlyRole", guild);
 
 	// Early return for followOnlyRoleIn mode
 	if (followOnlyRoleIn) {
@@ -118,21 +117,21 @@ export async function getUsersToPing(thread: ThreadChannel, members: GuildMember
 			(await checkIfUserNotInTheThread(thread, member))
 		) {
 			if (
-				getConfig(CommandName.followOnlyRoleIn, guild) &&
+				getConfig("followOnlyRoleIn", guild) &&
 				checkMemberRoleIn("follow", member.roles, thread)
 			) {
 				usersToBeAdded.push(member);
 			} else if (
-				getConfig(CommandName.followOnlyRole, guild) &&
+				getConfig("followOnlyRole", guild) &&
 				checkMemberRole(member.roles, "follow") &&
-				!getConfig(CommandName.followOnlyRoleIn, guild)
+				!getConfig("followOnlyRoleIn", guild)
 			) {
 				usersToBeAdded.push(member);
 			} else if (
-				!getConfig(CommandName.followOnlyRole, guild) &&
+				!getConfig("followOnlyRole", guild) &&
 				!checkMemberRole(member.roles, "ignore") &&
 				!checkMemberRoleIn("ignore", member.roles, thread) &&
-				!getConfig(CommandName.followOnlyRoleIn, guild)
+				!getConfig("followOnlyRoleIn", guild)
 			) {
 				usersToBeAdded.push(member);
 			}
@@ -163,12 +162,12 @@ export async function getRoleToPing(thread: ThreadChannel, roles: Role[]) {
 		) {
 			if (checkRoleIn("follow", role, thread)) {
 				roleToBeAdded.push(role);
-			} else if (!getConfig(CommandName.followOnlyRoleIn, guild)) {
-				if (getConfig(CommandName.followOnlyRole, guild) && checkRole(role, "follow")) {
+			} else if (!getConfig("followOnlyRoleIn", guild)) {
+				if (getConfig("followOnlyRole", guild) && checkRole(role, "follow")) {
 					roleToBeAdded.push(role);
 				} else if (
-					!getConfig(CommandName.followOnlyRoleIn, guild) &&
-					!getConfig(CommandName.followOnlyRole, guild) &&
+					!getConfig("followOnlyRoleIn", guild) &&
+					!getConfig("followOnlyRole", guild) &&
 					!checkRole(role, "ignore") &&
 					!checkRoleIn("ignore", role, thread)
 				) {

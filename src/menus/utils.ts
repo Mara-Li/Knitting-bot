@@ -1,14 +1,7 @@
 import type { CommandInteractionOptionResolver } from "discord.js";
 import * as Djs from "discord.js";
 import { getUl, t } from "../i18n";
-import {
-	CommandName,
-	type RoleIn,
-	type TChannel,
-	TIMEOUT,
-	type Translation,
-	TypeName,
-} from "../interface";
+import { type RoleIn, type TChannel, TIMEOUT, type Translation } from "../interface";
 import { getConfig, getRoleIn, setRoleIn } from "../maps";
 import { resolveChannelsByIds } from "../utils";
 import { SWEEP_INTERVAL_MS, type TrackedItems } from "./interfaces";
@@ -468,14 +461,13 @@ export async function interactionRoleInChannel(
 
 	if (
 		on === "follow" &&
-		(getConfig(CommandName.followOnlyChannel, guildID) ||
-			getConfig(CommandName.followOnlyRole, guildID))
+		(getConfig("followOnlyChannel", guildID) || getConfig("followOnlyRole", guildID))
 	) {
 		await interaction.reply({ content: ul("roleIn.error.otherMode") as string });
 		return;
 	}
 
-	if (!getConfig(CommandName.followOnlyRoleIn, guildID) && on === "follow") {
+	if (!getConfig("followOnlyRoleIn", guildID) && on === "follow") {
 		await interaction.reply({ content: ul("roleIn.error.need") as string });
 		return;
 	}
@@ -609,24 +601,20 @@ export async function resolveIds(
 }
 
 export function getChannelType(channelType: TChannel) {
-	let typeName: TypeName;
+	const typeName = channelType;
 	let channelTypeFilter: Djs.ChannelType[];
 
 	switch (channelType) {
 		case "channel":
-			typeName = TypeName.channel;
 			channelTypeFilter = [Djs.ChannelType.GuildText];
 			break;
 		case "thread":
-			typeName = TypeName.thread;
 			channelTypeFilter = [Djs.ChannelType.PublicThread, Djs.ChannelType.PrivateThread];
 			break;
 		case "category":
-			typeName = TypeName.category;
 			channelTypeFilter = [Djs.ChannelType.GuildCategory];
 			break;
 		case "forum":
-			typeName = TypeName.forum;
 			channelTypeFilter = [Djs.ChannelType.GuildForum];
 			break;
 	}

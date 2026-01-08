@@ -1,5 +1,4 @@
 import type { Client } from "discord.js";
-import { TypeName } from "../../interface";
 import {
 	deleteCachedMessage,
 	getMaps,
@@ -16,17 +15,17 @@ export default (client: Client): void => {
 		deleteCachedMessage(guildID, thread.id);
 
 		// Remove from thread ID lists
-		const followedThreads = getMaps("follow", TypeName.thread, guildID);
-		const ignoredThreads = getMaps("ignore", TypeName.thread, guildID);
+		const followedThreads = getMaps("follow", "thread", guildID);
+		const ignoredThreads = getMaps("ignore", "thread", guildID);
 
 		const filteredFollowed = followedThreads.filter((id) => id !== thread.id);
 		const filteredIgnored = ignoredThreads.filter((id) => id !== thread.id);
 
 		if (followedThreads.length !== filteredFollowed.length) {
-			setTrackedItem("follow", TypeName.thread, guildID, filteredFollowed);
+			setTrackedItem("follow", "thread", guildID, filteredFollowed);
 		}
 		if (ignoredThreads.length !== filteredIgnored.length) {
-			setTrackedItem("ignore", TypeName.thread, guildID, filteredIgnored);
+			setTrackedItem("ignore", "thread", guildID, filteredIgnored);
 		}
 
 		// Remove from RoleIn channel ID lists

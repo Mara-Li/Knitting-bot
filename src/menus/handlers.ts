@@ -1,11 +1,5 @@
 import * as Djs from "discord.js";
-import {
-	type ArrayChannel,
-	CommandName,
-	type RoleIn,
-	type TChannel,
-	type Translation,
-} from "../interface";
+import type { ArrayChannel, RoleIn, TChannel, Translation } from "../interface";
 import {
 	getConfig,
 	getMaps,
@@ -487,8 +481,7 @@ export async function checkRoleInConstraints(
 ): Promise<boolean> {
 	if (
 		mode === "follow" &&
-		(getConfig(CommandName.followOnlyChannel, guildID) ||
-			getConfig(CommandName.followOnlyRole, guildID))
+		(getConfig("followOnlyChannel", guildID) || getConfig("followOnlyRole", guildID))
 	) {
 		await interaction.reply({
 			content: ul("roleIn.error.otherMode"),
@@ -497,7 +490,7 @@ export async function checkRoleInConstraints(
 		return false;
 	}
 
-	if (!getConfig(CommandName.followOnlyRoleIn, guildID) && mode === "follow") {
+	if (!getConfig("followOnlyRoleIn", guildID) && mode === "follow") {
 		await interaction.reply({
 			content: ul("roleIn.error.need"),
 			flags: Djs.MessageFlags.Ephemeral,
@@ -554,10 +547,7 @@ export function processRoleTypeChanges(
 	}
 
 	const removedIds = new Set(removedRoles.map((r) => r.id));
-	const finalRoles = [
-		...oldRoles.filter((r) => !removedIds.has(r.id)),
-		...addedRoles,
-	];
+	const finalRoles = [...oldRoles.filter((r) => !removedIds.has(r.id)), ...addedRoles];
 	setRole(
 		mode,
 		guildID,

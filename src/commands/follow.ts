@@ -2,7 +2,7 @@
 import * as Djs from "discord.js";
 import type { TChannel } from "src/interface";
 import { cmdLn, getUl, t } from "../i18n";
-import { CommandName, TIMEOUT, type Translation } from "../interface";
+import { TIMEOUT, type Translation } from "../interface";
 import { getConfig, getRole } from "../maps";
 import {
 	channelSelectorsForType,
@@ -114,7 +114,7 @@ export default {
 
 		switch (commands) {
 			case t("common.channel").toLowerCase(): {
-				if (!getConfig(CommandName.followOnlyChannel, guild)) {
+				if (!getConfig("followOnlyChannel", guild)) {
 					await interaction.reply({
 						content: ul("follow.error.followChannel", {
 							id: await getCommandId("ignore", interaction.guild),
@@ -127,7 +127,7 @@ export default {
 				break;
 			}
 			case t("common.role").toLowerCase():
-				if (!getConfig(CommandName.followOnlyRole, guild)) {
+				if (!getConfig("followOnlyRole", guild)) {
 					await interaction.reply({
 						content: ul("follow.error.role", {
 							id: await getCommandId("ignore", interaction.guild),
@@ -188,7 +188,7 @@ async function displayFollowed(
 		forumNames: followedForumNames,
 	} = followed;
 	let embed: Djs.EmbedBuilder;
-	if (getConfig(CommandName.followOnlyChannel, guildID)) {
+	if (getConfig("followOnlyChannel", guildID)) {
 		embed = new Djs.EmbedBuilder()
 			.setColor("#2f8e7d")
 			.setTitle(ul("follow.list.title"))
@@ -208,18 +208,18 @@ async function displayFollowed(
 				name: ul("common.forum"),
 				value: followedForumNames || ul("common.none"),
 			});
-		if (getConfig(CommandName.followOnlyRole, guildID)) {
+		if (getConfig("followOnlyRole", guildID)) {
 			embed.addFields({
 				name: ul("common.role").toTitle(),
 				value: followedRolesNames || ul("common.none"),
 			});
 		}
-	} else if (getConfig(CommandName.followOnlyRole, guildID)) {
+	} else if (getConfig("followOnlyRole", guildID)) {
 		embed = new Djs.EmbedBuilder()
 			.setColor("#2f8e7d")
 			.setTitle(ul("follow.list.title"))
 			.setDescription(followedRolesNames || ul("common.none"));
-	} else if (getConfig(CommandName.followOnlyRoleIn, guildID)) {
+	} else if (getConfig("followOnlyRoleIn", guildID)) {
 		embed = new Djs.EmbedBuilder()
 			.setColor("#2f8e7d")
 			.setTitle(ul("follow.list.roleIn"))
