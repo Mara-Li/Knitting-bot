@@ -255,13 +255,13 @@
 			"otherMode": "Vous ne pouvez pas utiliser cette commande avec les autres modes de suivi."
 		},
 		"noLonger": {
-			"any": "Le rôle {{- mention}} n'est plus {{- on }} dans aucun salon."
+			"any": "Le rôle {{- mention}} n'est plus {{- on}} dans aucun salon."
 		},
 		"on": {
 			"follow": "Suivi",
 			"ignore": "Ignoré"
 		},
-		"updated": "Le rôle {{- mention}} sera maintenant {{- on}} dans :{{- channels }}"
+		"updated": "Le rôle {{- mention}} sera maintenant {{- on}} dans :{{- channels}}"
 	},
 	"select": {
 		"type": "Type de salons de discussions à gérer"
