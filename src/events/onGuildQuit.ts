@@ -11,7 +11,7 @@ export default (client: Client): void => {
 		db.globalPaginationStates.sweep((_state, key) => {
 			return key.split("_")[1] === guild.id;
 		});
-		db.messageToStateKey.sweep((_msgId, stateKey) => {
+		db.messageToStateKey.sweep((stateKey) => {
 			return stateKey.split("_")[1] === guild.id;
 		});
 		
