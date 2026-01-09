@@ -3,7 +3,7 @@ import type { RoleIn } from "../interface";
 import { getRoleIn } from "../maps";
 import { getTrackedItems } from "../menus";
 import configuration from "./config";
-import dev from "./dev";
+import dev from "./dev.js";
 import follow from "./follow";
 import ignore from "./ignore";
 import info from "./info";

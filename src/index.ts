@@ -19,10 +19,12 @@ import {
 	ready,
 } from "./events";
 
-let config = dotenv.config({ path: ".env", quiet: true });
+let dot = dotenv.config({ path: ".env", quiet: true });
 if (process.env.ENV === "production") {
-	config = dotenv.config({ path: ".env.prod", quiet: true });
+	dot = dotenv.config({ path: ".env.prod", quiet: true });
 }
+
+export { dot };
 
 const client = new Client({
 	intents: [
@@ -68,6 +70,6 @@ try {
 } catch (error) {
 	console.error(error);
 }
-client.login(config.parsed?.DISCORD_TOKEN).then(() => {
+client.login(process.env.DISCORD_TOKEN).then(() => {
 	console.log("Bot logged in successfully.");
 });

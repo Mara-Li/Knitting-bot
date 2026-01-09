@@ -1,10 +1,7 @@
+import * as Djs from "discord.js";
 import "../discord_ext.js";
 import "uniformize";
-import * as Djs from "discord.js";
-import dotenv from "dotenv";
 import { serverDataDb } from "../maps.js";
-
-dotenv.config({ quiet: true });
 
 export default {
 	data: new Djs.SlashCommandBuilder()
