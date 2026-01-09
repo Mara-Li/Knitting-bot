@@ -39,7 +39,7 @@ export default {
 	/**
 	 * Main Enmap for server settings
 	 */
-	settings: new Enmap<string, ServerData, unknown>({
+	settings: new Enmap<string, ServerData>({
 		autoEnsure: getDefaultServerData(),
 		name: "Database",
 	}),

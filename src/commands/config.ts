@@ -348,6 +348,8 @@ async function setupMessageCollector(
  * Display Mode menu as an embed
  */
 function displayModeMenu(guildID: string, ul: Translation): Djs.EmbedBuilder {
+	const config =
+		db.settings.get(guildID, "configuration") ?? db.defaultValues.configuration;
 	return new Djs.EmbedBuilder()
 		.setColor("#0099ff")
 		.setTitle(ul("configuration.menu.mode.title"))
@@ -355,20 +357,12 @@ function displayModeMenu(guildID: string, ul: Translation): Djs.EmbedBuilder {
 			{
 				inline: true,
 				name: ul("configuration.follow.role.title"),
-				value: enabledOrDisabled(
-					db.settings.get(guildID, "configuration.followOnlyRole") ??
-						db.defaultValues.configuration.followOnlyRole,
-					ul
-				),
+				value: enabledOrDisabled(config.followOnlyRole, ul),
 			},
 			{
 				inline: true,
 				name: ul("configuration.follow.thread.title"),
-				value: enabledOrDisabled(
-					db.settings.get(guildID, "configuration.followOnlyChannel") ??
-						db.defaultValues.configuration.followOnlyChannel,
-					ul
-				),
+				value: enabledOrDisabled(config.followOnlyChannel, ul),
 			}
 		)
 		.addFields({ name: "\u200A", value: "\u200A" })
@@ -376,17 +370,15 @@ function displayModeMenu(guildID: string, ul: Translation): Djs.EmbedBuilder {
 			{
 				inline: true,
 				name: ul("configuration.follow.roleIn"),
-				value: enabledOrDisabled(
-					db.settings.get(guildID, "configuration.followOnlyRoleIn") ??
-						db.defaultValues.configuration.followOnlyRoleIn,
-					ul
-				),
+				value: enabledOrDisabled(config.followOnlyRoleIn, ul),
 			},
 			{ inline: true, name: "\u200A", value: "\u200A" }
 		);
 }
 
 function autoUpdateMenu(guildID: string, ul: Translation): Djs.EmbedBuilder {
+	const config =
+		db.settings.get(guildID, "configuration") ?? db.defaultValues.configuration;
 	return new Djs.EmbedBuilder()
 		.setColor("#0099ff")
 		.setTitle(ul("configuration.menu.autoUpdate.title"))
@@ -394,20 +386,12 @@ function autoUpdateMenu(guildID: string, ul: Translation): Djs.EmbedBuilder {
 			{
 				inline: true,
 				name: ul("configuration.channel.title"),
-				value: enabledOrDisabled(
-					db.settings.get(guildID, "configuration.onChannelUpdate") ??
-						db.defaultValues.configuration.onChannelUpdate,
-					ul
-				),
+				value: enabledOrDisabled(config.onChannelUpdate, ul),
 			},
 			{
 				inline: true,
 				name: ul("configuration.member.title"),
-				value: enabledOrDisabled(
-					db.settings.get(guildID, "configuration.onNewMember") ??
-						db.defaultValues.configuration.onNewMember,
-					ul
-				),
+				value: enabledOrDisabled(config.onNewMember, ul),
 			}
 		)
 		.addFields({ name: "\u200A", value: "\u200A" })
@@ -415,20 +399,12 @@ function autoUpdateMenu(guildID: string, ul: Translation): Djs.EmbedBuilder {
 			{
 				inline: true,
 				name: ul("configuration.newMember.display"),
-				value: enabledOrDisabled(
-					db.settings.get(guildID, "configuration.onMemberUpdate") ??
-						db.defaultValues.configuration.onMemberUpdate,
-					ul
-				),
+				value: enabledOrDisabled(config.onMemberUpdate, ul),
 			},
 			{
 				inline: true,
 				name: ul("configuration.thread.display"),
-				value: enabledOrDisabled(
-					db.settings.get(guildID, "configuration.onThreadCreated") ??
-						db.defaultValues.configuration.onThreadCreated,
-					ul
-				),
+				value: enabledOrDisabled(config.onThreadCreated, ul),
 			}
 		);
 }
@@ -452,21 +428,15 @@ async function updateConfig(
 ) {
 	if (!interaction.guild) return;
 	let newConfig: string | boolean;
+	const config =
+		db.settings.get(interaction.guild.id, "configuration") ??
+		db.defaultValues.configuration;
 	const commandType = {
 		Mode: ["followOnlyRole", "followOnlyChannel", "followOnlyRoleIn"],
 	};
-	const followOnlyRole = db.settings.get(
-		interaction.guild.id,
-		"configuration.followOnlyRole"
-	);
-	const followOnlyChannel = db.settings.get(
-		interaction.guild.id,
-		"configuration.followOnlyChannel"
-	);
-	const followOnlyRoleIn = db.settings.get(
-		interaction.guild.id,
-		"configuration.followOnlyRoleIn"
-	);
+	const followOnlyRole = config.followOnlyRole;
+	const followOnlyChannel = config.followOnlyChannel;
+	const followOnlyRoleIn = config.followOnlyRoleIn;
 	if (
 		(command === "followOnlyRoleIn" && (followOnlyChannel || followOnlyRole)) ||
 		(followOnlyRoleIn &&
@@ -479,10 +449,7 @@ async function updateConfig(
 		const names = ["onChannelUpdate", "onMemberUpdate", "onThreadCreated", "onNewMember"];
 
 		// Determine current manual mode flag
-		const currentManual = db.settings.get(
-			interaction.guild.id,
-			"configuration.manualMode"
-		);
+		const currentManual = config.manualMode;
 
 		if (!currentManual) {
 			// Enabling manual mode: set manualMode = true and disable all auto-update flags
@@ -566,6 +533,8 @@ function createButton(command: ConfigurationKey, label: string, guildID: string)
 }
 
 function reloadButtonMode(guildID: string, ul: Translation) {
+	const config =
+		db.settings.get(guildID, "configuration") ?? db.defaultValues.configuration;
 	const translation = {
 		followOnlyChannel: ul("configuration.follow.thread.name"),
 		followOnlyRole: ul("configuration.follow.role.name"),
@@ -580,7 +549,7 @@ function reloadButtonMode(guildID: string, ul: Translation) {
 	}
 
 	// If manual mode is enabled, grey and disable all mode buttons
-	if (db.settings.get(guildID, "configuration.manualMode")) {
+	if (config.manualMode) {
 		for (let i = 0; i < buttons.length; i++) {
 			buttons[i] = buttons[i].setStyle(Djs.ButtonStyle.Secondary).setDisabled(true);
 		}
@@ -592,7 +561,7 @@ function reloadButtonMode(guildID: string, ul: Translation) {
 		];
 	}
 
-	if (db.settings.get(guildID, "configuration.followOnlyRoleIn")) {
+	if (config.followOnlyRoleIn) {
 		/**
 		 * Disable the button if followRoleIn is enable
 		 */
@@ -681,22 +650,16 @@ async function displayConfig(interaction: Djs.ChatInputCommandInteraction) {
 	const data = db.settings.get(interaction.guild.id) ?? db.defaultValues;
 	const config = data.configuration;
 	const mode = {
-		followOnlyChannel: db.settings.get(
-			interaction.guild.id,
-			"configuration.followOnlyChannel"
-		),
-		followOnlyRole: db.settings.get(interaction.guild.id, "configuration.followOnlyRole"),
-		followOnlyRoleIn: db.settings.get(
-			interaction.guild.id,
-			"configuration.followOnlyRoleIn"
-		),
+		followOnlyChannel: config.followOnlyChannel,
+		followOnlyRole: config.followOnlyRole,
+		followOnlyRoleIn: config.followOnlyRoleIn,
 	};
 	const auto = {
-		channel: db.settings.get(interaction.guild.id, "configuration.onChannelUpdate"),
-		manualMode: db.settings.get(interaction.guild.id, "configuration.manualMode"),
-		member: db.settings.get(interaction.guild.id, "configuration.onMemberUpdate"),
-		newMember: db.settings.get(interaction.guild.id, "configuration.onNewMember"),
-		thread: db.settings.get(interaction.guild.id, "configuration.onThreadCreated"),
+		channel: config.onChannelUpdate,
+		manualMode: config.manualMode,
+		member: config.onMemberUpdate,
+		newMember: config.onNewMember,
+		thread: config.onThreadCreated,
 	};
 
 	const randomHexColor = Math.floor(Math.random() * 0xffffff);

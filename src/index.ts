@@ -1,5 +1,5 @@
 import process from "node:process";
-import {Client, GatewayIntentBits, Partials} from "discord.js";
+import { Client, GatewayIntentBits, Partials } from "discord.js";
 import dotenv from "dotenv";
 import "uniformize";
 import {
@@ -19,7 +19,6 @@ import {
 } from "./events";
 
 dotenv.config({ path: ".env", quiet: true });
-
 
 const client = new Client({
 	intents: [

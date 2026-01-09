@@ -1,5 +1,5 @@
 import process from "node:process";
-import pkg from "../../package.json" with {type: "json"};
+import pkg from "../../package.json" with { type: "json" };
 
 export const EMOJI =
 	process.env.MESSAGE && process.env.MESSAGE.trim().length > 0
