@@ -24,7 +24,7 @@ await build({
 	},
 	entryPoints,
 	format: "esm",
-	minify: isProd,
+	minify: false,
 	outbase: "src",
 	outdir: "dist/src",
 	platform: "node",
