@@ -1,6 +1,6 @@
 import type { CommandInteractionOptionResolver } from "discord.js";
 import * as Djs from "discord.js";
-import db from "../database.js";
+import db from "../database";
 import { getUl, t } from "../i18n";
 import {
 	type CommandMode,
@@ -451,7 +451,7 @@ async function validateRoleInSelection(
 
 	if (channels.length === 0) {
 		const newRolesIn = allRoleIn.filter((r) => r.roleId !== roleId);
-		db.settings.set(guildID, newRolesIn, `${on}.OnlyRoleIn`); //setRoleIn(on, guildID, newRolesIn);
+		db.settings.set(guildID, newRolesIn, `${on}.onlyRoleIn`); //setRoleIn(on, guildID, newRolesIn);
 		await interaction.update({
 			components: [],
 			content: ul("roleIn.noLonger.any", {
@@ -470,8 +470,8 @@ async function validateRoleInSelection(
 
 	if (existing) {
 		const updated = allRoleIn.map((r) => (r.roleId === roleId ? newEntry : r));
-		db.settings.set(guildID, updated, `${on}.OnlyRoleIn`); //setRoleIn(on, guildID, updated);
-	} else db.settings.set(guildID, [...allRoleIn, newEntry], `${on}.OnlyRoleIn`); //setRoleIn(on, guildID, [...allRoleIn, newEntry]);
+		db.settings.set(guildID, updated, `${on}.onlyRoleIn`); //setRoleIn(on, guildID, updated);
+	} else db.settings.set(guildID, [...allRoleIn, newEntry], `${on}.onlyRoleIn`); //setRoleIn(on, guildID, [...allRoleIn, newEntry]);
 
 	const channelsByType = {
 		categories: channels.filter((c) => c.type === Djs.ChannelType.GuildCategory),
@@ -678,7 +678,7 @@ export async function removeRoleIn(
 	const allRoleIn = db.settings.get(guild, `${mode}.onlyRoleIn`) ?? []; //getRoleIn(mode, guild);
 	const filtered = allRoleIn.filter((ri) => ri.roleId !== roleId);
 	//setRoleIn(mode, guild, filtered);
-	db.settings.set(guild, filtered, `${mode}.OnlyRoleIn`);
+	db.settings.set(guild, filtered, `${mode}.onlyRoleIn`);
 	await interaction.reply({
 		content: ul("roleIn.noLonger.any", {
 			mention: Djs.roleMention(roleId),

@@ -1,7 +1,7 @@
 import * as Djs from "discord.js";
 import "../discord_ext.js";
 import "uniformize";
-import db from "../database.js";
+import db from "../database";
 import type { IgnoreFollowKey, ServerData } from "../interfaces";
 
 export default {
@@ -113,7 +113,7 @@ export default {
 				const nameIndexed = name
 					.replace("i", `${i + 1}`)
 					.replace("type", type)
-					.replace(/\{date::(.*?)\}/, formatDate(now, format));
+					.replace(/\{date::(.*?)\}/i, formatDate(now, format));
 				if (type === "channel") {
 					await interaction.guild!.channels.create({
 						name: nameIndexed,
@@ -199,6 +199,6 @@ function formatDate(input: Date | string | number, format = "dd/mm/YYYY"): strin
 		yyyy: String(year),
 	};
 
-	// Remplace les tokens les plus longs en premier via une regex
+	// Replace longest tokens first; be tolerant to token case.
 	return format.replace(/YYYY|YY|dd|d|mm|m/gi, (tok) => map[tok] ?? tok);
 }

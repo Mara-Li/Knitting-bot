@@ -1,5 +1,5 @@
 import * as Djs from "discord.js";
-import db from "../database.js";
+import db from "../database";
 import { type PaginatedHandlers, TIMEOUT, type Translation } from "../interfaces";
 import { deletePaginationState } from "./state";
 

@@ -1,6 +1,6 @@
 /** biome-ignore-all lint/style/useNamingConvention: Discord API doesn't respect spec */
 import * as Djs from "discord.js";
-import db from "../database.js";
+import db from "../database";
 import { cmdLn, getUl, t } from "../i18n";
 import { type TChannel, TIMEOUT, type Translation } from "../interfaces";
 import {

@@ -21,8 +21,9 @@ export default (client: Client): void => {
 			const newRoles = newMember.roles.cache;
 			const updatedRoles = newRoles.filter((role) => !oldRoles.has(role.id));
 			const guildID = newMember.guild.id;
-
-			if (!db.settings.get(guildID, "configuration.onMemberUpdate")) return;
+			const onMemberUpdate = db.settings.get(guildID, "configuration.onMemberUpdate");
+			console.log(onMemberUpdate);
+			if (!onMemberUpdate) return;
 			const ul = getTranslation(guildID, { locale: newMember.guild.preferredLocale });
 			if (updatedRoles.size === 0) {
 				await discordLogs(
@@ -44,10 +45,9 @@ export default (client: Client): void => {
 			);
 			const guild = newMember.guild;
 			const channels = guild.channels.cache.filter((channel) => channel.isThread());
-			const followOnlyChannelEnabled = db.settings.get(
-				guildID,
-				"configuration.followOnlyChannel"
-			);
+			const followOnlyChannelEnabled =
+				db.settings.get(guildID, "configuration.followOnlyChannel") ??
+				db.defaultValues.configuration.followOnlyChannel;
 
 			// Collect promises to add users to threads so we can run them in parallel
 			const tasks: Array<() => Promise<unknown>> = [];

@@ -1,6 +1,6 @@
 import * as Djs from "discord.js";
 import { default as i18next } from "i18next";
-import db from "../database.js";
+import db from "../database";
 import EnglishUS from "./locales/en.json" with { type: "json" };
 import French from "./locales/fr.json" with { type: "json" };
 

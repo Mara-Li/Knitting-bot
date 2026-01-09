@@ -1,5 +1,5 @@
 import * as Djs from "discord.js";
-import db from "../database.js";
+import db from "../database";
 import type {
 	ArrayChannel,
 	CommandMode,
@@ -437,7 +437,7 @@ async function persistRoleInSelection({
 	if (allChannelTypesIds.length === 0) {
 		const updatedRoleIn = allRoleIn.filter((r) => r.roleId !== roleId);
 		//setRoleIn(mode, guildID, updatedRoleIn);
-		db.settings.set(guildID, updatedRoleIn, `${mode}.OnlyRoleIn`);
+		db.settings.set(guildID, updatedRoleIn, `${mode}.onlyRoleIn`);
 		const finalMessage = ul("roleIn.noLonger.any", {
 			mention: Djs.roleMention(roleId),
 			on: ul(`roleIn.on.${mode}`),
@@ -456,10 +456,10 @@ async function persistRoleInSelection({
 	if (existingEntry) {
 		const updated = allRoleIn.map((r) => (r.roleId === roleId ? newEntry : r));
 		//setRoleIn(mode, guildID, updated);
-		db.settings.set(guildID, updated, `${mode}.OnlyRoleIn`);
+		db.settings.set(guildID, updated, `${mode}.onlyRoleIn`);
 	}
 	//setRoleIn(mode, guildID, [...allRoleIn, newEntry]);
-	else db.settings.set(guildID, [...allRoleIn, newEntry], `${mode}.OnlyRoleIn`);
+	else db.settings.set(guildID, [...allRoleIn, newEntry], `${mode}.onlyRoleIn`);
 
 	const finalMessage =
 		messages.length > 0

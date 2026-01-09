@@ -1,6 +1,6 @@
 import type { Client } from "discord.js";
 import { ALL_COMMANDS } from "../commands";
-import db from "../database.js";
+import db from "../database";
 /**
  * When the bot arrive on a server, check all thread and add members that have the permission to view the thread
  * @param {Client} client - Discord.js Client

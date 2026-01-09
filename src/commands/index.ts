@@ -1,5 +1,5 @@
 import * as djs from "discord.js";
-import db from "../database.js";
+import db from "../database";
 import type { RoleIn } from "../interfaces";
 import { getTrackedItems } from "../menus";
 import configuration from "./config";

@@ -5,7 +5,7 @@ import { fetchArchived, updateCache } from "../utils";
 import { addRoleAndUserToThread } from "../utils/add";
 import { checkThread } from "../utils/data_check";
 import "../discord_ext.js";
-import db from "../database.js";
+import db from "../database";
 import { runWithConcurrency } from "../utils/concurrency";
 
 export default {

@@ -1,5 +1,5 @@
 import * as Djs from "discord.js";
-import db from "../database.js";
+import db from "../database";
 import type { CommandMode, RoleIn, TChannel, Translation } from "../interfaces";
 import { startPaginatedChannelSelectorsFlow } from "./channel";
 import { checkRoleInConstraints, validateRoleInAndSave } from "./handlers";

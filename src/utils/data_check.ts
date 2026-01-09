@@ -1,5 +1,5 @@
 import * as Djs from "discord.js";
-import db from "../database.js";
+import db from "../database";
 
 /**
  * Verify that the channel type is :

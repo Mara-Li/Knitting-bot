@@ -1,4 +1,4 @@
-import db from "../database.js";
+import db from "../database";
 import type { PaginatedIdsState } from "../interfaces";
 
 export function paginateIds(ids: string[], pageSize = 25): Record<number, string[]> {
