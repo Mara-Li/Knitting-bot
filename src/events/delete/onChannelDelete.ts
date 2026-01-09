@@ -1,5 +1,4 @@
 import {
-	type CategoryChannel,
 	ChannelType,
 	type Client,
 	DMChannel,
@@ -7,130 +6,110 @@ import {
 	type NonThreadGuildBasedChannel,
 	type TextChannel,
 } from "discord.js";
-import { TypeName } from "../../interface";
-import { getMaps, getRoleIn, setIgnore, setRoleIn } from "../../maps";
+import type { RoleIn } from "../../interface";
+import {
+	deleteCachedMessage,
+	getMaps,
+	getRoleIn,
+	setRoleIn,
+	setTrackedItem,
+} from "../../maps";
 
+function filterRoleInsByChannel(roleIns: RoleIn[], channelId: string) {
+	return roleIns
+		.map((roleIn) => {
+			if (!roleIn.channelIds.includes(channelId)) return roleIn;
+			return {
+				...roleIn,
+				channelIds: roleIn.channelIds.filter((id) => id !== channelId),
+			};
+		})
+		.filter((roleIn) => roleIn.channelIds.length > 0);
+}
+
+function cleanupChannelFromMaps(
+	channelId: string,
+	typeName: "channel" | "category" | "forum",
+	guildID: string
+) {
+	const allIgnore = getMaps("ignore", typeName, guildID);
+	const allFollow = getMaps("follow", typeName, guildID);
+
+	const filteredIgnore = allIgnore.filter((id) => id !== channelId);
+	const filteredFollow = allFollow.filter((id) => id !== channelId);
+
+	if (allIgnore.length !== filteredIgnore.length) {
+		setTrackedItem("ignore", typeName, guildID, filteredIgnore);
+	}
+	if (allFollow.length !== filteredFollow.length) {
+		setTrackedItem("follow", typeName, guildID, filteredFollow);
+	}
+}
 /**
- * @param {Client} client - Discord.js Client
  * @returns {void}
  * @description This is a listener for channel delete event.
  * It will delete the channel from the database.
  */
-
 export default (client: Client): void => {
 	client.on("channelDelete", async (channel) => {
 		if (channel instanceof DMChannel) return;
 		const guildID = channel.guild.id;
 		const channelGuild = channel as NonThreadGuildBasedChannel;
 		const channelType = channelGuild.type;
-		const ignoredRoleIn = getRoleIn("ignore", guildID).some((ignored) => {
-			const channels = ignored.channels;
-			return channels.some((ignored) => channel.id === ignored.id);
+
+		const ignoredRoleIns = getRoleIn("ignore", guildID);
+		const followedRoleIns = getRoleIn("follow", guildID);
+
+		const hasIgnoredRoleIn = ignoredRoleIns.some((ignored) => {
+			return ignored.channelIds.includes(channel.id);
 		});
-		const followedRoleIn = getRoleIn("follow", guildID).some((followed) => {
-			const channels = followed.channels;
-			return channels.some((followed) => channel.id === followed.id);
+		const hasFollowedRoleIn = followedRoleIns.some((followed) => {
+			return followed.channelIds.includes(channel.id);
 		});
-		if (ignoredRoleIn) {
-			//remove the channel from the role.channels array
-			const ignored = getRoleIn("ignore", guildID);
-			ignored.forEach((ignored) => {
-				const channels = ignored.channels;
-				const index = channels.findIndex((chan) => chan.id === channel.id);
-				channels.splice(index, 1);
-				ignored.channels = channels;
-			});
-			setRoleIn("ignore", guildID, ignored);
+
+		if (hasIgnoredRoleIn) {
+			const updated = filterRoleInsByChannel(ignoredRoleIns, channel.id);
+			setRoleIn("ignore", guildID, updated);
 		}
-		if (followedRoleIn) {
-			//remove the channel from the role.channels array
-			const followed = getRoleIn("follow", guildID);
-			followed.forEach((followed) => {
-				const channels = followed.channels;
-				const index = channels.findIndex((chan) => chan.id === channel.id);
-				channels.splice(index, 1);
-				followed.channels = channels;
-			});
-			setRoleIn("follow", guildID, followed);
+
+		if (hasFollowedRoleIn) {
+			const updated = filterRoleInsByChannel(followedRoleIns, channel.id);
+			setRoleIn("follow", guildID, updated);
 		}
+
 		if (channelType === ChannelType.GuildText) {
 			/**
-			 * Remove the channel from the database "follow" and "ignore" maps
+			 * Clean up message cache for all threads in this text channel
 			 */
-			const allIgnore = getMaps("ignore", TypeName.channel, guildID) as TextChannel[];
-			const allFollow = getMaps("follow", TypeName.channel, guildID) as TextChannel[];
-			const isIgnored = allIgnore.some((ignored) => ignored.id === channel.id);
-			const isFollowed = allFollow.some((followed) => followed.id === channel.id);
-			if (isIgnored) {
-				const index = allIgnore.findIndex((ignored) => ignored.id === channel.id);
-				allIgnore.splice(index, 1);
-				setIgnore(TypeName.channel, guildID, allIgnore as TextChannel[]);
-			}
-			if (isFollowed) {
-				const index = allFollow.findIndex((followed) => followed.id === channel.id);
-				allFollow.splice(index, 1);
-				setIgnore(TypeName.channel, guildID, allFollow);
-			}
+			const textChannel = channelGuild as TextChannel;
+			//use cache as fetchActive can't works for deleted channels
+			const threads = textChannel.threads.cache;
+			threads.forEach((thread) => {
+				deleteCachedMessage(guildID, thread.id);
+			});
+
+			/**
+			 * Remove the channel ID from the database "follow" and "ignore" maps
+			 */
+			cleanupChannelFromMaps(channel.id, "channel", guildID);
 		} else if (channelType === ChannelType.GuildCategory) {
 			/**
-			 * Remove the category from the database "follow" and "ignore" maps
+			 * Remove the category ID from the database "follow" and "ignore" maps
 			 */
-			const allCategoryIgnore = getMaps(
-				"ignore",
-				TypeName.category,
-				guildID
-			) as CategoryChannel[];
-			const allCategoryFollow = getMaps(
-				"follow",
-				TypeName.category,
-				guildID
-			) as CategoryChannel[];
-			const isCategoryIgnored = allCategoryIgnore.some(
-				(ignored) => ignored.id === channel.id
-			);
-			const isCategoryFollowed = allCategoryFollow.some(
-				(followed) => followed.id === channel.id
-			);
-			if (isCategoryIgnored) {
-				const index = allCategoryIgnore.findIndex((ignored) => ignored.id === channel.id);
-				allCategoryIgnore.splice(index, 1);
-				setIgnore(TypeName.category, guildID, allCategoryIgnore);
-			}
-			if (isCategoryFollowed) {
-				const index = allCategoryFollow.findIndex(
-					(followed) => followed.id === channel.id
-				);
-				allCategoryFollow.splice(index, 1);
-				setIgnore(TypeName.category, guildID, allCategoryFollow);
-			}
+			cleanupChannelFromMaps(channel.id, "category", guildID);
 		} else if (channelType === ChannelType.GuildForum) {
 			/**
-			 * Remove the forum from the database "follow" and "ignore" maps
+			 * Clean up message cache for all threads in this forum
 			 */
-			const allThreadIgnore = getMaps(
-				"ignore",
-				TypeName.forum,
-				guildID
-			) as ForumChannel[];
-			const allThreadFollow = getMaps(
-				"follow",
-				TypeName.forum,
-				guildID
-			) as ForumChannel[];
-			const isForumIgnored = allThreadIgnore.some((ignored) => ignored.id === channel.id);
-			const isForumFollowed = allThreadFollow.some(
-				(followed) => followed.id === channel.id
-			);
-			if (isForumIgnored) {
-				const index = allThreadIgnore.findIndex((ignored) => ignored.id === channel.id);
-				allThreadIgnore.splice(index, 1);
-				setIgnore(TypeName.forum, guildID, allThreadIgnore);
-			}
-			if (isForumFollowed) {
-				const index = allThreadFollow.findIndex((followed) => followed.id === channel.id);
-				allThreadFollow.splice(index, 1);
-				setIgnore(TypeName.forum, guildID, allThreadFollow);
-			}
+			const forum = channelGuild as ForumChannel;
+			forum.threads.cache.forEach((thread) => {
+				deleteCachedMessage(guildID, thread.id);
+			});
+
+			/**
+			 * Remove the forum ID from the database "follow" and "ignore" maps
+			 */
+			cleanupChannelFromMaps(channel.id, "forum", guildID);
 		}
 	});
 };

@@ -1,8 +1,7 @@
 import { ChannelType, type Client, type ThreadChannel } from "discord.js";
 import { getTranslation } from "../../i18n";
-import { CommandName } from "../../interface";
 import { getConfig } from "../../maps";
-import { discordLogs, logInDev, updateCache } from "../../utils";
+import { discordLogs, updateCache } from "../../utils";
 import { addRoleAndUserToThread } from "../../utils/add";
 import { checkThread } from "../../utils/data_check";
 
@@ -17,18 +16,27 @@ export default (client: Client): void => {
 		//return if the thread is not a public thread
 		const guild = thread.guild.id;
 		if (thread.type !== ChannelType.PublicThread) return;
-		if (getConfig(CommandName.thread, guild) === false) return;
-		logInDev(`Thread ${thread.name} created!`);
+		if (!getConfig("onThreadCreated", guild)) return;
 		const ul = getTranslation(thread.guild.id, { locale: thread.guild.preferredLocale });
 		await discordLogs(guild, client, ul("logs.thread.created", { thread: thread.name }));
 		/** automatically add the bot to the thread */
-		await thread.join();
+		try {
+			await thread.join();
+		} catch (error) {
+			await discordLogs(
+				guild,
+				client,
+				ul("logs.thread.join_error", { error: String(error), thread: thread.name })
+			);
+			return;
+		}
+		/**
+		 * Update the cache
+		 */
 		await updateCache(thread.guild);
-		if (!getConfig(CommandName.followOnlyChannel, guild)) {
-			logInDev("Thread is not follow only", !checkThread(thread, "ignore"));
+		if (!getConfig("followOnlyChannel", guild)) {
 			if (!checkThread(thread, "ignore")) await addRoleAndUserToThread(thread);
 		} else {
-			logInDev("Thread is follow only", checkThread(thread, "follow"));
 			if (checkThread(thread, "follow")) await addRoleAndUserToThread(thread);
 		}
 	});

@@ -10,9 +10,3 @@ These commands don't appear for user that haven't the `manage thread` permission
 
 > [!WARNING]  
 > It will re-add all users that leave the thread, even if they left it on purpose.
-
-> [!NOTE]  
-> There is no way that I can code something that don't add any notification on the thread.
-> You **always** will have the thread that becomes white when the bot activates.
-
-More over, you can configure the bot and disable event that you don't want to use. You can do that with the `/config` command. You can see the configuration with `/config show`

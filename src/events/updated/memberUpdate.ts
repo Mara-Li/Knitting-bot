@@ -1,9 +1,9 @@
 import type { Client, ThreadChannel } from "discord.js";
 import { getTranslation } from "../../i18n";
-import { CommandName } from "../../interface";
 import { getConfig } from "../../maps";
-import { discordLogs, logInDev, updateCache } from "../../utils";
+import { discordLogs } from "../../utils";
 import { addUserToThread } from "../../utils/add";
+import { runWithConcurrency } from "../../utils/concurrency";
 import {
 	checkMemberRole,
 	checkMemberRoleIn,
@@ -21,8 +21,8 @@ export default (client: Client): void => {
 			const newRoles = newMember.roles.cache;
 			const updatedRoles = newRoles.filter((role) => !oldRoles.has(role.id));
 			const guildID = newMember.guild.id;
-			await updateCache(newMember.guild);
-			if (getConfig(CommandName.member, guildID) === false) return;
+
+			if (!getConfig("onMemberUpdate", guildID)) return;
 			const ul = getTranslation(guildID, { locale: newMember.guild.preferredLocale });
 			if (updatedRoles.size === 0) {
 				await discordLogs(
@@ -44,6 +44,10 @@ export default (client: Client): void => {
 			);
 			const guild = newMember.guild;
 			const channels = guild.channels.cache.filter((channel) => channel.isThread());
+			const followOnlyChannelEnabled = getConfig("followOnlyChannel", guildID);
+
+			// Collect promises to add users to threads so we can run them in parallel
+			const tasks: Array<() => Promise<unknown>> = [];
 			for (const channel of channels.values()) {
 				const threadChannel = channel as ThreadChannel;
 				const updatedRoleAllowed = updatedRoles.filter((role) => {
@@ -69,25 +73,34 @@ export default (client: Client): void => {
 						checkMemberRoleIn("ignore", newMember.roles, threadChannel);
 				}
 
-				if (!getConfig(CommandName.followOnlyChannel, guildID)) {
+				let shouldAddUser = false;
+				if (!followOnlyChannelEnabled) {
 					/**
 					 * followOnlyChannel is disabled && followOnlyRole can be enabled or disabled
 					 */
-					if (!checkThread(threadChannel, "ignore") && roleIsAllowed)
-						await addUserToThread(threadChannel, newMember);
+					shouldAddUser = !checkThread(threadChannel, "ignore") && roleIsAllowed;
 				} else {
 					/**
 					 * followOnlyChannel is enabled && followOnlyRole can be enabled or disabled
 					 */
-					const followedThread = checkThread(threadChannel, "follow");
-					if (roleIsAllowed && followedThread)
-						await addUserToThread(threadChannel, newMember);
+					shouldAddUser = roleIsAllowed && checkThread(threadChannel, "follow");
+				}
+
+				if (shouldAddUser) {
+					tasks.push(async () => addUserToThread(threadChannel, newMember));
+				}
+			}
+
+			if (tasks.length > 0) {
+				const results = await runWithConcurrency(tasks, 10);
+				for (const r of results) {
+					if (r.status === "rejected") {
+						console.warn("addUserToThread failed:", r.reason);
+					}
 				}
 			}
 		} catch (error) {
 			console.error(error);
-			logInDev(`Error on memberUpdate: ${error}`);
 		}
-		logInDev(`Member ${newMember.user.username} has been updated.`);
 	});
 };

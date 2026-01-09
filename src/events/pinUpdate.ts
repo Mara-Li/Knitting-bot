@@ -1,12 +1,20 @@
-import {Client, TextBasedChannel} from "discord.js";
+import type { Client, TextBasedChannel } from "discord.js";
 
 export default (client: Client): void => {
-	client.on("channelPinsUpdate", async (channel: TextBasedChannel, time: Date) => {
-		//fetch the system message that triggered the pin update
-		const timeNb = time as unknown as number;
-		const systemMessage = (await channel.messages.fetch()).find((msg => {
-			return msg.system && msg.createdTimestamp >= timeNb - 5000;
-		}));
-		if (systemMessage && systemMessage.author === client.user) await systemMessage.delete();
-	})
-}
+	client.on(
+		"channelPinsUpdate",
+		async (channel: TextBasedChannel, time: Date | number) => {
+			//fetch the system message that triggered the pin update
+			const timeNb = typeof time === "number" ? time : time.getTime();
+			const systemMessage = (await channel.messages.fetch({ limit: 10 })).find((msg) => {
+				return msg.system && msg.createdTimestamp >= timeNb - 5000;
+			});
+			if (systemMessage && systemMessage.author.id === client.user?.id)
+				try {
+					await systemMessage.delete();
+				} catch (err) {
+					//ignore
+				}
+		}
+	);
+};

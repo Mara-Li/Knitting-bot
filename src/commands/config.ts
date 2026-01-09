@@ -10,32 +10,19 @@
  * - Thread created {true, false}
  * - Channel updated
  */
-import {
-	ButtonBuilder,
-	type ButtonInteraction,
-	ButtonStyle,
-	ChannelType,
-	type ChatInputCommandInteraction,
-	type CommandInteractionOptionResolver,
-	channelMention,
-	EmbedBuilder,
-	Locale,
-	PermissionFlagsBits,
-	SlashCommandBuilder,
-	type StringSelectMenuInteraction,
-} from "discord.js";
+import * as Djs from "discord.js";
 import { getUl, ln, t } from "../i18n";
-import { CommandName, type Translation } from "../interface";
-import { getConfig, optionMaps, setConfig } from "../maps";
-import { logInDev } from "../utils";
+import { type ConfigurationKey, ConfigurationKeys, type Translation } from "../interface";
+import { getConfig, getDefaultServerData, serverDataDb, setConfig } from "../maps";
 
 import "../discord_ext.js";
+import dedent from "dedent";
 
 export default {
-	data: new SlashCommandBuilder()
+	data: new Djs.SlashCommandBuilder()
 		.setNames("configuration.main.name")
 		.setDescriptions("configuration.main.description")
-		.setDefaultMemberPermissions(PermissionFlagsBits.ManageThreads)
+		.setDefaultMemberPermissions(Djs.PermissionFlagsBits.ManageThreads)
 		.addSubcommand((subcommand) =>
 			subcommand
 				.setNames("configuration.menu.log.channel.title")
@@ -45,11 +32,11 @@ export default {
 						.setNames("common.channel")
 						.setDescriptions("configuration.menu.log.channel.desc")
 						.addChannelTypes(
-							ChannelType.GuildText,
-							ChannelType.AnnouncementThread,
-							ChannelType.PublicThread,
-							ChannelType.PrivateThread,
-							ChannelType.GuildAnnouncement
+							Djs.ChannelType.GuildText,
+							Djs.ChannelType.AnnouncementThread,
+							Djs.ChannelType.PublicThread,
+							Djs.ChannelType.PrivateThread,
+							Djs.ChannelType.GuildAnnouncement
 						)
 				)
 		)
@@ -109,14 +96,22 @@ export default {
 						.setNames("configuration.message.option.name")
 						.setDescriptions("configuration.message.option.description")
 				)
+		)
+		.addSubcommand((sub) =>
+			sub
+				.setNames("configuration.display.title")
+				.setDescriptions("configuration.display.description")
 		),
-	async execute(interaction: ChatInputCommandInteraction) {
+	async execute(interaction: Djs.ChatInputCommandInteraction) {
 		if (!interaction.guild) return;
-		const options = interaction.options as CommandInteractionOptionResolver;
+		const options = interaction.options as Djs.CommandInteractionOptionResolver;
 		const ul = getUl(interaction);
 		const commands = options.getSubcommand();
-
-		if (t("configuration.menu.log.channel.title").toLowerCase() === commands) {
+		if (commands === t("configuration.display.title")) {
+			await displayConfig(interaction);
+			return;
+		}
+		if (t("configuration.menu.log.channel.title") === commands) {
 			await handleLogChannelConfig(interaction, options, ul);
 			return;
 		}
@@ -131,7 +126,7 @@ export default {
 			return;
 		}
 
-		if (t("configuration.menu.autoUpdate.cmd").toLowerCase() === commands) {
+		if (t("configuration.menu.autoUpdate.cmd") === commands) {
 			await handleAutoUpdateConfig(interaction, ul);
 			return;
 		}
@@ -149,8 +144,8 @@ export default {
 };
 
 async function handleMessageConfig(
-	interaction: ChatInputCommandInteraction,
-	options: CommandInteractionOptionResolver,
+	interaction: Djs.ChatInputCommandInteraction,
+	options: Djs.CommandInteractionOptionResolver,
 	ul: Translation
 ) {
 	if (!interaction.guild) return;
@@ -160,7 +155,7 @@ async function handleMessageConfig(
 	);
 
 	if (!messageToSend) {
-		optionMaps.set(interaction.guild.id, "_ _", "messageToSend");
+		setConfig("messageToSend", interaction.guild.id, "_ _");
 		await interaction.reply({
 			content: ul("configuration.message.response.default"),
 		});
@@ -172,7 +167,7 @@ async function handleMessageConfig(
 		});
 		return;
 	}
-	optionMaps.set(interaction.guild.id, messageToSend, "messageToSend");
+	setConfig("messageToSend", interaction.guild.id, messageToSend);
 	await interaction.reply({
 		content: ul("configuration.message.response.custom", {
 			message: messageToSend,
@@ -184,22 +179,34 @@ async function handleMessageConfig(
  * Handle log channel configuration
  */
 async function handleLogChannelConfig(
-	interaction: ChatInputCommandInteraction,
-	options: CommandInteractionOptionResolver,
+	interaction: Djs.ChatInputCommandInteraction,
+	options: Djs.CommandInteractionOptionResolver,
 	ul: Translation
 ) {
 	if (!interaction.guild) return;
 
 	const channel = options.getChannel(t("common.channel").toLowerCase());
 	if (channel) {
-		setConfig(`${CommandName.log}.channel`, interaction.guild.id, channel.id);
+		if (
+			channel.type !== Djs.ChannelType.GuildText &&
+			channel.type !== Djs.ChannelType.GuildAnnouncement &&
+			channel.type !== Djs.ChannelType.AnnouncementThread &&
+			channel.type !== Djs.ChannelType.PublicThread &&
+			channel.type !== Djs.ChannelType.PrivateThread
+		) {
+			await interaction.reply({
+				content: ul("configuration.menu.log.channel.error"),
+			});
+			return;
+		}
+		setConfig("log", interaction.guild.id, channel.id);
 		await interaction.reply({
 			content: ul("configuration.menu.log.channel.success", {
-				channel: channelMention(channel.id),
-			}) as string,
+				channel: Djs.channelMention(channel.id),
+			}),
 		});
 	} else {
-		setConfig(`${CommandName.log}.channel`, interaction.guild.id, false);
+		setConfig("log", interaction.guild.id, false);
 		await interaction.reply({
 			content: ul("configuration.menu.log.channel.disable"),
 		});
@@ -210,14 +217,14 @@ async function handleLogChannelConfig(
  * Handle pin configuration
  */
 async function handlePinConfig(
-	interaction: ChatInputCommandInteraction,
-	options: CommandInteractionOptionResolver,
+	interaction: Djs.ChatInputCommandInteraction,
+	options: Djs.CommandInteractionOptionResolver,
 	ul: Translation
 ) {
 	if (!interaction.guild) return;
 
 	const toggle = options.getBoolean(t("configuration.pin.option.name"));
-	optionMaps.set(interaction.guild.id, toggle ?? false, "pin");
+	setConfig("pin", interaction.guild.id, toggle ?? false);
 
 	await interaction.reply({
 		content: toggle
@@ -230,7 +237,7 @@ async function handlePinConfig(
  * Handle mode configuration
  */
 async function handleModeConfig(
-	interaction: ChatInputCommandInteraction,
+	interaction: Djs.ChatInputCommandInteraction,
 	ul: Translation
 ) {
 	if (!interaction.guild) return;
@@ -250,7 +257,7 @@ async function handleModeConfig(
  * Handle auto-update configuration
  */
 async function handleAutoUpdateConfig(
-	interaction: ChatInputCommandInteraction,
+	interaction: Djs.ChatInputCommandInteraction,
 	ul: Translation
 ) {
 	if (!interaction.guild) return;
@@ -270,25 +277,27 @@ async function handleAutoUpdateConfig(
  * Handle locale configuration
  */
 async function handleLocaleConfig(
-	interaction: ChatInputCommandInteraction,
-	options: CommandInteractionOptionResolver
+	interaction: Djs.ChatInputCommandInteraction,
+	options: Djs.CommandInteractionOptionResolver
 ) {
 	if (!interaction.guild) return;
 
 	const locale = options.getString("locale", true);
-	let lang = optionMaps.get(interaction.guild.id, "language");
+	let lang: Djs.Locale = interaction.locale;
 
 	if (locale === "en") {
-		optionMaps.set(interaction.guild.id, Locale.EnglishUS, "language");
-		lang = Locale.EnglishUS;
+		setConfig("language", interaction.guild.id, Djs.Locale.EnglishUS);
+		lang = Djs.Locale.EnglishUS;
 	} else if (locale === "fr") {
-		optionMaps.set(interaction.guild.id, Locale.French, "language");
-		lang = Locale.French;
+		setConfig("language", interaction.guild.id, Djs.Locale.French);
+		lang = Djs.Locale.French;
 	}
 
-	const ul = ln(lang ?? interaction.locale);
+	const ul = ln(lang);
 	await interaction.reply({
-		content: `${ul("configuration.language.validate", { lang: (locale as Locale).toUpperCase() })}`,
+		content: `${ul("configuration.language.validate", {
+			lang: lang.toUpperCase(),
+		})}`,
 	});
 }
 
@@ -296,7 +305,7 @@ async function handleLocaleConfig(
  * Setup message component collector for button interactions
  */
 async function setupMessageCollector(
-	interaction: ChatInputCommandInteraction,
+	interaction: Djs.ChatInputCommandInteraction,
 	ul: Translation
 ) {
 	// biome-ignore lint/suspicious/noExplicitAny: we don't know the type
@@ -311,41 +320,43 @@ async function setupMessageCollector(
 			.createMessageComponentCollector({ filter, time: 60000 })
 			?.on("collect", async (i) => {
 				await i.deferUpdate();
-				await updateConfig(i.customId as CommandName, i as ButtonInteraction, ul);
+				if (ConfigurationKeys.includes(i.customId))
+					await updateConfig(
+						i.customId as ConfigurationKey,
+						i as Djs.ButtonInteraction,
+						ul
+					);
 			})
 			?.on("end", async () => {
 				await interaction.editReply({ components: [] });
 			});
 	} catch (error) {
-		logInDev(error);
+		if (error instanceof Djs.DiscordAPIError && error.code === 10008) {
+			// Message was deleted, no need to log error
+			return;
+		}
+		console.warn(error);
 		await interaction.editReply({ components: [] });
 	}
 }
 
 /**
  * Display Mode menu as an embed
- * @returns {@link EmbedBuilder}
  */
-function displayModeMenu(guildID: string, ul: Translation): EmbedBuilder {
-	return new EmbedBuilder()
+function displayModeMenu(guildID: string, ul: Translation): Djs.EmbedBuilder {
+	return new Djs.EmbedBuilder()
 		.setColor("#0099ff")
 		.setTitle(ul("configuration.menu.mode.title"))
 		.addFields(
 			{
 				inline: true,
 				name: ul("configuration.follow.role.title"),
-				value: enabledOrDisabled(
-					getConfig(CommandName.followOnlyRole, guildID) as boolean,
-					ul
-				),
+				value: enabledOrDisabled(getConfig("followOnlyRole", guildID) as boolean, ul),
 			},
 			{
 				inline: true,
 				name: ul("configuration.follow.thread.title"),
-				value: enabledOrDisabled(
-					getConfig(CommandName.followOnlyChannel, guildID) as boolean,
-					ul
-				),
+				value: enabledOrDisabled(getConfig("followOnlyChannel", guildID) as boolean, ul),
 			}
 		)
 		.addFields({ name: "\u200A", value: "\u200A" })
@@ -353,29 +364,26 @@ function displayModeMenu(guildID: string, ul: Translation): EmbedBuilder {
 			{
 				inline: true,
 				name: ul("configuration.follow.roleIn"),
-				value: enabledOrDisabled(
-					getConfig(CommandName.followOnlyRoleIn, guildID) as boolean,
-					ul
-				),
+				value: enabledOrDisabled(getConfig("followOnlyRoleIn", guildID) as boolean, ul),
 			},
 			{ inline: true, name: "\u200A", value: "\u200A" }
 		);
 }
 
-function autoUpdateMenu(guildID: string, ul: Translation): EmbedBuilder {
-	return new EmbedBuilder()
+function autoUpdateMenu(guildID: string, ul: Translation): Djs.EmbedBuilder {
+	return new Djs.EmbedBuilder()
 		.setColor("#0099ff")
 		.setTitle(ul("configuration.menu.autoUpdate.title"))
 		.addFields(
 			{
 				inline: true,
 				name: ul("configuration.channel.title"),
-				value: enabledOrDisabled(getConfig(CommandName.channel, guildID) as boolean, ul),
+				value: enabledOrDisabled(getConfig("onChannelUpdate", guildID) as boolean, ul),
 			},
 			{
 				inline: true,
 				name: ul("configuration.member.title"),
-				value: enabledOrDisabled(getConfig(CommandName.member, guildID) as boolean, ul),
+				value: enabledOrDisabled(getConfig("onNewMember", guildID) as boolean, ul),
 			}
 		)
 		.addFields({ name: "\u200A", value: "\u200A" })
@@ -383,15 +391,12 @@ function autoUpdateMenu(guildID: string, ul: Translation): EmbedBuilder {
 			{
 				inline: true,
 				name: ul("configuration.newMember.display"),
-				value: enabledOrDisabled(
-					getConfig(CommandName.newMember, guildID) as boolean,
-					ul
-				),
+				value: enabledOrDisabled(getConfig("onMemberUpdate", guildID) as boolean, ul),
 			},
 			{
 				inline: true,
 				name: ul("configuration.thread.display"),
-				value: enabledOrDisabled(getConfig(CommandName.thread, guildID) as boolean, ul),
+				value: enabledOrDisabled(getConfig("onThreadCreated", guildID) as boolean, ul),
 			}
 		);
 }
@@ -407,61 +412,46 @@ function enabledOrDisabled(value: boolean, ul: Translation): string {
 
 /**
  * Update the configuration and edit the interaction message with the new configuration
- * @param command {@link CommandName}
- * @param interaction
- * @param ul
  */
 async function updateConfig(
-	command: CommandName,
-	interaction: ButtonInteraction | StringSelectMenuInteraction,
+	command: ConfigurationKey,
+	interaction: Djs.ButtonInteraction | Djs.StringSelectMenuInteraction,
 	ul: Translation
 ) {
 	if (!interaction.guild) return;
 	let newConfig: string | boolean;
 	const commandType = {
-		AutoUpdate: [
-			CommandName.channel,
-			CommandName.member,
-			CommandName.newMember,
-			CommandName.thread,
-			CommandName.manualMode,
-		],
-		Mode: [
-			CommandName.followOnlyRole,
-			CommandName.followOnlyChannel,
-			CommandName.followOnlyRoleIn,
-		],
+		Mode: ["followOnlyRole", "followOnlyChannel", "followOnlyRoleIn"],
 	};
-	const followOnlyRole = getConfig(CommandName.followOnlyRole, interaction.guild.id);
-	const followOnlyChannel = getConfig(
-		CommandName.followOnlyChannel,
-		interaction.guild.id
-	);
-	const followOnlyRoleIn = getConfig(CommandName.followOnlyRoleIn, interaction.guild.id);
+	const followOnlyRole = getConfig("followOnlyRole", interaction.guild.id);
+	const followOnlyChannel = getConfig("followOnlyChannel", interaction.guild.id);
+	const followOnlyRoleIn = getConfig("followOnlyRoleIn", interaction.guild.id);
 	if (
-		(command === CommandName.followOnlyRoleIn && (followOnlyChannel || followOnlyRole)) ||
+		(command === "followOnlyRoleIn" && (followOnlyChannel || followOnlyRole)) ||
 		(followOnlyRoleIn &&
-			(command === CommandName.followOnlyChannel ||
-				command === CommandName.followOnlyRole))
+			(command === "followOnlyChannel" || command === "followOnlyRole"))
 	) {
 		const embed = displayModeMenu(interaction.guild.id, ul);
 		const rows = reloadButtonMode(interaction.guild.id, ul);
 		await interaction.editReply({ components: rows, embeds: [embed] });
-	} else if (command === CommandName.manualMode) {
-		const names = [
-			CommandName.channel,
-			CommandName.member,
-			CommandName.thread,
-			CommandName.newMember,
-		];
+	} else if (command === "manualMode") {
+		const names = ["onChannelUpdate", "onMemberUpdate", "onThreadCreated", "onNewMember"];
 
-		const allnames = names.map((command) => {
-			if (!interaction.guild) return false;
-			return getConfig(command, interaction.guild.id);
-		});
-		const manualMode = allnames.every((value) => value);
-		for (const command of names) {
-			setConfig(command, interaction.guild.id, !manualMode);
+		// Determine current manual mode flag
+		const currentManual = getConfig("manualMode", interaction.guild.id) as boolean;
+
+		if (!currentManual) {
+			// Enabling manual mode: set manualMode = true and disable all auto-update flags
+			setConfig("manualMode", interaction.guild.id, true);
+			for (const cmd of names) {
+				setConfig(cmd, interaction.guild.id, false);
+			}
+		} else {
+			// Disabling manual mode: set manualMode = false and enable all auto-update flags
+			setConfig("manualMode", interaction.guild.id, false);
+			for (const cmd of names) {
+				setConfig(cmd, interaction.guild.id, true);
+			}
 		}
 		const embed = autoUpdateMenu(interaction.guild.id, ul);
 		//reload buttons
@@ -471,10 +461,10 @@ async function updateConfig(
 		newConfig = !getConfig(command, interaction.guild.id);
 		await interaction.editReply({ content: "" });
 		setConfig(command, interaction.guild.id, newConfig);
-		let embed: EmbedBuilder;
+		let embed: Djs.EmbedBuilder;
 		//reload buttons
-		let rows: { type: number; components: ButtonBuilder[] }[];
-		if (commandType.Mode.includes(command)) {
+		let rows: { type: number; components: Djs.ButtonBuilder[] }[];
+		if (commandType.Mode.includes(command as string)) {
 			rows = reloadButtonMode(interaction.guild.id, ul);
 			embed = displayModeMenu(interaction.guild.id, ul);
 		} else {
@@ -487,52 +477,82 @@ async function updateConfig(
 
 /**
  * Create a button with the command name as custom id and the label as label
- * @param command {@link CommandName}
- * @param label {string} The label of the button
- * @param guildID
  */
 
-function createButton(command: CommandName, label: string, guildID: string) {
-	let style = getConfig(command, guildID) ? ButtonStyle.Danger : ButtonStyle.Success;
-	if (command === CommandName.manualMode) {
-		const truc = [
-			CommandName.channel,
-			CommandName.member,
-			CommandName.thread,
-			CommandName.newMember,
-		];
-		const allTruc = truc.map((command) => getConfig(command, guildID));
-		style = allTruc.some((value) => value) ? ButtonStyle.Danger : ButtonStyle.Success;
+function createButton(command: ConfigurationKey, label: string, guildID: string) {
+	const manualModeEnabled = getConfig("manualMode", guildID);
+
+	// If manual mode is enabled:
+	// - the manual button is green (Success)
+	// - all other buttons are grey (Secondary)
+	if (manualModeEnabled) {
+		if (command === "manualMode") {
+			return new Djs.ButtonBuilder()
+				.setCustomId(command)
+				.setStyle(Djs.ButtonStyle.Success)
+				.setLabel(label);
+		}
+		return new Djs.ButtonBuilder()
+			.setCustomId(command as string)
+			.setStyle(Djs.ButtonStyle.Secondary)
+			.setLabel(label);
 	}
-	return new ButtonBuilder().setCustomId(command).setStyle(style).setLabel(label);
+
+	// If manual mode is disabled:
+	// - the manual button is grey (Secondary)
+	// - other buttons reflect their configuration state: green (Success) when enabled, red (Danger) when disabled
+	if (command === "manualMode") {
+		return new Djs.ButtonBuilder()
+			.setCustomId(command)
+			.setStyle(Djs.ButtonStyle.Secondary)
+			.setLabel(label);
+	}
+
+	const style = getConfig(command, guildID)
+		? Djs.ButtonStyle.Success
+		: Djs.ButtonStyle.Danger;
+	return new Djs.ButtonBuilder()
+		.setCustomId(command as string)
+		.setStyle(style)
+		.setLabel(label);
 }
 
 function reloadButtonMode(guildID: string, ul: Translation) {
 	const translation = {
-		[CommandName.followOnlyRoleIn]: ul("configuration.roleIn.name"),
-		[CommandName.followOnlyRole]: ul("configuration.follow.role.name"),
-		[CommandName.followOnlyChannel]: ul("configuration.follow.thread.name"),
+		followOnlyChannel: ul("configuration.follow.thread.name"),
+		followOnlyRole: ul("configuration.follow.role.name"),
+		followOnlyRoleIn: ul("configuration.roleIn.name"),
 	};
 
-	const buttons: ButtonBuilder[] = [];
-	for (const command of [
-		CommandName.followOnlyRoleIn,
-		CommandName.followOnlyRole,
-		CommandName.followOnlyChannel,
-	].values()) {
+	const buttons: Djs.ButtonBuilder[] = [];
+	for (const command of ConfigurationKeys as ConfigurationKey[]) {
 		buttons.push(
 			createButton(command, labelButton(command, translation, guildID, ul), guildID)
 		);
 	}
-	if (getConfig(CommandName.followOnlyRoleIn, guildID)) {
+
+	// If manual mode is enabled, grey and disable all mode buttons
+	if (getConfig("manualMode", guildID)) {
+		for (let i = 0; i < buttons.length; i++) {
+			buttons[i] = buttons[i].setStyle(Djs.ButtonStyle.Secondary).setDisabled(true);
+		}
+		return [
+			{
+				components: buttons,
+				type: 1,
+			},
+		];
+	}
+
+	if (getConfig("followOnlyRoleIn", guildID)) {
 		/**
 		 * Disable the button if followRoleIn is enable
 		 */
 		buttons[1] = buttons[1].setDisabled(true);
 		buttons[2] = buttons[2].setDisabled(true);
 	} else if (
-		getConfig(CommandName.followOnlyRole, guildID) ||
-		getConfig(CommandName.followOnlyChannel, guildID)
+		getConfig("followOnlyRole", guildID) ||
+		getConfig("followOnlyChannel", guildID)
 	) {
 		/**
 		 * Disable the button if followRole or followChannel is enable
@@ -554,26 +574,18 @@ function reloadButtonMode(guildID: string, ul: Translation) {
 }
 
 function labelButton(
-	id: CommandName,
-	// biome-ignore lint/suspicious/noExplicitAny: easier
-	translation: any,
+	id: ConfigurationKey,
+	translation: Record<string, string>,
 	guildID: string,
 	ul: Translation
 ) {
-	const idIndex = Object.values(CommandName).indexOf(id);
-	const value = Object.values(CommandName)[idIndex];
-	const translated = translation[value];
-	if (id === CommandName.manualMode) {
-		const truc = [
-			CommandName.channel,
-			CommandName.member,
-			CommandName.thread,
-			CommandName.newMember,
-		].map((command) => getConfig(command, guildID));
-		const manualMode = truc.some((value) => value);
-		return manualMode
-			? `${ul("common.enable")} : ${translated}`
-			: `${ul("common.disable")} : ${translated}`;
+	const translated = translation[id];
+	if (id === "manualMode") {
+		// Use the actual manualMode flag for the label instead of inferring from other flags
+		const manualFlag = getConfig("manualMode", guildID) as boolean;
+		return manualFlag
+			? `${ul("common.disable")} : ${translated}`
+			: `${ul("common.enable")} : ${translated}`;
 	}
 	return getConfig(id, guildID)
 		? `${ul("common.disable")} : ${translated}`
@@ -582,24 +594,27 @@ function labelButton(
 
 function reloadButtonAuto(guildID: string, ul: Translation) {
 	const translation = {
-		[CommandName.manualMode]: ul("configuration.disable.name"),
-		[CommandName.channel]: ul("configuration.channel.name"),
-		[CommandName.member]: ul("configuration.member.name"),
-		[CommandName.newMember]: ul("configuration.newMember.name"),
-		[CommandName.thread]: ul("configuration.thread.name"),
+		channel: ul("configuration.channel.name"),
+		manualMode: ul("configuration.disable.name"),
+		member: ul("configuration.member.name"),
+		newMember: ul("configuration.newMember.name"),
+		thread: ul("configuration.thread.name"),
 	};
-	const buttons: ButtonBuilder[] = [];
-	for (const command of [
-		CommandName.manualMode,
-		CommandName.channel,
-		CommandName.member,
-		CommandName.newMember,
-		CommandName.thread,
-	].values()) {
+	const buttons: Djs.ButtonBuilder[] = [];
+	for (const command of ConfigurationKeys as ConfigurationKey[]) {
 		buttons.push(
 			createButton(command, labelButton(command, translation, guildID, ul), guildID)
 		);
 	}
+
+	// If manual mode is enabled, force other buttons to Secondary and disabled
+	if (getConfig("manualMode", guildID)) {
+		buttons[0] = buttons[0].setStyle(Djs.ButtonStyle.Success);
+		for (let i = 1; i < buttons.length; i++) {
+			buttons[i] = buttons[i].setStyle(Djs.ButtonStyle.Secondary).setDisabled(true);
+		}
+	}
+
 	return [
 		{
 			components: [buttons[0]],
@@ -610,4 +625,89 @@ function reloadButtonAuto(guildID: string, ul: Translation) {
 			type: 1,
 		},
 	];
+}
+
+async function displayConfig(interaction: Djs.ChatInputCommandInteraction) {
+	if (!interaction.guild) return;
+	const ul = getUl(interaction);
+	const db = serverDataDb.get(interaction.guild.id) ?? getDefaultServerData();
+	const config = db.configuration;
+	const mode = {
+		followOnlyChannel: getConfig("followOnlyChannel", interaction.guild.id),
+		followOnlyRole: getConfig("followOnlyRole", interaction.guild.id),
+		followOnlyRoleIn: getConfig("followOnlyRoleIn", interaction.guild.id),
+	};
+	const auto = {
+		channel: getConfig("onChannelUpdate", interaction.guild.id),
+		manualMode: getConfig("manualMode", interaction.guild.id),
+		member: getConfig("onMemberUpdate", interaction.guild.id),
+		newMember: getConfig("onNewMember", interaction.guild.id),
+		thread: getConfig("onThreadCreated", interaction.guild.id),
+	};
+
+	const randomHexColor = Math.floor(Math.random() * 0xffffff);
+	const s = ul("common.space");
+
+	const autoStr =
+		dedent(`- __${ul("configuration.channel.name")}__${s}: \`${auto.channel ? "✓" : "✕"}\`
+					- __${ul("configuration.member.name")}__${s}: \`${auto.member ? "✓" : "✕"}\`
+					- __${ul("configuration.newMember.display")}__${s}: \`${auto.newMember ? "✓" : "✕"}\`
+					- __${ul("configuration.thread.display")}__${s}: \`${auto.thread ? "✓" : "✕"}\``);
+
+	const manualStr = `- __${ul("configuration.disable.name")}__${s}: \`${auto.manualMode ? "✓" : "✕"}\``;
+
+	const autoFinal = auto.manualMode ? manualStr : autoStr;
+
+	const log =
+		config.log && typeof config.log === "string" ? Djs.channelMention(config.log) : "`✕`";
+	//use component v2
+	const components = [
+		new Djs.ContainerBuilder()
+			.setAccentColor(randomHexColor)
+			.addSectionComponents(
+				new Djs.SectionBuilder()
+					.setThumbnailAccessory(
+						new Djs.ThumbnailBuilder().setURL(
+							interaction.guild.iconURL() ||
+								interaction.client.user.avatarURL() ||
+								"https://raw.githubusercontent.com/Mara-Li/Knitting-bot/refs/heads/master/docs/_media/logo.png"
+						)
+					)
+					.addTextDisplayComponents(
+						new Djs.TextDisplayBuilder().setContent(
+							dedent(`# ${ul("configuration.display.main.title")}
+                        - __${ul("configuration.pin.name").toTitle()}__${s}: \`${config.pin ? "✓" : "✕"}\`
+                        - __${ul("configuration.message.name").toTitle()}__${s}: \`${config.messageToSend}\`
+                        - __${ul("configuration.language.name").toTitle()}__${s}: \`${config.language.toUpperCase()}\`
+                        - __${ul("configuration.menu.log.channel.title").toTitle()}__${s}: ${log}
+                        `)
+						)
+					)
+			)
+			.addSeparatorComponents(
+				new Djs.SeparatorBuilder()
+					.setSpacing(Djs.SeparatorSpacingSize.Small)
+					.setDivider(true)
+			)
+			.addTextDisplayComponents(
+				new Djs.TextDisplayBuilder().setContent(
+					dedent(`# ${ul("configuration.menu.mode.title").toTitle(true)}
+                - __${ul("configuration.follow.role.title")}__${s}: \`${mode.followOnlyRole ? "✓" : "✕"}\`
+								- __${ul("configuration.follow.thread.title")}__${s}: \`${mode.followOnlyChannel ? "✓" : "✕"}\`
+								- __${ul("configuration.roleIn.name")}__${s}: \`${mode.followOnlyRoleIn ? "✓" : "✕"}\``)
+				)
+			)
+			.addSeparatorComponents(
+				new Djs.SeparatorBuilder()
+					.setSpacing(Djs.SeparatorSpacingSize.Small)
+					.setDivider(true)
+			)
+			.addTextDisplayComponents(
+				new Djs.TextDisplayBuilder().setContent(
+					dedent(`# ${ul("configuration.menu.autoUpdate.title").toTitle(true)}
+					${autoFinal}`)
+				)
+			),
+	];
+	await interaction.reply({ components, flags: Djs.MessageFlags.IsComponentsV2 });
 }

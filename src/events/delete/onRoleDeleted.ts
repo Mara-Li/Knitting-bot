@@ -4,41 +4,37 @@ import { getRole, getRoleIn, setRole, setRoleIn } from "../../maps";
 export default (client: Client): void => {
 	client.on("roleDelete", (role) => {
 		const guildID = role.guild.id;
-		const isFollowed = getRole("follow", guildID).some(
-			(followed) => followed.id === role.id
-		);
-		const isIgnored = getRole("ignore", guildID).some(
-			(ignored) => ignored.id === role.id
-		);
-		const followedRoleIn = getRoleIn("follow", guildID).some(
-			(followed) => followed.role.id === role.id
-		);
-		const ignoredRoleIn = getRoleIn("ignore", guildID).some(
-			(ignored) => ignored.role.id === role.id
-		);
-		if (isFollowed) {
-			const followed = getRole("follow", guildID);
-			const index = followed.findIndex((followed) => followed.id === role.id);
-			followed.splice(index, 1);
-			setRole("follow", guildID, followed);
+
+		// Remove from simple role lists
+		const followedRoles = getRole("follow", guildID);
+		const ignoredRoles = getRole("ignore", guildID);
+
+		const filteredFollowed = followedRoles.filter((id) => id !== role.id);
+		const filteredIgnored = ignoredRoles.filter((id) => id !== role.id);
+
+		if (followedRoles.length !== filteredFollowed.length) {
+			setRole("follow", guildID, filteredFollowed);
 		}
-		if (isIgnored) {
-			const ignored = getRole("ignore", guildID);
-			const index = ignored.findIndex((ignored) => ignored.id === role.id);
-			ignored.splice(index, 1);
-			setRole("ignore", guildID, ignored);
+		if (ignoredRoles.length !== filteredIgnored.length) {
+			setRole("ignore", guildID, filteredIgnored);
 		}
-		if (followedRoleIn) {
-			const followed = getRoleIn("follow", guildID);
-			const index = followed.findIndex((followed) => followed.role.id === role.id);
-			followed.splice(index, 1);
-			setRoleIn("follow", guildID, followed);
+
+		// Remove from RoleIn lists
+		const followedRoleIns = getRoleIn("follow", guildID);
+		const ignoredRoleIns = getRoleIn("ignore", guildID);
+
+		const filteredFollowedRoleIn = followedRoleIns.filter(
+			(roleIn) => roleIn.roleId !== role.id
+		);
+		const filteredIgnoredRoleIn = ignoredRoleIns.filter(
+			(roleIn) => roleIn.roleId !== role.id
+		);
+
+		if (followedRoleIns.length !== filteredFollowedRoleIn.length) {
+			setRoleIn("follow", guildID, filteredFollowedRoleIn);
 		}
-		if (ignoredRoleIn) {
-			const ignored = getRoleIn("ignore", guildID);
-			const index = ignored.findIndex((ignored) => ignored.role.id === role.id);
-			ignored.splice(index, 1);
-			setRoleIn("ignore", guildID, ignored);
+		if (ignoredRoleIns.length !== filteredIgnoredRoleIn.length) {
+			setRoleIn("ignore", guildID, filteredIgnoredRoleIn);
 		}
 	});
 };

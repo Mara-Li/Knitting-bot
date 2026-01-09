@@ -133,3 +133,9 @@ package-lock.json
 
 data
 .env.prod
+
+_migration/bak
+_migration/files
+data_bak
+
+.obsidian

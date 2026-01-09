@@ -10,7 +10,7 @@ Le bot ajoutera automatiquement un utilisateur à un fil de discussion lorsque :
 - Lorsqu'un canal ou une catégorie ont leurs autorisations modifiées.
 - Lorsqu'un fil de discussion est créé.
 
-Le bot ne fera rien lorsqu'il rejoindra le serveur. Si vous voulez mettre à jour tous les fils, vous pouvez utiliser la commande slash `/update all` (voir ci-dessous).
+Le bot ne fera rien lorsqu'il rejoindra le serveur. Si vous voulez mettre à jour tous les fils, vous pouvez utiliser la commande slash [`/update all`](commands/update.md).
 
 > [!NOTE] 
 > L'utilisateur ajouté au fil doit avoir la permission de le voir.

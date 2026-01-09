@@ -20,15 +20,14 @@ await build({
 	define: {
 		"process.env.NODE_ENV": `"${process.env.NODE_ENV || "development"}"`,
 	},
-	drop: isProd ? ["console"] : [],
 	entryPoints,
 	format: "esm",
 	minify: isProd,
-	// Préserve la structure des dossiers
 	outbase: "src",
 	outdir: "dist/src",
 	platform: "node",
 	plugins: [fixImportsPlugin(), writeFilePlugin()],
+	pure: isProd ? ["console.log", "console.debug", "console.info", "console.warn"] : [],
 	sourcemap: !isProd,
 	sourceRoot: "src",
 	target: "esnext",
@@ -36,10 +35,8 @@ await build({
 	write: false,
 });
 
-// Copier package.json dans dist/
 copyFileSync("package.json", "dist/package.json");
 
-// Copier les fichiers de locales
 mkdirSync("dist/src/i18n/locales", { recursive: true });
 const localeFiles = await glob("src/i18n/locales/*.json", {
 	windowsPathsNoEscape: true,
