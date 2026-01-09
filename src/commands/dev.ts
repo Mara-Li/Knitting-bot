@@ -190,15 +190,19 @@ function formatDate(input: Date | string | number, format = "dd/mm/YYYY"): strin
 	const month = date.getMonth() + 1;
 	const year = date.getFullYear();
 
-	const map: Record<string, string> = {
+	const map = {
 		d: String(day),
 		dd: String(day).padStart(2, "0"),
 		m: String(month),
 		mm: String(month).padStart(2, "0"),
 		yy: String(year % 100).padStart(2, "0"),
 		yyyy: String(year),
-	};
+	} as const;
+	if (format === "dd/mm/YYYY") format = "dd/mm/yyyy";
 
 	// Replace longest tokens first; be tolerant to token case.
-	return format.replace(/YYYY|YY|dd|d|mm|m/gi, (tok) => map[tok] ?? tok);
+	return format.replace(/YYYY|YY|dd|d|mm|m/gi, (tok) => {
+		const key = tok.toLowerCase() as keyof typeof map;
+		return map[key] ?? tok;
+	});
 }
