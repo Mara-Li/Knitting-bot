@@ -107,8 +107,13 @@ export default {
 				});
 				return;
 			}
+			const format = detectFormatFromName(name);
+			const now = Date.now();
 			for (let i = 0; i < number; i++) {
-				const nameIndexed = name.replace("i", `${i + 1}`).replace("type", type);
+				const nameIndexed = name
+					.replace("i", `${i + 1}`)
+					.replace("type", type)
+					.replace(/\{date::(.*?)\}/, formatDate(now, format));
 				if (type === "channel") {
 					await interaction.guild!.channels.create({
 						name: nameIndexed,
@@ -168,3 +173,32 @@ export default {
 		}
 	},
 };
+
+function detectFormatFromName(name: string) {
+	const lowered = name.toLowerCase();
+	const regex = /\{date::(.*?)\}/;
+	const match = lowered.match(regex);
+	if (match?.[1]) return match[1];
+	return "dd/mm/yyyy";
+}
+
+function formatDate(input: Date | string | number, format = "dd/mm/YYYY"): string {
+	const date = input instanceof Date ? input : new Date(input);
+	if (Number.isNaN(date.getTime())) return "";
+
+	const day = date.getDate();
+	const month = date.getMonth() + 1;
+	const year = date.getFullYear();
+
+	const map: Record<string, string> = {
+		d: String(day),
+		dd: String(day).padStart(2, "0"),
+		m: String(month),
+		mm: String(month).padStart(2, "0"),
+		yy: String(year % 100).padStart(2, "0"),
+		yyyy: String(year),
+	};
+
+	// Remplace les tokens les plus longs en premier via une regex
+	return format.replace(/YYYY|YY|dd|d|mm|m/gi, (tok) => map[tok] ?? tok);
+}
