@@ -1,6 +1,5 @@
 export * from "./channel";
 export * from "./handlers";
-export * from "./interfaces";
 export * from "./items";
 export * from "./modal";
 export * from "./roleIn";

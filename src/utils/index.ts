@@ -6,8 +6,7 @@ import {
 	type Guild,
 	type TextThreadChannel,
 } from "discord.js";
-import Enmap from "enmap";
-import { serverDataDb } from "../maps";
+import db from "../database";
 import { addRoleAndUserToThread } from "./add";
 import { runWithConcurrency } from "./concurrency";
 import { checkThread } from "./data_check";
@@ -19,7 +18,7 @@ import { checkThread } from "./data_check";
  * @param text - Log messages to send
  */
 export async function discordLogs(guildID: string, bot: Client, ...text: unknown[]) {
-	const channelId = serverDataDb.get(guildID, "configuration")?.log;
+	const channelId = db.settings.get(guildID, "configuration.log");
 	if (!channelId || typeof channelId !== "string") return;
 	try {
 		const channel = await bot.channels.fetch(channelId);
@@ -39,21 +38,6 @@ export async function discordLogs(guildID: string, bot: Client, ...text: unknown
  */
 const CACHE_UPDATE_COOLDOWN = 5000; // 5 seconds
 
-type CacheEntry = { lastUpdate: number };
-
-// Use an in-memory Enmap for cache timestamps (no name = no persistence)
-const cacheUpdateTimestamps = new Enmap<string, CacheEntry>({
-	//@ts-expect-error except inMemory is valid
-	inMemory: true,
-});
-
-/**
- * Remove a specific guild from the cache. Intended to be called from a guildDelete handler.
- */
-export function removeCacheForGuild(guildId: string) {
-	cacheUpdateTimestamps.delete(guildId);
-}
-
 /**
  * Update guild cache by fetching members and roles
  * @param guild - Guild to update
@@ -61,7 +45,7 @@ export function removeCacheForGuild(guildId: string) {
  */
 export async function updateCache(guild: Guild, force = false) {
 	const now = Date.now();
-	const last = cacheUpdateTimestamps.get(guild.id)?.lastUpdate;
+	const last = db.cacheUpdateTimestamps.get(guild.id)?.lastUpdate;
 
 	// Skip if recently updated (within cooldown period) and not forced
 	if (!force && last && now - last < CACHE_UPDATE_COOLDOWN) {
@@ -70,7 +54,7 @@ export async function updateCache(guild: Guild, force = false) {
 
 	try {
 		await Promise.all([guild.members.fetch(), guild.roles.fetch()]);
-		cacheUpdateTimestamps.set(guild.id, { lastUpdate: now });
+		db.cacheUpdateTimestamps.set(guild.id, { lastUpdate: now });
 	} catch (e) {
 		console.log(e);
 		// Ignore error
@@ -169,7 +153,6 @@ export async function resolveChannelsByIds<T extends { type: number }>(
 		const results = await runWithConcurrency(tasks, 5);
 		for (let i = 0; i < results.length; i++) {
 			const r = results[i];
-			const id = Array.from(idSet)[i];
 			if (r.status === "fulfilled" && r.value) {
 				const ch = r.value as unknown as T;
 				if (allowedTypes.includes((ch as unknown as { type: number }).type)) {

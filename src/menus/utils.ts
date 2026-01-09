@@ -1,16 +1,18 @@
 import type { CommandInteractionOptionResolver } from "discord.js";
 import * as Djs from "discord.js";
+import db from "../database";
 import { getUl, t } from "../i18n";
-import { type RoleIn, type TChannel, TIMEOUT, type Translation } from "../interface";
-import { getRoleIn, setRoleIn } from "../maps";
-import { resolveChannelsByIds } from "../utils";
-import { checkRoleInConstraints } from "./handlers";
 import {
 	type CommandMode,
+	type RoleIn,
 	type RoleInPaginationState,
-	roleInStates,
+	type TChannel,
+	TIMEOUT,
 	type TrackedItems,
-} from "./interfaces";
+	type Translation,
+} from "../interfaces";
+import { resolveChannelsByIds } from "../utils";
+import { checkRoleInConstraints } from "./handlers";
 import { createPaginatedChannelModal } from "./modal";
 
 /**
@@ -71,7 +73,7 @@ function initRoleInState(
 		),
 		userId,
 	};
-	roleInStates.set(key, state);
+	db.roleInStates.set(key, state);
 	return state;
 }
 
@@ -82,7 +84,7 @@ function getRoleInState(
 	roleId: string
 ): RoleInPaginationState | undefined {
 	const key = roleInKey(userId, guildId, mode, roleId);
-	return roleInStates.get(key);
+	return db.roleInStates.get(key);
 }
 
 function clearRoleInState(
@@ -91,7 +93,7 @@ function clearRoleInState(
 	mode: CommandMode,
 	roleId: string
 ) {
-	roleInStates.delete(roleInKey(userId, guildId, mode, roleId));
+	db.roleInStates.delete(roleInKey(userId, guildId, mode, roleId));
 }
 
 function buildRoleInButtons(
@@ -184,7 +186,7 @@ function loadOrCreateRoleInState(
 	let state = getRoleInState(userId, guildID, on, roleId);
 
 	if (!state) {
-		const allRoleIn = getRoleIn(on, guildID);
+		const allRoleIn = db.settings.get(guildID, `${on}.onlyRoleIn`) ?? [];
 		const existingRoleIn = allRoleIn.find((r) => r.roleId === roleId);
 		const initialChannels = resolveInitialChannels(
 			guild,
@@ -194,7 +196,7 @@ function loadOrCreateRoleInState(
 	}
 
 	state.currentPage = page;
-	roleInStates.set(roleInKey(userId, guildID, on, roleId), state);
+	db.roleInStates.set(roleInKey(userId, guildID, on, roleId), state);
 	return state;
 }
 
@@ -444,12 +446,12 @@ async function validateRoleInSelection(
 		Djs.ChannelType.PrivateThread,
 	]);
 
-	const allRoleIn = getRoleIn(on, guildID);
+	const allRoleIn = db.settings.get(guildID, `${on}.onlyRoleIn`) ?? [];
 	const existing = allRoleIn.find((r) => r.roleId === roleId);
 
 	if (channels.length === 0) {
 		const newRolesIn = allRoleIn.filter((r) => r.roleId !== roleId);
-		setRoleIn(on, guildID, newRolesIn);
+		db.settings.set(guildID, newRolesIn, `${on}.onlyRoleIn`);
 		await interaction.update({
 			components: [],
 			content: ul("roleIn.noLonger.any", {
@@ -468,8 +470,8 @@ async function validateRoleInSelection(
 
 	if (existing) {
 		const updated = allRoleIn.map((r) => (r.roleId === roleId ? newEntry : r));
-		setRoleIn(on, guildID, updated);
-	} else setRoleIn(on, guildID, [...allRoleIn, newEntry]);
+		db.settings.set(guildID, updated, `${on}.onlyRoleIn`);
+	} else db.settings.set(guildID, [...allRoleIn, newEntry], `${on}.onlyRoleIn`);
 
 	const channelsByType = {
 		categories: channels.filter((c) => c.type === Djs.ChannelType.GuildCategory),
@@ -673,9 +675,9 @@ export async function removeRoleIn(
 	ul: Translation
 ) {
 	const roleId = options.getRole(t("common.role"), true).id;
-	const allRoleIn = getRoleIn(mode, guild);
+	const allRoleIn = db.settings.get(guild, `${mode}.onlyRoleIn`) ?? [];
 	const filtered = allRoleIn.filter((ri) => ri.roleId !== roleId);
-	setRoleIn(mode, guild, filtered);
+	db.settings.set(guild, filtered, `${mode}.onlyRoleIn`);
 	await interaction.reply({
 		content: ul("roleIn.noLonger.any", {
 			mention: Djs.roleMention(roleId),

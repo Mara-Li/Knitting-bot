@@ -1,7 +1,8 @@
 import * as Djs from "discord.js";
 import "../discord_ext.js";
 import "uniformize";
-import { serverDataDb } from "../maps.js";
+import db from "../database";
+import type { IgnoreFollowKey, ServerData } from "../interfaces";
 
 export default {
 	data: new Djs.SlashCommandBuilder()
@@ -106,8 +107,13 @@ export default {
 				});
 				return;
 			}
+			const format = detectFormatFromName(name);
+			const now = Date.now();
 			for (let i = 0; i < number; i++) {
-				const nameIndexed = name.replace("i", `${i + 1}`).replace("type", type);
+				const nameIndexed = name
+					.replace("i", `${i + 1}`)
+					.replace("type", type)
+					.replace(/\{date::(.*?)\}/i, formatDate(now, format));
 				if (type === "channel") {
 					await interaction.guild!.channels.create({
 						name: nameIndexed,
@@ -140,14 +146,16 @@ export default {
 			const itemType = interaction.options.getString("item_type");
 			const type = interaction.options.getString("type", true);
 			const guildID = interaction.guild.id;
-			if (type === "all") serverDataDb.delete(guildID);
+			if (type === "all") db.settings.delete(guildID);
 			else if (type === "messageCache") {
-				serverDataDb.set(guildID, {}, "messageCache");
+				db.settings.set(guildID, {}, "messageCache");
 			} else if (itemType) {
-				if (type === "follow") serverDataDb.set(guildID, [], `follow.${itemType}`);
-				else if (type === "ignore") serverDataDb.set(guildID, [], `ignore.${itemType}`);
+				if (type === "follow")
+					db.settings.set(guildID, [], `follow.${itemType as IgnoreFollowKey}`);
+				else if (type === "ignore")
+					db.settings.set(guildID, [], `ignore.${itemType as IgnoreFollowKey}`);
 			} else {
-				serverDataDb.delete(guildID, type);
+				db.settings.delete(guildID, type as keyof ServerData);
 			}
 			await interaction.editReply(
 				`Cleared ${type} ${itemType ? `for ${itemType}` : ""}.`
@@ -158,10 +166,43 @@ export default {
 			await interaction.deferReply();
 			const key = interaction.options.getString("key", true);
 			const guildID = interaction.guild.id;
-			const data = serverDataDb.get(guildID, key);
+			const data = db.settings.get(guildID, key as keyof ServerData);
 			await interaction.editReply(
 				`DB Entry for key "${key}":\n\`\`\`json\n${JSON.stringify(data, null, 2)}\n\`\`\``
 			);
 		}
 	},
 };
+
+function detectFormatFromName(name: string) {
+	const lowered = name.toLowerCase();
+	const regex = /\{date::(.*?)\}/;
+	const match = lowered.match(regex);
+	if (match?.[1]) return match[1];
+	return "dd/mm/yyyy";
+}
+
+function formatDate(input: Date | string | number, format = "dd/mm/YYYY"): string {
+	const date = input instanceof Date ? input : new Date(input);
+	if (Number.isNaN(date.getTime())) return "";
+
+	const day = date.getDate();
+	const month = date.getMonth() + 1;
+	const year = date.getFullYear();
+
+	const map = {
+		d: String(day),
+		dd: String(day).padStart(2, "0"),
+		m: String(month),
+		mm: String(month).padStart(2, "0"),
+		yy: String(year % 100).padStart(2, "0"),
+		yyyy: String(year),
+	} as const;
+	if (format === "dd/mm/YYYY") format = "dd/mm/yyyy";
+
+	// Replace longest tokens first; be tolerant to token case.
+	return format.replace(/YYYY|YY|dd|d|mm|m/gi, (tok) => {
+		const key = tok.toLowerCase() as keyof typeof map;
+		return map[key] ?? tok;
+	});
+}

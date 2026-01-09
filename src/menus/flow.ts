@@ -1,6 +1,6 @@
 import * as Djs from "discord.js";
-import { TIMEOUT, type Translation } from "../interface";
-import { messageToStateKey, type PaginatedHandlers } from "./interfaces";
+import db from "../database";
+import { type PaginatedHandlers, TIMEOUT, type Translation } from "../interfaces";
 import { deletePaginationState } from "./state";
 
 export function hasMorePages(
@@ -44,7 +44,7 @@ export async function startPaginatedButtonsFlow(
 	const buttonMessage = await interaction.fetchReply();
 	if (stateKey && buttonMessage.id) {
 		// link the message ID to the state key
-		messageToStateKey.set(buttonMessage.id, stateKey);
+		db.messageToStateKey.set(buttonMessage.id, stateKey);
 	}
 
 	const collector = buttonMessage.createMessageComponentCollector({
@@ -98,8 +98,8 @@ export async function startPaginatedButtonsFlow(
 	collector.on("end", async () => {
 		// cleanup mapping and state
 		try {
-			const id = (buttonMessage as Djs.Message).id;
-			if (messageToStateKey.has(id)) messageToStateKey.delete(id);
+			const id = buttonMessage.id;
+			if (db.messageToStateKey.has(id)) db.messageToStateKey.delete(id);
 			// Auto-cleanup the state when collector ends (timeout or stop)
 			if (stateKey) deletePaginationState(stateKey);
 		} catch (e) {

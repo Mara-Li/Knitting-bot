@@ -1,27 +1,25 @@
 import type { Client } from "discord.js";
-import { getRole, getRoleIn, setRole, setRoleIn } from "../../maps";
-
+import db from "../../database";
 export default (client: Client): void => {
 	client.on("roleDelete", (role) => {
 		const guildID = role.guild.id;
 
 		// Remove from simple role lists
-		const followedRoles = getRole("follow", guildID);
-		const ignoredRoles = getRole("ignore", guildID);
+		const followedRoles = db.settings.get(guildID, "follow.role") ?? [];
+		const ignoredRoles = db.settings.get(guildID, "ignore.role") ?? [];
 
 		const filteredFollowed = followedRoles.filter((id) => id !== role.id);
 		const filteredIgnored = ignoredRoles.filter((id) => id !== role.id);
 
-		if (followedRoles.length !== filteredFollowed.length) {
-			setRole("follow", guildID, filteredFollowed);
-		}
-		if (ignoredRoles.length !== filteredIgnored.length) {
-			setRole("ignore", guildID, filteredIgnored);
-		}
+		if (followedRoles.length !== filteredFollowed.length)
+			db.settings.set(guildID, filteredFollowed, "follow.role");
+
+		if (ignoredRoles.length !== filteredIgnored.length)
+			db.settings.set(guildID, filteredIgnored, "ignore.role");
 
 		// Remove from RoleIn lists
-		const followedRoleIns = getRoleIn("follow", guildID);
-		const ignoredRoleIns = getRoleIn("ignore", guildID);
+		const followedRoleIns = db.settings.get(guildID, "follow.onlyRoleIn") ?? [];
+		const ignoredRoleIns = db.settings.get(guildID, "ignore.onlyRoleIn") ?? [];
 
 		const filteredFollowedRoleIn = followedRoleIns.filter(
 			(roleIn) => roleIn.roleId !== role.id
@@ -30,11 +28,10 @@ export default (client: Client): void => {
 			(roleIn) => roleIn.roleId !== role.id
 		);
 
-		if (followedRoleIns.length !== filteredFollowedRoleIn.length) {
-			setRoleIn("follow", guildID, filteredFollowedRoleIn);
-		}
-		if (ignoredRoleIns.length !== filteredIgnoredRoleIn.length) {
-			setRoleIn("ignore", guildID, filteredIgnoredRoleIn);
-		}
+		if (followedRoleIns.length !== filteredFollowedRoleIn.length)
+			db.settings.set(guildID, filteredFollowedRoleIn, "follow.onlyRoleIn");
+
+		if (ignoredRoleIns.length !== filteredIgnoredRoleIn.length)
+			db.settings.set(guildID, filteredIgnoredRoleIn, "ignore.onlyRoleIn");
 	});
 };

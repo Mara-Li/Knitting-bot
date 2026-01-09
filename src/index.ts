@@ -1,7 +1,6 @@
 import process from "node:process";
 import { Client, GatewayIntentBits, Partials } from "discord.js";
 import dotenv from "dotenv";
-import pkg from "../package.json" with { type: "json" };
 import "uniformize";
 import {
 	interactionCreate,
@@ -19,12 +18,7 @@ import {
 	ready,
 } from "./events";
 
-let dot = dotenv.config({ path: ".env", quiet: true });
-if (process.env.ENV === "production") {
-	dot = dotenv.config({ path: ".env.prod", quiet: true });
-}
-
-export { dot };
+dotenv.config({ path: ".env", quiet: true });
 
 const client = new Client({
 	intents: [
@@ -39,20 +33,6 @@ const client = new Client({
 		Partials.User,
 	],
 });
-
-export const EMOJI =
-	process.env.MESSAGE && process.env.MESSAGE.trim().length > 0
-		? process.env.MESSAGE
-		: "_ _";
-export const VERSION = pkg.version ?? "0.0.0";
-export const DESTROY_DATABASE = process.env.DESTROY === "true";
-
-export const INFO_EMOJI = {
-	discord: process.env.DISCORD ?? "??",
-	docs: process.env.DOCS ?? "??",
-	github: process.env.GITHUB_EMOJI ?? "??",
-	kofi: process.env.KOFI ?? "??",
-};
 
 try {
 	ready(client);

@@ -30,7 +30,7 @@ export interface IgnoreFollow {
 	category: string[];
 	channel: string[];
 	forum: string[];
-	OnlyRoleIn: RoleIn[];
+	onlyRoleIn: RoleIn[];
 }
 
 export type IgnoreFollowKey = keyof IgnoreFollow;
@@ -50,13 +50,13 @@ export const DEFAULT_CONFIGURATION: Configuration = {
 	pin: false,
 };
 
-export const ConfigurationKeys = Object.keys(DEFAULT_CONFIGURATION);
+export const CONFIGURATION_KEYS = Object.keys(DEFAULT_CONFIGURATION);
 
 export const DEFAULT_IGNORE_FOLLOW: IgnoreFollow = {
 	category: [],
 	channel: [],
 	forum: [],
-	OnlyRoleIn: [],
+	onlyRoleIn: [],
 	role: [],
 	thread: [],
 };
@@ -73,7 +73,6 @@ export interface ServerData {
 }
 
 export type Translation = TFunction<"translation", undefined>;
-export const TIMEOUT = 600000; // 10 minutes
 export type TChannel = "channel" | "thread" | "category" | "forum";
 export type ArrayChannel = Array<
 	Djs.CategoryChannel | Djs.TextChannel | Djs.AnyThreadChannel | Djs.ForumChannel

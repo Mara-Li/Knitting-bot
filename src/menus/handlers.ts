@@ -1,17 +1,16 @@
 import * as Djs from "discord.js";
-import type { ArrayChannel, RoleIn, TChannel, Translation } from "../interface";
-import {
-	getConfig,
-	getMaps,
-	getRoleIn,
-	setRole,
-	setRoleIn,
-	setTrackedItem,
-} from "../maps";
+import db from "../database";
+import type {
+	ArrayChannel,
+	CommandMode,
+	PaginatedIdsState,
+	RoleIn,
+	TChannel,
+	Translation,
+} from "../interfaces";
 import { resolveChannelsByIds } from "../utils";
-import type { CommandMode, PaginatedIdsState } from "./interfaces";
 import { respondInteraction } from "./paginated";
-import { deletePaginationState, getPaginationState } from "./state";
+import { deletePaginationState } from "./state";
 import { resolveIds } from "./utils";
 
 /**
@@ -27,7 +26,7 @@ export async function validateAndSave(
 	mode: CommandMode
 ) {
 	const stateKey = `${userId}_${guildID}_${mode}_${channelType}`;
-	const state = getPaginationState(stateKey);
+	const state = db.globalPaginationStates.get(stateKey);
 	if (!state) return;
 
 	const guild = interaction.guild;
@@ -49,7 +48,7 @@ export async function validateAndSave(
 	};
 
 	const oppositeMode: CommandMode = mode === "follow" ? "ignore" : "follow";
-	const oppositeTrackedIds = new Set(getMaps(oppositeMode, typeName, guildID));
+	const oppositeTrackedIds = new Set(db.getMaps(oppositeMode, typeName, guildID));
 	const conflictIds = finalIds.filter((id) => oppositeTrackedIds.has(id));
 	if (conflictIds.length > 0) {
 		const conflictKey =
@@ -71,7 +70,7 @@ export async function validateAndSave(
 	);
 
 	// Save the changes
-	setTrackedItem(
+	db.setTrackedItem(
 		mode,
 		typeName,
 		guildID,
@@ -216,7 +215,7 @@ async function ensureRoleInContext(
 	roleId: string,
 	ul: Translation
 ): Promise<{ state: PaginatedIdsState; guild: Djs.Guild; role: Djs.Role } | undefined> {
-	const state = getPaginationState(stateKey);
+	const state = db.globalPaginationStates.get(stateKey);
 	if (!state) return;
 
 	const guild = interaction.guild;
@@ -300,7 +299,7 @@ async function handleRoleInConflicts({
 	) => string;
 }) {
 	const oppositeMode: CommandMode = mode === "follow" ? "ignore" : "follow";
-	const oppositeRoleIn = getRoleIn(oppositeMode, guildID);
+	const oppositeRoleIn = db.settings.get(guildID, `${oppositeMode}.onlyRoleIn`) ?? [];
 	const oppositeForRole = oppositeRoleIn.find((r) => r.roleId === roleId);
 	const oppositeChannelIds = new Set(oppositeForRole?.channelIds ?? []);
 
@@ -402,7 +401,7 @@ async function persistRoleInSelection({
 	ul: Translation;
 	mode: CommandMode;
 }) {
-	const allRoleIn = getRoleIn(mode, guildID);
+	const allRoleIn = db.settings.get(guildID, `${mode}.onlyRoleIn`) ?? [];
 	const existingEntry = allRoleIn.find((r) => r.roleId === roleId);
 
 	const allChannelTypesIds: string[] = [];
@@ -437,8 +436,7 @@ async function persistRoleInSelection({
 
 	if (allChannelTypesIds.length === 0) {
 		const updatedRoleIn = allRoleIn.filter((r) => r.roleId !== roleId);
-		setRoleIn(mode, guildID, updatedRoleIn);
-
+		db.settings.set(guildID, updatedRoleIn, `${mode}.onlyRoleIn`);
 		const finalMessage = ul("roleIn.noLonger.any", {
 			mention: Djs.roleMention(roleId),
 			on: ul(`roleIn.on.${mode}`),
@@ -456,10 +454,8 @@ async function persistRoleInSelection({
 
 	if (existingEntry) {
 		const updated = allRoleIn.map((r) => (r.roleId === roleId ? newEntry : r));
-		setRoleIn(mode, guildID, updated);
-	} else {
-		setRoleIn(mode, guildID, [...allRoleIn, newEntry]);
-	}
+		db.settings.set(guildID, updated, `${mode}.onlyRoleIn`);
+	} else db.settings.set(guildID, [...allRoleIn, newEntry], `${mode}.onlyRoleIn`);
 
 	const finalMessage =
 		messages.length > 0
@@ -481,7 +477,8 @@ export async function checkRoleInConstraints(
 ): Promise<boolean> {
 	if (
 		mode === "follow" &&
-		(getConfig("followOnlyChannel", guildID) || getConfig("followOnlyRole", guildID))
+		(db.settings.get(guildID, "configuration.followOnlyChannel") ||
+			db.settings.get(guildID, "configuration.followOnlyRole"))
 	) {
 		await interaction.reply({
 			content: ul("roleIn.error.otherMode"),
@@ -490,7 +487,7 @@ export async function checkRoleInConstraints(
 		return false;
 	}
 
-	if (!getConfig("followOnlyRoleIn", guildID) && mode === "follow") {
+	if (!db.settings.get(guildID, "configuration.followOnlyRoleIn") && mode === "follow") {
 		await interaction.reply({
 			content: ul("roleIn.error.need"),
 			flags: Djs.MessageFlags.Ephemeral,
@@ -548,9 +545,9 @@ export function processRoleTypeChanges(
 
 	const removedIds = new Set(removedRoles.map((r) => r.id));
 	const finalRoles = [...oldRoles.filter((r) => !removedIds.has(r.id)), ...addedRoles];
-	setRole(
-		mode,
+	db.settings.set(
 		guildID,
-		finalRoles.map((r) => r.id)
+		finalRoles.map((r) => r.id),
+		`${mode}.role`
 	);
 }

@@ -1,11 +1,11 @@
-import { TIMEOUT } from "../interface";
+import {
+	type ChannelSelectorsForTypeOptions,
+	type PaginatedChannelSelectorsOptions,
+	TIMEOUT,
+} from "../interfaces";
 import { discordLogs } from "../utils";
 import { createPaginationButtons, hasMorePages, startPaginatedButtonsFlow } from "./flow";
 import { validateAndSave } from "./handlers";
-import type {
-	ChannelSelectorsForTypeOptions,
-	PaginatedChannelSelectorsOptions,
-} from "./interfaces";
 import { getTrackedItems } from "./items";
 import { createFirstPageChannelModalByType } from "./modal";
 import { handleModalModifyGeneric, showPaginatedMessageGeneric } from "./paginated";

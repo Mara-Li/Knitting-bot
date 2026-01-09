@@ -1,6 +1,6 @@
 import { ChannelType, type Client, type TextChannel } from "discord.js";
+import db from "../../database";
 import { getTranslation } from "../../i18n";
-import { getConfig } from "../../maps";
 import { discordLogs, updateCache, updateThread } from "../../utils";
 import { runWithConcurrency } from "../../utils/concurrency";
 import { validateChannelType } from "../../utils/data_check";
@@ -25,7 +25,7 @@ export default (client: Client): void => {
 		const ul = getTranslation(guildId, {
 			locale: newChannel.guild.preferredLocale,
 		});
-		if (!getConfig("onChannelUpdate", guildId)) return;
+		if (!db.settings.get(guildId, "configuration.onChannelUpdate")) return;
 		if (
 			!validateChannelType(oldChannel) ||
 			!validateChannelType(newChannel) ||
@@ -34,7 +34,9 @@ export default (client: Client): void => {
 			return;
 		}
 		await updateCache(newChannel.guild);
-		const followOnlyChannelEnabled = getConfig("followOnlyChannel", guildId);
+		const followOnlyChannelEnabled =
+			db.settings.get(guildId, "configuration.followOnlyChannel") ??
+			db.defaultValues.configuration.followOnlyChannel;
 		const isCategory = newChannel.type === ChannelType.GuildCategory;
 
 		if (isCategory) {

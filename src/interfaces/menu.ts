@@ -1,6 +1,5 @@
 import type * as Djs from "discord.js";
-import Enmap from "enmap";
-import type { TChannel, Translation } from "../interface";
+import type { TChannel, Translation } from "./config";
 
 export type CommandMode = "follow" | "ignore";
 
@@ -47,18 +46,6 @@ export type PaginatedHandlers = {
 	onEnd?: (buttonMessage: Djs.Message) => Promise<void> | void;
 };
 
-// Global state storage using in-memory Enmap (no name = no persistence)
-export const globalPaginationStates = new Enmap<string, PaginatedIdsState>({
-	//@ts-expect-error except inMemory is valid
-	inMemory: true,
-});
-
-// Message ID -> state key mapping
-export const messageToStateKey = new Enmap<string, string>({
-	//@ts-expect-error except inMemory is valid
-	inMemory: true,
-});
-
 /**
  * Follow or ignore roles in specific channels using a modal
  * @param on {"follow" | "ignore"} The mode to use
@@ -74,11 +61,6 @@ export type RoleInPaginationState = {
 	selectedThreads: Set<string>;
 	selectedForums: Set<string>;
 };
-// Use an in-memory Enmap for roleIn pagination states (no name = no persistence)
-export const roleInStates = new Enmap<string, RoleInPaginationState>({
-	//@ts-expect-error except inMemory is valid
-	inMemory: true,
-});
 
 export interface PaginatedChannelSelectorsOptions {
 	interaction: Djs.ChatInputCommandInteraction;
@@ -99,3 +81,5 @@ export interface PaginatedChannelSelectorsOptions {
 		mode: CommandMode
 	) => Promise<void>;
 }
+
+export const TIMEOUT = 600000; // 10 minutes
