@@ -1,6 +1,5 @@
 import { Locale } from "discord.js";
 import Enmap from "enmap";
-import { EMOJI } from "./index";
 import {
 	DEFAULT_CONFIGURATION,
 	DEFAULT_IGNORE_FOLLOW,
@@ -10,6 +9,7 @@ import {
 	type RoleInPaginationState,
 	type ServerData,
 } from "./interfaces";
+import { EMOJI } from "./interfaces/constant";
 
 function getDefaultServerData(): ServerData {
 	return {
@@ -62,12 +62,13 @@ export default {
 		const follow = this.settings.get(guildId, "follow");
 		if (!follow) return [];
 
-		return [
+		const combined = [
 			...(follow.forum ?? []),
 			...(follow.channel ?? []),
 			...(follow.category ?? []),
 			...(follow.thread ?? []),
 		];
+		return Array.from(new Set(combined));
 	},
 	getLanguage(guildID: string): Locale {
 		const language = this.settings.get(guildID, "configuration.language");
@@ -111,7 +112,9 @@ export default {
 		guildID: string,
 		value: string[]
 	): void {
-		// onlyRoleIn has its own setter (setRoleIn) due to different data structure
+		/**
+		 * For roleIn, use `set(guildId, value, mode.onlyRoleIn)` directly
+		 */
 		if (name === "onlyRoleIn") return;
 		this.settings.set(guildID, value, `${mode}.${name}`);
 	},
