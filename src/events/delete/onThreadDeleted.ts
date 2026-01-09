@@ -26,26 +26,34 @@ export default (client: Client): void => {
 		const followedRoleIns = db.settings.get(guildID, "follow.onlyRoleIn") ?? [];
 		const ignoredRoleIns = db.settings.get(guildID, "ignore.onlyRoleIn") ?? [];
 
-		const updatedFollowedRoleIns = followedRoleIns.map((roleIn) => ({
-			...roleIn,
-			channelIds: roleIn.channelIds.filter((id) => id !== thread.id),
-		}));
-		const updatedIgnoredRoleIns = ignoredRoleIns.map((roleIn) => ({
-			...roleIn,
-			channelIds: roleIn.channelIds.filter((id) => id !== thread.id),
-		}));
+		const updatedFollowedRoleIns = followedRoleIns
+			.map((roleIn) => ({
+				...roleIn,
+				channelIds: roleIn.channelIds.filter((id) => id !== thread.id),
+			}))
+			.filter((roleIn) => roleIn.channelIds.length > 0);
+		const updatedIgnoredRoleIns = ignoredRoleIns
+			.map((roleIn) => ({
+				...roleIn,
+				channelIds: roleIn.channelIds.filter((id) => id !== thread.id),
+			}))
+			.filter((roleIn) => roleIn.channelIds.length > 0);
 
 		if (
+			followedRoleIns.length !== updatedFollowedRoleIns.length ||
 			followedRoleIns.some(
 				(roleIn, index) =>
+					updatedFollowedRoleIns[index] &&
 					roleIn.channelIds.length !== updatedFollowedRoleIns[index].channelIds.length
 			)
 		) {
 			db.settings.set(guildID, updatedFollowedRoleIns, "follow.onlyRoleIn");
 		}
 		if (
+			ignoredRoleIns.length !== updatedIgnoredRoleIns.length ||
 			ignoredRoleIns.some(
 				(roleIn, index) =>
+					updatedIgnoredRoleIns[index] &&
 					roleIn.channelIds.length !== updatedIgnoredRoleIns[index].channelIds.length
 			)
 		) {

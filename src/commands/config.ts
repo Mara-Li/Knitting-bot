@@ -446,7 +446,12 @@ async function updateConfig(
 		const rows = reloadButtonMode(interaction.guild.id, ul);
 		await interaction.editReply({ components: rows, embeds: [embed] });
 	} else if (command === "manualMode") {
-		const names = ["onChannelUpdate", "onMemberUpdate", "onThreadCreated", "onNewMember"];
+		const names: ConfigurationKey[] = [
+			"onChannelUpdate",
+			"onMemberUpdate",
+			"onThreadCreated",
+			"onNewMember",
+		];
 
 		// Determine current manual mode flag
 		const currentManual = config.manualMode;
@@ -454,27 +459,21 @@ async function updateConfig(
 		if (!currentManual) {
 			// Enabling manual mode: set manualMode = true and disable all auto-update flags
 			db.settings.set(interaction.guild.id, true, "configuration.manualMode");
-			for (const cmd of names) {
-				//setConfig(cmd, interaction.guild.id, false);
+			for (const cmd of names)
 				db.settings.set(interaction.guild.id, false, `configuration.${cmd}`);
-			}
 		} else {
 			// Disabling manual mode: set manualMode = false and enable all auto-update flags
 			db.settings.set(interaction.guild.id, false, "configuration.manualMode");
-			for (const cmd of names) {
-				//setConfig(cmd, interaction.guild.id, true);
+			for (const cmd of names)
 				db.settings.set(interaction.guild.id, true, `configuration.${cmd}`);
-			}
 		}
 		const embed = autoUpdateMenu(interaction.guild.id, ul);
 		//reload buttons
 		const rows = reloadButtonAuto(interaction.guild.id, ul);
 		await interaction.editReply({ components: rows, embeds: [embed] });
 	} else {
-		//newConfig = !getConfig(command, interaction.guild.id);
 		newConfig = !db.settings.get(interaction.guild.id, `configuration.${command}`);
 		await interaction.editReply({ content: "" });
-		//setConfig(command, interaction.guild.id, newConfig);
 		db.settings.set(interaction.guild.id, newConfig, `configuration.${command}`);
 		let embed: Djs.EmbedBuilder;
 		//reload buttons
