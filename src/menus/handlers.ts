@@ -455,8 +455,7 @@ async function persistRoleInSelection({
 	if (existingEntry) {
 		const updated = allRoleIn.map((r) => (r.roleId === roleId ? newEntry : r));
 		db.settings.set(guildID, updated, `${mode}.onlyRoleIn`);
-	}
-	else db.settings.set(guildID, [...allRoleIn, newEntry], `${mode}.onlyRoleIn`);
+	} else db.settings.set(guildID, [...allRoleIn, newEntry], `${mode}.onlyRoleIn`);
 
 	const finalMessage =
 		messages.length > 0
