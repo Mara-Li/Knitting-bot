@@ -57,9 +57,8 @@ export default (client: Client): void => {
 					}
 				}
 			}
-			if (tasks.length > 0) {
-				await runWithConcurrency(tasks, 10);
-			}
+			if (tasks.length > 0) await runWithConcurrency(tasks, 10);
+
 			if (totalThreads > 0) {
 				await discordLogs(
 					guildId,
