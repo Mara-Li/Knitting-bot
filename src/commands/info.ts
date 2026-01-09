@@ -2,6 +2,7 @@ import * as Djs from "discord.js";
 import { getUl } from "../i18n";
 import { INFO_EMOJI, VERSION } from "../index";
 import "../discord_ext.js";
+import { getConfig } from "../maps";
 
 export default {
 	data: new Djs.SlashCommandBuilder().setName("info").setDescriptions("info.cmds"),
@@ -21,28 +22,33 @@ export default {
 				value: VERSION as string,
 			})
 			.addFields({
-				name: `${ul("configuration.log.name")}`,
-				value: `\`/config ${ul("configuration.menu.log.channel.title")}\``,
+				name: ul("info.stats.title"),
+				value: ul("info.stats.value", {
+					guilds: interaction.client.guilds.cache.size,
+					latency: interaction.client.ws.ping,
+					uptime: Djs.time(
+						new Date(Date.now() - interaction.client.uptime!),
+						Djs.TimestampStyles.RelativeTime
+					),
+				}),
 			})
-			.addFields({ name: "\u200A", value: "\u200A" })
-			.addFields({
-				name: ul("configuration.menu.mode.title"),
-				value: `\`/config ${ul("configuration.menu.mode.title").toLowerCase()}\``,
-			})
-			.addFields({ name: "\u200A", value: "\u200A" })
-			.addFields({
-				name: ul("configuration.menu.autoUpdate.title"),
-				value: `\`/config ${ul("configuration.menu.autoUpdate.cmd").toLowerCase()}\``,
-			})
+
 			.setFooter({
 				text: ul("info.footer"),
 			});
+
+		const lang = getConfig("language", interaction.guild.id).split("-")[0];
 
 		/**
 		 * Create button with external link
 		 */
 
 		const row = new Djs.ActionRowBuilder<Djs.ButtonBuilder>().addComponents(
+			new Djs.ButtonBuilder()
+				.setLabel(ul("info.documentation"))
+				.setURL(`https://mara-li.github.io/Knitting-bot/#/${lang}/`)
+				.setEmoji("📄")
+				.setStyle(Djs.ButtonStyle.Link),
 			new Djs.ButtonBuilder()
 				.setLabel("GitHub")
 				.setURL(`${ul("info.readMe")}`)
@@ -65,7 +71,7 @@ export default {
 				})
 				.setStyle(Djs.ButtonStyle.Link),
 			new Djs.ButtonBuilder()
-				.setLabel("Changelog")
+				.setLabel(ul("info.changelog"))
 				.setURL("https://github.com/mara-li/Knitting-bot/blob/master/CHANGELOG.md")
 				.setEmoji("🕒")
 				.setStyle(Djs.ButtonStyle.Link)

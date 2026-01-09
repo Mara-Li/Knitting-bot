@@ -1,3 +1,4 @@
+import type { Locale } from "discord.js";
 import Enmap from "enmap";
 import {
 	type ConfigurationKey,
@@ -141,6 +142,7 @@ export function setRoleIn(
  * @param guildID Guild ID
  * @param channel - If true, get channel configuration
  */
+export function getConfig(name: "language", guildID: string): Locale;
 export function getConfig(
 	name: ConfigurationKey,
 	guildID: string,
@@ -151,7 +153,7 @@ export function getConfig(
 	name: ConfigurationKey,
 	guildID: string,
 	channel?: boolean
-): string | boolean {
+): string | boolean | Locale {
 	ensureGuild(guildID);
 
 	// If looking for a specific channel (e.g., for logs)
