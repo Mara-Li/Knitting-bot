@@ -1,8 +1,8 @@
 import * as Djs from "discord.js";
 import { getUl } from "../i18n";
-import { INFO_EMOJI, VERSION } from "../index";
 import "../discord_ext.js";
 import db from "../database";
+import {INFO_EMOJI, VERSION} from "../interfaces";
 
 export default {
 	data: new Djs.SlashCommandBuilder().setName("info").setDescriptions("info.cmds"),

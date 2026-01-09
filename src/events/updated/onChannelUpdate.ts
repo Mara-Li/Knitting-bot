@@ -1,5 +1,5 @@
 import { ChannelType, type Client, type TextChannel } from "discord.js";
-import db from "../../database.js";
+import db from "../../database";
 import { getTranslation } from "../../i18n";
 import { discordLogs, updateCache, updateThread } from "../../utils";
 import { runWithConcurrency } from "../../utils/concurrency";

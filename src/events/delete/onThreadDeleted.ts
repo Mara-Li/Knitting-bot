@@ -1,5 +1,5 @@
 import type { Client } from "discord.js";
-import db from "../../database.js";
+import db from "../../database";
 
 export default (client: Client): void => {
 	client.on("threadDelete", async (thread) => {

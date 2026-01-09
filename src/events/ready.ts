@@ -1,6 +1,6 @@
 import type { Client } from "discord.js";
 import { ALL_COMMANDS } from "../commands";
-import { VERSION } from "../index";
+import { VERSION } from "../interfaces";
 import { runWithConcurrency } from "../utils/concurrency";
 
 export default (client: Client): void => {

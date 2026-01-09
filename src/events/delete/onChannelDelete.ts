@@ -6,7 +6,7 @@ import {
 	type NonThreadGuildBasedChannel,
 	type TextChannel,
 } from "discord.js";
-import db from "../../database.js";
+import db from "../../database";
 import type { RoleIn } from "../../interfaces";
 
 function filterRoleInsByChannel(roleIns: RoleIn[], channelId: string) {

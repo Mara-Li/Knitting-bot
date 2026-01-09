@@ -1,5 +1,5 @@
 import type { Client, ThreadChannel } from "discord.js";
-import db from "../../database.js";
+import db from "../../database";
 import { getTranslation } from "../../i18n";
 import { discordLogs } from "../../utils";
 import { addUserToThread } from "../../utils/add";
