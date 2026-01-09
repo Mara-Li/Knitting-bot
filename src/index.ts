@@ -1,7 +1,7 @@
 import process from "node:process";
 import { Client, GatewayIntentBits, Partials } from "discord.js";
 import dotenv from "dotenv";
-import * as pkg from "../package.json" with { type: "json" };
+import pkg from "../package.json" with { type: "json" };
 import "uniformize";
 import {
 	interactionCreate,
