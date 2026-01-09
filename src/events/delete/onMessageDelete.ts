@@ -27,5 +27,7 @@ export default (client: Client): void => {
 				ul("error.deletedBotMessage", { bot: client.user.id, thread: threadId })
 			);
 		}
+		//also delete any pagination state linked to this message
+		db.messageToStateKey.delete(message.id);
 	});
 };

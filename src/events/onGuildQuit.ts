@@ -14,5 +14,6 @@ export default (client: Client): void => {
 		db.messageToStateKey.sweep((_msgId, stateKey) => {
 			return stateKey.split("_")[1] === guild.id;
 		});
+		
 	});
 };
