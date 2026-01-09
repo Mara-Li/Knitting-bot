@@ -3,6 +3,7 @@ import { getTranslation } from "../../i18n";
 import { getConfig } from "../../maps";
 import { discordLogs } from "../../utils";
 import { addUserToThread } from "../../utils/add";
+import { runWithConcurrency } from "../../utils/concurrency";
 import { checkMemberRole, checkThread } from "../../utils/data_check";
 
 /**
@@ -21,22 +22,26 @@ export default (client: Client): void => {
 		const guild = member.guild;
 		const channels = guild.channels.cache.filter((channel) => channel.isThread());
 
-		// Process threads in parallel with Promise.allSettled
-		const threadPromises = Array.from(channels.values()).map((channel) => {
-			const threadChannel = channel as ThreadChannel;
-			const roleIsAllowed =
-				!checkMemberRole(member.roles, "follow") &&
-				!checkMemberRole(member.roles, "ignore");
-			if (!getConfig("followOnlyChannel", guildID)) {
-				if (!checkThread(threadChannel, "ignore") && roleIsAllowed)
-					return addUserToThread(threadChannel, member);
-			} else {
-				if (roleIsAllowed && checkThread(threadChannel, "follow"))
-					return addUserToThread(threadChannel, member);
+		// Process threads in parallel with concurrency control
+		const tasks: Array<() => Promise<unknown>> = Array.from(channels.values()).map(
+			(channel) => {
+				return async () => {
+					const threadChannel = channel as ThreadChannel;
+					const roleIsAllowed =
+						!checkMemberRole(member.roles, "follow") &&
+						!checkMemberRole(member.roles, "ignore");
+					if (!getConfig("followOnlyChannel", guildID)) {
+						if (!checkThread(threadChannel, "ignore") && roleIsAllowed)
+							return addUserToThread(threadChannel, member);
+					} else {
+						if (roleIsAllowed && checkThread(threadChannel, "follow"))
+							return addUserToThread(threadChannel, member);
+					}
+					return Promise.resolve();
+				};
 			}
-			return Promise.resolve();
-		});
+		);
 
-		await Promise.allSettled(threadPromises);
+		await runWithConcurrency(tasks, 10);
 	});
 };

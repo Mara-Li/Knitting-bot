@@ -3,9 +3,10 @@ import { getUl, t } from "../i18n";
 import type { Translation } from "../interface";
 import { getConfig } from "../maps";
 import { fetchArchived, updateCache } from "../utils";
-import { addRoleAndUserToThread, fetchUntilMessage } from "../utils/add";
+import { addRoleAndUserToThread } from "../utils/add";
 import { checkThread } from "../utils/data_check";
 import "../discord_ext.js";
+import { runWithConcurrency } from "../utils/concurrency";
 
 export default {
 	data: new Djs.SlashCommandBuilder()
@@ -84,17 +85,32 @@ async function updateAllThreads(
 		for (const thread of archived) toUpdate.add(thread);
 	}
 	//merge both collections
-	for (const thread of threads.threads.values())
-		toUpdate.add(thread);
-	
+	for (const thread of threads.threads.values()) toUpdate.add(thread);
+
 	const count = threads.threads.size;
 	await updateCache(interaction.guild, true);
+	// Build tasks for threads that should be updated
+	const tasks: (() => Promise<void>)[] = [];
 	for (const thread of toUpdate) {
 		if (thread.locked) continue;
-		if (!getConfig("followOnlyChannel", guild) && !checkThread(thread, "ignore"))
-			await addRoleAndUserToThread(thread, includeArchived);
-		else if (checkThread(thread, "follow")) await addRoleAndUserToThread(thread, includeArchived);
+		const shouldUpdate =
+			(!getConfig("followOnlyChannel", guild) && !checkThread(thread, "ignore")) ||
+			checkThread(thread, "follow");
+		if (shouldUpdate) {
+			tasks.push(async () => {
+				try {
+					await thread.members.fetch({ cache: true });
+					await addRoleAndUserToThread(thread, includeArchived);
+				} catch (err) {
+					console.error(`Error updating thread ${thread.id}:`, err);
+				}
+			});
+		}
 	}
+
+	// Execute tasks with concurrency control using utility helper
+	await runWithConcurrency(tasks, 10);
+
 	await interaction.editReply({
 		content: ul("commands.updateAllThreads.success", {
 			count: count,
@@ -111,7 +127,6 @@ async function updateThread(
 	ul: Translation
 ) {
 	if (!interaction.guild) return;
-	await updateCache(interaction.guild, true);
 	const guild = interaction.guild.id;
 	const threadOption =
 		interaction.options.get(ul("common.thread").toLowerCase()) ?? interaction;
@@ -124,11 +139,13 @@ async function updateThread(
 		});
 		return;
 	}
+	await updateCache(interaction.guild, true);
+
 	if (channel.archived) {
 		//unarchive
 		await channel.setArchived(false, "Manual update of thread");
+		await channel.members.fetch({ cache: true }); //fetch members after unarchive
 	}
-	await fetchUntilMessage(threadOption!.channel as Djs.ThreadChannel);
 
 	const mention = Djs.channelMention(channel?.id as string);
 	const isFollowed =

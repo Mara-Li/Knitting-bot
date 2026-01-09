@@ -2,6 +2,7 @@ import { ChannelType, type Client, type TextChannel } from "discord.js";
 import { getTranslation } from "../../i18n";
 import { getConfig } from "../../maps";
 import { discordLogs, updateCache, updateThread } from "../../utils";
+import { runWithConcurrency } from "../../utils/concurrency";
 import { validateChannelType } from "../../utils/data_check";
 
 /**
@@ -42,7 +43,7 @@ export default (client: Client): void => {
 			if (children.size === 0) return;
 			let totalThreads = 0;
 			const childrenWithThreads: string[] = [];
-			const threadUpdatePromises: Promise<unknown>[] = [];
+			const tasks: Array<() => Promise<unknown>> = [];
 			for (const child of children.values()) {
 				if (child.type === ChannelType.GuildText) {
 					const threads = (child as TextChannel).threads.cache;
@@ -50,14 +51,14 @@ export default (client: Client): void => {
 						totalThreads += threads.size;
 						childrenWithThreads.push(`<#${child.id}>`);
 					}
-					// Collect promises instead of awaiting per child
+					// Collect tasks instead of awaiting per child
 					for (const thread of threads.values()) {
-						threadUpdatePromises.push(updateThread(followOnlyChannelEnabled, thread));
+						tasks.push(async () => updateThread(followOnlyChannelEnabled, thread));
 					}
 				}
 			}
-			if (threadUpdatePromises.length > 0) {
-				await Promise.allSettled(threadUpdatePromises);
+			if (tasks.length > 0) {
+				await runWithConcurrency(tasks, 10);
 			}
 			if (totalThreads > 0) {
 				await discordLogs(
@@ -74,9 +75,10 @@ export default (client: Client): void => {
 			const newTextChannel = newChannel as TextChannel;
 			const threads = newTextChannel.threads.cache;
 			if (threads.size === 0) return;
-			await Promise.allSettled(
-				threads.map((thread) => updateThread(followOnlyChannelEnabled, thread))
-			);
+			const tasks = Array.from(threads.values()).map((thread) => {
+				return async () => updateThread(followOnlyChannelEnabled, thread);
+			});
+			await runWithConcurrency(tasks, 10);
 		}
 	});
 };

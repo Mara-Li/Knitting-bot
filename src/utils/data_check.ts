@@ -36,22 +36,12 @@ export function validateChannelType(channel: GuildBasedChannel): boolean {
  * @param {ThreadChannel} thread - The thread to check
  * @param {GuildMember} memberToCheck - The member to check
  */
-export async function isUserInThread(
+export function isUserInThread(
 	thread: ThreadChannel,
 	memberToCheck: GuildMember
-): Promise<boolean> {
+): boolean {
 	// Fast path: if the thread member is cached, we know they're in the thread
-	if (thread.members.cache.has(memberToCheck.id)) return true;
-
-	// If not cached, try to fetch the member from the thread. If fetch succeeds,
-	// the user is in the thread; if it rejects, the user is not in it.
-	try {
-		await thread.members.fetch(memberToCheck.id);
-		return true;
-	} catch (err) {
-		// fetch throws when the member isn't part of the thread or on other errors
-		return false;
-	}
+	return thread.members.cache.has(memberToCheck.id);
 }
 
 /**

@@ -3,6 +3,7 @@ import { getTranslation } from "../../i18n";
 import { getConfig } from "../../maps";
 import { discordLogs } from "../../utils";
 import { addUserToThread } from "../../utils/add";
+import { runWithConcurrency } from "../../utils/concurrency";
 import {
 	checkMemberRole,
 	checkMemberRoleIn,
@@ -46,7 +47,7 @@ export default (client: Client): void => {
 			const followOnlyChannelEnabled = getConfig("followOnlyChannel", guildID);
 
 			// Collect promises to add users to threads so we can run them in parallel
-			const addPromises: Promise<unknown>[] = [];
+			const tasks: Array<() => Promise<unknown>> = [];
 			for (const channel of channels.values()) {
 				const threadChannel = channel as ThreadChannel;
 				const updatedRoleAllowed = updatedRoles.filter((role) => {
@@ -86,16 +87,15 @@ export default (client: Client): void => {
 				}
 
 				if (shouldAddUser) {
-					addPromises.push(addUserToThread(threadChannel, newMember));
+					tasks.push(async () => addUserToThread(threadChannel, newMember));
 				}
 			}
 
-			// Await all add operations and log any failures without failing the whole handler
-			if (addPromises.length > 0) {
-				const results = await Promise.allSettled(addPromises);
+			if (tasks.length > 0) {
+				const results = await runWithConcurrency(tasks, 10);
 				for (const r of results) {
 					if (r.status === "rejected") {
-						console.error("addUserToThread failed:", r.reason);
+						console.warn("addUserToThread failed:", r.reason);
 					}
 				}
 			}

@@ -61,7 +61,7 @@ export async function addUserToThread(thread: Djs.ThreadChannel, user: Djs.Guild
 	const emoji = getMessageToSend(guild) || EMOJI;
 
 	const hasPermission = thread.permissionsFor(user).has("ViewChannel", true);
-	const isInThread = await isUserInThread(thread, user);
+	const isInThread = isUserInThread(thread, user);
 
 	if (!hasPermission || isInThread) return;
 
@@ -91,21 +91,17 @@ export async function addUserToThread(thread: Djs.ThreadChannel, user: Djs.Guild
  * @param thread
  * @param members
  */
-export async function getUsersToPing(
-	thread: Djs.ThreadChannel,
-	members: Djs.GuildMember[]
-) {
+export function getUsersToPing(thread: Djs.ThreadChannel, members: Djs.GuildMember[]) {
 	const guild = thread.guild.id;
 	const usersToBeAdded: Djs.GuildMember[] = [];
 	for (const member of members) {
+		if (isUserInThread(thread, member)) continue;
 		if (
 			thread.permissionsFor(member).has("ViewChannel", true) &&
-			!(await isUserInThread(thread, member))
+			shouldAddUserToThread(member, thread, guild)
 		) {
 			// Use centralised decision helper to avoid duplicated logic
-			if (shouldAddUserToThread(member, thread, guild)) {
-				usersToBeAdded.push(member);
-			}
+			usersToBeAdded.push(member);
 		}
 	}
 	return usersToBeAdded;
@@ -192,7 +188,7 @@ export async function addRoleAndUserToThread(
 		}
 	} else {
 		const guildMembers: Djs.GuildMember[] = members.toJSON();
-		const users = await getUsersToPing(thread, guildMembers);
+		const users = getUsersToPing(thread, guildMembers);
 		toPing.push(...users);
 	}
 	//getConfig all member that have access to the thread (overwriting permission)
@@ -201,7 +197,7 @@ export async function addRoleAndUserToThread(
 	const memberWithAccess = getMemberPermission(reloadMembers, thread);
 	if (memberWithAccess) {
 		const memberWithAccessArray: Djs.GuildMember[] = memberWithAccess.toJSON();
-		const users = await getUsersToPing(thread, memberWithAccessArray);
+		const users = getUsersToPing(thread, memberWithAccessArray);
 		toPing.push(...users);
 	}
 	const emoji = getMessageToSend(thread.guild.id) || EMOJI;

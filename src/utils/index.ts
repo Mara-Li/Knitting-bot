@@ -9,6 +9,7 @@ import {
 import Enmap from "enmap";
 import { serverDataDb } from "../maps";
 import { addRoleAndUserToThread } from "./add";
+import { runWithConcurrency } from "./concurrency";
 import { checkThread } from "./data_check";
 
 /**
@@ -88,27 +89,28 @@ export async function fetchArchived(guild: Guild): Promise<AnyThreadChannel[]> {
 	);
 
 	// Fetch public archived threads
-	const publicResults = await Promise.allSettled(
-		parents.map((channel) =>
+	const publicTasks: Array<() => Promise<unknown>> = parents.map((channel) => {
+		return async () =>
 			channel.threads.fetchArchived({ fetchAll: true, type: "public" }).catch(() => {
-				// ignore per-channel errors
-				return { threads: new Collection<string, AnyThreadChannel>() } as unknown as {
-					threads: Collection<string, AnyThreadChannel>;
+				return {
+					threads: new Collection<string, AnyThreadChannel>(),
 				};
-			})
-		)
-	);
+			});
+	});
+
+	const publicResults = await runWithConcurrency(publicTasks, 5);
 
 	// Fetch private archived threads (requires proper permissions)
-	const privateResults = await Promise.allSettled(
-		parents.map((channel) =>
+	const privateTasks: Array<() => Promise<unknown>> = parents.map((channel) => {
+		return async () =>
 			channel.threads.fetchArchived({ fetchAll: true, type: "private" }).catch(() => {
-				return { threads: new Collection<string, AnyThreadChannel>() } as unknown as {
-					threads: Collection<string, AnyThreadChannel>;
+				return {
+					threads: new Collection<string, AnyThreadChannel>(),
 				};
-			})
-		)
-	);
+			});
+	});
+
+	const privateResults = await runWithConcurrency(privateTasks, 5);
 
 	const threads: Map<string, AnyThreadChannel> = new Map();
 
@@ -161,10 +163,13 @@ export async function resolveChannelsByIds<T extends { type: number }>(
 	}
 
 	if (idSet.size > 0) {
-		const results = await Promise.allSettled(
-			Array.from(idSet).map((id) => guild.channels.fetch(id).catch(() => null))
-		);
-		for (const r of results) {
+		const tasks: Array<() => Promise<unknown>> = Array.from(idSet).map((id) => {
+			return async () => guild.channels.fetch(id).catch(() => null);
+		});
+		const results = await runWithConcurrency(tasks, 5);
+		for (let i = 0; i < results.length; i++) {
+			const r = results[i];
+			const id = Array.from(idSet)[i];
 			if (r.status === "fulfilled" && r.value) {
 				const ch = r.value as unknown as T;
 				if (allowedTypes.includes((ch as unknown as { type: number }).type)) {

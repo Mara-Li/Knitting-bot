@@ -1,6 +1,7 @@
 import type { Client } from "discord.js";
 import { ALL_COMMANDS } from "../commands";
 import { VERSION } from "../index";
+import { runWithConcurrency } from "../utils/concurrency";
 
 export default (client: Client): void => {
 	client.on("clientReady", async () => {
@@ -16,14 +17,17 @@ export default (client: Client): void => {
 		}
 
 		console.info(`Registering commands on ${guilds.length} servers...`);
-		const guildPromises = guilds.map(async (guild) => {
-			try {
-				await guild.commands.set(serializedCommands);
-			} catch (error) {
-				console.error(`[${guild.name}] Failure on registering commands:`, error);
-			}
+		const tasks = guilds.map((guild) => {
+			return async () => {
+				try {
+					await guild.commands.set(serializedCommands);
+				} catch (error) {
+					console.error(`[${guild.name}] Failure on registering commands:`, error);
+				}
+			};
 		});
-		await Promise.all(guildPromises);
+
+		await runWithConcurrency(tasks, 5);
 		console.info("Done registering commands.");
 	});
 };
