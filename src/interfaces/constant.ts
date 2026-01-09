@@ -8,8 +8,8 @@ export const EMOJI =
 export const VERSION = pkg.version ?? "0.0.0";
 export const DESTROY_DATABASE = process.env.DESTROY === "true";
 export const INFO_EMOJI = {
-	discord: process.env.DISCORD ?? "??",
-	docs: process.env.DOCS ?? "??",
-	github: process.env.GITHUB_EMOJI ?? "??",
-	kofi: process.env.KOFI ?? "??",
+	discord: process.env.DISCORD ?? "💻",
+	docs: process.env.DOCS ?? "📚",
+	github: process.env.GITHUB_EMOJI ?? "🐙",
+	kofi: process.env.KOFI ?? "☕",
 };
