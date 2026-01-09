@@ -260,7 +260,7 @@ async function ignoreThisRole(
 
 	const guildID = interaction.guild.id;
 	const ignoredRoleIds = db.settings.get(guildID, "ignore.role") as string[];
-	// Résoudre les IDs en objets Role depuis le cache
+	// Resolve ID in Role object from the cache
 	const ignoredRoles = ignoredRoleIds
 		.map((id) => interaction.guild!.roles.cache.get(id))
 		.filter((r): r is Djs.Role => r !== undefined);

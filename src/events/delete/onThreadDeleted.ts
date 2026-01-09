@@ -7,7 +7,6 @@ export default (client: Client): void => {
 		const guildID = thread.guild.id;
 
 		// Clean up message cache for this thread
-		//deleteCachedMessage(guildID, thread.id);
 		db.settings.delete(guildID, `messageCache.${thread.id}`);
 		// Remove from thread ID lists
 		const followedThreads = db.getMaps("follow", "thread", guildID);
@@ -42,7 +41,6 @@ export default (client: Client): void => {
 					roleIn.channelIds.length !== updatedFollowedRoleIns[index].channelIds.length
 			)
 		) {
-			//setRoleIn("follow", guildID, updatedFollowedRoleIns);
 			db.settings.set(guildID, updatedFollowedRoleIns, "follow.onlyRoleIn");
 		}
 		if (
@@ -51,7 +49,6 @@ export default (client: Client): void => {
 					roleIn.channelIds.length !== updatedIgnoredRoleIns[index].channelIds.length
 			)
 		) {
-			//setRoleIn("ignore", guildID, updatedIgnoredRoleIns);
 			db.settings.set(guildID, updatedIgnoredRoleIns, "ignore.onlyRoleIn");
 		}
 	});

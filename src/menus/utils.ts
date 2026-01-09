@@ -186,7 +186,7 @@ function loadOrCreateRoleInState(
 	let state = getRoleInState(userId, guildID, on, roleId);
 
 	if (!state) {
-		const allRoleIn = db.settings.get(guildID, `${on}.onlyRoleIn`) ?? []; //getRoleIn(on, guildID);
+		const allRoleIn = db.settings.get(guildID, `${on}.onlyRoleIn`) ?? [];
 		const existingRoleIn = allRoleIn.find((r) => r.roleId === roleId);
 		const initialChannels = resolveInitialChannels(
 			guild,
@@ -446,12 +446,12 @@ async function validateRoleInSelection(
 		Djs.ChannelType.PrivateThread,
 	]);
 
-	const allRoleIn = db.settings.get(guildID, `${on}.onlyRoleIn`) ?? []; //getRoleIn(on, guildID);
+	const allRoleIn = db.settings.get(guildID, `${on}.onlyRoleIn`) ?? [];
 	const existing = allRoleIn.find((r) => r.roleId === roleId);
 
 	if (channels.length === 0) {
 		const newRolesIn = allRoleIn.filter((r) => r.roleId !== roleId);
-		db.settings.set(guildID, newRolesIn, `${on}.onlyRoleIn`); //setRoleIn(on, guildID, newRolesIn);
+		db.settings.set(guildID, newRolesIn, `${on}.onlyRoleIn`);
 		await interaction.update({
 			components: [],
 			content: ul("roleIn.noLonger.any", {
@@ -470,8 +470,8 @@ async function validateRoleInSelection(
 
 	if (existing) {
 		const updated = allRoleIn.map((r) => (r.roleId === roleId ? newEntry : r));
-		db.settings.set(guildID, updated, `${on}.onlyRoleIn`); //setRoleIn(on, guildID, updated);
-	} else db.settings.set(guildID, [...allRoleIn, newEntry], `${on}.onlyRoleIn`); //setRoleIn(on, guildID, [...allRoleIn, newEntry]);
+		db.settings.set(guildID, updated, `${on}.onlyRoleIn`);
+	} else db.settings.set(guildID, [...allRoleIn, newEntry], `${on}.onlyRoleIn`);
 
 	const channelsByType = {
 		categories: channels.filter((c) => c.type === Djs.ChannelType.GuildCategory),
@@ -675,9 +675,8 @@ export async function removeRoleIn(
 	ul: Translation
 ) {
 	const roleId = options.getRole(t("common.role"), true).id;
-	const allRoleIn = db.settings.get(guild, `${mode}.onlyRoleIn`) ?? []; //getRoleIn(mode, guild);
+	const allRoleIn = db.settings.get(guild, `${mode}.onlyRoleIn`) ?? [];
 	const filtered = allRoleIn.filter((ri) => ri.roleId !== roleId);
-	//setRoleIn(mode, guild, filtered);
 	db.settings.set(guild, filtered, `${mode}.onlyRoleIn`);
 	await interaction.reply({
 		content: ul("roleIn.noLonger.any", {

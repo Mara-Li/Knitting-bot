@@ -61,7 +61,6 @@ export type RoleInPaginationState = {
 	selectedThreads: Set<string>;
 	selectedForums: Set<string>;
 };
-// Use an in-memory Enmap for roleIn pagination states (no name = no persistence)
 
 export interface PaginatedChannelSelectorsOptions {
 	interaction: Djs.ChatInputCommandInteraction;

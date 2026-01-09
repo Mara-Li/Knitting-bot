@@ -299,7 +299,7 @@ async function handleRoleInConflicts({
 	) => string;
 }) {
 	const oppositeMode: CommandMode = mode === "follow" ? "ignore" : "follow";
-	const oppositeRoleIn = db.settings.get(guildID, `${oppositeMode}.onlyRoleIn`) ?? []; //getRoleIn(oppositeMode, guildID);
+	const oppositeRoleIn = db.settings.get(guildID, `${oppositeMode}.onlyRoleIn`) ?? [];
 	const oppositeForRole = oppositeRoleIn.find((r) => r.roleId === roleId);
 	const oppositeChannelIds = new Set(oppositeForRole?.channelIds ?? []);
 
@@ -401,7 +401,7 @@ async function persistRoleInSelection({
 	ul: Translation;
 	mode: CommandMode;
 }) {
-	const allRoleIn = db.settings.get(guildID, `${mode}.onlyRoleIn`) ?? []; //getRoleIn(mode, guildID);
+	const allRoleIn = db.settings.get(guildID, `${mode}.onlyRoleIn`) ?? [];
 	const existingEntry = allRoleIn.find((r) => r.roleId === roleId);
 
 	const allChannelTypesIds: string[] = [];
@@ -436,7 +436,6 @@ async function persistRoleInSelection({
 
 	if (allChannelTypesIds.length === 0) {
 		const updatedRoleIn = allRoleIn.filter((r) => r.roleId !== roleId);
-		//setRoleIn(mode, guildID, updatedRoleIn);
 		db.settings.set(guildID, updatedRoleIn, `${mode}.onlyRoleIn`);
 		const finalMessage = ul("roleIn.noLonger.any", {
 			mention: Djs.roleMention(roleId),
@@ -455,10 +454,8 @@ async function persistRoleInSelection({
 
 	if (existingEntry) {
 		const updated = allRoleIn.map((r) => (r.roleId === roleId ? newEntry : r));
-		//setRoleIn(mode, guildID, updated);
 		db.settings.set(guildID, updated, `${mode}.onlyRoleIn`);
 	}
-	//setRoleIn(mode, guildID, [...allRoleIn, newEntry]);
 	else db.settings.set(guildID, [...allRoleIn, newEntry], `${mode}.onlyRoleIn`);
 
 	const finalMessage =
@@ -549,11 +546,6 @@ export function processRoleTypeChanges(
 
 	const removedIds = new Set(removedRoles.map((r) => r.id));
 	const finalRoles = [...oldRoles.filter((r) => !removedIds.has(r.id)), ...addedRoles];
-	/*setRole(
-		mode,
-		guildID,
-		finalRoles.map((r) => r.id)
-	);*/
 	db.settings.set(
 		guildID,
 		finalRoles.map((r) => r.id),

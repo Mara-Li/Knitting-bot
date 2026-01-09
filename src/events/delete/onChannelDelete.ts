@@ -63,13 +63,11 @@ export default (client: Client): void => {
 
 		if (hasIgnoredRoleIn) {
 			const updated = filterRoleInsByChannel(ignoredRoleIns, channel.id);
-			//setRoleIn("ignore", guildID, updated);
 			db.settings.set(guildID, updated, "ignore.onlyRoleIn");
 		}
 
 		if (hasFollowedRoleIn) {
 			const updated = filterRoleInsByChannel(followedRoleIns, channel.id);
-			//setRoleIn("follow", guildID, updated);
 			db.settings.set(guildID, updated, "follow.onlyRoleIn");
 		}
 
@@ -81,7 +79,6 @@ export default (client: Client): void => {
 			//use cache as fetchActive can't works for deleted channels
 			const threads = textChannel.threads.cache;
 			threads.forEach((thread) => {
-				//deleteCachedMessage(guildID, thread.id);
 				db.settings.delete(guildID, `messageCache.${thread.id}`);
 			});
 

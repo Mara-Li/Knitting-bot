@@ -32,7 +32,5 @@ export function createPaginationState(
 
 export function deletePaginationState(key: string): void {
 	db.globalPaginationStates.delete(key);
-	//for (const [msgId, stateKey] of db.messageToStateKey.entries())
-	//	if (stateKey === key) db.messageToStateKey.delete(msgId);
 	db.messageToStateKey.sweep((stateKey) => stateKey === key);
 }
