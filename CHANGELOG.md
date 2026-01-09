@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [3.0.0](https://github.com/Mara-Li/Knitting-bot/compare/2.4.0...3.0.0) (2026-01-09)
+
+
+### ⚠ BREAKING CHANGES
+
+* implement multi-channel selection via modal in follow command
+
+### Features
+
+* implement multi-channel selection via modal in follow command ([500cd49](https://github.com/Mara-Li/Knitting-bot/commit/500cd497080dd6ea46b626829fe0dfd9eb7b74de))
+
 ## [2.4.0](https://github.com/Mara-Li/Knitting-bot/compare/2.3.5...2.4.0) (2026-01-03)
 
 
