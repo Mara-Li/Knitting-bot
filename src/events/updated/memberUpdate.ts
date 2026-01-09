@@ -22,7 +22,6 @@ export default (client: Client): void => {
 			const updatedRoles = newRoles.filter((role) => !oldRoles.has(role.id));
 			const guildID = newMember.guild.id;
 			const onMemberUpdate = db.settings.get(guildID, "configuration.onMemberUpdate");
-			console.log(onMemberUpdate);
 			if (!onMemberUpdate) return;
 			const ul = getTranslation(guildID, { locale: newMember.guild.preferredLocale });
 			if (updatedRoles.size === 0) {
