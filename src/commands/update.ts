@@ -87,7 +87,7 @@ async function updateAllThreads(
 	//merge both collections
 	for (const thread of threads.threads.values()) toUpdate.add(thread);
 
-	const count = threads.threads.size;
+	const count = toUpdate.size;
 	await updateCache(interaction.guild, true);
 	// Build tasks for threads that should be updated
 	const tasks: (() => Promise<void>)[] = [];
