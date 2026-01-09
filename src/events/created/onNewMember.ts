@@ -1,11 +1,10 @@
 import type { Client, ThreadChannel } from "discord.js";
 import { getTranslation } from "../../i18n";
-import { getConfig } from "../../maps";
 import { discordLogs } from "../../utils";
 import { addUserToThread } from "../../utils/add";
 import { runWithConcurrency } from "../../utils/concurrency";
 import { checkMemberRole, checkThread } from "../../utils/data_check";
-
+import db from "../../database.js";
 /**
  * @param {Client} client - Discord.js Client
  * @returns {void}
@@ -15,7 +14,7 @@ import { checkMemberRole, checkThread } from "../../utils/data_check";
 export default (client: Client): void => {
 	client.on("guildMemberAdd", async (member) => {
 		const guildID = member.guild.id;
-		if (!getConfig("onNewMember", guildID)) return;
+		if (!db.settings.get(guildID, "configuration.onNewMember")) return;
 		if (member.user.bot) return;
 		const ul = getTranslation(guildID, { locale: member.guild.preferredLocale });
 		await discordLogs(guildID, client, ul("logs.joined", { user: member.user.username }));
@@ -30,7 +29,7 @@ export default (client: Client): void => {
 					const roleIsAllowed =
 						!checkMemberRole(member.roles, "follow") &&
 						!checkMemberRole(member.roles, "ignore");
-					if (!getConfig("followOnlyChannel", guildID)) {
+					if (!db.settings.get(guildID, "configuration.followOnlyChannel")) {
 						if (!checkThread(threadChannel, "ignore") && roleIsAllowed)
 							return addUserToThread(threadChannel, member);
 					} else {

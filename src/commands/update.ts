@@ -1,11 +1,11 @@
 import * as Djs from "discord.js";
 import { getUl, t } from "../i18n";
-import type { Translation } from "../interface";
-import { getConfig } from "../maps";
+import type { Translation } from "../interfaces";
 import { fetchArchived, updateCache } from "../utils";
 import { addRoleAndUserToThread } from "../utils/add";
 import { checkThread } from "../utils/data_check";
 import "../discord_ext.js";
+import db from "../database.js"
 import { runWithConcurrency } from "../utils/concurrency";
 
 export default {
@@ -94,7 +94,7 @@ async function updateAllThreads(
 	for (const thread of toUpdate) {
 		if (thread.locked) continue;
 		const shouldUpdate =
-			(!getConfig("followOnlyChannel", guild) && !checkThread(thread, "ignore")) ||
+			(!db.settings.get(guild, "configuration.followOnlyChannel") && !checkThread(thread, "ignore")) ||
 			checkThread(thread, "follow");
 		if (shouldUpdate) {
 			tasks.push(async () => {
@@ -149,11 +149,11 @@ async function updateThread(
 
 	const mention = Djs.channelMention(channel?.id as string);
 	const isFollowed =
-		getConfig("followOnlyChannel", guild) &&
+		db.settings.get(guild, "configuration.followOnlyChannel") &&
 		checkThread(threadOption?.channel as Djs.ThreadChannel, "follow");
 
 	if (
-		!getConfig("followOnlyRoleIn", guild) &&
+		!db.settings.get(guild, "configuration.followOnlyRoleIn") &&
 		checkThread(threadOption?.channel as Djs.ThreadChannel, "ignore") &&
 		!isFollowed
 	) {

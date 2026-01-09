@@ -1,7 +1,8 @@
 import * as Djs from "discord.js";
 import "../discord_ext.js";
 import "uniformize";
-import { serverDataDb } from "../maps.js";
+import db from "../database.js";
+import type { IgnoreFollowKey, ServerData } from "../interfaces";
 
 export default {
 	data: new Djs.SlashCommandBuilder()
@@ -140,14 +141,16 @@ export default {
 			const itemType = interaction.options.getString("item_type");
 			const type = interaction.options.getString("type", true);
 			const guildID = interaction.guild.id;
-			if (type === "all") serverDataDb.delete(guildID);
+			if (type === "all") db.settings.delete(guildID);
 			else if (type === "messageCache") {
-				serverDataDb.set(guildID, {}, "messageCache");
+				db.settings.set(guildID, {}, "messageCache");
 			} else if (itemType) {
-				if (type === "follow") serverDataDb.set(guildID, [], `follow.${itemType}`);
-				else if (type === "ignore") serverDataDb.set(guildID, [], `ignore.${itemType}`);
+				if (type === "follow")
+					db.settings.set(guildID, [], `follow.${itemType as IgnoreFollowKey}`);
+				else if (type === "ignore")
+					db.settings.set(guildID, [], `ignore.${itemType as IgnoreFollowKey}`);
 			} else {
-				serverDataDb.delete(guildID, type);
+				db.settings.delete(guildID, type as keyof ServerData);
 			}
 			await interaction.editReply(
 				`Cleared ${type} ${itemType ? `for ${itemType}` : ""}.`
@@ -158,7 +161,7 @@ export default {
 			await interaction.deferReply();
 			const key = interaction.options.getString("key", true);
 			const guildID = interaction.guild.id;
-			const data = serverDataDb.get(guildID, key);
+			const data = db.settings.get(guildID, key as keyof ServerData);
 			await interaction.editReply(
 				`DB Entry for key "${key}":\n\`\`\`json\n${JSON.stringify(data, null, 2)}\n\`\`\``
 			);

@@ -1,7 +1,6 @@
 import type { ModalBuilder } from "discord.js";
 import * as Djs from "discord.js";
-import type { TChannel, Translation } from "../interface";
-import type { CommandMode, TrackedItems } from "./interfaces";
+import type { CommandMode, TChannel, TrackedItems, Translation } from "../interfaces";
 
 /**
  * Create a modal with 4 channel type selectors

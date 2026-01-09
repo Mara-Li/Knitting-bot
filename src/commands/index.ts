@@ -1,6 +1,6 @@
 import * as djs from "discord.js";
-import type { RoleIn } from "../interface";
-import { getRoleIn } from "../maps";
+import db from "../database.js";
+import type { RoleIn } from "../interfaces";
 import { getTrackedItems } from "../menus";
 import configuration from "./config";
 import dev from "./dev.js";
@@ -46,7 +46,7 @@ export function mapToStr(type: "follow" | "ignore", guildID: string) {
 		forums: forumIds,
 		roles: roleIds,
 	} = getTrackedItems(type, guildID);
-	const roleIns = getRoleIn(type, guildID);
+	const roleIns: RoleIn[] = db.settings.get(guildID, `${type}.OnlyRoleIn`) ?? [];
 
 	const rolesInNames = mapRoleIn(roleIns);
 	const categoriesNames = mapIds(categoryIds);

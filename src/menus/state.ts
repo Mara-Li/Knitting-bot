@@ -1,8 +1,5 @@
-import {
-	globalPaginationStates,
-	messageToStateKey,
-	type PaginatedIdsState,
-} from "./interfaces";
+import db from "../database.js";
+import type { PaginatedIdsState } from "../interfaces";
 
 export function paginateIds(ids: string[], pageSize = 25): Record<number, string[]> {
 	const paginated: Record<number, string[]> = {};
@@ -29,16 +26,16 @@ export function createPaginationState(
 		paginatedItems,
 		selectedIds: new Set(originalIds),
 	};
-	globalPaginationStates.set(key, state);
+	db.globalPaginationStates.set(key, state);
 	return state;
 }
 
 export function getPaginationState(key: string): PaginatedIdsState | undefined {
-	return globalPaginationStates.get(key);
+	return db.globalPaginationStates.get(key);
 }
 
 export function deletePaginationState(key: string): void {
-	globalPaginationStates.delete(key);
-	for (const [msgId, stateKey] of messageToStateKey.entries())
-		if (stateKey === key) messageToStateKey.delete(msgId);
+	db.globalPaginationStates.delete(key);
+	for (const [msgId, stateKey] of db.messageToStateKey.entries())
+		if (stateKey === key) db.messageToStateKey.delete(msgId);
 }

@@ -1,7 +1,7 @@
 import type { Client } from "discord.js";
 import { getTranslation } from "../../i18n";
-import { deleteCachedMessage, getCachedMessage } from "../../maps";
 import { discordLogs } from "../../utils";
+import db from "../../database.js";
 
 /**
  * @param {Client} client - Discord.js Client
@@ -16,10 +16,10 @@ export default (client: Client): void => {
 
 		const guildId = message.guild.id;
 		const threadId = message.channel.id;
-		const cachedMessageId = getCachedMessage(guildId, threadId);
+		const cachedMessageId = db.settings.get(guildId, `messageCache.${threadId}`);
 		// If this deleted message was our cached message, warn the admins
 		if (cachedMessageId === message.id) {
-			deleteCachedMessage(guildId, threadId);
+			db.settings.delete(guildId, `messageCache.${threadId}`);
 			const ul = getTranslation(guildId, { locale: message.guild.preferredLocale });
 			await discordLogs(
 				guildId,

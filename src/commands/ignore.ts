@@ -1,9 +1,8 @@
 /** biome-ignore-all lint/style/useNamingConvention: Discord API doesn't respect spec */
 import * as Djs from "discord.js";
-import type { TChannel } from "src/interface";
+import db from "../database.js";
 import { cmdLn, getUl, t } from "../i18n";
-import { TIMEOUT, type Translation } from "../interface";
-import { getConfig, getRole, getRoleIn } from "../maps";
+import { type TChannel, TIMEOUT, type Translation } from "../interfaces";
 import {
 	channelSelectorsForType,
 	createRoleSelectModal,
@@ -114,7 +113,7 @@ export default {
 
 		switch (commands) {
 			case t("common.channel").toLowerCase(): {
-				if (getConfig("followOnlyChannel", guild)) {
+				if (db) {
 					await interaction.reply({
 						content: ul("ignore.error.followChannel", {
 							id: await getCommandId("follow", interaction.guild),
@@ -127,7 +126,7 @@ export default {
 				break;
 			}
 			case t("common.role"):
-				if (getConfig("followOnlyRole", guild)) {
+				if (db.settings.get(guild, "configuration.followOnlyRole")) {
 					await interaction.reply({
 						content: ul("ignore.error.followRole", {
 							id: await getCommandId("follow", interaction.guild),
@@ -138,7 +137,7 @@ export default {
 				await ignoreThisRole(interaction, ul);
 				break;
 			case t("common.roleIn"): {
-				if (getConfig("followOnlyRoleIn", guild)) {
+				if (db.settings.get(guild, "configuration.followOnlyRoleIn")) {
 					await interaction.reply({
 						content: ul("ignore.error.followRoleIn", {
 							id: await getCommandId("follow", interaction.guild),
@@ -184,7 +183,7 @@ async function displayIgnored(
 	if (!interaction.guild) return;
 	const guildID = interaction.guild.id;
 	const ignored = mapToStr("ignore", guildID);
-	const roleIn = getRoleIn("ignore", guildID);
+	const roleIn = db.settings.get(guildID, "ignore.OnlyRoleIn");
 	const {
 		rolesNames: ignoredRolesNames,
 		categoriesNames: ignoredCategoriesNames,
@@ -195,7 +194,7 @@ async function displayIgnored(
 	} = ignored;
 
 	let embed: Djs.EmbedBuilder;
-	if (getConfig("followOnlyChannel", guildID)) {
+	if (db.settings.get(guildID, "configuration.followOnlyChannel")) {
 		embed = new Djs.EmbedBuilder()
 			.setColor("#2f8e7d")
 			.setTitle(ul("ignore.list.title"))
@@ -215,18 +214,18 @@ async function displayIgnored(
 				name: ul("common.forum"),
 				value: ignoredForumNames || ul("common.none"),
 			});
-		if (getConfig("followOnlyRole", guildID)) {
+		if (db.settings.get(guildID, "configuration.followOnlyRole")) {
 			embed.addFields({
 				name: ul("common.role").toTitle(),
 				value: ignoredRolesNames || ul("common.none"),
 			});
 		}
-	} else if (getConfig("followOnlyRole", guildID)) {
+	} else if (db.settings.get(guildID, "configuration.followOnlyRole")) {
 		embed = new Djs.EmbedBuilder()
 			.setColor("#2f8e7d")
 			.setTitle(ul("ignore.list.title"))
 			.setDescription(ignoredRolesNames || ul("common.none"));
-	} else if (getConfig("followOnlyRoleIn", guildID)) {
+	} else if (db.settings.get(guildID, "configuration.followOnlyRoleIn")) {
 		embed = new Djs.EmbedBuilder()
 			.setColor("#2f8e7d")
 			.setTitle(ul("ignore.roleIn.title"))
@@ -235,7 +234,7 @@ async function displayIgnored(
 		embed = new Djs.EmbedBuilder().setColor("#2f8e7d").setTitle(ul("common.disabled"));
 	}
 
-	if (roleIn.length > 0) {
+	if (roleIn && roleIn.length > 0) {
 		const embed2 = new Djs.EmbedBuilder()
 			.setTitle(ul("ignore.roleIn.title"))
 			.setColor("#2f8e7d")
@@ -260,7 +259,7 @@ async function ignoreThisRole(
 	if (!interaction.guild) return;
 
 	const guildID = interaction.guild.id;
-	const ignoredRoleIds = getRole("ignore", guildID) ?? [];
+	const ignoredRoleIds = db.settings.get(guildID, "ignore.role") as string[];
 	// Résoudre les IDs en objets Role depuis le cache
 	const ignoredRoles = ignoredRoleIds
 		.map((id) => interaction.guild!.roles.cache.get(id))

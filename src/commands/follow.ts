@@ -1,9 +1,8 @@
 /** biome-ignore-all lint/style/useNamingConvention: Discord API doesn't respect specs */
 import * as Djs from "discord.js";
-import type { TChannel } from "src/interface";
+import db from "../database";
 import { cmdLn, getUl, t } from "../i18n";
-import { TIMEOUT, type Translation } from "../interface";
-import { getConfig, getRole } from "../maps";
+import { TIMEOUT, type Translation,TChannel } from "../interfaces";
 import {
 	channelSelectorsForType,
 	createRoleSelectModal,
@@ -114,7 +113,7 @@ export default {
 
 		switch (commands) {
 			case t("common.channel").toLowerCase(): {
-				if (!getConfig("followOnlyChannel", guild)) {
+				if (!db.settings.get(guild, "configuration.followOnlyChannel")) {
 					await interaction.reply({
 						content: ul("follow.error.followChannel", {
 							id: await getCommandId("ignore", interaction.guild),
@@ -127,7 +126,7 @@ export default {
 				break;
 			}
 			case t("common.role").toLowerCase():
-				if (!getConfig("followOnlyRole", guild)) {
+				if (!db.settings.get(guild, "configuration.followOnlyRole")) {
 					await interaction.reply({
 						content: ul("follow.error.role", {
 							id: await getCommandId("ignore", interaction.guild),
@@ -188,7 +187,7 @@ async function displayFollowed(
 		forumNames: followedForumNames,
 	} = followed;
 	let embed: Djs.EmbedBuilder;
-	if (getConfig("followOnlyChannel", guildID)) {
+	if (db.settings.get(guildID, "configuration.followOnlyChannel")) {
 		embed = new Djs.EmbedBuilder()
 			.setColor("#2f8e7d")
 			.setTitle(ul("follow.list.title"))
@@ -208,18 +207,18 @@ async function displayFollowed(
 				name: ul("common.forum"),
 				value: followedForumNames || ul("common.none"),
 			});
-		if (getConfig("followOnlyRole", guildID)) {
+		if (db.settings.get(guildID, "configuration.followOnlyRole")) {
 			embed.addFields({
 				name: ul("common.role").toTitle(),
 				value: followedRolesNames || ul("common.none"),
 			});
 		}
-	} else if (getConfig("followOnlyRole", guildID)) {
+	} else if (db.settings.get(guildID, "configuration.followOnlyRole")) {
 		embed = new Djs.EmbedBuilder()
 			.setColor("#2f8e7d")
 			.setTitle(ul("follow.list.title"))
 			.setDescription(followedRolesNames || ul("common.none"));
-	} else if (getConfig("followOnlyRoleIn", guildID)) {
+	} else if (db.settings.get(guildID, "configuration.followOnlyRoleIn")) {
 		embed = new Djs.EmbedBuilder()
 			.setColor("#2f8e7d")
 			.setTitle(ul("follow.list.roleIn"))
@@ -243,8 +242,7 @@ async function followThisRole(
 	if (!interaction.guild) return;
 
 	const guildID = interaction.guild.id;
-	const followedRoleIds = getRole("follow", guildID) ?? [];
-	// Résoudre les IDs en objets Role depuis le cache
+	const followedRoleIds = db.settings.get(guildID, "follow.role") ?? [];
 	const followedRoles = followedRoleIds
 		.map((id) => interaction.guild!.roles.cache.get(id))
 		.filter((r): r is Djs.Role => r !== undefined);

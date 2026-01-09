@@ -6,14 +6,8 @@ import {
 	type NonThreadGuildBasedChannel,
 	type TextChannel,
 } from "discord.js";
-import type { RoleIn } from "../../interface";
-import {
-	deleteCachedMessage,
-	getMaps,
-	getRoleIn,
-	setRoleIn,
-	setTrackedItem,
-} from "../../maps";
+import db from "../../database.js";
+import type { RoleIn } from "../../interfaces";
 
 function filterRoleInsByChannel(roleIns: RoleIn[], channelId: string) {
 	return roleIns
@@ -32,17 +26,17 @@ function cleanupChannelFromMaps(
 	typeName: "channel" | "category" | "forum",
 	guildID: string
 ) {
-	const allIgnore = getMaps("ignore", typeName, guildID);
-	const allFollow = getMaps("follow", typeName, guildID);
+	const allIgnore = db.getMaps("ignore", typeName, guildID);
+	const allFollow = db.getMaps("follow", typeName, guildID);
 
 	const filteredIgnore = allIgnore.filter((id) => id !== channelId);
 	const filteredFollow = allFollow.filter((id) => id !== channelId);
 
 	if (allIgnore.length !== filteredIgnore.length) {
-		setTrackedItem("ignore", typeName, guildID, filteredIgnore);
+		db.setTrackedItem("ignore", typeName, guildID, filteredIgnore);
 	}
 	if (allFollow.length !== filteredFollow.length) {
-		setTrackedItem("follow", typeName, guildID, filteredFollow);
+		db.setTrackedItem("follow", typeName, guildID, filteredFollow);
 	}
 }
 /**
@@ -57,8 +51,8 @@ export default (client: Client): void => {
 		const channelGuild = channel as NonThreadGuildBasedChannel;
 		const channelType = channelGuild.type;
 
-		const ignoredRoleIns = getRoleIn("ignore", guildID);
-		const followedRoleIns = getRoleIn("follow", guildID);
+		const ignoredRoleIns = db.settings.get(guildID, "ignore.OnlyRoleIn") ?? [];
+		const followedRoleIns = db.settings.get(guildID, "follow.OnlyRoleIn") ?? [];
 
 		const hasIgnoredRoleIn = ignoredRoleIns.some((ignored) => {
 			return ignored.channelIds.includes(channel.id);
@@ -69,12 +63,14 @@ export default (client: Client): void => {
 
 		if (hasIgnoredRoleIn) {
 			const updated = filterRoleInsByChannel(ignoredRoleIns, channel.id);
-			setRoleIn("ignore", guildID, updated);
+			//setRoleIn("ignore", guildID, updated);
+			db.settings.set(guildID, updated, "ignore.OnlyRoleIn");
 		}
 
 		if (hasFollowedRoleIn) {
 			const updated = filterRoleInsByChannel(followedRoleIns, channel.id);
-			setRoleIn("follow", guildID, updated);
+			//setRoleIn("follow", guildID, updated);
+			db.settings.set(guildID, updated, "follow.OnlyRoleIn");
 		}
 
 		if (channelType === ChannelType.GuildText) {
@@ -85,7 +81,8 @@ export default (client: Client): void => {
 			//use cache as fetchActive can't works for deleted channels
 			const threads = textChannel.threads.cache;
 			threads.forEach((thread) => {
-				deleteCachedMessage(guildID, thread.id);
+				//deleteCachedMessage(guildID, thread.id);
+				db.settings.delete(guildID, `messageCache.${thread.id}`);
 			});
 
 			/**
@@ -103,7 +100,7 @@ export default (client: Client): void => {
 			 */
 			const forum = channelGuild as ForumChannel;
 			forum.threads.cache.forEach((thread) => {
-				deleteCachedMessage(guildID, thread.id);
+				db.settings.delete(guildID, `messageCache.${thread.id}`);
 			});
 
 			/**

@@ -1,10 +1,8 @@
 import * as Djs from "discord.js";
-import type { TChannel, Translation } from "../interface";
-import { getRoleIn } from "../maps";
+import db from "../database.js";
+import type { CommandMode, RoleIn, TChannel, Translation } from "../interfaces";
 import { startPaginatedChannelSelectorsFlow } from "./channel";
 import { checkRoleInConstraints, validateRoleInAndSave } from "./handlers";
-import type { CommandMode } from "./interfaces";
-
 /**
  * Handle roleIn channel selectors with pagination for follow/ignore commands
  */
@@ -23,7 +21,7 @@ export async function roleInSelectorsForType(
 	const isAllowed = await checkRoleInConstraints(interaction, guildID, mode, ul);
 	if (!isAllowed) return;
 
-	const allRoleIn = getRoleIn(mode, guildID);
+	const allRoleIn: RoleIn[] = db.settings.get(guildID, `${mode}.OnlyRoleIn`) ?? []; //getRoleIn(mode, guildID);
 	const existingRoleIn = allRoleIn.find((r) => r.roleId === roleId);
 
 	const trackedIds = existingRoleIn?.channelIds ?? [];

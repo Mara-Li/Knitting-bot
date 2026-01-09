@@ -2,7 +2,7 @@ import * as Djs from "discord.js";
 import { getUl } from "../i18n";
 import { INFO_EMOJI, VERSION } from "../index";
 import "../discord_ext.js";
-import { getConfig } from "../maps";
+import db from "../database.js";
 
 export default {
 	data: new Djs.SlashCommandBuilder().setName("info").setDescriptions("info.cmds"),
@@ -37,7 +37,7 @@ export default {
 				text: ul("info.footer"),
 			});
 
-		const lang = getConfig("language", interaction.guild.id).split("-")[0];
+		const lang = db.getLanguage(interaction.guild.id).split("-")[0];
 
 		/**
 		 * Create button with external link

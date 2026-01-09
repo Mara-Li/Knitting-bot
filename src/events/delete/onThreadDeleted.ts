@@ -1,11 +1,5 @@
 import type { Client } from "discord.js";
-import {
-	deleteCachedMessage,
-	getMaps,
-	getRoleIn,
-	setRoleIn,
-	setTrackedItem,
-} from "../../maps";
+import db from "../../database.js";
 
 export default (client: Client): void => {
 	client.on("threadDelete", async (thread) => {
@@ -13,25 +7,25 @@ export default (client: Client): void => {
 		const guildID = thread.guild.id;
 
 		// Clean up message cache for this thread
-		deleteCachedMessage(guildID, thread.id);
-
+		//deleteCachedMessage(guildID, thread.id);
+		db.settings.delete(guildID, `messageCache.${thread.id}`);
 		// Remove from thread ID lists
-		const followedThreads = getMaps("follow", "thread", guildID);
-		const ignoredThreads = getMaps("ignore", "thread", guildID);
+		const followedThreads = db.getMaps("follow", "thread", guildID);
+		const ignoredThreads = db.getMaps("ignore", "thread", guildID);
 
 		const filteredFollowed = followedThreads.filter((id) => id !== thread.id);
 		const filteredIgnored = ignoredThreads.filter((id) => id !== thread.id);
 
 		if (followedThreads.length !== filteredFollowed.length) {
-			setTrackedItem("follow", "thread", guildID, filteredFollowed);
+			db.setTrackedItem("follow", "thread", guildID, filteredFollowed);
 		}
 		if (ignoredThreads.length !== filteredIgnored.length) {
-			setTrackedItem("ignore", "thread", guildID, filteredIgnored);
+			db.setTrackedItem("ignore", "thread", guildID, filteredIgnored);
 		}
 
 		// Remove from RoleIn channel ID lists
-		const followedRoleIns = getRoleIn("follow", guildID);
-		const ignoredRoleIns = getRoleIn("ignore", guildID);
+		const followedRoleIns = db.settings.get(guildID, "follow.OnlyRoleIn") ?? [];
+		const ignoredRoleIns = db.settings.get(guildID, "ignore.OnlyRoleIn") ?? [];
 
 		const updatedFollowedRoleIns = followedRoleIns.map((roleIn) => ({
 			...roleIn,
@@ -48,7 +42,8 @@ export default (client: Client): void => {
 					roleIn.channelIds.length !== updatedFollowedRoleIns[index].channelIds.length
 			)
 		) {
-			setRoleIn("follow", guildID, updatedFollowedRoleIns);
+			//setRoleIn("follow", guildID, updatedFollowedRoleIns);
+			db.settings.set(guildID, updatedFollowedRoleIns, "follow.OnlyRoleIn");
 		}
 		if (
 			ignoredRoleIns.some(
@@ -56,7 +51,8 @@ export default (client: Client): void => {
 					roleIn.channelIds.length !== updatedIgnoredRoleIns[index].channelIds.length
 			)
 		) {
-			setRoleIn("ignore", guildID, updatedIgnoredRoleIns);
+			//setRoleIn("ignore", guildID, updatedIgnoredRoleIns);
+			db.settings.set(guildID, updatedIgnoredRoleIns, "ignore.OnlyRoleIn");
 		}
 	});
 };

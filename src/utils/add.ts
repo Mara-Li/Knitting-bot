@@ -1,14 +1,6 @@
 import * as Djs from "discord.js";
+import db from "../database";
 import { getTranslation } from "../i18n";
-import { EMOJI } from "../index";
-import {
-	deleteCachedMessage,
-	getCachedMessage,
-	getConfig,
-	getMessageToSend,
-	getPinSetting,
-	setCachedMessage,
-} from "../maps";
 import {
 	checkMemberRole,
 	checkMemberRoleIn,
@@ -31,16 +23,14 @@ function shouldAddUserToThread(
 	thread: Djs.ThreadChannel,
 	guild: string
 ): boolean {
-	const followOnlyRoleIn = getConfig("followOnlyRoleIn", guild);
-	const followOnlyRole = getConfig("followOnlyRole", guild);
+	const followOnlyRoleIn = db.settings.get(guild, "configuration.followOnlyRoleIn");
+	const followOnlyRole = db.settings.get(guild, "configuration.followOnlyRole");
 
 	// Early return for followOnlyRoleIn mode
 	if (followOnlyRoleIn) return checkMemberRoleIn("follow", user.roles, thread);
 
 	// Check if user is ignored
-	if (checkMemberRole(user.roles, "ignore")) {
-		return false;
-	}
+	if (checkMemberRole(user.roles, "ignore")) return false;
 
 	// followOnlyRole mode
 	if (followOnlyRole) return checkMemberRole(user.roles, "follow");
@@ -58,7 +48,7 @@ function shouldAddUserToThread(
 export async function addUserToThread(thread: Djs.ThreadChannel, user: Djs.GuildMember) {
 	const guild = thread.guild.id;
 	const ul = getTranslation(guild, { locale: thread.guild.preferredLocale });
-	const emoji = getMessageToSend(guild) || EMOJI;
+	const emoji = db.getMessageToSend(guild);
 
 	const hasPermission = thread.permissionsFor(user).has("ViewChannel", true);
 	const isInThread = isUserInThread(thread, user);
@@ -126,10 +116,11 @@ function shouldAddRoleToThread(
 	if (checkRoleIn("follow", role, thread)) return true;
 
 	// If followOnlyRoleIn is enabled, only roles marked in-thread as follow are allowed
-	if (getConfig("followOnlyRoleIn", guild)) return false;
+	if (db.settings.get(guild, "configuration.followOnlyRoleIn")) return false;
 
 	// If followOnlyRole is enabled, only roles marked as follow are allowed
-	if (getConfig("followOnlyRole", guild)) return checkRole(role, "follow");
+	if (db.settings.get(guild, "configuration.followOnlyRole"))
+		return checkRole(role, "follow");
 
 	// Default: add role unless it's ignored globally or in-thread
 	return !checkRole(role, "ignore") && !checkRoleIn("ignore", role, thread);
@@ -200,7 +191,7 @@ export async function addRoleAndUserToThread(
 		const users = getUsersToPing(thread, memberWithAccessArray);
 		toPing.push(...users);
 	}
-	const emoji = getMessageToSend(thread.guild.id) || EMOJI;
+	const emoji = db.getMessageToSend(thread.guild.id);
 	//remove duplicates
 	const uniqueToPingMap = new Map<string, Djs.GuildMember>();
 	for (const member of toPing) uniqueToPingMap.set(member.id, member);
@@ -268,7 +259,7 @@ async function splitAndSend(toPing: Djs.GuildMember[], message: Djs.Message) {
 		await message.edit(currentMessage);
 	}
 	// Send the emoji at the end
-	const emoji = getMessageToSend(message.guild!.id) || EMOJI;
+	const emoji = db.getMessageToSend(message.guild!.id);
 	return await message.edit(emoji);
 }
 
@@ -360,7 +351,7 @@ async function fetchAllPinnedMessages(
 async function fetchFirstMessage(
 	thread: Djs.ThreadChannel
 ): Promise<Djs.Message | undefined | null> {
-	const pin = getPinSetting(thread.guild.id);
+	const pin = db.settings.get(thread.guild.id, "configuration.pin");
 	if (pin) {
 		//fetch pinned messages
 		const pinnedMessages = thread.messages.cache.filter((m) => m.pinned);
@@ -377,8 +368,8 @@ async function fetchFirstMessage(
 }
 
 async function sendAndPin(thread: Djs.ThreadChannel): Promise<Djs.Message> {
-	const toPin = getPinSetting(thread.guild.id);
-	const messageToSend = getMessageToSend(thread.guild.id) || EMOJI;
+	const toPin = db.settings.get(thread.guild.id, "configuration.pin");
+	const messageToSend = db.getMessageToSend(thread.guild.id);
 	const message = await thread.send({
 		content: messageToSend,
 		flags: Djs.MessageFlags.SuppressNotifications,
@@ -397,24 +388,24 @@ async function sendAndPin(thread: Djs.ThreadChannel): Promise<Djs.Message> {
 async function fetchMessage(thread: Djs.ThreadChannel): Promise<Djs.Message> {
 	const guildId = thread.guild.id;
 	// Try cache first
-	const cachedId = getCachedMessage(guildId, thread.id);
+	const cachedId = db.settings.get(guildId, `messageCache.${thread.id}`);
 	if (cachedId) {
 		try {
 			const message = await thread.messages.fetch(cachedId);
 			// Verify pin status
-			const shouldBePinned = getPinSetting(guildId);
+			const shouldBePinned = db.settings.get(guildId, "configuration.pin");
 			if (shouldBePinned && !message.pinned) await message.pin();
 			return message;
 		} catch (e) {
 			//only pin error can allow to continue, other should delete the cached message
 			if (e instanceof Djs.DiscordAPIError && e.code !== 30003)
-				deleteCachedMessage(guildId, thread.id);
+				db.settings.delete(guildId, `messageCache.${thread.id}`);
 		}
 	}
 
 	// Fallback to fetching
 	const firstMessage = await fetchFirstMessage(thread);
-	const shouldBePinned = getPinSetting(guildId);
+	const shouldBePinned = db.settings.get(guildId, "configuration.pin");
 	if (shouldBePinned && firstMessage && !firstMessage.pinned) {
 		try {
 			await firstMessage.pin();
@@ -426,6 +417,6 @@ async function fetchMessage(thread: Djs.ThreadChannel): Promise<Djs.Message> {
 	const message = firstMessage ?? (await sendAndPin(thread));
 
 	// Cache the result
-	setCachedMessage(guildId, thread.id, message.id);
+	db.settings.set(guildId, message.id, `messageCache.${thread.id}`);
 	return message;
 }

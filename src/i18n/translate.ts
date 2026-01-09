@@ -1,8 +1,8 @@
 import * as Djs from "discord.js";
 import { default as i18next } from "i18next";
-import { getLanguage } from "../maps";
 import EnglishUS from "./locales/en.json" with { type: "json" };
 import French from "./locales/fr.json" with { type: "json" };
+import db from "../database.js"
 
 export const t = i18next.getFixedT("en");
 
@@ -58,6 +58,6 @@ export function getTranslation(
 	defaultLocales: { preferredLocale?: Djs.Locale; locale: Djs.Locale }
 ) {
 	const { preferredLocale, locale } = defaultLocales;
-	const lang = (getLanguage(guildId) as Djs.Locale) ?? preferredLocale ?? locale;
+	const lang = (db.getLanguage(guildId)) ?? preferredLocale ?? locale;
 	return ln(lang);
 }

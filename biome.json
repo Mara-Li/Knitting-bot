@@ -167,7 +167,8 @@
 				"**/package.json",
 				"biome.json",
 				"**/tsconfig.json",
-				"!**/node_modules/**"
+				"!**/node_modules/**",
+				"src/database.ts"
 			],
 			"assist": { "actions": { "source": { "useSortedKeys": "off" } } }
 		},

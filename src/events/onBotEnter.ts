@@ -1,7 +1,6 @@
 import type { Client } from "discord.js";
 import { ALL_COMMANDS } from "../commands";
-import { loadDBFirstTime } from "../maps";
-
+import db from "../database.js";
 /**
  * When the bot arrive on a server, check all thread and add members that have the permission to view the thread
  * @param {Client} client - Discord.js Client
@@ -17,6 +16,6 @@ export default (client: Client): void => {
 		} catch (error) {
 			console.error(error);
 		}
-		loadDBFirstTime(guild.id);
+		db.loadDBFirstTime(guild.id);
 	});
 };

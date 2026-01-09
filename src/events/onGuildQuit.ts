@@ -1,11 +1,10 @@
 import type { Client } from "discord.js";
-import { deleteGuild } from "../maps";
-import { removeCacheForGuild } from "../utils";
+import db from "../database";
 
 export default (client: Client): void => {
 	client.on("guildDelete", async (guild) => {
 		// Remove cache timestamps for this guild to prevent memory leak
-		removeCacheForGuild(guild.id);
-		deleteGuild(guild.id);
+		db.cacheUpdateTimestamps.delete(guild.id);
+		db.settings.delete(guild.id);
 	});
 };
