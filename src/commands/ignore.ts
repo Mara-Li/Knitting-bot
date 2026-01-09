@@ -113,7 +113,7 @@ export default {
 
 		switch (commands) {
 			case t("common.channel").toLowerCase(): {
-				if (db) {
+				if (db.settings.get(guild, "configuration.followOnlyChannel")) {
 					await interaction.reply({
 						content: ul("ignore.error.followChannel", {
 							id: await getCommandId("follow", interaction.guild),
@@ -259,7 +259,7 @@ async function ignoreThisRole(
 	if (!interaction.guild) return;
 
 	const guildID = interaction.guild.id;
-	const ignoredRoleIds = db.settings.get(guildID, "ignore.role") as string[];
+	const ignoredRoleIds = db.settings.get(guildID, "ignore.role") ?? [];
 	// Resolve ID in Role object from the cache
 	const ignoredRoles = ignoredRoleIds
 		.map((id) => interaction.guild!.roles.cache.get(id))
