@@ -1,6 +1,6 @@
 import type { Client, ThreadChannel } from "discord.js";
-import { getTranslation } from "../../i18n";
 import db from "../../database.js";
+import { getTranslation } from "../../i18n";
 import { discordLogs } from "../../utils";
 import { addUserToThread } from "../../utils/add";
 import { runWithConcurrency } from "../../utils/concurrency";
@@ -44,7 +44,10 @@ export default (client: Client): void => {
 			);
 			const guild = newMember.guild;
 			const channels = guild.channels.cache.filter((channel) => channel.isThread());
-			const followOnlyChannelEnabled = db.settings.get(guildID, "configuration.followOnlyChannel");
+			const followOnlyChannelEnabled = db.settings.get(
+				guildID,
+				"configuration.followOnlyChannel"
+			);
 
 			// Collect promises to add users to threads so we can run them in parallel
 			const tasks: Array<() => Promise<unknown>> = [];

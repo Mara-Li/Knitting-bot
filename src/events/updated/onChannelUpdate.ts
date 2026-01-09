@@ -34,10 +34,9 @@ export default (client: Client): void => {
 			return;
 		}
 		await updateCache(newChannel.guild);
-		const followOnlyChannelEnabled = db.settings.get(
-			guildId,
-			"configuration.followOnlyChannel"
-		) ?? db.defaultValues.configuration.followOnlyChannel;
+		const followOnlyChannelEnabled =
+			db.settings.get(guildId, "configuration.followOnlyChannel") ??
+			db.defaultValues.configuration.followOnlyChannel;
 		const isCategory = newChannel.type === ChannelType.GuildCategory;
 
 		if (isCategory) {

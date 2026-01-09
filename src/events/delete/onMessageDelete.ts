@@ -1,7 +1,7 @@
 import type { Client } from "discord.js";
+import db from "../../database.js";
 import { getTranslation } from "../../i18n";
 import { discordLogs } from "../../utils";
-import db from "../../database.js";
 
 /**
  * @param {Client} client - Discord.js Client

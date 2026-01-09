@@ -51,8 +51,8 @@ export default (client: Client): void => {
 		const channelGuild = channel as NonThreadGuildBasedChannel;
 		const channelType = channelGuild.type;
 
-		const ignoredRoleIns = db.settings.get(guildID, "ignore.OnlyRoleIn") ?? [];
-		const followedRoleIns = db.settings.get(guildID, "follow.OnlyRoleIn") ?? [];
+		const ignoredRoleIns = db.settings.get(guildID, "ignore.onlyRoleIn") ?? [];
+		const followedRoleIns = db.settings.get(guildID, "follow.onlyRoleIn") ?? [];
 
 		const hasIgnoredRoleIn = ignoredRoleIns.some((ignored) => {
 			return ignored.channelIds.includes(channel.id);
@@ -64,13 +64,13 @@ export default (client: Client): void => {
 		if (hasIgnoredRoleIn) {
 			const updated = filterRoleInsByChannel(ignoredRoleIns, channel.id);
 			//setRoleIn("ignore", guildID, updated);
-			db.settings.set(guildID, updated, "ignore.OnlyRoleIn");
+			db.settings.set(guildID, updated, "ignore.onlyRoleIn");
 		}
 
 		if (hasFollowedRoleIn) {
 			const updated = filterRoleInsByChannel(followedRoleIns, channel.id);
 			//setRoleIn("follow", guildID, updated);
-			db.settings.set(guildID, updated, "follow.OnlyRoleIn");
+			db.settings.set(guildID, updated, "follow.onlyRoleIn");
 		}
 
 		if (channelType === ChannelType.GuildText) {

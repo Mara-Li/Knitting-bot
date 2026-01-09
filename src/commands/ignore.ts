@@ -183,7 +183,7 @@ async function displayIgnored(
 	if (!interaction.guild) return;
 	const guildID = interaction.guild.id;
 	const ignored = mapToStr("ignore", guildID);
-	const roleIn = db.settings.get(guildID, "ignore.OnlyRoleIn");
+	const roleIn = db.settings.get(guildID, "ignore.onlyRoleIn");
 	const {
 		rolesNames: ignoredRolesNames,
 		categoriesNames: ignoredCategoriesNames,

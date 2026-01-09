@@ -1,10 +1,10 @@
 import type { Client, ThreadChannel } from "discord.js";
+import db from "../../database.js";
 import { getTranslation } from "../../i18n";
 import { discordLogs } from "../../utils";
 import { addUserToThread } from "../../utils/add";
 import { runWithConcurrency } from "../../utils/concurrency";
 import { checkMemberRole, checkThread } from "../../utils/data_check";
-import db from "../../database.js";
 /**
  * @param {Client} client - Discord.js Client
  * @returns {void}

@@ -2,7 +2,7 @@
 import * as Djs from "discord.js";
 import db from "../database";
 import { cmdLn, getUl, t } from "../i18n";
-import { TIMEOUT, type Translation,TChannel } from "../interfaces";
+import { type TChannel, TIMEOUT, type Translation } from "../interfaces";
 import {
 	channelSelectorsForType,
 	createRoleSelectModal,

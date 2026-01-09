@@ -13,7 +13,11 @@
 import * as Djs from "discord.js";
 import db from "../database";
 import { getUl, ln, t } from "../i18n";
-import { type ConfigurationKey, ConfigurationKeys, type Translation } from "../interfaces";
+import {
+	type ConfigurationKey,
+	CONFIGURATION_KEYS,
+	type Translation,
+} from "../interfaces";
 
 import "../discord_ext.js";
 import dedent from "dedent";
@@ -320,7 +324,7 @@ async function setupMessageCollector(
 			.createMessageComponentCollector({ filter, time: 60000 })
 			?.on("collect", async (i) => {
 				await i.deferUpdate();
-				if (ConfigurationKeys.includes(i.customId))
+				if (CONFIGURATION_KEYS.includes(i.customId))
 					await updateConfig(
 						i.customId as ConfigurationKey,
 						i as Djs.ButtonInteraction,
@@ -352,7 +356,8 @@ function displayModeMenu(guildID: string, ul: Translation): Djs.EmbedBuilder {
 				inline: true,
 				name: ul("configuration.follow.role.title"),
 				value: enabledOrDisabled(
-					db.settings.get(guildID, "configuration.followOnlyRole") ?? db.defaultValues.configuration.followOnlyRole,
+					db.settings.get(guildID, "configuration.followOnlyRole") ??
+						db.defaultValues.configuration.followOnlyRole,
 					ul
 				),
 			},
@@ -360,7 +365,8 @@ function displayModeMenu(guildID: string, ul: Translation): Djs.EmbedBuilder {
 				inline: true,
 				name: ul("configuration.follow.thread.title"),
 				value: enabledOrDisabled(
-					db.settings.get(guildID, "configuration.followOnlyChannel") ?? db.defaultValues.configuration.followOnlyChannel,
+					db.settings.get(guildID, "configuration.followOnlyChannel") ??
+						db.defaultValues.configuration.followOnlyChannel,
 					ul
 				),
 			}
@@ -371,7 +377,8 @@ function displayModeMenu(guildID: string, ul: Translation): Djs.EmbedBuilder {
 				inline: true,
 				name: ul("configuration.follow.roleIn"),
 				value: enabledOrDisabled(
-					db.settings.get(guildID, "configuration.followOnlyRoleIn") ?? db.defaultValues.configuration.followOnlyRoleIn,
+					db.settings.get(guildID, "configuration.followOnlyRoleIn") ??
+						db.defaultValues.configuration.followOnlyRoleIn,
 					ul
 				),
 			},
@@ -388,7 +395,8 @@ function autoUpdateMenu(guildID: string, ul: Translation): Djs.EmbedBuilder {
 				inline: true,
 				name: ul("configuration.channel.title"),
 				value: enabledOrDisabled(
-					db.settings.get(guildID, "configuration.onChannelUpdate") ?? db.defaultValues.configuration.onChannelUpdate,
+					db.settings.get(guildID, "configuration.onChannelUpdate") ??
+						db.defaultValues.configuration.onChannelUpdate,
 					ul
 				),
 			},
@@ -396,7 +404,8 @@ function autoUpdateMenu(guildID: string, ul: Translation): Djs.EmbedBuilder {
 				inline: true,
 				name: ul("configuration.member.title"),
 				value: enabledOrDisabled(
-					db.settings.get(guildID, "configuration.onNewMember") ?? db.defaultValues.configuration.onNewMember,
+					db.settings.get(guildID, "configuration.onNewMember") ??
+						db.defaultValues.configuration.onNewMember,
 					ul
 				),
 			}
@@ -407,7 +416,8 @@ function autoUpdateMenu(guildID: string, ul: Translation): Djs.EmbedBuilder {
 				inline: true,
 				name: ul("configuration.newMember.display"),
 				value: enabledOrDisabled(
-					db.settings.get(guildID, "configuration.onMemberUpdate") ?? db.defaultValues.configuration.onMemberUpdate,
+					db.settings.get(guildID, "configuration.onMemberUpdate") ??
+						db.defaultValues.configuration.onMemberUpdate,
 					ul
 				),
 			},
@@ -415,7 +425,8 @@ function autoUpdateMenu(guildID: string, ul: Translation): Djs.EmbedBuilder {
 				inline: true,
 				name: ul("configuration.thread.display"),
 				value: enabledOrDisabled(
-					db.settings.get(guildID, "configuration.onThreadCreated") ?? db.defaultValues.configuration.onThreadCreated,
+					db.settings.get(guildID, "configuration.onThreadCreated") ??
+						db.defaultValues.configuration.onThreadCreated,
 					ul
 				),
 			}
@@ -444,9 +455,18 @@ async function updateConfig(
 	const commandType = {
 		Mode: ["followOnlyRole", "followOnlyChannel", "followOnlyRoleIn"],
 	};
-	const followOnlyRole = db.settings.get(interaction.guild.id, "configuration.followOnlyRole");
-	const followOnlyChannel = db.settings.get(interaction.guild.id, "configuration.followOnlyChannel");
-	const followOnlyRoleIn = db.settings.get(interaction.guild.id, "configuration.followOnlyRoleIn");
+	const followOnlyRole = db.settings.get(
+		interaction.guild.id,
+		"configuration.followOnlyRole"
+	);
+	const followOnlyChannel = db.settings.get(
+		interaction.guild.id,
+		"configuration.followOnlyChannel"
+	);
+	const followOnlyRoleIn = db.settings.get(
+		interaction.guild.id,
+		"configuration.followOnlyRoleIn"
+	);
 	if (
 		(command === "followOnlyRoleIn" && (followOnlyChannel || followOnlyRole)) ||
 		(followOnlyRoleIn &&
@@ -553,7 +573,7 @@ function reloadButtonMode(guildID: string, ul: Translation) {
 	};
 
 	const buttons: Djs.ButtonBuilder[] = [];
-	for (const command of ConfigurationKeys as ConfigurationKey[]) {
+	for (const command of CONFIGURATION_KEYS as ConfigurationKey[]) {
 		buttons.push(
 			createButton(command, labelButton(command, translation, guildID, ul), guildID)
 		);
@@ -629,7 +649,7 @@ function reloadButtonAuto(guildID: string, ul: Translation) {
 		thread: ul("configuration.thread.name"),
 	};
 	const buttons: Djs.ButtonBuilder[] = [];
-	for (const command of ConfigurationKeys as ConfigurationKey[]) {
+	for (const command of CONFIGURATION_KEYS as ConfigurationKey[]) {
 		buttons.push(
 			createButton(command, labelButton(command, translation, guildID, ul), guildID)
 		);
@@ -661,9 +681,15 @@ async function displayConfig(interaction: Djs.ChatInputCommandInteraction) {
 	const data = db.settings.get(interaction.guild.id) ?? db.defaultValues;
 	const config = data.configuration;
 	const mode = {
-		followOnlyChannel: db.settings.get(interaction.guild.id, "configuration.followOnlyChannel"),
+		followOnlyChannel: db.settings.get(
+			interaction.guild.id,
+			"configuration.followOnlyChannel"
+		),
 		followOnlyRole: db.settings.get(interaction.guild.id, "configuration.followOnlyRole"),
-		followOnlyRoleIn: db.settings.get(interaction.guild.id, "configuration.followOnlyRoleIn"),
+		followOnlyRoleIn: db.settings.get(
+			interaction.guild.id,
+			"configuration.followOnlyRoleIn"
+		),
 	};
 	const auto = {
 		channel: db.settings.get(interaction.guild.id, "configuration.onChannelUpdate"),

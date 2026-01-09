@@ -1,5 +1,5 @@
 import type * as Djs from "discord.js";
-import type {TChannel, Translation} from "./config";
+import type { TChannel, Translation } from "./config";
 
 export type CommandMode = "follow" | "ignore";
 

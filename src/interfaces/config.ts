@@ -1,6 +1,6 @@
 import type * as Djs from "discord.js";
-import {Locale} from "discord.js";
-import type {TFunction} from "i18next";
+import { Locale } from "discord.js";
+import type { TFunction } from "i18next";
 
 export interface RoleIn {
 	roleId: string;
@@ -30,7 +30,7 @@ export interface IgnoreFollow {
 	category: string[];
 	channel: string[];
 	forum: string[];
-	OnlyRoleIn: RoleIn[];
+	onlyRoleIn: RoleIn[];
 }
 
 export type IgnoreFollowKey = keyof IgnoreFollow;
@@ -50,13 +50,13 @@ export const DEFAULT_CONFIGURATION: Configuration = {
 	pin: false,
 };
 
-export const ConfigurationKeys = Object.keys(DEFAULT_CONFIGURATION);
+export const CONFIGURATION_KEYS = Object.keys(DEFAULT_CONFIGURATION);
 
 export const DEFAULT_IGNORE_FOLLOW: IgnoreFollow = {
 	category: [],
 	channel: [],
 	forum: [],
-	OnlyRoleIn: [],
+	onlyRoleIn: [],
 	role: [],
 	thread: [],
 };

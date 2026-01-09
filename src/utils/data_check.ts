@@ -1,5 +1,5 @@
 import * as Djs from "discord.js";
-import db from "../database.js"
+import db from "../database.js";
 
 /**
  * Verify that the channel type is :
@@ -42,10 +42,14 @@ export function isUserInThread(
  * @param role {@link Djs.GuildMemberRoleManager} The role to check
  * @param on {"ignore" | "follow"} The settings map to check
  */
-export function checkMemberRole(role: Djs.GuildMemberRoleManager, on: "ignore" | "follow") {
+export function checkMemberRole(
+	role: Djs.GuildMemberRoleManager,
+	on: "ignore" | "follow"
+) {
 	const guild = role.guild.id;
-	if (on === "follow" && !db.settings.get(guild, "configuration.followOnlyRole")) return true;
-	const roleIds = db.settings.get(guild, `${on}.role`) ?? [] //getRole(on, guild);
+	if (on === "follow" && !db.settings.get(guild, "configuration.followOnlyRole"))
+		return true;
+	const roleIds = db.settings.get(guild, `${on}.role`) ?? []; //getRole(on, guild);
 	const allMemberRoles = role.cache;
 	return allMemberRoles.some((memberRole) => roleIds.includes(memberRole.id));
 }
@@ -59,8 +63,9 @@ export function checkMemberRole(role: Djs.GuildMemberRoleManager, on: "ignore" |
  */
 export function checkRole(role: Djs.Role, on: "ignore" | "follow") {
 	const guild = role.guild.id;
-	if (on === "follow" && !db.settings.get(guild, "configuration.followOnlyRole")) return true;
-	const roleIds = db.settings.get(guild, `${on}.role`) ?? [] //getRole(on, guild);
+	if (on === "follow" && !db.settings.get(guild, "configuration.followOnlyRole"))
+		return true;
+	const roleIds = db.settings.get(guild, `${on}.role`) ?? []; //getRole(on, guild);
 	return roleIds.includes(role.id);
 }
 
@@ -78,11 +83,12 @@ export function checkMemberRoleIn(
 	thread: Djs.ThreadChannel
 ) {
 	const guild = thread.guild.id;
-	if (on === "follow" && !db.settings.get(guild, "configuration.followOnlyRoleIn")) return true;
+	if (on === "follow" && !db.settings.get(guild, "configuration.followOnlyRoleIn"))
+		return true;
 	const roles = roleManager.cache;
 	const parentChannel = thread.parent;
 	const categoryOfParent = parentChannel?.parent;
-	const roleIn =  db.settings.get(guild, `${on}.OnlyRoleIn`) ?? [] //getRoleIn(on, guild);
+	const roleIn = db.settings.get(guild, `${on}.OnlyRoleIn`) ?? []; //getRoleIn(on, guild);
 	return roles.some((role) => {
 		const find = roleIn.find((r) => r.roleId === role.id);
 		if (!find) return false;
@@ -102,12 +108,17 @@ export function checkMemberRoleIn(
  * @param role {@link Role} The role to check
  * @param thread {@link Djs.ThreadChannel} The thread to check
  */
-export function checkRoleIn(on: "follow" | "ignore", role: Djs.Role, thread: Djs.ThreadChannel) {
+export function checkRoleIn(
+	on: "follow" | "ignore",
+	role: Djs.Role,
+	thread: Djs.ThreadChannel
+) {
 	const guild = thread.guild.id;
-	if (on === "follow" && !db.settings.get(guild, "configuration.followOnlyRoleIn")) return true;
+	if (on === "follow" && !db.settings.get(guild, "configuration.followOnlyRoleIn"))
+		return true;
 	const parentChannel = thread.parent;
 	const categoryOfParent = parentChannel?.parent;
-	const roleIns = db.settings.get(guild, `${on}.OnlyRoleIn`) ?? [] //getRoleIn(on, guild);
+	const roleIns = db.settings.get(guild, `${on}.OnlyRoleIn`) ?? []; //getRoleIn(on, guild);
 	const find = roleIns.find((followedRole) => followedRole.roleId === role.id);
 	if (!find) return false;
 	return find.channelIds.some((channelId) => {

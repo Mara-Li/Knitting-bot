@@ -111,8 +111,8 @@ export default {
 		guildID: string,
 		value: string[]
 	): void {
-		// OnlyRoleIn has its own setter (setRoleIn) due to different data structure
-		if (name === "OnlyRoleIn") return;
+		// onlyRoleIn has its own setter (setRoleIn) due to different data structure
+		if (name === "onlyRoleIn") return;
 		this.settings.set(guildID, value, `${mode}.${name}`);
 	},
 };

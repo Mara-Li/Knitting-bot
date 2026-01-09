@@ -5,7 +5,7 @@ import { fetchArchived, updateCache } from "../utils";
 import { addRoleAndUserToThread } from "../utils/add";
 import { checkThread } from "../utils/data_check";
 import "../discord_ext.js";
-import db from "../database.js"
+import db from "../database.js";
 import { runWithConcurrency } from "../utils/concurrency";
 
 export default {
@@ -94,7 +94,8 @@ async function updateAllThreads(
 	for (const thread of toUpdate) {
 		if (thread.locked) continue;
 		const shouldUpdate =
-			(!db.settings.get(guild, "configuration.followOnlyChannel") && !checkThread(thread, "ignore")) ||
+			(!db.settings.get(guild, "configuration.followOnlyChannel") &&
+				!checkThread(thread, "ignore")) ||
 			checkThread(thread, "follow");
 		if (shouldUpdate) {
 			tasks.push(async () => {

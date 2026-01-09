@@ -24,8 +24,8 @@ export default (client: Client): void => {
 		}
 
 		// Remove from RoleIn channel ID lists
-		const followedRoleIns = db.settings.get(guildID, "follow.OnlyRoleIn") ?? [];
-		const ignoredRoleIns = db.settings.get(guildID, "ignore.OnlyRoleIn") ?? [];
+		const followedRoleIns = db.settings.get(guildID, "follow.onlyRoleIn") ?? [];
+		const ignoredRoleIns = db.settings.get(guildID, "ignore.onlyRoleIn") ?? [];
 
 		const updatedFollowedRoleIns = followedRoleIns.map((roleIn) => ({
 			...roleIn,
@@ -43,7 +43,7 @@ export default (client: Client): void => {
 			)
 		) {
 			//setRoleIn("follow", guildID, updatedFollowedRoleIns);
-			db.settings.set(guildID, updatedFollowedRoleIns, "follow.OnlyRoleIn");
+			db.settings.set(guildID, updatedFollowedRoleIns, "follow.onlyRoleIn");
 		}
 		if (
 			ignoredRoleIns.some(
@@ -52,7 +52,7 @@ export default (client: Client): void => {
 			)
 		) {
 			//setRoleIn("ignore", guildID, updatedIgnoredRoleIns);
-			db.settings.set(guildID, updatedIgnoredRoleIns, "ignore.OnlyRoleIn");
+			db.settings.set(guildID, updatedIgnoredRoleIns, "ignore.onlyRoleIn");
 		}
 	});
 };
