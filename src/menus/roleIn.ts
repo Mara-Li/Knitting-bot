@@ -21,7 +21,7 @@ export async function roleInSelectorsForType(
 	const isAllowed = await checkRoleInConstraints(interaction, guildID, mode, ul);
 	if (!isAllowed) return;
 
-	const allRoleIn: RoleIn[] = db.settings.get(guildID, `${mode}.OnlyRoleIn`) ?? []; //getRoleIn(mode, guildID);
+	const allRoleIn: RoleIn[] = db.settings.get(guildID, `${mode}.onlyRoleIn`) ?? []; //getRoleIn(mode, guildID);
 	const existingRoleIn = allRoleIn.find((r) => r.roleId === roleId);
 
 	const trackedIds = existingRoleIn?.channelIds ?? [];

@@ -299,7 +299,7 @@ async function handleRoleInConflicts({
 	) => string;
 }) {
 	const oppositeMode: CommandMode = mode === "follow" ? "ignore" : "follow";
-	const oppositeRoleIn = db.settings.get(guildID, `${oppositeMode}.OnlyRoleIn`) ?? []; //getRoleIn(oppositeMode, guildID);
+	const oppositeRoleIn = db.settings.get(guildID, `${oppositeMode}.onlyRoleIn`) ?? []; //getRoleIn(oppositeMode, guildID);
 	const oppositeForRole = oppositeRoleIn.find((r) => r.roleId === roleId);
 	const oppositeChannelIds = new Set(oppositeForRole?.channelIds ?? []);
 
@@ -401,7 +401,7 @@ async function persistRoleInSelection({
 	ul: Translation;
 	mode: CommandMode;
 }) {
-	const allRoleIn = db.settings.get(guildID, `${mode}.OnlyRoleIn`) ?? []; //getRoleIn(mode, guildID);
+	const allRoleIn = db.settings.get(guildID, `${mode}.onlyRoleIn`) ?? []; //getRoleIn(mode, guildID);
 	const existingEntry = allRoleIn.find((r) => r.roleId === roleId);
 
 	const allChannelTypesIds: string[] = [];

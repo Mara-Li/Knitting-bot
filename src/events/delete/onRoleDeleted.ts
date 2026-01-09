@@ -13,10 +13,9 @@ export default (client: Client): void => {
 
 		if (followedRoles.length !== filteredFollowed.length)
 			db.settings.set(guildID, filteredFollowed, "follow.role");
-		
+
 		if (ignoredRoles.length !== filteredIgnored.length)
 			db.settings.set(guildID, filteredIgnored, "ignore.role");
-		
 
 		// Remove from RoleIn lists
 		const followedRoleIns = db.settings.get(guildID, "follow.onlyRoleIn") ?? [];

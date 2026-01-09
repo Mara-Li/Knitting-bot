@@ -46,7 +46,7 @@ export function mapToStr(type: "follow" | "ignore", guildID: string) {
 		forums: forumIds,
 		roles: roleIds,
 	} = getTrackedItems(type, guildID);
-	const roleIns: RoleIn[] = db.settings.get(guildID, `${type}.OnlyRoleIn`) ?? [];
+	const roleIns: RoleIn[] = db.settings.get(guildID, `${type}.onlyRoleIn`) ?? [];
 
 	const rolesInNames = mapRoleIn(roleIns);
 	const categoriesNames = mapIds(categoryIds);

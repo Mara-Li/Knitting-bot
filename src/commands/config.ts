@@ -14,8 +14,8 @@ import * as Djs from "discord.js";
 import db from "../database";
 import { getUl, ln, t } from "../i18n";
 import {
-	type ConfigurationKey,
 	CONFIGURATION_KEYS,
+	type ConfigurationKey,
 	type Translation,
 } from "../interfaces";
 

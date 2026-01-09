@@ -88,7 +88,7 @@ export function checkMemberRoleIn(
 	const roles = roleManager.cache;
 	const parentChannel = thread.parent;
 	const categoryOfParent = parentChannel?.parent;
-	const roleIn = db.settings.get(guild, `${on}.OnlyRoleIn`) ?? []; //getRoleIn(on, guild);
+	const roleIn = db.settings.get(guild, `${on}.onlyRoleIn`) ?? []; //getRoleIn(on, guild);
 	return roles.some((role) => {
 		const find = roleIn.find((r) => r.roleId === role.id);
 		if (!find) return false;
@@ -118,7 +118,7 @@ export function checkRoleIn(
 		return true;
 	const parentChannel = thread.parent;
 	const categoryOfParent = parentChannel?.parent;
-	const roleIns = db.settings.get(guild, `${on}.OnlyRoleIn`) ?? []; //getRoleIn(on, guild);
+	const roleIns = db.settings.get(guild, `${on}.onlyRoleIn`) ?? []; //getRoleIn(on, guild);
 	const find = roleIns.find((followedRole) => followedRole.roleId === role.id);
 	if (!find) return false;
 	return find.channelIds.some((channelId) => {
