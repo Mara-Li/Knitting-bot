@@ -98,7 +98,7 @@ export async function startPaginatedButtonsFlow(
 	collector.on("end", async () => {
 		// cleanup mapping and state
 		try {
-			const id = (buttonMessage as Djs.Message).id;
+			const id = buttonMessage.id;
 			if (db.messageToStateKey.has(id)) db.messageToStateKey.delete(id);
 			// Auto-cleanup the state when collector ends (timeout or stop)
 			if (stateKey) deletePaginationState(stateKey);

@@ -30,12 +30,9 @@ export function createPaginationState(
 	return state;
 }
 
-export function getPaginationState(key: string): PaginatedIdsState | undefined {
-	return db.globalPaginationStates.get(key);
-}
-
 export function deletePaginationState(key: string): void {
 	db.globalPaginationStates.delete(key);
-	for (const [msgId, stateKey] of db.messageToStateKey.entries())
-		if (stateKey === key) db.messageToStateKey.delete(msgId);
+	//for (const [msgId, stateKey] of db.messageToStateKey.entries())
+	//	if (stateKey === key) db.messageToStateKey.delete(msgId);
+	db.messageToStateKey.sweep((_msgId, stateKey) => stateKey === key);
 }

@@ -10,7 +10,7 @@ import type {
 } from "../interfaces";
 import { resolveChannelsByIds } from "../utils";
 import { respondInteraction } from "./paginated";
-import { deletePaginationState, getPaginationState } from "./state";
+import { deletePaginationState } from "./state";
 import { resolveIds } from "./utils";
 
 /**
@@ -26,7 +26,7 @@ export async function validateAndSave(
 	mode: CommandMode
 ) {
 	const stateKey = `${userId}_${guildID}_${mode}_${channelType}`;
-	const state = getPaginationState(stateKey);
+	const state = db.globalPaginationStates.get(stateKey);
 	if (!state) return;
 
 	const guild = interaction.guild;
@@ -215,7 +215,7 @@ async function ensureRoleInContext(
 	roleId: string,
 	ul: Translation
 ): Promise<{ state: PaginatedIdsState; guild: Djs.Guild; role: Djs.Role } | undefined> {
-	const state = getPaginationState(stateKey);
+	const state = db.globalPaginationStates.get(stateKey);
 	if (!state) return;
 
 	const guild = interaction.guild;
