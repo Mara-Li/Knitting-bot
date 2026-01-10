@@ -493,38 +493,45 @@ async function updateConfig(
  * Create a button with the command name as custom id and the label as label
  */
 
-function createButton(command: ConfigurationKey, label: string, guildID: string) {
-	const manualModeEnabled = db.settings.get(guildID, "configuration.manualMode");
+function createButton(
+	command: ConfigurationKey,
+	label: string,
+	guildID: string,
+	auto?: boolean
+) {
+	const config =
+		db.settings.get(guildID, "configuration") ?? db.defaultValues.configuration;
+	const manualModeEnabled = config.manualMode;
 
 	// If manual mode is enabled:
 	// - the manual button is green (Success)
 	// - all other buttons are grey (Secondary)
-	if (manualModeEnabled) {
+	if (auto) {
+		if (manualModeEnabled) {
+			if (command === "manualMode") {
+				return new Djs.ButtonBuilder()
+					.setCustomId(command)
+					.setStyle(Djs.ButtonStyle.Success)
+					.setLabel(label);
+			}
+			return new Djs.ButtonBuilder()
+				.setCustomId(command as string)
+				.setStyle(Djs.ButtonStyle.Secondary)
+				.setLabel(label);
+		}
+
+		// If manual mode is disabled:
+		// - the manual button is grey (Secondary)
+		// - other buttons reflect their configuration state: green (Success) when enabled, red (Danger) when disabled
 		if (command === "manualMode") {
 			return new Djs.ButtonBuilder()
 				.setCustomId(command)
-				.setStyle(Djs.ButtonStyle.Success)
+				.setStyle(Djs.ButtonStyle.Secondary)
 				.setLabel(label);
 		}
-		return new Djs.ButtonBuilder()
-			.setCustomId(command as string)
-			.setStyle(Djs.ButtonStyle.Secondary)
-			.setLabel(label);
 	}
 
-	// If manual mode is disabled:
-	// - the manual button is grey (Secondary)
-	// - other buttons reflect their configuration state: green (Success) when enabled, red (Danger) when disabled
-	if (command === "manualMode") {
-		return new Djs.ButtonBuilder()
-			.setCustomId(command)
-			.setStyle(Djs.ButtonStyle.Secondary)
-			.setLabel(label);
-	}
-
-	const style = db.settings.get(guildID, `configuration.${command}`)
-		? Djs.ButtonStyle.Success
-		: Djs.ButtonStyle.Danger;
+	const style = config[command] ? Djs.ButtonStyle.Success : Djs.ButtonStyle.Danger;
 	return new Djs.ButtonBuilder()
 		.setCustomId(command as string)
 		.setStyle(style)
@@ -534,17 +541,17 @@ function createButton(command: ConfigurationKey, label: string, guildID: string)
 function reloadButtonMode(guildID: string, ul: Translation) {
 	const config =
 		db.settings.get(guildID, "configuration") ?? db.defaultValues.configuration;
-	const translation:Partial<Record<ConfigurationKey, string>> = {
-		followOnlyRoleIn: ul("configuration.roleIn.name"),
+	const translation: Partial<Record<ConfigurationKey, string>> = {
 		followOnlyChannel: ul("configuration.follow.thread.name"),
 		followOnlyRole: ul("configuration.follow.role.name"),
+		followOnlyRoleIn: ul("configuration.roleIn.name"),
 	};
 
-	const names:ConfigurationKey[] = [
+	const names: ConfigurationKey[] = [
 		"followOnlyRoleIn",
 		"followOnlyChannel",
 		"followOnlyRole",
-	]
+	];
 
 	const buttons: Djs.ButtonBuilder[] = [];
 	for (const command of names) {
@@ -559,10 +566,7 @@ function reloadButtonMode(guildID: string, ul: Translation) {
 		 */
 		buttons[1] = buttons[1].setDisabled(true);
 		buttons[2] = buttons[2].setDisabled(true);
-	} else if (
-		config.followOnlyChannel ||
-		config.followOnlyRole
-	) {
+	} else if (config.followOnlyChannel || config.followOnlyRole) {
 		/**
 		 * Disable the button if followRole or followChannel is enable
 		 */
@@ -602,10 +606,11 @@ function labelButton(
 }
 
 function reloadButtonAuto(guildID: string, ul: Translation) {
-	const config = db.settings.get(guildID, "configuration") ?? db.defaultValues.configuration;
-	const translation:Partial<Record<ConfigurationKey, string>> = {
-		onChannelUpdate: ul("configuration.channel.name"),
+	const config =
+		db.settings.get(guildID, "configuration") ?? db.defaultValues.configuration;
+	const translation: Partial<Record<ConfigurationKey, string>> = {
 		manualMode: ul("configuration.disable.name"),
+		onChannelUpdate: ul("configuration.channel.name"),
 		onMemberUpdate: ul("configuration.member.name"),
 		onNewMember: ul("configuration.newMember.name"),
 		onThreadCreated: ul("configuration.thread.name"),
@@ -616,11 +621,11 @@ function reloadButtonAuto(guildID: string, ul: Translation) {
 		"onMemberUpdate",
 		"onNewMember",
 		"onThreadCreated",
-	]
+	];
 	const buttons: Djs.ButtonBuilder[] = [];
 	for (const command of names) {
 		buttons.push(
-			createButton(command, labelButton(command, translation, guildID, ul), guildID)
+			createButton(command, labelButton(command, translation, guildID, ul), guildID, true)
 		);
 	}
 
