@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [3.0.4](https://github.com/Mara-Li/Knitting-bot/compare/3.0.3...3.0.4) (2026-01-10)
+
+
+### Bug Fixes
+
+* add pagination state persistence in database ([170b10d](https://github.com/Mara-Li/Knitting-bot/commit/170b10dd9efc332280764b771d2c972d6b623ea6))
+
 ## [3.0.3](https://github.com/Mara-Li/Knitting-bot/compare/3.0.2...3.0.3) (2026-01-10)
 
 
