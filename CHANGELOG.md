@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [3.0.5](https://github.com/Mara-Li/Knitting-bot/compare/3.0.4...3.0.5) (2026-01-10)
+
+
+### Bug Fixes
+
+* on new server, should use correct colors ([77f97be](https://github.com/Mara-Li/Knitting-bot/commit/77f97be600a8c768f25b084e0a0dc3a151ab0ec2))
+
 ## [3.0.4](https://github.com/Mara-Li/Knitting-bot/compare/3.0.3...3.0.4) (2026-01-10)
 
 
