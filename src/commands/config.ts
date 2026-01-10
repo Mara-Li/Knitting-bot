@@ -534,30 +534,23 @@ function createButton(command: ConfigurationKey, label: string, guildID: string)
 function reloadButtonMode(guildID: string, ul: Translation) {
 	const config =
 		db.settings.get(guildID, "configuration") ?? db.defaultValues.configuration;
-	const translation = {
+	const translation:Partial<Record<ConfigurationKey, string>> = {
+		followOnlyRoleIn: ul("configuration.roleIn.name"),
 		followOnlyChannel: ul("configuration.follow.thread.name"),
 		followOnlyRole: ul("configuration.follow.role.name"),
-		followOnlyRoleIn: ul("configuration.roleIn.name"),
 	};
 
+	const names:ConfigurationKey[] = [
+		"followOnlyRoleIn",
+		"followOnlyChannel",
+		"followOnlyRole",
+	]
+
 	const buttons: Djs.ButtonBuilder[] = [];
-	for (const command of CONFIGURATION_KEYS as ConfigurationKey[]) {
+	for (const command of names) {
 		buttons.push(
 			createButton(command, labelButton(command, translation, guildID, ul), guildID)
 		);
-	}
-
-	// If manual mode is enabled, grey and disable all mode buttons
-	if (config.manualMode) {
-		for (let i = 0; i < buttons.length; i++) {
-			buttons[i] = buttons[i].setStyle(Djs.ButtonStyle.Secondary).setDisabled(true);
-		}
-		return [
-			{
-				components: buttons,
-				type: 1,
-			},
-		];
 	}
 
 	if (config.followOnlyRoleIn) {
@@ -567,8 +560,8 @@ function reloadButtonMode(guildID: string, ul: Translation) {
 		buttons[1] = buttons[1].setDisabled(true);
 		buttons[2] = buttons[2].setDisabled(true);
 	} else if (
-		db.settings.get(guildID, "configuration.followOnlyRole") ||
-		db.settings.get(guildID, "configuration.followOnlyChannel")
+		config.followOnlyChannel ||
+		config.followOnlyRole
 	) {
 		/**
 		 * Disable the button if followRole or followChannel is enable
@@ -609,22 +602,30 @@ function labelButton(
 }
 
 function reloadButtonAuto(guildID: string, ul: Translation) {
-	const translation = {
-		channel: ul("configuration.channel.name"),
+	const config = db.settings.get(guildID, "configuration") ?? db.defaultValues.configuration;
+	const translation:Partial<Record<ConfigurationKey, string>> = {
+		onChannelUpdate: ul("configuration.channel.name"),
 		manualMode: ul("configuration.disable.name"),
-		member: ul("configuration.member.name"),
-		newMember: ul("configuration.newMember.name"),
-		thread: ul("configuration.thread.name"),
+		onMemberUpdate: ul("configuration.member.name"),
+		onNewMember: ul("configuration.newMember.name"),
+		onThreadCreated: ul("configuration.thread.name"),
 	};
+	const names: ConfigurationKey[] = [
+		"manualMode",
+		"onChannelUpdate",
+		"onMemberUpdate",
+		"onNewMember",
+		"onThreadCreated",
+	]
 	const buttons: Djs.ButtonBuilder[] = [];
-	for (const command of CONFIGURATION_KEYS as ConfigurationKey[]) {
+	for (const command of names) {
 		buttons.push(
 			createButton(command, labelButton(command, translation, guildID, ul), guildID)
 		);
 	}
 
 	// If manual mode is enabled, force other buttons to Secondary and disabled
-	if (db.settings.get(guildID, "configuration.manualMode")) {
+	if (config.manualMode) {
 		buttons[0] = buttons[0].setStyle(Djs.ButtonStyle.Success);
 		for (let i = 1; i < buttons.length; i++) {
 			buttons[i] = buttons[i].setStyle(Djs.ButtonStyle.Secondary).setDisabled(true);
