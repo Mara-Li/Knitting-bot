@@ -1,4 +1,5 @@
 import * as Djs from "discord.js";
+import db from "../database";
 import {
 	type CommandMode,
 	type PaginatedIdsState,
@@ -88,7 +89,8 @@ export async function handleModalModifyGeneric(options: {
 		ul,
 		channelType,
 		pageTrackedIds,
-		modalLabel
+		modalLabel,
+		page
 	);
 
 	try {
@@ -114,6 +116,9 @@ export async function handleModalModifyGeneric(options: {
 			state,
 			mode
 		);
+		
+		// Resave in the database the updated state
+		db.globalPaginationStates.set(stateKey, state);
 
 		const summary = summaryBuilder(page, pageItemsCount);
 

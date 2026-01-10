@@ -79,9 +79,10 @@ export function createFirstPageChannelModalByType(
 	ul: Translation,
 	channelType: TChannel,
 	trackedIds: string[],
-	shortTitle?: string
+	shortTitle?: string,
+	pageNumber: number = 0
 ): { modal: ModalBuilder; hasMore: boolean; pageItemIds: string[] } {
-	const page = 0;
+	const page = pageNumber;
 	const channelTypeMap: Record<TChannel, Djs.ChannelType[]> = {
 		category: [Djs.ChannelType.GuildCategory],
 		channel: [Djs.ChannelType.GuildText],
