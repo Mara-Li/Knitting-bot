@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [3.1.0](https://github.com/Mara-Li/Knitting-bot/compare/3.0.6...3.1.0) (2026-01-11)
+
+
+### Features
+
+* use log to get a better accuracy on what is edited on the user ([17b7402](https://github.com/Mara-Li/Knitting-bot/commit/17b74023d650f339563836f0951c5fdc177315b1))
+
 ## [3.0.6](https://github.com/Mara-Li/Knitting-bot/compare/3.0.5...3.0.6) (2026-01-11)
 
 
