@@ -1,4 +1,4 @@
-import type { Client, ThreadChannel } from "discord.js";
+import * as Djs from "discord.js";
 import db from "../../database";
 import { getTranslation } from "../../i18n";
 import { discordLogs } from "../../utils";
@@ -11,21 +11,21 @@ import {
 	checkThread,
 } from "../../utils/data_check";
 
-export default (client: Client): void => {
+export default (client: Djs.Client): void => {
 	client.on("guildMemberUpdate", async (oldMember, newMember) => {
 		//trigger only on role change
 		try {
 			const guildID = newMember.guild.id;
 			const onMemberUpdate = db.settings.get(guildID, "configuration.onMemberUpdate");
 			if (!onMemberUpdate) return;
-			if (oldMember.partial || oldMember.nickname !== newMember.nickname) return;
+			if (oldMember.nickname != null && oldMember.nickname !== newMember.nickname) return;
 			const oldRoles = oldMember.roles.cache;
 			const newRoles = newMember.roles.cache;
 			if (oldRoles.equals(newRoles)) return;
-			/** Search updated roles */
-			const updatedRoles = newRoles.filter((role) => !oldRoles.has(role.id));
+			/** Search updated roles from logs as it is more accurate */
+			const updatedRoles = await updatedRolesFromLogs(oldMember, newMember);
 			const ul = getTranslation(guildID, { locale: newMember.guild.preferredLocale });
-			if (updatedRoles.size === 0) {
+			if (!updatedRoles || updatedRoles.size === 0) {
 				await discordLogs(
 					guildID,
 					client,
@@ -51,8 +51,7 @@ export default (client: Client): void => {
 
 			// Collect promises to add users to threads so we can run them in parallel
 			const tasks: Array<() => Promise<unknown>> = [];
-			for (const channel of channels.values()) {
-				const threadChannel = channel as ThreadChannel;
+			for (const threadChannel of channels.values()) {
 				const updatedRoleAllowed = updatedRoles.filter((role) => {
 					return checkRoleIn("follow", role, threadChannel);
 				});
@@ -89,17 +88,14 @@ export default (client: Client): void => {
 					shouldAddUser = roleIsAllowed && checkThread(threadChannel, "follow");
 				}
 
-				if (shouldAddUser) {
+				if (shouldAddUser)
 					tasks.push(async () => addUserToThread(threadChannel, newMember));
-				}
 			}
 
 			if (tasks.length > 0) {
 				const results = await runWithConcurrency(tasks, 10);
 				for (const r of results) {
-					if (r.status === "rejected") {
-						console.warn("addUserToThread failed:", r.reason);
-					}
+					if (r.status === "rejected") console.warn("addUserToThread failed:", r.reason);
 				}
 			}
 		} catch (error) {
@@ -107,3 +103,32 @@ export default (client: Client): void => {
 		}
 	});
 };
+
+async function updatedRolesFromLogs(
+	oldMember: Djs.PartialGuildMember | Djs.GuildMember,
+	newMember: Djs.GuildMember
+) {
+	const fetchLogs = await newMember.guild.fetchAuditLogs({
+		limit: 1,
+		type: Djs.AuditLogEvent.MemberRoleUpdate,
+	});
+	const roleLog = fetchLogs.entries.first();
+	if (!roleLog) return;
+	const { target, changes } = roleLog;
+	if (!target || !changes) return;
+	if (target.id !== oldMember.id) return;
+	//detect the roles that was added
+	const addedRoles = changes.find(
+		(change) => change.key === "$add" && change.new?.length
+	);
+	let newRoles = addedRoles?.new;
+	if (!addedRoles || !newRoles) return;
+	newRoles = newRoles as { name: string; id: string }[];
+	//create a collection of roles from the newRoles ids
+	const updatedRoles = new Djs.Collection<string, Djs.Role>();
+	newRoles.forEach((roleId) => {
+		const role = newMember.roles.cache.find((r) => r.id === roleId.id);
+		if (role) updatedRoles.set(roleId.id, role);
+	});
+	return updatedRoles;
+}
