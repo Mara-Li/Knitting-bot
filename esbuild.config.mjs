@@ -8,7 +8,7 @@ import { glob } from "glob";
 
 dotenv.config({ quiet: true });
 
-rmSync("dist", { force: true, recursive: true });
+rmSync("./dist", { force: true, recursive: true });
 
 const isProd = process.env.NODE_ENV === "production";
 
@@ -35,6 +35,10 @@ await build({
 	target: "esnext",
 	tsconfig: "./tsconfig.json",
 	write: false,
+	minifySyntax: isProd,
+	minifyWhitespace: false,
+	minifyIdentifiers: false,
+	
 });
 
 copyFileSync("package.json", "dist/package.json");

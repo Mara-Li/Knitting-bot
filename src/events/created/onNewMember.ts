@@ -41,6 +41,6 @@ export default (client: Client): void => {
 			}
 		);
 
-		await runWithConcurrency(tasks, 10);
+		await runWithConcurrency(tasks, 3);
 	});
 };

@@ -79,7 +79,7 @@ export default (client: Client): void => {
 			const tasks = Array.from(threads.values()).map((thread) => {
 				return async () => updateThread(followOnlyChannelEnabled, thread);
 			});
-			await runWithConcurrency(tasks, 10);
+			await runWithConcurrency(tasks, 3);
 		}
 	});
 };

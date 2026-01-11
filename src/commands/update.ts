@@ -100,7 +100,14 @@ async function updateAllThreads(
 		if (shouldUpdate) {
 			tasks.push(async () => {
 				try {
-					await thread.members.fetch({ cache: true });
+					// Only fetch members if the cache is empty to avoid unnecessary gateway requests
+					if (thread.members.cache.size === 0) {
+						try {
+							await thread.members.fetch({ cache: true });
+						} catch (err) {
+							console.error(`Failed to fetch members for thread ${thread.id}:`, err);
+						}
+					}
 					await addRoleAndUserToThread(thread, includeArchived);
 				} catch (err) {
 					console.error(`Error updating thread ${thread.id}:`, err);
@@ -110,7 +117,7 @@ async function updateAllThreads(
 	}
 
 	// Execute tasks with concurrency control using utility helper
-	await runWithConcurrency(tasks, 10);
+	await runWithConcurrency(tasks, 3);
 
 	await interaction.editReply({
 		content: ul("commands.updateAllThreads.success", {
@@ -145,7 +152,13 @@ async function updateThread(
 	if (channel.archived) {
 		//unarchive
 		await channel.setArchived(false, "Manual update of thread");
-		await channel.members.fetch({ cache: true }); //fetch members after unarchive
+		if (channel.members.cache.size === 0) {
+			try {
+				await channel.members.fetch({ cache: true }); //fetch members after unarchive
+			} catch (err) {
+				console.error(`Failed to fetch members for thread ${channel.id}:`, err);
+			}
+		}
 	}
 
 	const mention = Djs.channelMention(channel?.id as string);

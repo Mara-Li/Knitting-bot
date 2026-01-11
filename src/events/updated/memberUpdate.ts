@@ -93,7 +93,7 @@ export default (client: Djs.Client): void => {
 			}
 
 			if (tasks.length > 0) {
-				const results = await runWithConcurrency(tasks, 10);
+				const results = await runWithConcurrency(tasks, 3);
 				for (const r of results) {
 					if (r.status === "rejected") console.warn("addUserToThread failed:", r.reason);
 				}

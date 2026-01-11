@@ -39,6 +39,12 @@ export async function discordLogs(guildID: string, bot: Client, ...text: unknown
 const CACHE_UPDATE_COOLDOWN = 5000; // 5 seconds
 
 /**
+ * Map to keep track of in-flight member fetch promises per guild.
+ * This prevents concurrent duplicate member fetches that can trigger opcode 8 rate limits.
+ */
+const inFlightMemberFetches = new Map<string, Promise<void>>();
+
+/**
  * Update guild cache by fetching members and roles
  * @param guild - Guild to update
  * @param force - Force update even if within cooldown period
@@ -52,13 +58,25 @@ export async function updateCache(guild: Guild, force = false) {
 		return;
 	}
 
-	try {
-		await Promise.all([guild.members.fetch(), guild.roles.fetch()]);
-		db.cacheUpdateTimestamps.set(guild.id, { lastUpdate: now });
-	} catch (e) {
-		console.log(e);
-		// Ignore error
+	// If a fetch is already in progress for this guild, reuse the same promise
+	if (inFlightMemberFetches.has(guild.id)) {
+		return inFlightMemberFetches.get(guild.id);
 	}
+
+	const p = (async () => {
+		try {
+			await Promise.all([guild.members.fetch(), guild.roles.fetch()]);
+			db.cacheUpdateTimestamps.set(guild.id, { lastUpdate: now });
+		} catch (e) {
+			console.log(e);
+			// Ignore error
+		} finally {
+			inFlightMemberFetches.delete(guild.id);
+		}
+	})();
+
+	inFlightMemberFetches.set(guild.id, p);
+	return p;
 }
 
 /**
@@ -82,7 +100,7 @@ export async function fetchArchived(guild: Guild): Promise<AnyThreadChannel[]> {
 			});
 	});
 
-	const publicResults = await runWithConcurrency(publicTasks, 5);
+	const publicResults = await runWithConcurrency(publicTasks, 3);
 
 	// Fetch private archived threads (requires proper permissions)
 	const privateTasks: Array<() => Promise<unknown>> = parents.map((channel) => {
@@ -94,7 +112,7 @@ export async function fetchArchived(guild: Guild): Promise<AnyThreadChannel[]> {
 			});
 	});
 
-	const privateResults = await runWithConcurrency(privateTasks, 5);
+	const privateResults = await runWithConcurrency(privateTasks, 3);
 
 	const threads: Map<string, AnyThreadChannel> = new Map();
 
