@@ -15,14 +15,15 @@ export default (client: Client): void => {
 	client.on("guildMemberUpdate", async (oldMember, newMember) => {
 		//trigger only on role change
 		try {
-			if (oldMember.roles.cache.size === newMember.roles.cache.size) return;
-			/** Search updated roles */
-			const oldRoles = oldMember.roles.cache;
-			const newRoles = newMember.roles.cache;
-			const updatedRoles = newRoles.filter((role) => !oldRoles.has(role.id));
 			const guildID = newMember.guild.id;
 			const onMemberUpdate = db.settings.get(guildID, "configuration.onMemberUpdate");
 			if (!onMemberUpdate) return;
+			if (oldMember.partial || oldMember.nickname !== newMember.nickname) return;
+			const oldRoles = oldMember.roles.cache;
+			const newRoles = newMember.roles.cache;
+			if (oldRoles.equals(newRoles)) return;
+			/** Search updated roles */
+			const updatedRoles = newRoles.filter((role) => !oldRoles.has(role.id));
 			const ul = getTranslation(guildID, { locale: newMember.guild.preferredLocale });
 			if (updatedRoles.size === 0) {
 				await discordLogs(
