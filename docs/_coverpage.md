@@ -6,5 +6,5 @@
 > A little discord bot that automatically add or remove members in thread, without pinging them!
 
 [📜 Documentation](en/README.md)
-[✨ Invite the bot](https://discord.com/api/oauth2/authorize?client_id=1101559076086886500&permissions=292057785360&scope=bot)
+[✨ Invite the bot](https://discord.com/oauth2/authorize?client_id=1101559076086886500)
 
