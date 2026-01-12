@@ -252,7 +252,8 @@
         "roleList": "{{- user}} a été mis à jour avec les rôles : {{- role}}"
       }
     },
-    "missingPermissions": "Depuis la version 3.0.2, Knitting nécessite la permission « Voir les logs du serveur » afin de récupérer de manière correcte les données de mise à jour des membres et leurs rôles. Merci de mettre à jour les permissions du Bot afin de bénéficier de cette fonctionnalité.",
+    "missingPermissions": "{{- owner}}Depuis la version 3.0.2, Knitting nécessite la permission « Voir les logs du serveur » afin de récupérer de manière correcte les données de mise à jour des membres et leurs rôles. Merci de mettre à jour les permissions du Bot afin de bénéficier de cette fonctionnalité.",
+    "owner": "Dans le serveur **{{- guild}}**:\\n",
     "thread": {
       "created": "Le thread {{- thread}} a été créé !",
       "join_error": "Le bot ne peut pas rejoindre <#{{- id}}> : \n```\n{{- error}}\n```"

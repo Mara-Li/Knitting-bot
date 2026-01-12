@@ -252,7 +252,8 @@
         "roleList": "{{- user}} has been updated with roles: {{- role}}"
       }
     },
-    "missingPermissions": "Since version 3.0.2, Knitting requires the \"View audit logs\" permission in order to correctly retrieve member update data and roles. Please update Bot permissions to take advantage of this feature.",
+    "missingPermissions": "{{- owner}}Since version 3.0.2, Knitting requires the \"View audit logs\" permission in order to correctly retrieve member update data and roles. Please update Bot permissions to take advantage of this feature.",
+    "owner": "In the **{{- guild}}** server:\\n",
     "thread": {
       "created": "Thread {{- thread}} created!",
       "join_error": "The bot can't join <#{{- id}}>:\n```\n{{- error}}\n```"
