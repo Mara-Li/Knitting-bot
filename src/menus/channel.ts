@@ -158,6 +158,7 @@ export async function startPaginatedChannelSelectorsFlow({
 		await discordLogs(
 			guildID,
 			interaction.client,
+			true,
 			ul("logs.errors.modalInteractionFailed", { error: String(e) })
 		);
 		return;

@@ -65,6 +65,7 @@ export default (client: Client): void => {
 				await discordLogs(
 					guildId,
 					client,
+					false,
 					ul("logs.channelUpdate.category", {
 						channelList: `\n- ${childrenWithThreads.join("\n- ")}`,
 						nb: totalThreads,

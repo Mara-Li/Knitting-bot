@@ -63,6 +63,7 @@ export async function addUserToThread(thread: Djs.ThreadChannel, user: Djs.Guild
 		await discordLogs(
 			guild,
 			thread.client,
+			false,
 			`Add @${user.user.username} to #${thread.name}`
 		);
 	} catch (error) {
@@ -71,6 +72,7 @@ export async function addUserToThread(thread: Djs.ThreadChannel, user: Djs.Guild
 			await discordLogs(
 				guild,
 				thread.client,
+				false,
 				ul("error.missingPermission", { thread: thread.id })
 			);
 	}
@@ -166,6 +168,7 @@ export async function addRoleAndUserToThread(
 	thread: Djs.ThreadChannel,
 	includeArchived?: boolean
 ) {
+	const ul = getTranslation(thread.guild.id, { locale: thread.guild.preferredLocale });
 	const members = thread.guild.members.cache;
 	const toPing: Djs.GuildMember[] = [];
 	const rolesWithAccess: Djs.Role[] = thread.guild.roles.cache.toJSON();
@@ -206,10 +209,12 @@ export async function addRoleAndUserToThread(
 			const message = await fetchMessage(thread);
 			await splitAndSend(uniqueToPing, message);
 			await message.edit(emoji);
+
 			await discordLogs(
 				thread.guild.id,
 				thread.client,
-				`Add ${uniqueToPing.length} members to #${thread.name}:\n- ${uniqueToPing.map((member) => member.user.username).join("\n- ")}`
+				false,
+				`${ul("logs.addedMembersToThread", { thread: `<#${thread.id}>`, count: uniqueToPing.length })}\n- ${uniqueToPing.map((member) => member.user.username).join("\n- ")}`
 			);
 		} catch (error) {
 			console.error(error);
@@ -217,9 +222,8 @@ export async function addRoleAndUserToThread(
 				await discordLogs(
 					thread.guild.id,
 					thread.client,
-					getTranslation(thread.guild.id, {
-						locale: thread.guild.preferredLocale,
-					})("error.missingPermission", { thread: thread.id })
+					false,
+					ul("error.missingPermission", { thread: thread.id })
 				);
 			}
 		}

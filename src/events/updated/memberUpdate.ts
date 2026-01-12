@@ -29,6 +29,7 @@ export default (client: Djs.Client): void => {
 				await discordLogs(
 					guildID,
 					client,
+					false,
 					ul("logs.member.updated.noRole", {
 						user: oldMember.user.username,
 					})
@@ -38,6 +39,7 @@ export default (client: Djs.Client): void => {
 			await discordLogs(
 				guildID,
 				client,
+				false,
 				ul("logs.member.updated.roleList", {
 					role: updatedRoles.map((role) => role.name).join(", "),
 					user: oldMember.user.username,
@@ -99,7 +101,23 @@ export default (client: Djs.Client): void => {
 				}
 			}
 		} catch (error) {
-			console.error(error);
+			if (error instanceof Djs.DiscordAPIError && error.code === 50013) {
+				const ul = getTranslation(newMember.guild.id, {
+					locale: newMember.guild.preferredLocale,
+				});
+				// Missing Permissions //send a message to the log channel + warn the server owner
+				if (db.settings.get(newMember.guild.id, "configuration.log")) {
+					await discordLogs(
+						newMember.guild.id,
+						client,
+						false,
+						ul("logs.missingPermissions")
+					);
+				} else {
+					const owner = await newMember.guild.fetchOwner();
+					await owner.send(ul("logs.missingPermissions"));
+				}
+			} else console.error(error);
 		}
 	});
 };

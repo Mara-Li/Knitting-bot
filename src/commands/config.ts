@@ -473,6 +473,20 @@ async function updateConfig(
 		await interaction.editReply({ components: rows, embeds: [embed] });
 	} else {
 		newConfig = !db.settings.get(interaction.guild.id, `configuration.${command}`);
+		if (command === "onMemberUpdate" && newConfig === true) {
+			//verify that the bot have the permission to view audit log
+			const havePermission = interaction.guild.members.cache
+				.get(interaction.client.user.id)
+				?.permissions.has(Djs.PermissionFlagsBits.ViewAuditLog);
+			if (!havePermission) {
+				await interaction.editReply({
+					components: [],
+					content: ul("logs.missingPermissions"),
+					embeds: [],
+				});
+				return;
+			}
+		}
 		await interaction.editReply({ content: "" });
 		db.settings.set(interaction.guild.id, newConfig, `configuration.${command}`);
 		let embed: Djs.EmbedBuilder;

@@ -24,6 +24,7 @@ export default (client: Client): void => {
 			await discordLogs(
 				guildId,
 				client,
+				false,
 				ul("error.deletedBotMessage", { bot: client.user.id, thread: threadId })
 			);
 		}
