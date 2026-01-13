@@ -481,7 +481,7 @@ async function updateConfig(
 			if (!havePermission) {
 				await interaction.editReply({
 					components: [],
-					content: ul("logs.missingPermissions", { owner: "" }),
+					content: ul("logs.missingPermissions"),
 					embeds: [],
 				});
 				return;

@@ -111,13 +111,13 @@ export default (client: Djs.Client): void => {
 						newMember.guild.id,
 						client,
 						false,
-						ul("logs.missingPermissions", { owner: "" })
+						ul("logs.missingPermissions")
 					);
 				} else {
 					const owner = await newMember.guild.fetchOwner();
 					await owner.send(
-						ul("logs.missingPermissions", {
-							owner: ul("logs.owner", { guild: newMember.guild.name }),
+						ul("logs.owner", {
+							guild: newMember.guild.name,
 						})
 					);
 				}
