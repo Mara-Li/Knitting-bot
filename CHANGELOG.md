@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [3.1.3](https://github.com/Mara-Li/Knitting-bot/compare/3.1.2...3.1.3) (2026-01-13)
+
+
+### Bug Fixes
+
+* broken new line ([5863ebc](https://github.com/Mara-Li/Knitting-bot/commit/5863ebce1b46ae2dc5a8793cb8152b538fcbacf5))
+* enhance missing permissions message with owner details ([9176e70](https://github.com/Mara-Li/Knitting-bot/commit/9176e70c40101b59f5e3acd6dd5b749ce157e3ee))
+
 ## [3.1.2](https://github.com/Mara-Li/Knitting-bot/compare/3.1.1...3.1.2) (2026-01-12)
 
 ## [3.1.1](https://github.com/Mara-Li/Knitting-bot/compare/3.1.0...3.1.1) (2026-01-11)
