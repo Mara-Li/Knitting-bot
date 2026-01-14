@@ -53,7 +53,9 @@ export default (client: Djs.Client): void => {
 
 			// Collect promises to add users to threads so we can run them in parallel
 			const tasks: Array<() => Promise<unknown>> = [];
+			const toAdd: string[] = [];
 			for (const threadChannel of channels.values()) {
+				toAdd.push(threadChannel.id);
 				const updatedRoleAllowed = updatedRoles.filter((role) => {
 					return checkRoleIn("follow", role, threadChannel);
 				});
@@ -96,6 +98,33 @@ export default (client: Djs.Client): void => {
 
 			if (tasks.length > 0) {
 				const results = await runWithConcurrency(tasks, 3);
+				if (toAdd.length > 0) {
+					const formattedToAdd =
+						toAdd.length === 1
+							? `<#${toAdd[0]}>`
+							: `\n- ${toAdd.map((id) => `<#${id}>`).join("\n- ")}`;
+
+					await discordLogs(
+						guildID,
+						client,
+						false,
+						ul("logs.member.updated.addedThreads_other", {
+							count: toAdd.length,
+							threads: formattedToAdd,
+							user: `<@${newMember.user.id}>`,
+						})
+					);
+				} else {
+					await discordLogs(
+						guildID,
+						client,
+						false,
+						ul("logs.member.updated.error", {
+							user: `<@${newMember.user.id}>`,
+						})
+					);
+				}
+				//log errors
 				for (const r of results) {
 					if (r.status === "rejected") console.warn("addUserToThread failed:", r.reason);
 				}
