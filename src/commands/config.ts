@@ -477,7 +477,7 @@ async function updateConfig(
 			//verify that the bot have the permission to view audit log
 			const havePermission = interaction.guild.members.cache
 				.get(interaction.client.user.id)
-				?.permissions.has(Djs.PermissionFlagsBits.ViewAuditLog);
+				?.permissions.has(Djs.PermissionFlagsBits.ViewAuditLog, true);
 			if (!havePermission) {
 				await interaction.editReply({
 					components: [],
