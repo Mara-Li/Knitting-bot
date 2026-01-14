@@ -59,13 +59,8 @@ export async function addUserToThread(thread: Djs.ThreadChannel, user: Djs.Guild
 
 	try {
 		const message = await fetchMessage(thread);
-		await message.edit(`${Djs.userMention(user.id)} ${emoji}`);
-		await discordLogs(
-			guild,
-			thread.client,
-			false,
-			`Add @${user.user.username} to #${thread.name}`
-		);
+		await message.edit(`${Djs.userMention(user.id)}`);
+		await message.edit(emoji);
 	} catch (error) {
 		console.error(error);
 		if (error instanceof Djs.DiscordAPIError && error.code === 50001)
@@ -214,7 +209,7 @@ export async function addRoleAndUserToThread(
 				thread.guild.id,
 				thread.client,
 				false,
-				`${ul("logs.addedMembersToThread", { thread: `<#${thread.id}>`, count: uniqueToPing.length })}\n- ${uniqueToPing.map((member) => member.user.username).join("\n- ")}`
+				`${ul("logs.addedMembersToThread", { count: uniqueToPing.length, thread: `<#${thread.id}>` })}\n- ${uniqueToPing.map((member) => member.user.username).join("\n- ")}`
 			);
 		} catch (error) {
 			console.error(error);
