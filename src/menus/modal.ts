@@ -80,7 +80,7 @@ export function createFirstPageChannelModalByType(
 	channelType: TChannel,
 	trackedIds: string[],
 	shortTitle?: string,
-	pageNumber: number = 0
+	pageNumber = 0
 ): { modal: ModalBuilder; hasMore: boolean; pageItemIds: string[] } {
 	const page = pageNumber;
 	const channelTypeMap: Record<TChannel, Djs.ChannelType[]> = {

@@ -1,3 +1,4 @@
+import db from "../database";
 import {
 	type ChannelSelectorsForTypeOptions,
 	type PaginatedChannelSelectorsOptions,
@@ -11,7 +12,6 @@ import { createFirstPageChannelModalByType } from "./modal";
 import { handleModalModifyGeneric, showPaginatedMessageGeneric } from "./paginated";
 import { createPaginationState, deletePaginationState, paginateIds } from "./state";
 import { getTrackedIdsByType } from "./utils";
-import db from "../database";
 
 /**
  * Generic handler for paginated channel selectors
@@ -139,7 +139,7 @@ export async function startPaginatedChannelSelectorsFlow({
 		for (const id of newSelectedIds) {
 			state.selectedIds.add(id);
 		}
-		
+
 		// Resauvegarder le state dans la Enmap après modification
 		db.globalPaginationStates.set(stateKey, state);
 

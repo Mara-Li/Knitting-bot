@@ -17,7 +17,12 @@ import { checkThread } from "./data_check";
  * @param bot - Discord client
  * @param text - Log messages to send
  */
-export async function discordLogs(guildID: string, bot: Client, code = true, ...text: unknown[]) {
+export async function discordLogs(
+	guildID: string,
+	bot: Client,
+	code = true,
+	...text: unknown[]
+) {
 	const channelId = db.settings.get(guildID, "configuration.log");
 	if (!channelId || typeof channelId !== "string") return;
 	try {
@@ -26,8 +31,7 @@ export async function discordLogs(guildID: string, bot: Client, code = true, ...
 			const formatted = text
 				.map((t) => (typeof t === "string" ? t : JSON.stringify(t)))
 				.join(" ");
-			if (code)
-				await channel.send(`\`\`\`\n${formatted}\n\`\`\``);
+			if (code) await channel.send(`\`\`\`\n${formatted}\n\`\`\``);
 			else await channel.send(formatted);
 		}
 	} catch (error) {

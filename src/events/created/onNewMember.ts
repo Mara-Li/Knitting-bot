@@ -17,7 +17,12 @@ export default (client: Client): void => {
 		if (!db.settings.get(guildID, "configuration.onNewMember")) return;
 		if (member.user.bot) return;
 		const ul = getTranslation(guildID, { locale: member.guild.preferredLocale });
-		await discordLogs(guildID, client, false, ul("logs.joined", { user: member.user.username }));
+		await discordLogs(
+			guildID,
+			client,
+			false,
+			ul("logs.joined", { user: member.user.username })
+		);
 		const guild = member.guild;
 		const channels = guild.channels.cache.filter((channel) => channel.isThread());
 

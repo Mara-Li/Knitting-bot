@@ -17,7 +17,12 @@ export default (client: Client): void => {
 		if (thread.type !== ChannelType.PublicThread) return;
 		if (!db.settings.get(guild, "configuration.onThreadCreated")) return;
 		const ul = getTranslation(thread.guild.id, { locale: thread.guild.preferredLocale });
-		await discordLogs(guild, client, false, ul("logs.thread.created", { thread: thread.name }));
+		await discordLogs(
+			guild,
+			client,
+			false,
+			ul("logs.thread.created", { thread: thread.name })
+		);
 		/** automatically add the bot to the thread */
 		try {
 			await thread.join();

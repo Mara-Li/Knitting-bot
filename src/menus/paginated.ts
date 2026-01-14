@@ -116,7 +116,7 @@ export async function handleModalModifyGeneric(options: {
 			state,
 			mode
 		);
-		
+
 		// Resave in the database the updated state
 		db.globalPaginationStates.set(stateKey, state);
 
