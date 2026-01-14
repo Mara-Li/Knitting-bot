@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [3.1.4](https://github.com/Mara-Li/Knitting-bot/compare/3.1.3...3.1.4) (2026-01-14)
+
+
+### Bug Fixes
+
+* should back to emoji after member update ([dc79506](https://github.com/Mara-Li/Knitting-bot/commit/dc7950630744722caaf3753612d64529c9fa2d7d))
+* should check admin ([b041333](https://github.com/Mara-Li/Knitting-bot/commit/b0413335873e5c858945965f45839e24dc52103b))
+
 ## [3.1.3](https://github.com/Mara-Li/Knitting-bot/compare/3.1.2...3.1.3) (2026-01-13)
 
 
