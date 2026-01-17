@@ -21,6 +21,8 @@ export default {
 		.setNames("follow.title")
 		.setDescriptions("follow.description")
 		.setDefaultMemberPermissions(Djs.PermissionFlagsBits.ManageThreads)
+		.setContexts(Djs.InteractionContextType.Guild)
+
 		.addSubcommand((subcommand) =>
 			subcommand
 				.setNames("common.channel")

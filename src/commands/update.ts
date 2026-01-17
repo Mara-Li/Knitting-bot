@@ -11,6 +11,8 @@ import { runWithConcurrency } from "../utils/concurrency";
 export default {
 	data: new Djs.SlashCommandBuilder()
 		.setNames("commands.name")
+		.setContexts(Djs.InteractionContextType.Guild)
+
 		.setDescriptions("commands.description")
 		.setDefaultMemberPermissions(Djs.PermissionFlagsBits.ManageThreads)
 		.addSubcommand((subcommand) =>

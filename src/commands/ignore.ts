@@ -19,6 +19,8 @@ import "uniformize";
 export default {
 	data: new Djs.SlashCommandBuilder()
 		.setName("ignore")
+		.setContexts(Djs.InteractionContextType.Guild)
+
 		.setDescriptions("ignore.description")
 		.setDefaultMemberPermissions(Djs.PermissionFlagsBits.ManageThreads)
 		.addSubcommand((subcommand) =>

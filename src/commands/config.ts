@@ -27,6 +27,8 @@ export default {
 		.setNames("configuration.main.name")
 		.setDescriptions("configuration.main.description")
 		.setDefaultMemberPermissions(Djs.PermissionFlagsBits.ManageThreads)
+		.setContexts(Djs.InteractionContextType.Guild)
+
 		.addSubcommand((subcommand) =>
 			subcommand
 				.setNames("configuration.menu.log.channel.title")

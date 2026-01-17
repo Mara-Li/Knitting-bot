@@ -9,6 +9,8 @@ export default {
 		.setName("dev")
 		.setDescription("Developer only command")
 		.setDefaultMemberPermissions(Djs.PermissionFlagsBits.Administrator)
+		.setContexts(Djs.InteractionContextType.Guild)
+
 		.addSubcommand((group) =>
 			group
 				.setName("create_bulk")

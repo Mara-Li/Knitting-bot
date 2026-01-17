@@ -5,7 +5,14 @@ import db from "../database";
 import { INFO_EMOJI, VERSION } from "../interfaces";
 
 export default {
-	data: new Djs.SlashCommandBuilder().setName("info").setDescriptions("info.cmds"),
+	data: new Djs.SlashCommandBuilder()
+		.setName("info")
+		.setContexts(
+			Djs.InteractionContextType.Guild,
+			Djs.InteractionContextType.BotDM,
+			Djs.InteractionContextType.PrivateChannel
+		)
+		.setDescriptions("info.cmds"),
 	async execute(interaction: Djs.CommandInteraction) {
 		if (!interaction.guild) return;
 		const ul = getUl(interaction);
