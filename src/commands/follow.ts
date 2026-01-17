@@ -67,7 +67,7 @@ export default {
 				.addRoleOption((option) =>
 					option
 						.setNames("common.role")
-						.setDescription("follow.roleIn.option.role")
+						.setDescriptions("follow.role.description")
 						.setRequired(true)
 				)
 				.addStringOption((option) =>
