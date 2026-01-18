@@ -12,7 +12,7 @@ export default {
 	data: new Djs.SlashCommandBuilder()
 		.setNames("commands.name")
 		.setContexts(Djs.InteractionContextType.Guild)
-
+		.setIntegrationTypes(Djs.ApplicationIntegrationType.GuildInstall)
 		.setDescriptions("commands.description")
 		.setDefaultMemberPermissions(Djs.PermissionFlagsBits.ManageThreads)
 		.addSubcommand((subcommand) =>

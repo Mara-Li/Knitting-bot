@@ -22,6 +22,7 @@ export default {
 		.setDescriptions("follow.description")
 		.setDefaultMemberPermissions(Djs.PermissionFlagsBits.ManageThreads)
 		.setContexts(Djs.InteractionContextType.Guild)
+		.setIntegrationTypes(Djs.ApplicationIntegrationType.GuildInstall)
 
 		.addSubcommand((subcommand) =>
 			subcommand

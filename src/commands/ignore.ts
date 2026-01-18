@@ -20,7 +20,7 @@ export default {
 	data: new Djs.SlashCommandBuilder()
 		.setName("ignore")
 		.setContexts(Djs.InteractionContextType.Guild)
-
+		.setIntegrationTypes(Djs.ApplicationIntegrationType.GuildInstall)
 		.setDescriptions("ignore.description")
 		.setDefaultMemberPermissions(Djs.PermissionFlagsBits.ManageThreads)
 		.addSubcommand((subcommand) =>

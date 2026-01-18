@@ -28,7 +28,7 @@ export default {
 		.setDescriptions("configuration.main.description")
 		.setDefaultMemberPermissions(Djs.PermissionFlagsBits.ManageThreads)
 		.setContexts(Djs.InteractionContextType.Guild)
-
+		.setIntegrationTypes(Djs.ApplicationIntegrationType.GuildInstall)
 		.addSubcommand((subcommand) =>
 			subcommand
 				.setNames("configuration.menu.log.channel.title")
@@ -475,7 +475,7 @@ async function updateConfig(
 		await interaction.editReply({ components: rows, embeds: [embed] });
 	} else {
 		newConfig = !db.settings.get(interaction.guild.id, `configuration.${command}`);
-		if (command === "onMemberUpdate" && newConfig === true) {
+		if (command === "onMemberUpdate" && newConfig) {
 			//verify that the bot have the permission to view audit log
 			const botMember = interaction.guild.members.cache.get(interaction.client.user.id);
 			const havePermission = botMember?.permissions.has(

@@ -12,6 +12,10 @@ export default {
 			Djs.InteractionContextType.BotDM,
 			Djs.InteractionContextType.PrivateChannel
 		)
+		.setIntegrationTypes(
+			Djs.ApplicationIntegrationType.GuildInstall,
+			Djs.ApplicationIntegrationType.UserInstall
+		)
 		.setDescriptions("info.cmds"),
 	async execute(interaction: Djs.CommandInteraction) {
 		if (!interaction.guild) return;

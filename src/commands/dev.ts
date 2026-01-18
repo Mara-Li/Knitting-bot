@@ -10,6 +10,7 @@ export default {
 		.setDescription("Developer only command")
 		.setDefaultMemberPermissions(Djs.PermissionFlagsBits.Administrator)
 		.setContexts(Djs.InteractionContextType.Guild)
+		.setIntegrationTypes(Djs.ApplicationIntegrationType.GuildInstall)
 
 		.addSubcommand((group) =>
 			group
