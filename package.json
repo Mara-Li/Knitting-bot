@@ -5,14 +5,14 @@
 	"private": true,
 	"type": "module",
 	"engines": {
-		"node": "20.x"
+		"node": "24.14.0"
 	},
 	"scripts": {
 		"typecheck": "tsc --noEmit",
 		"build": "pnpm run typecheck && node esbuild.config.mjs",
 		"build:watch": "node esbuild.config.mjs --watch",
 		"prestart": "pnpm run build",
-		"start": "pm2 start dist/src/index.js --name knitting --log-date-format=\"YYYY-MM-DD HH:mm Z\"",
+		"start": "pm2 start ecosystem.config.mjs",
 		"stop": "pm2 stop knitting",
 		"prerestart": "pnpm run build",
 		"restart": "pm2 restart knitting",
