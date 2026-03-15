@@ -2,7 +2,7 @@ import type * as Djs from "discord.js";
 import { Locale } from "discord.js";
 import type { TFunction } from "i18next";
 
-export interface RoleIn {
+export type RoleIn = {
 	roleId: string;
 	channelIds: string[];
 }
@@ -12,36 +12,23 @@ export interface RoleIn {
  * Stores all server configuration data in a single Enmap
  */
 export interface ServerData {
-	configuration: {
-		onChannelUpdate: boolean;
-		onMemberUpdate: boolean;
-		onNewMember: boolean;
-		onThreadCreated: boolean;
-		followOnlyChannel: boolean;
-		followOnlyRole: boolean;
-		followOnlyRoleIn: boolean;
-		manualMode: boolean;
-		language: Locale;
-		pin: boolean;
-		messageToSend: string;
-		log: boolean | string;
-	};
-	ignore: {
-		thread: string[];
-		role: string[];
-		category: string[];
-		channel: string[];
-		forum: string[];
-		onlyRoleIn: RoleIn[];
-	}
-	follow: ServerData["ignore"];
+	configuration: Configuration;
+	ignore: IgnoreFollow;
+	follow: IgnoreFollow;
 	messageCache: Record<string, string>;
 }
 
 
 export type ConfigurationKey = keyof Configuration;
 
-export type IgnoreFollow = ServerData["ignore"]
+export type IgnoreFollow = {
+	thread: string[];
+	role: string[];
+	category: string[];
+	channel: string[];
+	forum: string[];
+	onlyRoleIn: RoleIn[];
+}
 
 export type IgnoreFollowKey = keyof IgnoreFollow;
 
@@ -70,7 +57,20 @@ export const DEFAULT_IGNORE_FOLLOW: IgnoreFollow = {
 	role: [],
 	thread: [],
 };
-export type Configuration = ServerData["configuration"];
+export type Configuration = {
+	onChannelUpdate: boolean;
+	onMemberUpdate: boolean;
+	onNewMember: boolean;
+	onThreadCreated: boolean;
+	followOnlyChannel: boolean;
+	followOnlyRole: boolean;
+	followOnlyRoleIn: boolean;
+	manualMode: boolean;
+	language: Locale;
+	pin: boolean;
+	messageToSend: string;
+	log: boolean | string;
+}
 
 export type Translation = TFunction<"translation", undefined>;
 export type TChannel = "channel" | "thread" | "category" | "forum";
