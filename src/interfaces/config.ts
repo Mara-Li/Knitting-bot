@@ -7,31 +7,41 @@ export interface RoleIn {
 	channelIds: string[];
 }
 
-export interface Configuration {
-	onChannelUpdate: boolean;
-	onMemberUpdate: boolean;
-	onNewMember: boolean;
-	onThreadCreated: boolean;
-	followOnlyChannel: boolean;
-	followOnlyRole: boolean;
-	followOnlyRoleIn: boolean;
-	manualMode: boolean;
-	language: Locale;
-	pin: boolean;
-	messageToSend: string;
-	log: boolean | string;
+/**
+ * Interface for unified ServerData Enmap
+ * Stores all server configuration data in a single Enmap
+ */
+export interface ServerData {
+	configuration: {
+		onChannelUpdate: boolean;
+		onMemberUpdate: boolean;
+		onNewMember: boolean;
+		onThreadCreated: boolean;
+		followOnlyChannel: boolean;
+		followOnlyRole: boolean;
+		followOnlyRoleIn: boolean;
+		manualMode: boolean;
+		language: Locale;
+		pin: boolean;
+		messageToSend: string;
+		log: boolean | string;
+	};
+	ignore: {
+		thread: string[];
+		role: string[];
+		category: string[];
+		channel: string[];
+		forum: string[];
+		onlyRoleIn: RoleIn[];
+	}
+	follow: ServerData["ignore"];
+	messageCache: Record<string, string>;
 }
+
 
 export type ConfigurationKey = keyof Configuration;
 
-export interface IgnoreFollow {
-	thread: string[];
-	role: string[];
-	category: string[];
-	channel: string[];
-	forum: string[];
-	onlyRoleIn: RoleIn[];
-}
+export type IgnoreFollow = ServerData["ignore"]
 
 export type IgnoreFollowKey = keyof IgnoreFollow;
 
@@ -60,17 +70,7 @@ export const DEFAULT_IGNORE_FOLLOW: IgnoreFollow = {
 	role: [],
 	thread: [],
 };
-
-/**
- * Interface for unified ServerData Enmap
- * Stores all server configuration data in a single Enmap
- */
-export interface ServerData {
-	configuration: Configuration;
-	ignore: IgnoreFollow;
-	follow: IgnoreFollow;
-	messageCache: Record<string, string>;
-}
+export type Configuration = ServerData["configuration"];
 
 export type Translation = TFunction<"translation", undefined>;
 export type TChannel = "channel" | "thread" | "category" | "forum";

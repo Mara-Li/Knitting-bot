@@ -7,9 +7,10 @@ import {
 	type IgnoreFollowKey,
 	type PaginatedIdsState,
 	type RoleInPaginationState,
-	type ServerData,
+	type ServerData
 } from "./interfaces";
 import { EMOJI } from "./interfaces/constant";
+
 
 function getDefaultServerData(): ServerData {
 	return {
@@ -19,7 +20,6 @@ function getDefaultServerData(): ServerData {
 		messageCache: {},
 	};
 }
-
 
 export default {
 	/**
@@ -71,8 +71,8 @@ export default {
 		];
 		return Array.from(new Set(combined));
 	},
-	getLanguage(guildID: string, settings: Enmap<ServerData>): Locale {
-		const language = settings.get(guildID, "configuration.language");
+	getLanguage(guildID: string): Locale {
+		const language = this.settings.get(guildID, "configuration.language");
 		return language ?? Locale.EnglishUS;
 	},
 	getMaps(
