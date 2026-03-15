@@ -20,26 +20,27 @@ function getDefaultServerData(): ServerData {
 	};
 }
 
+
 export default {
 	/**
 	 * In-memory Enmap to track last update timestamps for caches
 	 */
-	cacheUpdateTimestamps: new Enmap<string, { lastUpdate: number }>({
+	cacheUpdateTimestamps: new Enmap<{ lastUpdate: number }>({
 		inMemory: true,
 	}),
-	messageToStateKey: new Enmap<string, string>({
+	messageToStateKey: new Enmap<string>({
 		inMemory: true,
 	}),
-	globalPaginationStates: new Enmap<string, PaginatedIdsState>({
+	globalPaginationStates: new Enmap<PaginatedIdsState>({
 		inMemory: true,
 	}),
-	roleInStates: new Enmap<string, RoleInPaginationState>({
+	roleInStates: new Enmap<RoleInPaginationState>({
 		inMemory: true,
 	}),
 	/**
 	 * Main Enmap for server settings
 	 */
-	settings: new Enmap<string, ServerData>({
+	settings: new Enmap<ServerData>({
 		autoEnsure: getDefaultServerData(),
 		name: "Database",
 	}),
