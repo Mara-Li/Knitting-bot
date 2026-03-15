@@ -1,0 +1,35 @@
+.sidebar ul li strong,
+.sidebar ul li strong a {
+	font-weight: 600;
+	font-size: large;
+	color: var(--accent);
+}
+
+.sidebar ul li.file a strong:hover,
+.sidebar ul li strong a:hover {
+	text-decoration: underline;
+	color: var(--accent-hover);
+}
+
+.sidebar ul li.file a strong {
+	font-weight: 600;
+	font-size: large;
+	color: var(--accent);
+}
+
+.sidebar ul li strong:hover {
+	text-decoration: underline;
+	color: var(--accent-hover);
+}
+
+.sidebar ul li a:hover {
+	text-decoration: underline;
+	color: var(--accent);
+}
+
+/* Navbar */
+
+.app-nav ul>li>ul {
+	background-color: var(--navbar-bg);
+	border: 1px solid var(--navbar-border);
+}

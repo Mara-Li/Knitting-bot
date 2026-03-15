@@ -33,10 +33,19 @@
   <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/docsify-darklight-theme@latest/dist/style.min.css" title="docsify-darklight-theme" type="text/css" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/docsify-breadcrumb@latest/dist/breadcrumb.min.css">
   <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/docsify-sidebar-collapse/dist/sidebar.min.css" />
-
+  <!-- CUSTOM STYLE -->
   <link rel="stylesheet" href="./_styles/button.css" type="text/css" />
   <link rel="stylesheet" href="./_styles/coverpage.css" type="text/css" />
-
+  <link rel="stylesheet" href="./_styles/sidebar.css" type="text/css" />
+  <link rel="stylesheet" href="./_styles/root.css" type="text/css" />
+  <link rel="stylesheet" href="./_styles/callout.css" type="text/css"/>
+  <link rel="stylesheet" href="./_styles/tailwind.css" type="text/css"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" />
+  <!-- Google font -->
+   <link rel="preconnect"href="https://fonts.googleapis.com">
+   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+   <link href="https://fonts.googleapis.com/css2?family=Ubuntu+Mono:ital,wght@0,400;0,700;1,400;1,700&family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&display=swap" rel="stylesheet">
+   <link href="https://fonts.googleapis.com/css2?family=Iosevka+Charon:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&display=swap" rel="stylesheet">
   <style>
     .sidebar .sidebar-nav {
       padding-left: 1rem;
@@ -60,12 +69,36 @@
       repo: 'https://github.com/Mara-Li/Knitting-bot',
       loadSidebar: 'en/_sidebar.md',
       sidebarDisplayLevel: 1,
-      subMaxLevel: 3,
+      subMaxLevel: 2,
       homepage: "/en/README.md",
-      coverpage: ['/', '/fr/', '/en/'],
       logo: "/_media/logo.png",
+      coverpage: ['/', '/fr/', '/en/'],
+      darklightTheme: {
+        dark: {
+          codeBackgroundColor: "#3341555c",
+          highlightColor: "#b7c3d5"
+        },
+        light: {
+          codeBackgroundColor: "#b6babf60",
+          highlightColor: "#031e49"
+        }
+      },
       'flexible-alerts': {
-        style: 'flat'
+        style: 'flat',
+        usage: {
+          label: "Usage",
+          icon: "fa-solid fa-file-pen",
+          className: "usage-alert"
+        },
+        example: {
+          label: {
+            '/fr/': "Exemple",
+            '/en/': "Example",
+            '/': "Example",
+          },
+          icon: "fa-solid fa-code",
+          className: "example-alert"
+        }
       },
       alias: {
         '/.*/_navbar.md': '/_navbar.md',
@@ -89,8 +122,83 @@
   </script>
   <script src="https://cdn.jsdelivr.net/npm/docsify-breadcrumb@latest/dist/index.min.js"></script>
   <script src="//cdn.jsdelivr.net/npm/docsify-sidebar-collapse/dist/docsify-sidebar-collapse.min.js"></script>
-<script src="//cdn.jsdelivr.net/npm/docsify-footnote/dist/docsify-footnote.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/docsify-footnote/dist/docsify-footnote.min.js"></script>
+  <script>
+      (function () {
+        const root = document.documentElement;
+        const darkMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
 
+        const normalizeScheme = (value) => {
+          const normalized = (value || '').toLowerCase().trim();
+          if (normalized.startsWith('dark')) {
+            return 'dark';
+          }
+
+          if (normalized.startsWith('light')) {
+            return 'light';
+          }
+
+          return null;
+        };
+
+        const getThemeFromDom = () => {
+          const htmlTheme = (root.getAttribute('data-theme') || '').toLowerCase();
+          const bodyTheme = (document.body?.getAttribute('data-theme') || '').toLowerCase();
+          const normalizedAttr = `${htmlTheme} ${bodyTheme}`;
+
+          if (normalizedAttr.includes('dark')) {
+            return 'dark';
+          }
+
+          if (normalizedAttr.includes('light')) {
+            return 'light';
+          }
+
+          const inlineScheme = normalizeScheme(root.style?.colorScheme);
+          if (inlineScheme) {
+            return inlineScheme;
+          }
+
+          const computedScheme = normalizeScheme(window.getComputedStyle(root).colorScheme);
+          if (computedScheme) {
+            return computedScheme;
+          }
+
+          return darkMediaQuery.matches ? 'dark' : 'light';
+        };
+
+        const syncThemeClass = () => {
+          const theme = getThemeFromDom();
+          const shouldBeDark = theme === 'dark';
+          const hasDark = root.classList.contains('theme-dark');
+          const hasLight = root.classList.contains('theme-light');
+
+          if ((shouldBeDark && hasDark && !hasLight) || (!shouldBeDark && hasLight && !hasDark)) {
+            return;
+          }
+
+          root.classList.toggle('theme-dark', shouldBeDark);
+          root.classList.toggle('theme-light', !shouldBeDark);
+        };
+
+        syncThemeClass();
+
+        const observer = new MutationObserver(syncThemeClass);
+        observer.observe(root, { attributes: true, attributeFilter: ['data-theme', 'style'] });
+
+        if (document.body) {
+          observer.observe(document.body, { attributes: true, attributeFilter: ['data-theme', 'style'] });
+        }
+
+        if (typeof darkMediaQuery.addEventListener === 'function') {
+          darkMediaQuery.addEventListener('change', syncThemeClass);
+        } else if (typeof darkMediaQuery.addListener === 'function') {
+          darkMediaQuery.addListener(syncThemeClass);
+        }
+
+        window.addEventListener('DOMContentLoaded', syncThemeClass);
+      })();
+</script>
 </body>
 
 </html>

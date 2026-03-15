@@ -1,0 +1,63 @@
+@import url('https://fonts.googleapis.com/css2?family=Iosevka+Charon:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&display=swap');
+
+
+body {
+	--codeFontFamily: 'Iosevka Charon', monospace;
+}
+
+.theme-dark {
+	--code-bg: color-mix(in oklch, var(--color-slate-800) 70%, var(--color-slate-900));
+	--code-color: var(--color-slate-300);
+	--code-border: var(--color-slate-600);
+	--code-callout-bg: color-mix(in oklch, var(--color-slate-700) 55%, var(--color-slate-900));
+	--code-callout-border: var(--color-slate-600);
+	--code-callout-color: var(--color-slate-300);
+	--hr-color: var(--color-slate-600);
+	--navbar-bg: color-mix(in oklch, transparent 50%, var(--color-slate-900));
+	--navbar-border: var(--color-slate-700);
+}
+
+.theme-light {
+	--code-bg: var(--color-slate-100);
+	--code-color: var(--color-slate-900);
+	--code-border: var(--color-slate-300);
+	--code-callout-bg: var(--color-slate-200);
+	--code-callout-border: var(--color-slate-400);
+	--code-callout-color: var(--color-slate-900);
+	--hr-color: var(--color-slate-300);
+	--navbar-bg: color-mix(in oklch, transparent 50%, var(--color-slate-100));
+	--navbar-border: var(--color-slate-300);
+}
+
+.markdown-section code {
+	border-radius: 5px;
+	padding: 0.2em 0.5em;
+	line-height: 2;
+	background-color: var(--code-bg);
+	color: var(--code-color);
+	border: 1px solid var(--code-border);
+}
+
+.markdown-section pre>code {
+	font-family: var(--codeFontFamily);
+	font-size: 1em;
+	background-color: var(--code-bg);
+	color: var(--code-color);
+	border: 1px solid var(--code-border);
+}
+
+.markdown-section td, .markdown-section th {
+	border: 1px solid var(--code-border);
+}
+
+/* Table width */
+.markdown-section table {
+	width: 100%;
+	max-width: 100%;
+	display: table;
+	table-layout: auto;
+}
+
+.markdown-section hr {
+	border-bottom: 1px solid var(--hr-color);
+}

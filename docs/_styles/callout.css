@@ -1,0 +1,173 @@
+.theme-dark {
+	--note-bg: #cdeefd;
+	--note-color: #02587f;
+	--note-border: #b7e7fc;
+
+	--tip-bg: #dbefdc;
+	--tip-color: #285b2a;
+	--tip-border: #cbe8cd;
+
+	--warning-bg: #ffddd3;
+	--warning-color: #852d12;
+	--warning-border: #ffcbbc;
+
+	--important-bg: #d0cede;
+	--important-color: #8250df;
+	--important-border: #c4c1d5;
+
+	--attention-bg: #fdd9d7;
+	--attention-color: #7f231c;
+	--attention-border: #fcc4c1;
+
+	--example-bg: color-mix(in oklch, var(--color-emerald-500) 24%, transparent);
+	--example-color: var(--color-emerald-100);
+	--example-border: var(--color-emerald-400);
+	--usage-bg: color-mix(in oklch, var(--color-zinc-700) 50%, transparent);
+	--usage-color: var(--color-zinc-400);
+	--usage-border: var(--color-zinc-800);
+	--callout-color: var(--color-slate-300);
+}
+
+.theme-light {
+	--note-bg: #cdeefd;
+	--note-color: #02587f;
+	--note-border: #b7e7fc;
+
+	--tip-bg: #dbefdc;
+	--tip-color: #285b2a;
+	--tip-border: #cbe8cd;
+
+	--warning-bg: #ffddd3;
+	--warning-color: #852d12;
+	--warning-border: #ffcbbc;
+
+	--important-bg: #d0cede;
+	--important-color: #8250df;
+	--important-border: #c4c1d5;
+
+	--attention-bg: #fdd9d7;
+	--attention-color: #7f231c;
+	--attention-border: #fcc4c1;
+
+	--example-bg: var(--color-emerald-100);
+	--example-color: var(--color-emerald-900);
+	--example-border: var(--color-emerald-400);
+
+	--usage-bg: var(--color-zinc-200);
+	--usage-color: var(--color-zinc-600);
+	--usage-border: var(--color-zinc-400);
+
+	--callout-color: var(--color-slate-900);
+}
+
+.alert.flat.note {
+	background-color: var(--note-bg) !important;
+	color: var(--note-color) !important;
+	border-color: var(--note-border) !important;
+	--callout-bg: var(--note-bg);
+	--callout-fg: var(--note-color);
+	--callout-border: var(--note-border);
+	--callout-color: var(--note-color);
+}
+
+.alert.flat.tip {
+	background-color: var(--tip-bg) !important;
+	color: var(--tip-color) !important;
+	border-color: var(--tip-border) !important;
+	--callout-bg: var(--tip-bg);
+	--callout-fg: var(--tip-color);
+	--callout-border: var(--tip-border);
+	--callout-color: var(--tip-color);
+}
+
+.alert.flat.warning {
+	background-color: var(--warning-bg) !important;
+	color: var(--warning-color) !important;
+	border-color: var(--warning-border) !important;
+	--callout-bg: var(--warning-bg);
+	--callout-fg: var(--warning-color);
+	--callout-border: var(--warning-border);
+	--callout-color: var(--warning-color);
+}
+
+.alert.flat.important {
+	background-color: var(--important-bg) !important;
+	color: var(--important-color) !important;
+	border-color: var(--important-border) !important;
+	--callout-bg: var(--important-bg);
+	--callout-fg: var(--important-color);
+	--callout-border: var(--important-border);
+	--callout-color: var(--important-color);
+}
+
+.alert.flat.attention {
+	background-color: var(--attention-bg) !important;
+	color: var(--attention-color) !important;
+	border-color: var(--attention-border) !important;
+	--callout-bg: var(--attention-bg);
+	--callout-fg: var(--attention-color);
+	--callout-border: var(--attention-border);
+	--callout-color: var(--attention-color);
+}
+
+.alert.flat.example-alert {
+	background-color: var(--example-bg) !important;
+	color: var(--example-color) !important;
+	border-color: var(--example-border) !important;
+	--callout-bg: var(--example-bg);
+	--callout-fg: var(--example-color);
+	--callout-border: var(--example-border);
+	--callout-color: var(--example-color);
+}
+
+.alert.flat.usage-alert {
+	background-color: var(--usage-bg) !important;
+	color: var(--usage-color) !important;
+	border-color: var(--usage-border) !important;
+	--callout-bg: var(--usage-bg);
+	--callout-fg: var(--usage-color);
+	--callout-border: var(--usage-border);
+	--callout-color: var(--usage-color);
+}
+
+.usage-alert .title {
+	color: var(--usage-color);
+}
+
+.alert.flat pre {
+	background-color: transparent;
+	border: 0;
+	box-shadow: none;
+}
+
+.alert.flat pre>code {
+	border-radius: 5px;
+	margin: 0;
+	padding: 0 0.5em;
+}
+
+
+.markdown-section .alert {
+	--callout-code-color: var(--callout-fg, var(--code-callout-color));
+	--callout-code-bg: var(--code-callout-bg);
+	--callout-code-border: var(--code-callout-border);
+}
+
+.theme-dark .markdown-section .alert {
+	--callout-code-color: var(--callout-color);
+	--callout-code-bg: color-mix(in oklch, var(--callout-bg, var(--code-bg)) 84%, var(--callout-color));
+	--callout-code-border: color-mix(in oklch, var(--callout-bg, var(--code-bg)) 50%, var(--callout-color));
+}
+
+.theme-light .markdown-section .alert {
+	--callout-code-color: var(--callout-color);
+	--callout-code-bg: color-mix(in oklch, var(--callout-bg, var(--code-bg)) 86%, var(--callout-color));
+	--callout-code-border: color-mix(in oklch, var(--callout-bg, var(--code-bg)) 50%, var(--callout-color));
+}
+
+.markdown-section .alert code {
+	background-color: var(--callout-code-bg);
+	color: var(--callout-code-color);
+	border: 1px solid var(--callout-code-border);
+	margin-left: 0.5em;
+}

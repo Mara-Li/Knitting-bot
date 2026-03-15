@@ -1,7 +1,7 @@
 # Knitting
 > [!WARNING]
 > Lorsque vous êtes invité, le bot est en « mode manuel » afin d'éviter toute erreur lors de son ajout à un serveur. 
-> Vous devez activer les événements automatiques à l'aide de la commande « /config auto ».
+> Vous devez activer les événements automatiques à l'aide de la commande « `/config auto` ».
 
 Le bot ajoutera automatiquement un utilisateur à un fil de discussion lorsque :
 

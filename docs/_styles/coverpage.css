@@ -1,5 +1,8 @@
 body {
 	--coverBackground: radial-gradient(circle at 20% 30%, #c7d2fe, #a5b4fc 30%, #6366f1 70%);
+	--accent-hover: #165696;
+	--accent: #4298b9;
+	--theme-color: #4298b9;
 }
 
 section.cover img {
@@ -10,7 +13,6 @@ section.cover img {
 }
 
 
-
 /* --- Titre --- */
 section.cover h1 span {
 	font-size: 3rem !important;
@@ -19,7 +21,6 @@ section.cover h1 span {
 	color: #f8fafc;
 	text-shadow: 0 2px 12px rgba(0, 0, 0, 0.35);
 	background: none !important;
-	/* ✅ enlève le fond semi-transparent */
 }
 
 /* --- Description --- */
