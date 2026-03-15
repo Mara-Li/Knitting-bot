@@ -11,7 +11,7 @@ export type RoleIn = {
  * Interface for unified ServerData Enmap
  * Stores all server configuration data in a single Enmap
  */
-export interface ServerData {
+export type ServerData = {
 	configuration: Configuration;
 	ignore: IgnoreFollow;
 	follow: IgnoreFollow;
