@@ -53,7 +53,7 @@ export default {
 		ignore: { ...DEFAULT_IGNORE_FOLLOW },
 	},
 	/*
-	 * Useful methods
+	  Useful methods
 	 */
 
 	clearMessageCache(guildId: string): void {
@@ -71,8 +71,8 @@ export default {
 		];
 		return Array.from(new Set(combined));
 	},
-	getLanguage(guildID: string): Locale {
-		const language = this.settings.get(guildID, "configuration.language");
+	getLanguage(guildID: string, settings: Enmap<ServerData>): Locale {
+		const language = settings.get(guildID, "configuration.language");
 		return language ?? Locale.EnglishUS;
 	},
 	getMaps(
