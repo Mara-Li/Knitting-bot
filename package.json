@@ -12,7 +12,7 @@
 		"build": "pnpm run typecheck && node esbuild.config.mjs",
 		"build:watch": "node esbuild.config.mjs --watch",
 		"prestart": "pnpm run build",
-		"start": "pm2 start ecosystem.config.cjs",
+		"start": "pm2 start pm2.config.cjs",
 		"stop": "pm2 stop knitting",
 		"prerestart": "pnpm run build",
 		"restart": "pm2 restart knitting",
