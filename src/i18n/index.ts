@@ -8,4 +8,5 @@ await i18next.init({
 	lng: "en",
 	resources,
 	returnNull: false,
+	showSupportNotice: false,
 });
