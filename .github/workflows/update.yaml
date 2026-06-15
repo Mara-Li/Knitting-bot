@@ -17,9 +17,8 @@ jobs:
           port: ${{secrets.PORT}}
           key: ${{ secrets.SSH_KEY }}
           script: |
-            set PATH $PATH:/home/.local/share/nvm/v20.14.0/bin
-            nvm use v20.14.0
-            cd knitting-bot/
+            cd Knitting-bot/
+            fnm use lts
             git pull --rebase
             pnpm i
             pnpm run restart
