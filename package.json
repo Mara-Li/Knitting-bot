@@ -1,6 +1,6 @@
 {
 	"name": "knitting",
-	"version": "3.1.6",
+	"version": "3.1.7",
 	"description": "A bot used to add new user automatically in thread, without pinging them!",
 	"private": true,
 	"type": "module",
