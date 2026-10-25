@@ -14,7 +14,7 @@
 		"rootDir": "./",
 		"outDir": "./dist/",
 		"strict": true,
-		"moduleResolution": "node",
+		"moduleResolution": "bundler",
 		"importHelpers": true,
 		"experimentalDecorators": true,
 		"esModuleInterop": true,
@@ -25,7 +25,6 @@
 		"removeComments": true,
 		"typeRoots": ["node_modules/@types", "src/@types"],
 		"sourceMap": false,
-		"baseUrl": "./",
 		"allowJs": true,
 		"composite": false,
 		"declaration": false
